@@ -1,13 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  LayoutDashboard, ArrowLeftRight, Wallet, TrendingUp, Plus, Menu, X,
-  CreditCard, PieChart as PieChartIcon, Sun, Moon, BarChart3, CalendarDays,
-  AlertCircle, Flame, LineChart, TrendingUp as TrendingUpIcon, Search, Coins,
-  Calendar, Tag, Edit3, Target, LogOut
+  LayoutDashboard, ArrowLeftRight, TrendingUp as TrendingUpIcon, Plus, Menu, X,
+  CalendarDays, LineChart, Search, Coins,
+  Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar
+  PieChart, Pie, Cell
 } from 'recharts';
 import { Session } from '@supabase/supabase-js'; 
 import { supabase } from './supabase'; 
@@ -21,8 +20,8 @@ import GoalsManager from './components/GoalsManager';
 import DashboardHome from './components/DashboardHome';
 import Auth from './components/Auth';
 
-const CORES_MODERNAS = ['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
+const CORES_MODERNAS = ['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -32,9 +31,12 @@ const App: React.FC = () => {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
+  
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [editForm, setEditForm] = useState({ description: '', amountString: '', date: '', category: '', type: TransactionType.EXPENSE });
+
   const [deleteData, setDeleteData] = useState<{ id: string; type: 'transaction' | 'category' | 'goal' } | null>(null);
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -44,11 +46,20 @@ const App: React.FC = () => {
   const [payingTransaction, setPayingTransaction] = useState<Transaction | null>(null);
   const [realValueInput, setRealValueInput] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [newTx, setNewTx] = useState({ description: '', totalAmount: '', installmentAmount: '', type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], installments: '1', inputMode: 'total' as 'total' | 'installment', category: '' });
-  const [newInv, setNewInv] = useState({ name: '', amount: '', date: new Date().toISOString().split('T')[0], category: 'Ações' });
 
   const showToast = (message: string, type: 'success' | 'error') => { setToast({ message, type }); setTimeout(() => setToast(null), 3000); };
   const formatCurrencyInput = (val: string) => { if (!val || val === '0') return 'R$ 0,00'; const numberValue = parseFloat(val) / 100; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numberValue); };
+
+  const [newTx, setNewTx] = useState({
+    description: '', totalAmount: '', installmentAmount: '',
+    type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0],
+    installments: '1', inputMode: 'total' as 'total' | 'installment',
+    category: ''
+  });
+
+  const [newInv, setNewInv] = useState({
+    name: '', amount: '', date: new Date().toISOString().split('T')[0], category: 'Ações'
+  });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => { setSession(session); });
@@ -62,10 +73,13 @@ const App: React.FC = () => {
       setLoading(true);
       const { data: txData } = await supabase.from('transactions').select('*').eq('user_id', session.user.id).order('date', { ascending: false });
       if (txData) setTransactions(txData.map((t: any) => ({ ...t, amount: Number(t.amount || 0), paid_amount: Number(t.paid_amount || 0) })));
+
       const { data: catData } = await supabase.from('categories').select('*').order('name', { ascending: true });
       if (catData) setCategories(catData);
+
       const { data: invData } = await supabase.from('investments').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
       if (invData) setInvestments(invData.map((i: any) => ({ ...i, invested_amount: Number(i.invested_amount || 0), current_amount: Number(i.current_amount || 0) })));
+
       const { data: goalData } = await supabase.from('goals').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
       if (goalData) setGoals(goalData.map((g: any) => ({ ...g, target_amount: Number(g.target_amount), current_amount: Number(g.current_amount) })));
     } catch (error) { console.error(error); showToast('Erro de conexão.', 'error'); } finally { setLoading(false); }
@@ -73,23 +87,61 @@ const App: React.FC = () => {
 
   useEffect(() => { if (session) fetchData(); }, [session]);
   useEffect(() => { const root = window.document.documentElement; if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark'); }, [theme]);
+
   const handleLogout = async () => { await supabase.auth.signOut(); setSession(null); };
+
   const requestDelete = (id: string, type: 'transaction' | 'category' | 'goal') => { setDeleteData({ id, type }); };
-  const handleConfirmDelete = async () => { if (!deleteData) return; const { id, type } = deleteData; let table = ''; if (type === 'transaction') table = 'transactions'; if (type === 'category') table = 'categories'; if (type === 'goal') table = 'goals'; const { error } = await supabase.from(table).delete().eq('id', id); if (error) { showToast('Erro ao excluir.', 'error'); } else { if (type === 'transaction') setTransactions(prev => prev.filter(t => t.id !== id)); if (type === 'category') setCategories(prev => prev.filter(c => c.id !== id)); if (type === 'goal') setGoals(prev => prev.filter(g => g.id !== id)); showToast('Item removido!', 'success'); } setDeleteData(null); };
-  const handleAddGoal = async (goal: Omit<Goal, 'id' | 'current_amount'>) => { if (!session?.user) return; const { data, error } = await supabase.from('goals').insert([{ ...goal, user_id: session.user.id, current_amount: 0 }]).select(); if (error) showToast('Erro ao criar.', 'error'); else { setGoals([data[0], ...goals]); showToast('Meta criada!', 'success'); } };
-  const handleDepositGoal = async (id: string, amount: number) => { const goal = goals.find(g => g.id === id); if (!goal) return; const newAmount = goal.current_amount + amount; const { error } = await supabase.from('goals').update({ current_amount: newAmount }).eq('id', id); if (error) showToast('Erro ao depositar.', 'error'); else { setGoals(goals.map(g => g.id === id ? { ...g, current_amount: newAmount } : g)); showToast('Depósito realizado!', 'success'); } };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteData) return;
+    const { id, type } = deleteData;
+    let table = '';
+    if (type === 'transaction') table = 'transactions';
+    if (type === 'category') table = 'categories';
+    if (type === 'goal') table = 'goals';
+
+    const { error } = await supabase.from(table).delete().eq('id', id);
+    if (error) { showToast('Erro ao excluir.', 'error'); } 
+    else {
+      if (type === 'transaction') setTransactions(prev => prev.filter(t => t.id !== id));
+      if (type === 'category') setCategories(prev => prev.filter(c => c.id !== id));
+      if (type === 'goal') setGoals(prev => prev.filter(g => g.id !== id));
+      showToast('Item removido!', 'success');
+    }
+    setDeleteData(null);
+  };
+
+  const handleAddGoal = async (goal: Omit<Goal, 'id' | 'current_amount'>) => {
+    if (!session?.user) return;
+    const { data, error } = await supabase.from('goals').insert([{ ...goal, user_id: session.user.id, current_amount: 0 }]).select();
+    if (error) showToast('Erro ao criar.', 'error'); else { setGoals([data[0], ...goals]); showToast('Meta criada!', 'success'); }
+  };
+  const handleDepositGoal = async (id: string, amount: number) => {
+    const goal = goals.find(g => g.id === id); if (!goal) return;
+    const newAmount = goal.current_amount + amount;
+    const { error } = await supabase.from('goals').update({ current_amount: newAmount }).eq('id', id);
+    if (error) showToast('Erro ao depositar.', 'error'); else { setGoals(goals.map(g => g.id === id ? { ...g, current_amount: newAmount } : g)); showToast('Depósito realizado!', 'success'); }
+  };
+
+  const openEditModal = (tx: Transaction) => { setEditingTransaction(tx); const amountStr = (tx.amount * 100).toFixed(0); setEditForm({ description: tx.description, amountString: amountStr, date: tx.date, category: tx.category || '', type: tx.type }); };
+  const handleUpdateTransaction = async (e: React.FormEvent) => { e.preventDefault(); if (!editingTransaction) return; const updatedAmount = parseFloat(editForm.amountString) / 100; const { error } = await supabase.from('transactions').update({ description: editForm.description, amount: updatedAmount, date: editForm.date, category: editForm.category, type: editForm.type }).eq('id', editingTransaction.id); if (error) showToast('Erro ao atualizar.', 'error'); else { showToast('Atualizado!', 'success'); setEditingTransaction(null); fetchData(); } };
+  const handleAddCategory = async (name: string, type: TransactionType) => { const { data, error } = await supabase.from('categories').insert([{ name, type }]).select(); if (error) showToast('Erro ao criar categoria.', 'error'); else if (data) { setCategories([...categories, data[0]]); showToast('Categoria criada!', 'success'); } };
   
   const handleAddTransaction = async (e: React.FormEvent) => { 
     e.preventDefault(); 
     if (!session?.user) return;
+    
     const total = parseFloat(newTx.totalAmount) / 100;
     const installmentsCount = parseInt(newTx.installments);
     const newEntries = [];
+    
+    // Garante uma categoria padrão se o usuário não selecionou
     const finalCategory = newTx.category || (categories.find(c => c.type === newTx.type)?.name || 'Geral'); 
     
     for (let i = 0; i < installmentsCount; i++) { 
       const txDate = new Date(newTx.date); 
       txDate.setMonth(txDate.getMonth() + i); 
+      
       newEntries.push({ 
         user_id: session.user.id, 
         account_id: 'acc1', 
@@ -102,23 +154,41 @@ const App: React.FC = () => {
         is_recurring: installmentsCount > 1 
       }); 
     } 
+    
     const { error } = await supabase.from('transactions').insert(newEntries); 
-    if (error) { showToast('Erro ao salvar.', 'error'); } else { fetchData(); setIsModalOpen(false); setNewTx({ description: '', category: '', totalAmount: '', installmentAmount: '', type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], installments: '1', inputMode: 'total' as 'total' | 'installment' }); showToast('Salvo!', 'success'); } 
+    
+    if (error) {
+      showToast('Erro ao salvar.', 'error'); 
+    } else { 
+      fetchData(); 
+      setIsModalOpen(false); 
+      
+      // CORRIGIDO: Removida a duplicata de category no objeto
+      setNewTx({ 
+        description: '', 
+        category: '', 
+        totalAmount: '', 
+        installmentAmount: '', 
+        type: TransactionType.EXPENSE, 
+        date: new Date().toISOString().split('T')[0], 
+        installments: '1', 
+        inputMode: 'total'
+      }); 
+      
+      showToast('Salvo!', 'success'); 
+    } 
   };
 
   const handleAddInvestment = async (e: React.FormEvent) => { e.preventDefault(); if (!session?.user) return; const amount = parseFloat(newInv.amount) / 100; const investment = { user_id: session.user.id, name: newInv.name, category: newInv.category, invested_amount: amount, current_amount: amount, created_at: new Date(newInv.date).toISOString() }; const { error } = await supabase.from('investments').insert([investment]); if (error) showToast('Erro ao salvar.', 'error'); else { fetchData(); setIsInvestmentModalOpen(false); setNewInv({ name: '', amount: '', date: new Date().toISOString().split('T')[0], category: 'Ações' }); showToast('Salvo!', 'success'); } };
-  const openEditModal = (tx: Transaction) => { setEditingTransaction(tx); const amountStr = (tx.amount * 100).toFixed(0); setEditForm({ description: tx.description, amountString: amountStr, date: tx.date, category: tx.category || '', type: tx.type }); };
-  const handleUpdateTransaction = async (e: React.FormEvent) => { e.preventDefault(); if (!editingTransaction) return; const updatedAmount = parseFloat(editForm.amountString) / 100; const { error } = await supabase.from('transactions').update({ description: editForm.description, amount: updatedAmount, date: editForm.date, category: editForm.category, type: editForm.type }).eq('id', editingTransaction.id); if (error) showToast('Erro ao atualizar.', 'error'); else { showToast('Atualizado!', 'success'); setEditingTransaction(null); fetchData(); } };
-  const handleAddCategory = async (name: string, type: TransactionType) => { const { data, error } = await supabase.from('categories').insert([{ name, type }]).select(); if (error) showToast('Erro ao criar categoria.', 'error'); else if (data) { setCategories([...categories, data[0]]); showToast('Categoria criada!', 'success'); } };
   const confirmPayment = async () => { if (!payingTransaction) return; const paid = parseFloat(realValueInput) / 100; const { error } = await supabase.from('transactions').update({ status: TransactionStatus.COMPLETED, paid_amount: paid }).eq('id', payingTransaction.id); if (error) showToast('Erro ao confirmar.', 'error'); else { fetchData(); setPayingTransaction(null); showToast('Confirmado!', 'success'); } };
   const handleAmountChange = (val: string, mode: 'total' | 'installment') => { const numeric = val.replace(/\D/g, ''); const instCount = parseInt(newTx.installments) || 1; if (mode === 'total') { const total = parseFloat(numeric); const perInst = Math.round(total / instCount); setNewTx(prev => ({ ...prev, totalAmount: numeric, installmentAmount: perInst.toString(), inputMode: 'total' })); } else { const perInst = parseFloat(numeric); const total = perInst * instCount; setNewTx(prev => ({ ...prev, installmentAmount: numeric, totalAmount: total.toString(), inputMode: 'installment' })); } };
 
-  // --- CÁLCULOS VISUAIS ---
   const filteredTransactions = useMemo(() => { return transactions.filter(t => { const tDate = new Date(t.date); tDate.setMinutes(tDate.getMinutes() + tDate.getTimezoneOffset()); return tDate.getMonth() === currentDate.getMonth() && tDate.getFullYear() === currentDate.getFullYear(); }); }, [transactions, currentDate]);
   const totalInvested = useMemo(() => investments.reduce((acc, curr) => acc + curr.current_amount, 0), [investments]);
   const urgencies = useMemo(() => { const today = new Date(); today.setHours(0,0,0,0); const pending = transactions.filter(t => t.status === TransactionStatus.PENDING); const delayed = pending.filter(t => new Date(t.date) < today); return { delayedCount: delayed.length }; }, [transactions]);
   const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 shadow-sm border border-indigo-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
   const investmentAllocation = useMemo(() => { const allocation: Record<string, number> = {}; investments.forEach(inv => { allocation[inv.category] = (allocation[inv.category] || 0) + inv.current_amount; }); const data = Object.entries(allocation).map(([name, value]) => ({ name, value })); if (data.length === 0) return [{ name: 'Sem ativos', value: 1 }]; return data; }, [investments]);
+
   if (!session) return <Auth />;
 
   const renderContent = () => {
