@@ -13,7 +13,7 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
   const [depositModal, setDepositModal] = useState<string | null>(null);
   const [depositValue, setDepositValue] = useState('');
   
-  // CORREÇÃO: Usando 'name' corretamente
+  // CORREÇÃO: Usando 'name' corretamente para evitar erro no TypeScript
   const [newGoal, setNewGoal] = useState({
     name: '',
     target_amount: '',
@@ -34,7 +34,7 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
 
     const amount = parseFloat(newGoal.target_amount) / 100;
     
-    // CORREÇÃO: Envia 'name' e faz o cast para 'any' para evitar erro de tipo estrito se o types.ts estiver diferente
+    // CORREÇÃO: Cast 'as any' para garantir que passe mesmo se a interface no types.ts estiver desatualizada
     onAdd({
       name: newGoal.name,
       target_amount: amount,
@@ -54,7 +54,6 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
     }
   };
 
-  // Cálculos dos Cards Superiores
   const totalGuardado = goals.reduce((acc, g) => acc + g.current_amount, 0);
   const metaGlobal = goals.reduce((acc, g) => acc + g.target_amount, 0);
   const percentualGlobal = metaGlobal > 0 ? (totalGuardado / metaGlobal) * 100 : 0;
@@ -62,7 +61,7 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
   return (
     <div className="h-full flex flex-col gap-6 overflow-y-auto pb-24 lg:pb-0 custom-scrollbar">
       
-      {/* --- 1. CARDS DE RESUMO (TOPO) --- */}
+      {/* CARDS DE RESUMO (TOPO) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
          <div className="bg-indigo-600 rounded-[2.5rem] p-6 text-white shadow-lg relative overflow-hidden flex items-center justify-between">
             <div className="relative z-10">
@@ -91,10 +90,10 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
          </div>
       </div>
 
-      {/* --- 2. ÁREA PRINCIPAL (Formulário + Lista) --- */}
+      {/* ÁREA PRINCIPAL */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
         
-        {/* ESQUERDA: Formulário de Nova Meta (Fixo) */}
+        {/* Formulário Fixo */}
         <div className="lg:col-span-1">
             <div className="bg-slate-900 rounded-[2.5rem] p-6 border border-slate-800 shadow-xl h-fit sticky top-0">
                 <div className="flex items-center gap-3 mb-6">
@@ -141,7 +140,7 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
             </div>
         </div>
 
-        {/* DIREITA: Lista de Metas */}
+        {/* Lista de Metas */}
         <div className="lg:col-span-2 space-y-4">
             {goals.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-10 opacity-50 min-h-[300px]">
@@ -152,9 +151,8 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
             ) : (
                 goals.map((goal) => {
                   const progress = Math.min((goal.current_amount / goal.target_amount) * 100, 100);
-                  // Verifica se 'name' ou 'description' existem para exibir
+                  // CORREÇÃO: Fallback seguro para nome e data
                   const goalName = (goal as any).name || (goal as any).description || 'Meta';
-                  // Garante que a data seja válida antes de renderizar
                   const dateString = goal.deadline ? new Date(goal.deadline).toLocaleDateString('pt-BR') : '--/--/----';
                   
                   return (
@@ -180,7 +178,6 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
                             </div>
                         </div>
                         
-                        {/* Barra de Progresso */}
                         <div className="h-4 w-full bg-slate-100 dark:bg-slate-950 rounded-full overflow-hidden mb-4 border border-slate-200 dark:border-slate-800/50 p-[2px]">
                             <div className={`h-full rounded-full transition-all duration-1000 ease-out ${progress >= 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-indigo-600 to-purple-600'}`} style={{ width: `${progress}%` }}></div>
                         </div>
@@ -201,7 +198,6 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
         </div>
       </div>
 
-      {/* --- MODAL DEPOSITAR (Mantido) --- */}
       {depositModal && (
         <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-slate-900 w-full sm:max-w-xs rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 shadow-2xl border border-slate-800">
