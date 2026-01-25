@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
-  LayoutDashboard, ArrowLeftRight, TrendingUp as TrendingUpIcon, Plus, Menu, X,
+  LayoutDashboard, ArrowLeftRight, TrendingUp, Plus, Menu, X,
   CalendarDays, LineChart, Search, Coins,
-  Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle
+  Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle, ArrowUpRight, ArrowDownRight, Layers
 } from 'lucide-react';
+// CORREÇÃO: Limpei imports não usados (AreaChart, etc.)
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell
+  ResponsiveContainer,
+  PieChart, Pie, Cell, BarChart, Bar, Legend, CartesianGrid, XAxis, Tooltip
 } from 'recharts';
 import { supabase } from './supabase'; 
 import { Session } from '@supabase/supabase-js';
@@ -21,7 +22,7 @@ import DashboardHome from './components/DashboardHome';
 import Auth from './components/Auth';
 
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
-const CORES_MODERNAS = ['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
+const CORES_MODERNAS = ['#0a0eebff', '#60f30aff', '#ec0c31ff', '#f59e0b', '#e9650dff', '#dc08f8ff', '#ec4899', '#cc1616ff'];
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -161,20 +162,30 @@ const App: React.FC = () => {
   const handleAmountChange = (val: string, mode: 'total' | 'installment') => { const numeric = val.replace(/\D/g, ''); const instCount = parseInt(newTx.installments) || 1; if (mode === 'total') { const total = parseFloat(numeric); const perInst = Math.round(total / instCount); setNewTx(prev => ({ ...prev, totalAmount: numeric, installmentAmount: perInst.toString(), inputMode: 'total' })); } else { const perInst = parseFloat(numeric); const total = perInst * instCount; setNewTx(prev => ({ ...prev, installmentAmount: numeric, totalAmount: total.toString(), inputMode: 'installment' })); } };
 
   const filteredTransactions = useMemo(() => { return transactions.filter(t => { const tDate = new Date(t.date); tDate.setMinutes(tDate.getMinutes() + tDate.getTimezoneOffset()); return tDate.getMonth() === currentDate.getMonth() && tDate.getFullYear() === currentDate.getFullYear(); }); }, [transactions, currentDate]);
-  const totalInvested = useMemo(() => investments.reduce((acc, curr) => acc + curr.current_amount, 0), [investments]);
+  const totalApplied = useMemo(() => investments.reduce((acc, curr) => acc + curr.invested_amount, 0), [investments]);
+  const totalCurrent = useMemo(() => investments.reduce((acc, curr) => acc + curr.current_amount, 0), [investments]);
+  const totalProfit = totalCurrent - totalApplied;
+  const totalProfitPercent = totalApplied > 0 ? (totalProfit / totalApplied) * 100 : 0;
+
   const urgencies = useMemo(() => { const today = new Date(); today.setHours(0,0,0,0); const pending = transactions.filter(t => t.status === TransactionStatus.PENDING); const delayed = pending.filter(t => new Date(t.date) < today); return { delayedCount: delayed.length }; }, [transactions]);
   const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 shadow-sm border border-indigo-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
   
-  const investmentAllocation = useMemo(() => { const allocation: Record<string, number> = {}; investments.forEach(inv => { allocation[inv.category] = (allocation[inv.category] || 0) + inv.current_amount; }); const data = Object.entries(allocation).map(([name, value]) => ({ name, value })); if (data.length === 0) return [{ name: 'Sem ativos', value: 1 }]; return data; }, [investments]);
+  const investmentAllocation = useMemo(() => { 
+      const allocation: Record<string, number> = {}; 
+      investments.forEach(inv => { allocation[inv.category] = (allocation[inv.category] || 0) + inv.current_amount; }); 
+      const data = Object.entries(allocation).map(([name, value]) => ({ name, value })); 
+      if (data.length === 0) return [{ name: 'Sem ativos', value: 1 }]; 
+      return data; 
+  }, [investments]);
   
-  const patrimonyData = useMemo(() => {
-      if (investments.length === 0) return [];
-      const sortedInv = [...investments].sort((a, b) => new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime());
-      let cumulative = 0;
-      return sortedInv.map(inv => {
-          cumulative += inv.current_amount;
-          return { name: new Date(inv.created_at || '').toLocaleDateString('pt-BR', {month: 'short'}), patrimonio: cumulative };
+  const comparativeData = useMemo(() => {
+      const data: Record<string, {name: string, Investido: number, Atual: number}> = {};
+      investments.forEach(inv => {
+          if (!data[inv.category]) data[inv.category] = { name: inv.category, Investido: 0, Atual: 0 };
+          data[inv.category].Investido += inv.invested_amount;
+          data[inv.category].Atual += inv.current_amount;
       });
+      return Object.values(data);
   }, [investments]);
 
   if (!session) return <Auth />;
@@ -186,27 +197,90 @@ const App: React.FC = () => {
     
     if (activeTab === 'investimentos') {
       return (
-        // CORREÇÃO: Adicionei 'overflow-x-hidden' e 'w-full' para evitar a barra horizontal
-        <div className="h-full flex flex-col space-y-4 min-h-0 min-w-0 w-full max-w-full overflow-x-hidden overflow-y-auto pb-20 lg:pb-0">
+        <div className="h-full flex flex-col gap-4 min-h-0 min-w-0 overflow-y-auto pb-20 lg:pb-0 custom-scrollbar p-1">
             
-            {/* CORREÇÃO: Usei GRID em vez de Flex para cálculos exatos de largura e evitar estouro */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 shrink-0 w-full">
-                
-                {/* 1. Gráfico Evolução (Ocupa 3 colunas no desktop) */}
-                <div className="lg:col-span-3 h-[250px] lg:h-[320px] bg-white dark:bg-slate-900/40 rounded-[2.5rem] p-5 shadow-sm flex flex-col shrink-0 overflow-hidden relative w-full">
-                    <div className="flex items-center justify-between mb-4 z-10"><h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><TrendingUpIcon className="w-4 h-4 text-indigo-500" /> Evolução</h3><div className="flex items-center gap-2"><span className="text-[10px] font-black text-slate-400 uppercase">Total:</span><span className="text-sm font-black text-indigo-600">R$ {totalInvested.toLocaleString()}</span></div></div>
-                    <div className="flex-1 relative min-h-0 min-w-0 w-full mt-2"><ResponsiveContainer width="100%" height="100%"><AreaChart data={patrimonyData} margin={{ top: 0, right: 0, left: -40, bottom: 0 }}><defs><linearGradient id="gradPatri" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/><stop offset="95%" stopColor="#6366f1" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.03} /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700 }} /><YAxis hide /><Tooltip contentStyle={{ fontSize: '10px', borderRadius: '12px', border: 'none', fontWeight: 'black', background: '#1e293b', color: '#fff' }} /><Area type="monotone" dataKey="patrimonio" stroke="#6366f1" fill="url(#gradPatri)" strokeWidth={4} /></AreaChart></ResponsiveContainer></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+                <div className="bg-white dark:bg-slate-900/40 rounded-[2rem] p-5 shadow-sm border border-slate-100 dark:border-slate-800">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl"><Layers className="w-5 h-5 text-slate-500" /></div>
+                        <span className="text-[10px] font-black text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg uppercase">Aplicado</span>
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter mt-4">R$ {totalApplied.toLocaleString()}</h3>
                 </div>
 
-                {/* 2. Gráfico Pizza (Alocação) (Ocupa 2 colunas no desktop) */}
-                <div className="lg:col-span-2 h-[300px] lg:h-[320px] bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] flex flex-col shadow-sm overflow-hidden shrink-0 w-full"><h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3><div className="flex-1 flex flex-col items-center gap-4 min-h-0 w-full relative"><div className="flex-1 h-full w-full relative min-w-0"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={investmentAllocation} innerRadius="55%" outerRadius="85%" dataKey="value" stroke="none">{investmentAllocation.map((_, i) => <Cell key={i} fill={CORES_MODERNAS[i % CORES_MODERNAS.length]} />)}</Pie><Tooltip contentStyle={{ fontSize: '10px', borderRadius: '12px', fontWeight: 'bold' }} /></PieChart></ResponsiveContainer></div><div className="w-full space-y-2 overflow-y-auto custom-scrollbar h-[100px] pr-2">{investmentAllocation.map((item, i) => (<div key={i} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/30 border-l-4" style={{ borderLeftColor: CORES_MODERNAS[i % CORES_MODERNAS.length] }}><span className="text-[9px] font-black uppercase text-slate-400 tracking-wider truncate">{item.name}</span><span className="text-xs font-black text-slate-900 dark:text-white">R$ {item.value.toLocaleString()}</span></div>))}</div></div></div>
-            
+                <div className="bg-indigo-600 rounded-[2rem] p-5 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-10"><Coins className="w-16 h-16" /></div>
+                    <div className="relative z-10">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm"><TrendingUp className="w-5 h-5" /></div>
+                            <span className="text-[10px] font-black bg-white/20 px-2 py-1 rounded-lg uppercase">Patrimônio</span>
+                        </div>
+                        <h3 className="text-xl font-black tracking-tighter mt-4">R$ {totalCurrent.toLocaleString()}</h3>
+                    </div>
+                </div>
+
+                <div className={`rounded-[2rem] p-5 shadow-sm border flex flex-col justify-center relative overflow-hidden ${totalProfit >= 0 ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-500/20' : 'bg-rose-50 border-rose-200 dark:bg-rose-900/10 dark:border-rose-500/20'}`}>
+                    <div className="flex justify-between items-center mb-2">
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${totalProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>Rentabilidade</span>
+                        <div className={`p-1.5 rounded-lg ${totalProfit >= 0 ? 'bg-emerald-200/50 text-emerald-700' : 'bg-rose-200/50 text-rose-700'}`}>
+                            {totalProfit >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+                        </div>
+                    </div>
+                    <h3 className={`text-2xl font-black tracking-tighter ${totalProfit >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
+                        {totalProfit >= 0 ? '+' : ''} R$ {Math.abs(totalProfit).toLocaleString()}
+                    </h3>
+                    <p className={`text-xs font-bold mt-1 ${totalProfit >= 0 ? 'text-emerald-600/70' : 'text-rose-600/70'}`}>
+                        {totalProfitPercent.toFixed(2)}% de retorno
+                    </p>
+                </div>
             </div>
 
-            {/* 3. Tabela de Ativos (Fica embaixo) */}
-            <div className="flex-1 bg-white dark:bg-slate-900/40 rounded-[2.5rem] overflow-hidden flex flex-col min-h-[300px] shadow-sm shrink-0 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 shrink-0 lg:h-[300px]">
+                
+                <div className="lg:col-span-3 bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><LineChart className="w-4 h-4" /> Performance por Categoria</h3>
+                    <div className="flex-1 w-full min-h-0">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={comparativeData} barGap={4}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: '#64748b'}} />
+                                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
+                                <Legend wrapperStyle={{fontSize: '10px', paddingTop: '10px'}} />
+                                <Bar dataKey="Investido" fill="#94a3b8" radius={[4, 4, 0, 0]} barSize={12} name="Aplicado" />
+                                <Bar dataKey="Atual" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={12} name="Atual" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                <div className="lg:col-span-2 bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] flex flex-col shadow-sm h-[250px] lg:h-auto overflow-hidden">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3>
+                    <div className="flex-1 flex items-center gap-2 min-h-0">
+                        <div className="h-full w-1/2 min-w-[100px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie data={investmentAllocation} innerRadius={50} outerRadius={70} dataKey="value" stroke="none">
+                                        {investmentAllocation.map((_, i) => <Cell key={i} fill={CORES_MODERNAS[i % CORES_MODERNAS.length]} />)}
+                                    </Pie>
+                                    <Tooltip contentStyle={{ fontSize: '10px', borderRadius: '12px', fontWeight: 'bold', background: '#1e293b', border: 'none', color: '#fff' }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar h-full pr-1 flex flex-col justify-center">
+                            {investmentAllocation.map((item, i) => (
+                                <div key={i} className="flex items-center justify-between p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/30 border-l-2" style={{ borderLeftColor: CORES_MODERNAS[i % CORES_MODERNAS.length] }}>
+                                    <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider truncate max-w-[70px]">{item.name}</span>
+                                    <span className="text-[10px] font-black text-slate-900 dark:text-white">R$ {item.value.toLocaleString()}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex-1 bg-white dark:bg-slate-900/40 rounded-[2.5rem] overflow-hidden flex flex-col min-h-[300px] shadow-sm shrink-0">
                 <div className="flex items-center justify-between p-6 pb-4 shrink-0"><div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div><button onClick={() => setIsInvestmentModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/30"><Plus className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-wider">Nova Aplicação</span></button></div>
-                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0 custom-scrollbar"><table className="w-full text-left border-collapse"><thead><tr className="border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900/90 backdrop-blur-md z-10"><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Ativo</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Categoria</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Investido</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Atual</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest text-right">Rent.</th></tr></thead><tbody>{investments.map((inv) => { const profit = ((inv.current_amount / inv.invested_amount) - 1) * 100; return (<tr key={inv.id} className="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"><td className="py-5 px-2 font-bold text-sm truncate max-w-[150px]">{inv.name}</td><td className="py-5 px-2 text-xs font-bold text-slate-500">{inv.category}</td><td className="py-5 px-2 text-sm font-bold text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td><td className="py-5 px-2 text-sm font-black text-indigo-600">R$ {inv.current_amount.toLocaleString()}</td><td className={`py-5 px-2 text-xs font-black text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td></tr>); })}</tbody></table></div>
+                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0 custom-scrollbar"><table className="w-full text-left border-collapse"><thead><tr className="border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900/90 backdrop-blur-md z-10"><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Ativo</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Categoria</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Aplicado</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Atual</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest text-right">Rent.</th></tr></thead><tbody>{investments.map((inv) => { const profit = ((inv.current_amount / inv.invested_amount) - 1) * 100; return (<tr key={inv.id} className="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"><td className="py-5 px-2 font-bold text-sm truncate max-w-[150px]">{inv.name}</td><td className="py-5 px-2 text-xs font-bold text-slate-500">{inv.category}</td><td className="py-5 px-2 text-sm font-bold text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td><td className="py-5 px-2 text-sm font-black text-indigo-600">R$ {inv.current_amount.toLocaleString()}</td><td className={`py-5 px-2 text-xs font-black text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td></tr>); })}</tbody></table></div>
             </div>
         </div>
       );
@@ -282,7 +356,7 @@ const App: React.FC = () => {
         <div className="flex-1 px-4 lg:px-12 pb-8 overflow-hidden flex flex-col min-h-0">{renderContent()}</div>
       </main>
 
-      {/* Modais permanecem iguais */}
+      {/* Os modais continuam iguais abaixo... */}
       {editingTransaction && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-slate-800 p-6">

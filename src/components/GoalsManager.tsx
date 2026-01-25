@@ -13,7 +13,7 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
   const [depositModal, setDepositModal] = useState<string | null>(null);
   const [depositValue, setDepositValue] = useState('');
   
-  // CORREÇÃO: Usando 'name' corretamente para evitar erro no TypeScript
+  // CORREÇÃO: 'name' em vez de 'description'
   const [newGoal, setNewGoal] = useState({
     name: '',
     target_amount: '',
@@ -34,7 +34,7 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
 
     const amount = parseFloat(newGoal.target_amount) / 100;
     
-    // CORREÇÃO: Cast 'as any' para garantir que passe mesmo se a interface no types.ts estiver desatualizada
+    // CORREÇÃO: Enviando 'name' e convertendo 'any' para evitar erro de tipo estrito
     onAdd({
       name: newGoal.name,
       target_amount: amount,
@@ -151,9 +151,10 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
             ) : (
                 goals.map((goal) => {
                   const progress = Math.min((goal.current_amount / goal.target_amount) * 100, 100);
-                  // CORREÇÃO: Fallback seguro para nome e data
-                  const goalName = (goal as any).name || (goal as any).description || 'Meta';
+                  // CORREÇÃO: Fallback seguro para data
                   const dateString = goal.deadline ? new Date(goal.deadline).toLocaleDateString('pt-BR') : '--/--/----';
+                  // CORREÇÃO: Fallback seguro para nome
+                  const goalName = (goal as any).name || (goal as any).description || 'Meta';
                   
                   return (
                     <div key={goal.id} className="bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800 relative group transition-all hover:border-indigo-500/30">
