@@ -15,7 +15,7 @@ interface DashboardHomeProps {
   currentDate: Date;
 }
 
-const CORES_MODERNAS = ['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
+const CORES_MODERNAS = ['#0e12e7ff', '#4dee0dff', '#f50c33ff', '#f38e09ff', '#f13f09ff', '#0bd3f7ff', '#d847b9ff', '#f5f109ff'];
 
 const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments, filteredTransactions }) => {
   
@@ -115,8 +115,8 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments
                           <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
                           <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} />
                           <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
-                          <Bar dataKey="entrada" fill="#10b981" radius={[2, 2, 0, 0]} />
-                          <Bar dataKey="saida" fill="#f43f5e" radius={[2, 2, 0, 0]} />
+                          <Bar dataKey="entrada" fill="#72f10aff" radius={[2, 2, 0, 0]} />
+                          <Bar dataKey="saida" fill="#f8560bff" radius={[2, 2, 0, 0]} />
                       </BarChart>
                   </ResponsiveContainer>
               </div>
@@ -148,7 +148,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments
                           <XAxis dataKey="name" hide />
                           <YAxis hide />
                           <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
-                          <Line type="monotone" dataKey="valor" stroke="#ee780aff" strokeWidth={2} dot={false} />
+                          <Line type="monotone" dataKey="valor" stroke="#ee650aff" strokeWidth={2} dot={false} />
                       </LineChart>
                   </ResponsiveContainer>
               </div>
