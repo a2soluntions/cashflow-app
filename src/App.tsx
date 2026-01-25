@@ -8,8 +8,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
-import { Session } from '@supabase/supabase-js'; 
 import { supabase } from './supabase'; 
+import { Session } from '@supabase/supabase-js';
 import { TransactionType, TransactionStatus, Transaction, Investment, Category, Goal } from './types';
 import TransactionTable from './components/TransactionTable';
 import Toast from './components/Toast';
@@ -89,7 +89,6 @@ const App: React.FC = () => {
   useEffect(() => { const root = window.document.documentElement; if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark'); }, [theme]);
 
   const handleLogout = async () => { await supabase.auth.signOut(); setSession(null); };
-
   const requestDelete = (id: string, type: 'transaction' | 'category' | 'goal') => { setDeleteData({ id, type }); };
 
   const handleConfirmDelete = async () => {
@@ -130,52 +129,30 @@ const App: React.FC = () => {
   const handleAddTransaction = async (e: React.FormEvent) => { 
     e.preventDefault(); 
     if (!session?.user) return;
-    
     const total = parseFloat(newTx.totalAmount) / 100;
     const installmentsCount = parseInt(newTx.installments);
     const newEntries = [];
-    
-    // Garante uma categoria padrão se o usuário não selecionou
     const finalCategory = newTx.category || (categories.find(c => c.type === newTx.type)?.name || 'Geral'); 
     
     for (let i = 0; i < installmentsCount; i++) { 
       const txDate = new Date(newTx.date); 
       txDate.setMonth(txDate.getMonth() + i); 
-      
       newEntries.push({ 
-        user_id: session.user.id, 
-        account_id: 'acc1', 
-        category: finalCategory, 
-        amount: total / installmentsCount, 
-        description: installmentsCount > 1 ? `${newTx.description} (${i + 1}/${installmentsCount})` : newTx.description, 
-        type: newTx.type, 
-        status: TransactionStatus.PENDING, 
-        date: txDate.toISOString().split('T')[0], 
-        is_recurring: installmentsCount > 1 
+        user_id: session.user.id, account_id: 'acc1', category: finalCategory, 
+        amount: total / installmentsCount, description: installmentsCount > 1 ? `${newTx.description} (${i + 1}/${installmentsCount})` : newTx.description, 
+        type: newTx.type, status: TransactionStatus.PENDING, date: txDate.toISOString().split('T')[0], is_recurring: installmentsCount > 1 
       }); 
     } 
-    
     const { error } = await supabase.from('transactions').insert(newEntries); 
-    
-    if (error) {
-      showToast('Erro ao salvar.', 'error'); 
-    } else { 
-      fetchData(); 
-      setIsModalOpen(false); 
-      
-      // CORRIGIDO: Removida a duplicata de category no objeto
-      setNewTx({ 
-        description: '', 
-        category: '', 
-        totalAmount: '', 
-        installmentAmount: '', 
-        type: TransactionType.EXPENSE, 
-        date: new Date().toISOString().split('T')[0], 
-        installments: '1', 
-        inputMode: 'total'
-      }); 
-      
-      showToast('Salvo!', 'success'); 
+    if (error) { showToast('Erro ao salvar.', 'error'); } 
+    else { 
+        fetchData(); setIsModalOpen(false); 
+        setNewTx({ 
+            description: '', category: '', totalAmount: '', installmentAmount: '', 
+            type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], 
+            installments: '1', inputMode: 'total' 
+        }); 
+        showToast('Salvo!', 'success'); 
     } 
   };
 
@@ -187,7 +164,18 @@ const App: React.FC = () => {
   const totalInvested = useMemo(() => investments.reduce((acc, curr) => acc + curr.current_amount, 0), [investments]);
   const urgencies = useMemo(() => { const today = new Date(); today.setHours(0,0,0,0); const pending = transactions.filter(t => t.status === TransactionStatus.PENDING); const delayed = pending.filter(t => new Date(t.date) < today); return { delayedCount: delayed.length }; }, [transactions]);
   const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 shadow-sm border border-indigo-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
+  
   const investmentAllocation = useMemo(() => { const allocation: Record<string, number> = {}; investments.forEach(inv => { allocation[inv.category] = (allocation[inv.category] || 0) + inv.current_amount; }); const data = Object.entries(allocation).map(([name, value]) => ({ name, value })); if (data.length === 0) return [{ name: 'Sem ativos', value: 1 }]; return data; }, [investments]);
+  
+  const patrimonyData = useMemo(() => {
+      if (investments.length === 0) return [];
+      const sortedInv = [...investments].sort((a, b) => new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime());
+      let cumulative = 0;
+      return sortedInv.map(inv => {
+          cumulative += inv.current_amount;
+          return { name: new Date(inv.created_at || '').toLocaleDateString('pt-BR', {month: 'short'}), patrimonio: cumulative };
+      });
+  }, [investments]);
 
   if (!session) return <Auth />;
 
@@ -198,16 +186,27 @@ const App: React.FC = () => {
     
     if (activeTab === 'investimentos') {
       return (
-        <div className="h-full flex flex-col space-y-4 min-h-0 min-w-0 animate-in fade-in slide-in-from-bottom-2">
-            <div className="h-[200px] w-full bg-white dark:bg-slate-900/40 rounded-[2.5rem] p-5 shadow-sm flex flex-col shrink-0 overflow-hidden relative">
-                <div className="flex items-center justify-between mb-4 z-10"><h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><TrendingUpIcon className="w-4 h-4 text-indigo-500" /> Evolução Patrimonial</h3><div className="flex items-center gap-2"><span className="text-[10px] font-black text-slate-400 uppercase">Patrimônio Atual:</span><span className="text-sm font-black text-indigo-600">R$ {totalInvested.toLocaleString()}</span></div></div>
-                <div className="flex-1 relative min-h-0 min-w-0 w-full mt-2"><ResponsiveContainer width="100%" height="100%"><AreaChart data={[]} margin={{ top: 0, right: 0, left: -40, bottom: 0 }}><defs><linearGradient id="gradPatri" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/><stop offset="95%" stopColor="#6366f1" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.03} /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700 }} /><YAxis hide /><Tooltip contentStyle={{ fontSize: '10px', borderRadius: '12px', border: 'none', fontWeight: 'black', background: '#1e293b', color: '#fff' }} /><Area type="monotone" dataKey="patrimonio" stroke="#6366f1" fill="url(#gradPatri)" strokeWidth={4} /></AreaChart></ResponsiveContainer></div>
+        <div className="h-full flex flex-col space-y-4 min-h-0 min-w-0 overflow-y-auto pb-20 lg:pb-0">
+            
+            {/* CONTAINER DOS GRÁFICOS: Lado a lado no Desktop, Empilhado no Mobile */}
+            <div className="flex flex-col lg:flex-row gap-4 shrink-0">
+                
+                {/* 1. Gráfico Evolução */}
+                <div className="h-[250px] lg:h-[320px] w-full lg:w-3/5 bg-white dark:bg-slate-900/40 rounded-[2.5rem] p-5 shadow-sm flex flex-col shrink-0 overflow-hidden relative">
+                    <div className="flex items-center justify-between mb-4 z-10"><h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><TrendingUpIcon className="w-4 h-4 text-indigo-500" /> Evolução</h3><div className="flex items-center gap-2"><span className="text-[10px] font-black text-slate-400 uppercase">Total:</span><span className="text-sm font-black text-indigo-600">R$ {totalInvested.toLocaleString()}</span></div></div>
+                    <div className="flex-1 relative min-h-0 min-w-0 w-full mt-2"><ResponsiveContainer width="100%" height="100%"><AreaChart data={patrimonyData} margin={{ top: 0, right: 0, left: -40, bottom: 0 }}><defs><linearGradient id="gradPatri" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/><stop offset="95%" stopColor="#6366f1" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.03} /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700 }} /><YAxis hide /><Tooltip contentStyle={{ fontSize: '10px', borderRadius: '12px', border: 'none', fontWeight: 'black', background: '#1e293b', color: '#fff' }} /><Area type="monotone" dataKey="patrimonio" stroke="#6366f1" fill="url(#gradPatri)" strokeWidth={4} /></AreaChart></ResponsiveContainer></div>
+                </div>
+
+                {/* 2. Gráfico Pizza (Alocação) - AGORA NO TOPO AO LADO */}
+                <div className="h-[300px] lg:h-[320px] w-full lg:w-2/5 bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] flex flex-col shadow-sm overflow-hidden shrink-0"><h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3><div className="flex-1 flex flex-col items-center gap-4 min-h-0 w-full relative"><div className="flex-1 h-full w-full relative min-w-0"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={investmentAllocation} innerRadius="55%" outerRadius="85%" dataKey="value" stroke="none">{investmentAllocation.map((_, i) => <Cell key={i} fill={CORES_MODERNAS[i % CORES_MODERNAS.length]} />)}</Pie><Tooltip contentStyle={{ fontSize: '10px', borderRadius: '12px', fontWeight: 'bold' }} /></PieChart></ResponsiveContainer></div><div className="w-full space-y-2 overflow-y-auto custom-scrollbar h-[100px] pr-2">{investmentAllocation.map((item, i) => (<div key={i} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/30 border-l-4" style={{ borderLeftColor: CORES_MODERNAS[i % CORES_MODERNAS.length] }}><span className="text-[9px] font-black uppercase text-slate-400 tracking-wider truncate">{item.name}</span><span className="text-xs font-black text-slate-900 dark:text-white">R$ {item.value.toLocaleString()}</span></div>))}</div></div></div>
+            
             </div>
-            <div className="flex-1 bg-white dark:bg-slate-900/40 rounded-[2.5rem] overflow-hidden flex flex-col min-h-0 shadow-sm">
+
+            {/* 3. Tabela de Ativos (Fica embaixo) */}
+            <div className="flex-1 bg-white dark:bg-slate-900/40 rounded-[2.5rem] overflow-hidden flex flex-col min-h-[300px] shadow-sm shrink-0">
                 <div className="flex items-center justify-between p-6 pb-4 shrink-0"><div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div><button onClick={() => setIsInvestmentModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/30"><Plus className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-wider">Nova Aplicação</span></button></div>
                 <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0 custom-scrollbar"><table className="w-full text-left border-collapse"><thead><tr className="border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900/90 backdrop-blur-md z-10"><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Ativo</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Categoria</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Investido</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Atual</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest text-right">Rent.</th></tr></thead><tbody>{investments.map((inv) => { const profit = ((inv.current_amount / inv.invested_amount) - 1) * 100; return (<tr key={inv.id} className="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"><td className="py-5 px-2 font-bold text-sm truncate max-w-[150px]">{inv.name}</td><td className="py-5 px-2 text-xs font-bold text-slate-500">{inv.category}</td><td className="py-5 px-2 text-sm font-bold text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td><td className="py-5 px-2 text-sm font-black text-indigo-600">R$ {inv.current_amount.toLocaleString()}</td><td className={`py-5 px-2 text-xs font-black text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td></tr>); })}</tbody></table></div>
             </div>
-            <div className="bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] flex flex-col shadow-sm h-full overflow-hidden min-w-0 mt-4"><h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3><div className="flex-1 flex items-center gap-8 min-h-0 w-full relative"><div className="flex-1 h-full relative min-w-0"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={investmentAllocation} innerRadius="55%" outerRadius="85%" dataKey="value" stroke="none">{investmentAllocation.map((_, i) => <Cell key={i} fill={CORES_MODERNAS[i % CORES_MODERNAS.length]} />)}</Pie><Tooltip contentStyle={{ fontSize: '10px', borderRadius: '12px', fontWeight: 'bold' }} /></PieChart></ResponsiveContainer></div><div className="w-1/2 space-y-3 pr-6 overflow-y-auto custom-scrollbar h-full py-2">{investmentAllocation.map((item, i) => (<div key={i} className="flex flex-col border-l-4 pl-4 py-2 bg-slate-50/30 dark:bg-slate-800/20 rounded-r-2xl" style={{ borderColor: CORES_MODERNAS[i % CORES_MODERNAS.length] }}><span className="text-[9px] font-black uppercase text-slate-400 tracking-wider truncate">{item.name}</span><span className="text-sm font-black text-slate-900 dark:text-white">R$ {item.value.toLocaleString()}</span></div>))}</div></div></div>
         </div>
       );
     }
@@ -228,9 +227,25 @@ const App: React.FC = () => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <ConfirmModal isOpen={!!deleteData} onClose={() => setDeleteData(null)} onConfirm={handleConfirmDelete} title={`Excluir ${deleteData?.type === 'category' ? 'Categoria' : deleteData?.type === 'goal' ? 'Meta' : 'Lançamento'}?`} message="Esta ação não pode ser desfeita." />
 
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)} 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+        ></div>
+      )}
+
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-slate-950 lg:relative lg:translate-x-0 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
            <div className="p-8 flex flex-col h-full">
-             <div className="flex items-center gap-4 mb-10"><div className="w-11 h-11 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/40"><PieChartIcon className="w-6 h-6 text-white" /></div><h1 className="text-2xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">CashFlow</h1></div>
+             <div className="flex items-center justify-between mb-10">
+               <div className="flex items-center gap-4">
+                 <div className="w-11 h-11 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/40"><PieChartIcon className="w-6 h-6 text-white" /></div>
+                 <h1 className="text-2xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">CashFlow</h1>
+               </div>
+               <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                 <X className="w-6 h-6" />
+               </button>
+             </div>
+
              <nav className="space-y-3 flex-1">
                 <button onClick={() => { setIsModalOpen(true); setSidebarOpen(false); }} className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 shadow-sm"><Plus className="w-5 h-5" /><span>Lançamento</span></button>
                 <div className="py-2"><MonthSelector currentDate={currentDate} onMonthChange={setCurrentDate} /></div>
@@ -248,17 +263,27 @@ const App: React.FC = () => {
 
       <main className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden relative min-w-0">
         <header className="h-20 flex items-center justify-between px-8 lg:px-12 shrink-0 z-40">
-           <div className="flex items-center gap-6"><button className="lg:hidden p-3 text-slate-500 bg-white dark:bg-slate-900 rounded-2xl shadow-sm" onClick={() => setSidebarOpen(true)}><Menu className="w-6 h-6" /></button><h2 className="lg:hidden text-lg font-black uppercase text-slate-900 dark:text-white tracking-widest">{activeTab}</h2><div className="hidden lg:flex items-center gap-2"><span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] opacity-50">Portal Financeiro Inteligente</span></div></div>
+           <div className="flex items-center gap-6"><button className="lg:hidden p-3 text-slate-500 bg-white dark:bg-slate-900 rounded-2xl shadow-sm" onClick={() => setSidebarOpen(true)}><Menu className="w-6 h-6" /></button><div className="hidden lg:flex items-center gap-2"><span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] opacity-50">Portal Financeiro Inteligente</span></div></div>
            <div className="flex-1"></div>
            <div className="flex items-center gap-3">
               {urgencies.delayedCount > 0 && (<button onClick={() => setActiveTab('contas')} className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl hover:bg-rose-500/20 transition-all shadow-sm group"><AlertCircle className="w-4 h-4 group-hover:animate-shake" /><span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{urgencies.delayedCount} Atrasos</span></button>)}
               <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shadow-sm active:scale-90">{theme === 'dark' ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5" />}</button>
-              <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:border-indigo-500/30"><div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">{session?.user?.email?.charAt(0).toUpperCase()}</div><p className="hidden md:block text-[11px] font-black uppercase truncate max-w-[120px] text-slate-700 dark:text-slate-200">{session?.user?.email}</p></div>
+              <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:border-indigo-500/30">
+                <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+                  {session?.user?.email?.charAt(0).toUpperCase()}
+                </div>
+                <p className="hidden md:block text-sm font-black uppercase truncate max-w-[200px] text-slate-700 dark:text-slate-200">
+                  {session?.user?.email}
+                </p>
+              </div>
            </div>
         </header>
-        <div className="flex-1 px-8 lg:px-12 pb-8 overflow-hidden flex flex-col min-h-0">{renderContent()}</div>
+        <div className="flex-1 px-4 lg:px-12 pb-8 overflow-hidden flex flex-col min-h-0">{renderContent()}</div>
       </main>
 
+      {/* Modais omitidos para manter a brevidade - eles continuam iguais */}
+      {/* ... (códigos dos modais editingTransaction, isModalOpen, etc.) ... */}
+      
       {editingTransaction && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-slate-800 p-6">
