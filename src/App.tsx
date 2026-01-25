@@ -1,3 +1,4 @@
+import './index.css';
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   LayoutDashboard, ArrowLeftRight, TrendingUp, Plus, Menu, X,
@@ -21,7 +22,8 @@ import DashboardHome from './components/DashboardHome';
 import Auth from './components/Auth';
 
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
-const CORES_MODERNAS = ['#0e12e7ff', '#4dee0dff', '#f50c33ff', '#f38e09ff', '#f13f09ff', '#0bd3f7ff', '#d847b9ff', '#f5f109ff'];
+// Cores atualizadas para a marca VittaCash (Verde, Laranja e complementares)
+const CORES_MODERNAS = ['#22C55E', '#FF8A00', '#0e12e7', '#f50c33', '#0bd3f7', '#d847b9', '#f5f109'];
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -69,16 +71,13 @@ const App: React.FC = () => {
   // ATUALIZA O TEMA E A COR DA BARRA DO CELULAR (PWA)
   useEffect(() => {
     const root = window.document.documentElement;
-    // Pega a meta tag que controla a cor do navegador no celular
     const metaThemeColor = document.querySelector("meta[name='theme-color']");
 
     if (theme === 'dark') {
       root.classList.add('dark');
-      // Muda a barra do celular para Escuro (Azul Petróleo)
-      metaThemeColor?.setAttribute("content", "#0f172a"); 
+      metaThemeColor?.setAttribute("content", "#000000"); // Preto Absoluto para VittaCash
     } else {
       root.classList.remove('dark');
-      // Muda a barra do celular para Claro (Branco Gelo)
       metaThemeColor?.setAttribute("content", "#f8fafc"); 
     }
   }, [theme]);
@@ -101,9 +100,20 @@ const App: React.FC = () => {
     } catch (error) { console.error(error); showToast('Erro de conexão.', 'error'); } finally { setLoading(false); }
   };
 
-  useEffect(() => { if (session) fetchData(); }, [session]);
-  useEffect(() => { const root = window.document.documentElement; if (theme === 'dark') root.classList.add('dark'); else root.classList.remove('dark'); }, [theme]);
+  useEffect(() => { 
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+    });
 
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => { if (session) fetchData(); }, [session]);
+  
   const handleLogout = async () => { await supabase.auth.signOut(); setSession(null); };
   const requestDelete = (id: string, type: 'transaction' | 'category' | 'goal') => { setDeleteData({ id, type }); };
 
@@ -151,14 +161,12 @@ const App: React.FC = () => {
           const newState = { ...prev, inputMode: mode };
           if (mode === 'total') {
               newState.totalAmount = numeric;
-              // Calcula parcela se possível
               const totalVal = parseFloat(numeric);
               if (!isNaN(totalVal)) {
                   newState.installmentAmount = Math.round(totalVal / installments).toString();
               }
           } else {
               newState.installmentAmount = numeric;
-              // Calcula total se possível
               const instVal = parseFloat(numeric);
               if (!isNaN(instVal)) {
                   newState.totalAmount = (instVal * installments).toString();
@@ -174,7 +182,6 @@ const App: React.FC = () => {
       
       setNewTx(prev => {
           const newState = { ...prev, installments: countStr };
-          // Recalcula baseado no modo ativo
           if (prev.inputMode === 'total') {
               const totalVal = parseFloat(prev.totalAmount);
               if (!isNaN(totalVal)) newState.installmentAmount = Math.round(totalVal / count).toString();
@@ -192,15 +199,11 @@ const App: React.FC = () => {
 
     const numParcelas = parseInt(newTx.installments);
     const qtdFinal = numParcelas > 0 ? numParcelas : 1;
-    
-    // O valor a ser salvo por parcela depende do inputMode
     let valorFinalParcela = 0;
 
     if (newTx.inputMode === 'total') {
-        // Se digitou o total, divide pelas parcelas
         valorFinalParcela = (parseFloat(newTx.totalAmount) / 100) / qtdFinal;
     } else {
-        // Se digitou a parcela, usa o valor direto
         valorFinalParcela = parseFloat(newTx.installmentAmount) / 100;
     }
 
@@ -251,7 +254,8 @@ const App: React.FC = () => {
   const totalProfitPercent = totalApplied > 0 ? (totalProfit / totalApplied) * 100 : 0;
 
   const urgencies = useMemo(() => { const today = new Date(); today.setHours(0,0,0,0); const pending = transactions.filter(t => t.status === TransactionStatus.PENDING); const delayed = pending.filter(t => new Date(t.date) < today); return { delayedCount: delayed.length }; }, [transactions]);
-  const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 shadow-sm border border-indigo-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
+  // CORRIGIDO: Botão da Navbar com cor Verde (Emerald) quando ativo
+  const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 shadow-sm border border-emerald-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
   
   const investmentAllocation = useMemo(() => { 
       const allocation: Record<string, number> = {}; 
@@ -312,14 +316,15 @@ const App: React.FC = () => {
       return (
         <div className="h-full flex flex-col gap-4 min-h-0 min-w-0 overflow-y-auto pb-20 lg:pb-0 custom-scrollbar p-1">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
-                <div className="bg-white dark:bg-slate-900/40 rounded-[2rem] p-5 shadow-sm border border-slate-100 dark:border-slate-800">
+                <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-5 shadow-sm border border-slate-100 dark:border-zinc-800">
                     <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl"><Layers className="w-5 h-5 text-slate-500" /></div>
-                        <span className="text-[10px] font-black text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg uppercase">Aplicado</span>
+                        <div className="p-2 bg-slate-100 dark:bg-zinc-800 rounded-xl"><Layers className="w-5 h-5 text-slate-500" /></div>
+                        <span className="text-[10px] font-black text-slate-500 bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded-lg uppercase">Aplicado</span>
                     </div>
                     <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter mt-4">R$ {totalApplied.toLocaleString()}</h3>
                 </div>
-                <div className="bg-indigo-600 rounded-[2rem] p-5 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
+                {/* CORRIGIDO: Cartão Patrimônio agora é Verde (Emerald) */}
+                <div className="bg-emerald-600 rounded-[2rem] p-5 text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10"><Coins className="w-16 h-16" /></div>
                     <div className="relative z-10">
                         <div className="flex justify-between items-start mb-4">
@@ -344,29 +349,30 @@ const App: React.FC = () => {
                     </p>
                 </div>
             </div>
+            {/* Gráficos e Tabelas */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 shrink-0 lg:h-[300px]">
-                <div className="lg:col-span-3 bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
+                <div className="lg:col-span-3 bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Evolução do Patrimônio</h3>
                     <div className="flex-1 w-full min-h-0">
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={patrimonyData}>
                                 <defs>
                                     <linearGradient id="gradPatrimonio" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={CORES_MODERNAS[1]} stopOpacity={0.2}/>
-                                        <stop offset="95%" stopColor={CORES_MODERNAS[1]} stopOpacity={0}/>
+                                        <stop offset="5%" stopColor="#22C55E" stopOpacity={0.2}/>
+                                        <stop offset="95%" stopColor="#22C55E" stopOpacity={0}/>
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: '#64748b'}} />
                                 <YAxis hide />
                                 <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
-                                <Bar dataKey="aporte" barSize={12} fill={CORES_MODERNAS[0]} radius={[4, 4, 0, 0]} name="Aporte Mês" />
-                                <Area type="monotone" dataKey="total" stroke={CORES_MODERNAS[1]} strokeWidth={3} fill="url(#gradPatrimonio)" name="Total Acumulado" />
+                                <Bar dataKey="aporte" barSize={12} fill="#FF8A00" radius={[4, 4, 0, 0]} name="Aporte Mês" />
+                                <Area type="monotone" dataKey="total" stroke="#22C55E" strokeWidth={3} fill="url(#gradPatrimonio)" name="Total Acumulado" />
                             </ComposedChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
-                <div className="lg:col-span-2 bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] flex flex-col shadow-sm h-[250px] lg:h-auto overflow-hidden">
+                <div className="lg:col-span-2 bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] flex flex-col shadow-sm h-[250px] lg:h-auto overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3>
                     <div className="flex-1 flex items-center gap-2 min-h-0">
                         <div className="h-full w-1/2 min-w-[100px]">
@@ -390,7 +396,7 @@ const App: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <div className="bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden shrink-0">
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden shrink-0">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><LineChart className="w-4 h-4" /> Performance</h3>
                 <div className="flex-1 w-full min-h-0">
                     <ResponsiveContainer width="100%" height="100%">
@@ -401,14 +407,14 @@ const App: React.FC = () => {
                             <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
                             <Legend wrapperStyle={{fontSize: '9px'}} />
                             <Bar dataKey="Investido" fill="#64748b" radius={[0, 4, 4, 0]} barSize={10} name="Investido" />
-                            <Bar dataKey="Atual" fill={CORES_MODERNAS[3]} radius={[0, 4, 4, 0]} barSize={10} name="Atual" />
+                            <Bar dataKey="Atual" fill="#22C55E" radius={[0, 4, 4, 0]} barSize={10} name="Atual" />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
             </div>
-            <div className="flex-1 bg-white dark:bg-slate-900/40 rounded-[2.5rem] overflow-hidden flex flex-col min-h-[300px] shadow-sm shrink-0">
-                <div className="flex items-center justify-between p-6 pb-4 shrink-0"><div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div><button onClick={() => setIsInvestmentModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/30"><Plus className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-wider">Nova Aplicação</span></button></div>
-                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0 custom-scrollbar"><table className="w-full text-left border-collapse"><thead><tr className="border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900/90 backdrop-blur-md z-10"><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Ativo</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Categoria</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Aplicado</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Atual</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest text-right">Rent.</th></tr></thead><tbody>{investments.map((inv) => { const profit = ((inv.current_amount / inv.invested_amount) - 1) * 100; return (<tr key={inv.id} className="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"><td className="py-5 px-2 font-bold text-sm truncate max-w-[150px]">{inv.name}</td><td className="py-5 px-2 text-xs font-bold text-slate-500">{inv.category}</td><td className="py-5 px-2 text-sm font-bold text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td><td className="py-5 px-2 text-sm font-black text-indigo-600">R$ {inv.current_amount.toLocaleString()}</td><td className={`py-5 px-2 text-xs font-black text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td></tr>); })}</tbody></table></div>
+            <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden flex flex-col min-h-[300px] shadow-sm shrink-0">
+                <div className="flex items-center justify-between p-6 pb-4 shrink-0"><div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-emerald-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div><button onClick={() => setIsInvestmentModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-500/30"><Plus className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-wider">Nova Aplicação</span></button></div>
+                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0 custom-scrollbar"><table className="w-full text-left border-collapse"><thead><tr className="border-b border-slate-100 dark:border-zinc-800 sticky top-0 bg-white dark:bg-zinc-900/90 backdrop-blur-md z-10"><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Ativo</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Categoria</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Aplicado</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Atual</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest text-right">Rent.</th></tr></thead><tbody>{investments.map((inv) => { const profit = ((inv.current_amount / inv.invested_amount) - 1) * 100; return (<tr key={inv.id} className="border-b border-slate-50 dark:border-zinc-800/50 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors"><td className="py-5 px-2 font-bold text-sm truncate max-w-[150px]">{inv.name}</td><td className="py-5 px-2 text-xs font-bold text-slate-500">{inv.category}</td><td className="py-5 px-2 text-sm font-bold text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td><td className="py-5 px-2 text-sm font-black text-emerald-600">R$ {inv.current_amount.toLocaleString()}</td><td className={`py-5 px-2 text-xs font-black text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td></tr>); })}</tbody></table></div>
             </div>
         </div>
       );
@@ -418,15 +424,16 @@ const App: React.FC = () => {
     const list = isHistory ? filteredTransactions.filter(t => t.status === TransactionStatus.COMPLETED) : [];
     return (
       <div className="h-full flex flex-col min-h-0 min-w-0 animate-in fade-in slide-in-from-bottom-2">
-        <div className="flex-1 bg-white dark:bg-slate-900/40 rounded-[2.5rem] overflow-y-auto p-6 custom-scrollbar min-h-0 shadow-sm">
+        <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-y-auto p-6 custom-scrollbar min-h-0 shadow-sm">
             {loading ? <p className="text-center p-10 text-slate-400">Carregando...</p> : <TransactionTable transactions={list} onDelete={!isHistory ? (id) => requestDelete(id, 'transaction') : undefined} onEdit={!isHistory ? openEditModal : undefined} onPay={!isHistory ? (id) => { const tx = transactions.find(t => t.id === id); if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); } } : undefined} />}
         </div>
       </div>
     );
   };
 
+  // --- RENDERIZAÇÃO PRINCIPAL DO APP ---
   return (
-    <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 flex overflow-hidden font-inter">
+    <div className="h-screen w-full bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-200 flex overflow-hidden font-inter">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <ConfirmModal isOpen={!!deleteData} onClose={() => setDeleteData(null)} onConfirm={handleConfirmDelete} title={`Excluir ${deleteData?.type === 'category' ? 'Categoria' : deleteData?.type === 'goal' ? 'Meta' : 'Lançamento'}?`} message="Esta ação não pode ser desfeita." />
 
@@ -437,12 +444,16 @@ const App: React.FC = () => {
         ></div>
       )}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-slate-950 lg:relative lg:translate-x-0 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* SIDEBAR COM O VISUAL VITTACASH */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-black lg:relative lg:translate-x-0 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
            <div className="p-8 flex flex-col h-full">
              <div className="flex items-center justify-between mb-10">
                <div className="flex items-center gap-4">
-                 <div className="w-11 h-11 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/40"><PieChartIcon className="w-6 h-6 text-white" /></div>
-                 <h1 className="text-2xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">CashFlow</h1>
+                 {/* LOGO NOVA AQUI */}
+                 <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center">
+                    <img src="/logo.png" alt="VittaCash" className="w-full h-full object-contain" />
+                 </div>
+                 <h1 className="text-2xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">VittaCash</h1>
                </div>
                <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                  <X className="w-6 h-6" />
@@ -450,9 +461,9 @@ const App: React.FC = () => {
              </div>
 
              <nav className="space-y-3 flex-1">
-                <button onClick={() => { setIsModalOpen(true); setSidebarOpen(false); }} className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 shadow-sm"><Plus className="w-5 h-5" /><span>Lançamento</span></button>
+                <button onClick={() => { setIsModalOpen(true); setSidebarOpen(false); }} className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 bg-emerald-50/50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 shadow-sm"><Plus className="w-5 h-5" /><span>Lançamento</span></button>
                 <div className="py-2"><MonthSelector currentDate={currentDate} onMonthChange={setCurrentDate} /></div>
-                <div className="h-px bg-slate-200 dark:bg-slate-800 my-4 opacity-30"></div>
+                <div className="h-px bg-slate-200 dark:bg-zinc-800 my-4 opacity-30"></div>
                 <button onClick={() => { setActiveTab('dashboard'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'dashboard')}><LayoutDashboard className="w-5 h-5" /><span>Dashboard</span></button>
                 <button onClick={() => { setActiveTab('categorias'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'categorias')}><Tag className="w-5 h-5" /><span>Categorias</span></button>
                 <button onClick={() => { setActiveTab('metas'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'metas')}><Target className="w-5 h-5" /><span>Metas</span></button>
@@ -464,15 +475,15 @@ const App: React.FC = () => {
            </div>
       </aside>
 
-      <main className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden relative min-w-0">
+      <main className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-black overflow-hidden relative min-w-0">
         <header className="h-20 flex items-center justify-between px-8 lg:px-12 shrink-0 z-40">
-           <div className="flex items-center gap-6"><button className="lg:hidden p-3 text-slate-500 bg-white dark:bg-slate-900 rounded-2xl shadow-sm" onClick={() => setSidebarOpen(true)}><Menu className="w-6 h-6" /></button><div className="hidden lg:flex items-center gap-2"><span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] opacity-50">Portal Financeiro Inteligente</span></div></div>
+           <div className="flex items-center gap-6"><button className="lg:hidden p-3 text-slate-500 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm" onClick={() => setSidebarOpen(true)}><Menu className="w-6 h-6" /></button><div className="hidden lg:flex items-center gap-2"><span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] opacity-50">Portal Financeiro Inteligente</span></div></div>
            <div className="flex-1"></div>
            <div className="flex items-center gap-3">
               {urgencies.delayedCount > 0 && (<button onClick={() => setActiveTab('contas')} className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl hover:bg-rose-500/20 transition-all shadow-sm group"><AlertCircle className="w-4 h-4 group-hover:animate-shake" /><span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{urgencies.delayedCount} Atrasos</span></button>)}
-              <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shadow-sm active:scale-90">{theme === 'dark' ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5" />}</button>
-              <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:border-indigo-500/30">
-                <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+              <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-3.5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all shadow-sm active:scale-90">{theme === 'dark' ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5" />}</button>
+              <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 shadow-sm transition-all hover:border-emerald-500/30">
+                <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-sm">
                   {session?.user?.email?.charAt(0).toUpperCase()}
                 </div>
                 <p className="hidden md:block text-sm font-black uppercase truncate max-w-[200px] text-slate-700 dark:text-slate-200">
@@ -487,12 +498,12 @@ const App: React.FC = () => {
       {/* Os modais continuam iguais abaixo... */}
       {editingTransaction && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-slate-800 p-6">
-            <div className="flex items-center justify-between mb-4"><h3 className="font-black text-xl uppercase tracking-tighter text-amber-500 flex items-center gap-2"><Edit3 className="w-5 h-5"/> Editar</h3><button onClick={() => setEditingTransaction(null)} className="p-2 text-slate-400 hover:text-slate-600 transition-all bg-slate-50 dark:bg-slate-900 rounded-xl"><X className="w-5 h-5" /></button></div>
+          <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-6">
+            <div className="flex items-center justify-between mb-4"><h3 className="font-black text-xl uppercase tracking-tighter text-amber-500 flex items-center gap-2"><Edit3 className="w-5 h-5"/> Editar</h3><button onClick={() => setEditingTransaction(null)} className="p-2 text-slate-400 hover:text-slate-600 transition-all bg-slate-50 dark:bg-zinc-900 rounded-xl"><X className="w-5 h-5" /></button></div>
             <form onSubmit={handleUpdateTransaction} className="space-y-4">
-              <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Descrição</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-amber-500 shadow-inner" value={editForm.description} onChange={(e) => setEditForm({...editForm, description: e.target.value})} required /></div>
-              <div className="grid grid-cols-2 gap-3"><div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-amber-500 shadow-inner" value={formatCurrencyInput(editForm.amountString)} onChange={(e) => setEditForm({...editForm, amountString: e.target.value.replace(/\D/g, '')})} required /></div><div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Data</label><input type="date" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-xs font-black outline-none border-2 border-transparent focus:border-amber-500 shadow-inner" value={editForm.date} onChange={(e) => setEditForm({...editForm, date: e.target.value})} required /></div></div>
-              <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-amber-500 shadow-inner" value={editForm.category} onChange={(e) => setEditForm({...editForm, category: e.target.value})}><option value="">Sem categoria</option>{categories.filter(c => c.type === editForm.type).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
+              <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Descrição</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-amber-500 shadow-inner" value={editForm.description} onChange={(e) => setEditForm({...editForm, description: e.target.value})} required /></div>
+              <div className="grid grid-cols-2 gap-3"><div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-amber-500 shadow-inner" value={formatCurrencyInput(editForm.amountString)} onChange={(e) => setEditForm({...editForm, amountString: e.target.value.replace(/\D/g, '')})} required /></div><div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Data</label><input type="date" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-xs font-black outline-none border-2 border-transparent focus:border-amber-500 shadow-inner" value={editForm.date} onChange={(e) => setEditForm({...editForm, date: e.target.value})} required /></div></div>
+              <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-amber-500 shadow-inner" value={editForm.category} onChange={(e) => setEditForm({...editForm, category: e.target.value})}><option value="">Sem categoria</option>{categories.filter(c => c.type === editForm.type).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
               <button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-xl transition-all active:scale-95 mt-2">Salvar Alterações</button>
             </form>
           </div>
@@ -502,29 +513,29 @@ const App: React.FC = () => {
       {/* MODAL NOVO LANÇAMENTO - COM TOGGLE DE VALOR */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-              <div className="bg-white dark:bg-slate-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-slate-800 p-6">
-                <div className="flex items-center justify-between mb-4"><h3 className="font-black text-xl uppercase tracking-tighter text-indigo-600">Novo Lançamento</h3><button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 transition-all bg-slate-50 dark:bg-slate-900 rounded-xl"><X className="w-5 h-5" /></button></div>
+              <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-6">
+                <div className="flex items-center justify-between mb-4"><h3 className="font-black text-xl uppercase tracking-tighter text-emerald-600">Novo Lançamento</h3><button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 transition-all bg-slate-50 dark:bg-zinc-900 rounded-xl"><X className="w-5 h-5" /></button></div>
                 <form onSubmit={handleAddTransaction} className="space-y-3">
-                    <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Descrição</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-indigo-500 shadow-inner" value={newTx.description} onChange={(e) => setNewTx({...newTx, description: e.target.value})} required /></div>
-                    <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-indigo-500 shadow-inner" value={newTx.category} onChange={(e) => setNewTx({...newTx, category: e.target.value})}><option value="">Selecione uma Categoria...</option>{categories.filter(c => c.type === newTx.type).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
+                    <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Descrição</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-emerald-500 shadow-inner" value={newTx.description} onChange={(e) => setNewTx({...newTx, description: e.target.value})} required /></div>
+                    <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-emerald-500 shadow-inner" value={newTx.category} onChange={(e) => setNewTx({...newTx, category: e.target.value})}><option value="">Selecione uma Categoria...</option>{categories.filter(c => c.type === newTx.type).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
                     
                     {/* TOGGLE: ESCOLHA ENTRE VALOR TOTAL OU PARCELA */}
                     <div className="flex gap-2 mb-1">
-                        <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'total'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'total' ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Total</button>
-                        <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'installment'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'installment' ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Parcela</button>
+                        <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'total'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'total' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Total</button>
+                        <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'installment'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'installment' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Parcela</button>
                     </div>
 
                     {newTx.inputMode === 'total' ? (
-                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor Total</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-indigo-500 shadow-inner" value={formatCurrencyInput(newTx.totalAmount)} onChange={(e) => handleValueChange(e.target.value, 'total')} required /></div>
+                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor Total</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-emerald-500 shadow-inner" value={formatCurrencyInput(newTx.totalAmount)} onChange={(e) => handleValueChange(e.target.value, 'total')} required /></div>
                     ) : (
-                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor da Parcela</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-indigo-500 shadow-inner" value={formatCurrencyInput(newTx.installmentAmount)} onChange={(e) => handleValueChange(e.target.value, 'installment')} required /></div>
+                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor da Parcela</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-emerald-500 shadow-inner" value={formatCurrencyInput(newTx.installmentAmount)} onChange={(e) => handleValueChange(e.target.value, 'installment')} required /></div>
                     )}
 
                     <div className="grid grid-cols-2 gap-3 mt-2">
                         <div className="space-y-1">
                             <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Parcelas</label>
                             <select 
-                                className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-indigo-500 appearance-none shadow-inner cursor-pointer" 
+                                className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-emerald-500 appearance-none shadow-inner cursor-pointer" 
                                 value={newTx.installments} 
                                 onChange={handleInstallmentsChange}
                             >
@@ -534,12 +545,12 @@ const App: React.FC = () => {
                         </div>
                         <div className="space-y-1">
                             <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Vencimento</label>
-                            <input type="date" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-xs font-black outline-none border-2 border-transparent focus:border-indigo-500 shadow-inner" value={newTx.date} onChange={(e) => setNewTx({...newTx, date: e.target.value})} required />
+                            <input type="date" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-xs font-black outline-none border-2 border-transparent focus:border-emerald-500 shadow-inner" value={newTx.date} onChange={(e) => setNewTx({...newTx, date: e.target.value})} required />
                         </div>
                     </div>
 
-                    <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 h-[48px]"><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.INCOME})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.INCOME ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500'}`}>Receita</button><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.EXPENSE})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.EXPENSE ? 'bg-rose-500 text-white shadow-md' : 'text-slate-500'}`}>Despesa</button></div>
-                    <button type="submit" className="w-full bg-indigo-600 py-4 rounded-xl text-white font-black uppercase text-xs tracking-[0.1em] shadow-xl active:scale-95 transition-all mt-2 hover:bg-indigo-700">Lançar Agora</button>
+                    <div className="flex bg-slate-100 dark:bg-zinc-800 rounded-xl p-1 h-[48px]"><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.INCOME})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.INCOME ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500'}`}>Receita</button><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.EXPENSE})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.EXPENSE ? 'bg-rose-500 text-white shadow-md' : 'text-slate-500'}`}>Despesa</button></div>
+                    <button type="submit" className="w-full bg-emerald-600 py-4 rounded-xl text-white font-black uppercase text-xs tracking-[0.1em] shadow-xl active:scale-95 transition-all mt-2 hover:bg-emerald-700">Lançar Agora</button>
                 </form>
               </div>
         </div>
@@ -548,13 +559,13 @@ const App: React.FC = () => {
       {/* MODAL NOVA APLICAÇÃO */}
       {isInvestmentModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
-             <div className="bg-white dark:bg-slate-950 w-full max-w-md rounded-[3.5rem] shadow-3xl border border-slate-100 dark:border-slate-800 p-10 transform scale-100">
-                <div className="flex items-center justify-between mb-10"><div className="flex items-center gap-4"><div className="p-4 bg-indigo-600 rounded-3xl shadow-xl shadow-indigo-500/30"><Coins className="w-8 h-8 text-white" /></div><h3 className="font-black text-2xl lg:text-3xl uppercase tracking-tighter text-slate-900 dark:text-white">Nova Aplicação</h3></div><button onClick={() => setIsInvestmentModalOpen(false)} className="p-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all bg-slate-50 dark:bg-slate-900 rounded-3xl"><X className="w-7 h-7" /></button></div>
+             <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[3.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-10 transform scale-100">
+                <div className="flex items-center justify-between mb-10"><div className="flex items-center gap-4"><div className="p-4 bg-emerald-600 rounded-3xl shadow-xl shadow-emerald-500/30"><Coins className="w-8 h-8 text-white" /></div><h3 className="font-black text-2xl lg:text-3xl uppercase tracking-tighter text-slate-900 dark:text-white">Nova Aplicação</h3></div><button onClick={() => setIsInvestmentModalOpen(false)} className="p-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all bg-slate-50 dark:bg-zinc-900 rounded-3xl"><X className="w-7 h-7" /></button></div>
                 <form onSubmit={handleAddInvestment} className="space-y-8">
-                     <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Search className="w-4 h-4 text-indigo-500" /> Ativo Selecionado</label><input type="text" placeholder="Ticker ou Nome" className="w-full bg-slate-50 dark:bg-slate-900 rounded-3xl px-8 py-6 text-lg font-black outline-none" value={newInv.name} onChange={(e) => setNewInv({...newInv, name: e.target.value})} required /></div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Wallet className="w-4 h-4 text-indigo-500" /> Valor</label><input type="text" className="w-full bg-indigo-50/50 dark:bg-indigo-500/10 rounded-3xl px-6 py-6 text-xl font-black outline-none text-indigo-600" value={formatCurrencyInput(newInv.amount)} onChange={(e) => setNewInv({...newInv, amount: e.target.value.replace(/\D/g, '')})} required /></div><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Calendar className="w-4 h-4 text-indigo-500" /> Data</label><input type="date" className="w-full bg-slate-50 dark:bg-slate-900 rounded-3xl px-6 py-6 text-sm font-black outline-none dark:text-white" value={newInv.date} onChange={(e) => setNewInv({...newInv, date: e.target.value})} required /></div></div>
-                     <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-slate-900 rounded-3xl px-8 py-6 text-sm font-black outline-none dark:text-white" value={newInv.category} onChange={(e) => setNewInv({...newInv, category: e.target.value})}><option>Ações</option><option>Renda Fixa</option><option>FIIs</option><option>Cripto</option><option>Tesouro</option><option>Fundos</option></select></div>
-                     <button type="submit" className="w-full bg-indigo-600 py-7 rounded-[2.5rem] text-white font-black uppercase text-sm tracking-[0.2em] shadow-2xl mt-6">Salvar Aplicação</button>
+                     <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Search className="w-4 h-4 text-emerald-500" /> Ativo Selecionado</label><input type="text" placeholder="Ticker ou Nome" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-8 py-6 text-lg font-black outline-none" value={newInv.name} onChange={(e) => setNewInv({...newInv, name: e.target.value})} required /></div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Wallet className="w-4 h-4 text-emerald-500" /> Valor</label><input type="text" className="w-full bg-emerald-50/50 dark:bg-emerald-500/10 rounded-3xl px-6 py-6 text-xl font-black outline-none text-emerald-600" value={formatCurrencyInput(newInv.amount)} onChange={(e) => setNewInv({...newInv, amount: e.target.value.replace(/\D/g, '')})} required /></div><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Calendar className="w-4 h-4 text-emerald-500" /> Data</label><input type="date" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-6 py-6 text-sm font-black outline-none dark:text-white" value={newInv.date} onChange={(e) => setNewInv({...newInv, date: e.target.value})} required /></div></div>
+                     <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-8 py-6 text-sm font-black outline-none dark:text-white" value={newInv.category} onChange={(e) => setNewInv({...newInv, category: e.target.value})}><option>Ações</option><option>Renda Fixa</option><option>FIIs</option><option>Cripto</option><option>Tesouro</option><option>Fundos</option></select></div>
+                     <button type="submit" className="w-full bg-emerald-600 py-7 rounded-[2.5rem] text-white font-black uppercase text-sm tracking-[0.2em] shadow-2xl mt-6">Salvar Aplicação</button>
                 </form>
              </div>
         </div>
@@ -562,14 +573,14 @@ const App: React.FC = () => {
 
       {payingTransaction && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-           <div className="bg-white dark:bg-slate-950 w-full max-w-xs rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-slate-800 p-8">
+           <div className="bg-white dark:bg-zinc-950 w-full max-w-xs rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-8">
               <h3 className="font-black text-sm uppercase tracking-widest mb-6 text-center text-slate-500">Confirmar Pagamento</h3>
               <div className="space-y-4">
-                 <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800"><p className="text-[9px] font-black uppercase text-slate-400 mb-2">Lançamento</p><p className="font-black text-sm text-slate-900 dark:text-white">{payingTransaction.description}</p></div>
-                 <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl border-2 border-indigo-200 dark:border-indigo-500/20"><p className="text-[9px] font-black uppercase text-indigo-500 mb-2">Valor Real</p><input autoFocus type="text" className="w-full bg-transparent border-none p-0 font-black text-lg text-indigo-600 outline-none" value={formatCurrencyInput(realValueInput)} onChange={(e) => setRealValueInput(e.target.value.replace(/\D/g, ''))} /></div>
+                 <div className="p-4 bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800"><p className="text-[9px] font-black uppercase text-slate-400 mb-2">Lançamento</p><p className="font-black text-sm text-slate-900 dark:text-white">{payingTransaction.description}</p></div>
+                 <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl border-2 border-emerald-200 dark:border-emerald-500/20"><p className="text-[9px] font-black uppercase text-emerald-500 mb-2">Valor Real</p><input autoFocus type="text" className="w-full bg-transparent border-none p-0 font-black text-lg text-emerald-600 outline-none" value={formatCurrencyInput(realValueInput)} onChange={(e) => setRealValueInput(e.target.value.replace(/\D/g, ''))} /></div>
                  <div className="grid grid-cols-2 gap-4 pt-2">
-                    <button onClick={() => setPayingTransaction(null)} className="py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 font-black uppercase text-xs tracking-widest hover:bg-slate-200 transition-colors">Voltar</button>
-                    <button onClick={confirmPayment} className="py-4 rounded-2xl bg-indigo-600 text-white font-black uppercase text-xs tracking-widest hover:bg-indigo-700 shadow-xl shadow-indigo-500/20 transition-all active:scale-95">Confirmar</button>
+                    <button onClick={() => setPayingTransaction(null)} className="py-4 rounded-2xl bg-slate-100 dark:bg-zinc-800 text-slate-500 font-black uppercase text-xs tracking-widest hover:bg-slate-200 transition-colors">Voltar</button>
+                    <button onClick={confirmPayment} className="py-4 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs tracking-widest hover:bg-emerald-700 shadow-xl shadow-emerald-500/20 transition-all active:scale-95">Confirmar</button>
                  </div>
               </div>
            </div>

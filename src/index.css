@@ -2,8 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === BARRA DE ROLAGEM GLOBAL (Laranja Neon) === */
 @layer base {
+  /* Fundo Totalmente Preto para destacar a Logo */
+  body {
+    @apply bg-black text-white;
+    background-color: #000000 !important; /* Remove o Vermelho de vez */
+  }
+
+  /* BARRA DE ROLAGEM (Degradê Laranja para Verde) */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -12,16 +18,17 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #fbbf24 0%, #ea580c 100%);
+    /* Cores da sua logo: Laranja em cima, Verde embaixo */
+    background: linear-gradient(180deg, #FF8A00 0%, #22C55E 100%);
     border-radius: 10px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #f59e0b 0%, #c2410c 100%);
+    background: linear-gradient(180deg, #f59e0b 0%, #16a34a 100%);
   }
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #ea580c transparent;
+  scrollbar-color: #22C55E transparent;
 }
