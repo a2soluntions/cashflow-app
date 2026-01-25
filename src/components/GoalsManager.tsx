@@ -13,7 +13,7 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
   const [depositModal, setDepositModal] = useState<string | null>(null);
   const [depositValue, setDepositValue] = useState('');
   
-  // CORREÇÃO: Usando 'name' pois é o que o banco de dados espera (conforme o erro mostrou)
+  // CORREÇÃO: Usando 'name' corretamente
   const [newGoal, setNewGoal] = useState({
     name: '',
     target_amount: '',
@@ -34,7 +34,7 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
 
     const amount = parseFloat(newGoal.target_amount) / 100;
     
-    // Envia o objeto com a propriedade correta 'name'
+    // CORREÇÃO: Envia 'name' e faz o cast para 'any' para evitar erro de tipo estrito se o types.ts estiver diferente
     onAdd({
       name: newGoal.name,
       target_amount: amount,
@@ -64,7 +64,6 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
       
       {/* --- 1. CARDS DE RESUMO (TOPO) --- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
-         {/* Card Roxo: Total Guardado */}
          <div className="bg-indigo-600 rounded-[2.5rem] p-6 text-white shadow-lg relative overflow-hidden flex items-center justify-between">
             <div className="relative z-10">
                <span className="text-[10px] font-black bg-white/20 px-3 py-1 rounded-lg uppercase tracking-widest">Total Guardado</span>
@@ -73,7 +72,6 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
             <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm"><Wallet className="w-6 h-6 text-white" /></div>
          </div>
 
-         {/* Card Verde: Meta Global */}
          <div className="bg-emerald-500 rounded-[2.5rem] p-6 text-white shadow-lg relative overflow-hidden flex items-center justify-between">
             <div className="relative z-10">
                <span className="text-[10px] font-black bg-white/20 px-3 py-1 rounded-lg uppercase tracking-widest">Meta Global</span>
@@ -82,7 +80,6 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
             <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm"><Target className="w-6 h-6 text-white" /></div>
          </div>
 
-         {/* Card Azul: Situação */}
          <div className="bg-blue-500 rounded-[2.5rem] p-6 text-white shadow-lg relative overflow-hidden flex items-center justify-between">
             <div className="relative z-10">
                <span className="text-[10px] font-black bg-white/20 px-3 py-1 rounded-lg uppercase tracking-widest">Situação</span>
@@ -204,7 +201,7 @@ const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, on
         </div>
       </div>
 
-      {/* --- MODAL DEPOSITAR (Mantido para a ação de depósito) --- */}
+      {/* --- MODAL DEPOSITAR (Mantido) --- */}
       {depositModal && (
         <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-slate-900 w-full sm:max-w-xs rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 shadow-2xl border border-slate-800">
