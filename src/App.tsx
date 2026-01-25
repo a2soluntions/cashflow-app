@@ -2,8 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   LayoutDashboard, ArrowLeftRight, TrendingUp, Plus, Menu, X,
   CalendarDays, LineChart, Search, Coins,
-  Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle, ArrowUpRight, ArrowDownRight, Layers, BarChart3
-} from 'lucide-react';
+  Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle, ArrowUpRight, ArrowDownRight, Layers, BarChart3} from 'lucide-react';
 import { 
   ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, Legend, CartesianGrid, XAxis, YAxis, Tooltip, ComposedChart, Area
@@ -17,6 +16,7 @@ import ConfirmModal from './components/ConfirmModal';
 import MonthSelector from './components/MonthSelector';
 import CategoryManager from './components/CategoryManager';
 import GoalsManager from './components/GoalsManager';
+import BillsManager from './components/BillsManager';
 import DashboardHome from './components/DashboardHome';
 import Auth from './components/Auth';
 
@@ -50,10 +50,15 @@ const App: React.FC = () => {
   const showToast = (message: string, type: 'success' | 'error') => { setToast({ message, type }); setTimeout(() => setToast(null), 3000); };
   const formatCurrencyInput = (val: string) => { if (!val || val === '0') return 'R$ 0,00'; const numberValue = parseFloat(val) / 100; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numberValue); };
 
+  // ESTADO APPRIMORADO: inputMode define quem manda no cálculo
   const [newTx, setNewTx] = useState({
-    description: '', totalAmount: '', installmentAmount: '',
-    type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0],
-    installments: '1', inputMode: 'total' as 'total' | 'installment',
+    description: '', 
+    totalAmount: '',       // Valor total da compra
+    installmentAmount: '', // Valor da parcela
+    inputMode: 'total' as 'total' | 'installment', // Quem está sendo digitado?
+    type: TransactionType.EXPENSE, 
+    date: new Date().toISOString().split('T')[0],
+    installments: '1', 
     category: ''
   });
 
@@ -126,39 +131,107 @@ const App: React.FC = () => {
   const handleUpdateTransaction = async (e: React.FormEvent) => { e.preventDefault(); if (!editingTransaction) return; const updatedAmount = parseFloat(editForm.amountString) / 100; const { error } = await supabase.from('transactions').update({ description: editForm.description, amount: updatedAmount, date: editForm.date, category: editForm.category, type: editForm.type }).eq('id', editingTransaction.id); if (error) showToast('Erro ao atualizar.', 'error'); else { showToast('Atualizado!', 'success'); setEditingTransaction(null); fetchData(); } };
   const handleAddCategory = async (name: string, type: TransactionType) => { const { data, error } = await supabase.from('categories').insert([{ name, type }]).select(); if (error) showToast('Erro ao criar categoria.', 'error'); else if (data) { setCategories([...categories, data[0]]); showToast('Categoria criada!', 'success'); } };
   
+  // --- LÓGICA DE VALORES (Bidirecional) ---
+  const handleValueChange = (val: string, mode: 'total' | 'installment') => {
+      const numeric = val.replace(/\D/g, '');
+      const installments = parseInt(newTx.installments) || 1;
+      
+      setNewTx(prev => {
+          const newState = { ...prev, inputMode: mode };
+          if (mode === 'total') {
+              newState.totalAmount = numeric;
+              // Calcula parcela se possível
+              const totalVal = parseFloat(numeric);
+              if (!isNaN(totalVal)) {
+                  newState.installmentAmount = Math.round(totalVal / installments).toString();
+              }
+          } else {
+              newState.installmentAmount = numeric;
+              // Calcula total se possível
+              const instVal = parseFloat(numeric);
+              if (!isNaN(instVal)) {
+                  newState.totalAmount = (instVal * installments).toString();
+              }
+          }
+          return newState;
+      });
+  };
+
+  const handleInstallmentsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const countStr = e.target.value;
+      const count = parseInt(countStr) || 1;
+      
+      setNewTx(prev => {
+          const newState = { ...prev, installments: countStr };
+          // Recalcula baseado no modo ativo
+          if (prev.inputMode === 'total') {
+              const totalVal = parseFloat(prev.totalAmount);
+              if (!isNaN(totalVal)) newState.installmentAmount = Math.round(totalVal / count).toString();
+          } else {
+              const instVal = parseFloat(prev.installmentAmount);
+              if (!isNaN(instVal)) newState.totalAmount = (instVal * count).toString();
+          }
+          return newState;
+      });
+  };
+
   const handleAddTransaction = async (e: React.FormEvent) => { 
     e.preventDefault(); 
     if (!session?.user) return;
-    const total = parseFloat(newTx.totalAmount) / 100;
-    const installmentsCount = parseInt(newTx.installments);
+
+    const numParcelas = parseInt(newTx.installments);
+    const qtdFinal = numParcelas > 0 ? numParcelas : 1;
+    
+    // O valor a ser salvo por parcela depende do inputMode
+    let valorFinalParcela = 0;
+
+    if (newTx.inputMode === 'total') {
+        // Se digitou o total, divide pelas parcelas
+        valorFinalParcela = (parseFloat(newTx.totalAmount) / 100) / qtdFinal;
+    } else {
+        // Se digitou a parcela, usa o valor direto
+        valorFinalParcela = parseFloat(newTx.installmentAmount) / 100;
+    }
+
     const newEntries = [];
     const finalCategory = newTx.category || (categories.find(c => c.type === newTx.type)?.name || 'Geral'); 
-    
-    for (let i = 0; i < installmentsCount; i++) { 
-      const txDate = new Date(newTx.date); 
-      txDate.setMonth(txDate.getMonth() + i); 
+    const [year, month, day] = newTx.date.split('-').map(Number);
+
+    for (let i = 0; i < qtdFinal; i++) { 
+      const txDate = new Date(year, (month - 1) + i, day);
+      const dateString = txDate.toLocaleDateString('en-CA'); 
+
       newEntries.push({ 
-        user_id: session.user.id, account_id: 'acc1', category: finalCategory, 
-        amount: total / installmentsCount, description: installmentsCount > 1 ? `${newTx.description} (${i + 1}/${installmentsCount})` : newTx.description, 
-        type: newTx.type, status: TransactionStatus.PENDING, date: txDate.toISOString().split('T')[0], is_recurring: installmentsCount > 1 
+        user_id: session.user.id, 
+        account_id: 'acc1', 
+        category: finalCategory, 
+        amount: valorFinalParcela, 
+        description: qtdFinal > 1 ? `${newTx.description} (${i + 1}/${qtdFinal})` : newTx.description, 
+        type: newTx.type, 
+        status: TransactionStatus.PENDING, 
+        date: dateString, 
+        is_recurring: qtdFinal > 1 
       }); 
     } 
+    
     const { error } = await supabase.from('transactions').insert(newEntries); 
-    if (error) { showToast('Erro ao salvar.', 'error'); } 
+    if (error) { 
+        showToast('Erro ao salvar.', 'error'); 
+    } 
     else { 
-        fetchData(); setIsModalOpen(false); 
+        fetchData(); 
+        setIsModalOpen(false); 
         setNewTx({ 
-            description: '', category: '', totalAmount: '', installmentAmount: '', 
+            description: '', category: '', totalAmount: '', installmentAmount: '',
             type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], 
-            installments: '1', inputMode: 'total' 
+            installments: '1', inputMode: 'total'
         }); 
-        showToast('Salvo!', 'success'); 
+        showToast(`Lançado ${qtdFinal}x com sucesso!`, 'success'); 
     } 
   };
 
   const handleAddInvestment = async (e: React.FormEvent) => { e.preventDefault(); if (!session?.user) return; const amount = parseFloat(newInv.amount) / 100; const investment = { user_id: session.user.id, name: newInv.name, category: newInv.category, invested_amount: amount, current_amount: amount, created_at: new Date(newInv.date).toISOString() }; const { error } = await supabase.from('investments').insert([investment]); if (error) showToast('Erro ao salvar.', 'error'); else { fetchData(); setIsInvestmentModalOpen(false); setNewInv({ name: '', amount: '', date: new Date().toISOString().split('T')[0], category: 'Ações' }); showToast('Salvo!', 'success'); } };
   const confirmPayment = async () => { if (!payingTransaction) return; const paid = parseFloat(realValueInput) / 100; const { error } = await supabase.from('transactions').update({ status: TransactionStatus.COMPLETED, paid_amount: paid }).eq('id', payingTransaction.id); if (error) showToast('Erro ao confirmar.', 'error'); else { fetchData(); setPayingTransaction(null); showToast('Confirmado!', 'success'); } };
-  const handleAmountChange = (val: string, mode: 'total' | 'installment') => { const numeric = val.replace(/\D/g, ''); const instCount = parseInt(newTx.installments) || 1; if (mode === 'total') { const total = parseFloat(numeric); const perInst = Math.round(total / instCount); setNewTx(prev => ({ ...prev, totalAmount: numeric, installmentAmount: perInst.toString(), inputMode: 'total' })); } else { const perInst = parseFloat(numeric); const total = perInst * instCount; setNewTx(prev => ({ ...prev, installmentAmount: numeric, totalAmount: total.toString(), inputMode: 'installment' })); } };
 
   const filteredTransactions = useMemo(() => { return transactions.filter(t => { const tDate = new Date(t.date); tDate.setMinutes(tDate.getMinutes() + tDate.getTimezoneOffset()); return tDate.getMonth() === currentDate.getMonth() && tDate.getFullYear() === currentDate.getFullYear(); }); }, [transactions, currentDate]);
   const totalApplied = useMemo(() => investments.reduce((acc, curr) => acc + curr.invested_amount, 0), [investments]);
@@ -208,11 +281,25 @@ const App: React.FC = () => {
     if (activeTab === 'categorias') return <CategoryManager categories={categories} onAdd={handleAddCategory} onDelete={(id) => requestDelete(id, 'category')} />;
     if (activeTab === 'metas') return <GoalsManager goals={goals} onAdd={handleAddGoal} onDeposit={handleDepositGoal} onDelete={(id) => requestDelete(id, 'goal')} />;
     
+    if (activeTab === 'contas') {
+        const pendingBills = filteredTransactions.filter(t => t.status === TransactionStatus.PENDING && t.type === TransactionType.EXPENSE);
+        return (
+            <BillsManager 
+                transactions={pendingBills}
+                onDelete={(id) => requestDelete(id, 'transaction')}
+                onEdit={openEditModal}
+                onAddClick={() => setIsModalOpen(true)}
+                onPay={(id) => {
+                    const tx = transactions.find(t => t.id === id);
+                    if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); }
+                }}
+            />
+        );
+    }
+
     if (activeTab === 'investimentos') {
       return (
         <div className="h-full flex flex-col gap-4 min-h-0 min-w-0 overflow-y-auto pb-20 lg:pb-0 custom-scrollbar p-1">
-            
-            {/* CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
                 <div className="bg-white dark:bg-slate-900/40 rounded-[2rem] p-5 shadow-sm border border-slate-100 dark:border-slate-800">
                     <div className="flex justify-between items-start mb-4">
@@ -221,7 +308,6 @@ const App: React.FC = () => {
                     </div>
                     <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter mt-4">R$ {totalApplied.toLocaleString()}</h3>
                 </div>
-
                 <div className="bg-indigo-600 rounded-[2rem] p-5 text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10"><Coins className="w-16 h-16" /></div>
                     <div className="relative z-10">
@@ -232,7 +318,6 @@ const App: React.FC = () => {
                         <h3 className="text-xl font-black tracking-tighter mt-4">R$ {totalCurrent.toLocaleString()}</h3>
                     </div>
                 </div>
-
                 <div className={`rounded-[2rem] p-5 shadow-sm border flex flex-col justify-center relative overflow-hidden ${totalProfit >= 0 ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-500/20' : 'bg-rose-50 border-rose-200 dark:bg-rose-900/10 dark:border-rose-500/20'}`}>
                     <div className="flex justify-between items-center mb-2">
                         <span className={`text-[10px] font-black uppercase tracking-widest ${totalProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>Rentabilidade</span>
@@ -248,11 +333,7 @@ const App: React.FC = () => {
                     </p>
                 </div>
             </div>
-
-            {/* GRÁFICOS */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 shrink-0 lg:h-[300px]">
-                
-                {/* 1. EVOLUÇÃO */}
                 <div className="lg:col-span-3 bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Evolução do Patrimônio</h3>
                     <div className="flex-1 w-full min-h-0">
@@ -274,8 +355,6 @@ const App: React.FC = () => {
                         </ResponsiveContainer>
                     </div>
                 </div>
-
-                {/* 2. ALOCAÇÃO (PIZZA) - USA A VARIÁVEL 'investmentAllocation' */}
                 <div className="lg:col-span-2 bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] flex flex-col shadow-sm h-[250px] lg:h-auto overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3>
                     <div className="flex-1 flex items-center gap-2 min-h-0">
@@ -300,8 +379,6 @@ const App: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-            {/* 3. PERFORMANCE (BARRAS) - USA A VARIÁVEL 'comparativeData' */}
             <div className="bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden shrink-0">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><LineChart className="w-4 h-4" /> Performance</h3>
                 <div className="flex-1 w-full min-h-0">
@@ -318,8 +395,6 @@ const App: React.FC = () => {
                     </ResponsiveContainer>
                 </div>
             </div>
-
-            {/* 4. TABELA DE ATIVOS */}
             <div className="flex-1 bg-white dark:bg-slate-900/40 rounded-[2.5rem] overflow-hidden flex flex-col min-h-[300px] shadow-sm shrink-0">
                 <div className="flex items-center justify-between p-6 pb-4 shrink-0"><div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div><button onClick={() => setIsInvestmentModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/30"><Plus className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-wider">Nova Aplicação</span></button></div>
                 <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0 custom-scrollbar"><table className="w-full text-left border-collapse"><thead><tr className="border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900/90 backdrop-blur-md z-10"><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Ativo</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Categoria</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Aplicado</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Atual</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest text-right">Rent.</th></tr></thead><tbody>{investments.map((inv) => { const profit = ((inv.current_amount / inv.invested_amount) - 1) * 100; return (<tr key={inv.id} className="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"><td className="py-5 px-2 font-bold text-sm truncate max-w-[150px]">{inv.name}</td><td className="py-5 px-2 text-xs font-bold text-slate-500">{inv.category}</td><td className="py-5 px-2 text-sm font-bold text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td><td className="py-5 px-2 text-sm font-black text-indigo-600">R$ {inv.current_amount.toLocaleString()}</td><td className={`py-5 px-2 text-xs font-black text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td></tr>); })}</tbody></table></div>
@@ -329,7 +404,7 @@ const App: React.FC = () => {
     }
 
     const isHistory = activeTab === 'transacoes';
-    const list = activeTab === 'contas' ? filteredTransactions.filter(t => t.status === TransactionStatus.PENDING) : isHistory ? filteredTransactions.filter(t => t.status === TransactionStatus.COMPLETED) : [];
+    const list = isHistory ? filteredTransactions.filter(t => t.status === TransactionStatus.COMPLETED) : [];
     return (
       <div className="h-full flex flex-col min-h-0 min-w-0 animate-in fade-in slide-in-from-bottom-2">
         <div className="flex-1 bg-white dark:bg-slate-900/40 rounded-[2.5rem] overflow-y-auto p-6 custom-scrollbar min-h-0 shadow-sm">
@@ -413,6 +488,7 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* MODAL NOVO LANÇAMENTO - COM TOGGLE DE VALOR */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
               <div className="bg-white dark:bg-slate-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-slate-800 p-6">
@@ -420,8 +496,37 @@ const App: React.FC = () => {
                 <form onSubmit={handleAddTransaction} className="space-y-3">
                     <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Descrição</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-indigo-500 shadow-inner" value={newTx.description} onChange={(e) => setNewTx({...newTx, description: e.target.value})} required /></div>
                     <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-indigo-500 shadow-inner" value={newTx.category} onChange={(e) => setNewTx({...newTx, category: e.target.value})}><option value="">Selecione uma Categoria...</option>{categories.filter(c => c.type === newTx.type).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
-                    <div className="grid grid-cols-2 gap-3"><div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Total</label><input type="text" className={`w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 ${newTx.inputMode === 'total' ? 'border-indigo-500' : 'border-transparent'} shadow-inner`} value={formatCurrencyInput(newTx.totalAmount)} onChange={(e) => handleAmountChange(e.target.value, 'total')} /></div><div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Parcela</label><input type="text" className={`w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 ${newTx.inputMode === 'installment' ? 'border-indigo-500' : 'border-transparent'} shadow-inner`} value={formatCurrencyInput(newTx.installmentAmount)} onChange={(e) => handleAmountChange(e.target.value, 'installment')} /></div></div>
-                    <div className="grid grid-cols-2 gap-3"><div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Parcelas</label><select className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-indigo-500 appearance-none shadow-inner cursor-pointer" value={newTx.installments} onChange={(e) => { const count = e.target.value; const mode = newTx.inputMode; if (mode === 'total') { const totalNum = parseFloat(newTx.totalAmount) || 0; const perInst = Math.round(totalNum / parseInt(count)); setNewTx(prev => ({...prev, installments: count, installmentAmount: perInst.toString()})); } else { const perNum = parseFloat(newTx.installmentAmount) || 0; const total = perNum * parseInt(count); setNewTx(prev => ({...prev, installments: count, totalAmount: total.toString()})); } }}><option value="1">À Vista</option>{OPCOES_PARCELAS.map(n => <option key={n} value={n}>{n}x</option>)}</select></div><div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Vencimento</label><input type="date" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-xs font-black outline-none border-2 border-transparent focus:border-indigo-500 shadow-inner" value={newTx.date} onChange={(e) => setNewTx({...newTx, date: e.target.value})} required /></div></div>
+                    
+                    {/* TOGGLE: ESCOLHA ENTRE VALOR TOTAL OU PARCELA */}
+                    <div className="flex gap-2 mb-1">
+                        <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'total'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'total' ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Total</button>
+                        <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'installment'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'installment' ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Parcela</button>
+                    </div>
+
+                    {newTx.inputMode === 'total' ? (
+                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor Total</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-indigo-500 shadow-inner" value={formatCurrencyInput(newTx.totalAmount)} onChange={(e) => handleValueChange(e.target.value, 'total')} required /></div>
+                    ) : (
+                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor da Parcela</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-indigo-500 shadow-inner" value={formatCurrencyInput(newTx.installmentAmount)} onChange={(e) => handleValueChange(e.target.value, 'installment')} required /></div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-3 mt-2">
+                        <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Parcelas</label>
+                            <select 
+                                className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-indigo-500 appearance-none shadow-inner cursor-pointer" 
+                                value={newTx.installments} 
+                                onChange={handleInstallmentsChange}
+                            >
+                                <option value="1">À Vista</option>
+                                {OPCOES_PARCELAS.map(n => <option key={n} value={n}>{n}x</option>)}
+                            </select>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Vencimento</label>
+                            <input type="date" className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl px-4 py-3 text-xs font-black outline-none border-2 border-transparent focus:border-indigo-500 shadow-inner" value={newTx.date} onChange={(e) => setNewTx({...newTx, date: e.target.value})} required />
+                        </div>
+                    </div>
+
                     <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 h-[48px]"><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.INCOME})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.INCOME ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500'}`}>Receita</button><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.EXPENSE})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.EXPENSE ? 'bg-rose-500 text-white shadow-md' : 'text-slate-500'}`}>Despesa</button></div>
                     <button type="submit" className="w-full bg-indigo-600 py-4 rounded-xl text-white font-black uppercase text-xs tracking-[0.1em] shadow-xl active:scale-95 transition-all mt-2 hover:bg-indigo-700">Lançar Agora</button>
                 </form>
@@ -429,6 +534,7 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* MODAL NOVA APLICAÇÃO */}
       {isInvestmentModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
              <div className="bg-white dark:bg-slate-950 w-full max-w-md rounded-[3.5rem] shadow-3xl border border-slate-100 dark:border-slate-800 p-10 transform scale-100">

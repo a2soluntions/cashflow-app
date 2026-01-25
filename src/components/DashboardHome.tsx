@@ -15,7 +15,6 @@ interface DashboardHomeProps {
   currentDate: Date;
 }
 
-// SUAS CORES PERSONALIZADAS
 const CORES_MODERNAS = ['#0e12e7ff', '#4dee0dff', '#f50c33ff', '#f38e09ff', '#f13f09ff', '#0bd3f7ff', '#d847b9ff', '#f5f109ff'];
 
 const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments, filteredTransactions }) => {
@@ -74,7 +73,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments
   return (
     <div className="flex flex-col gap-3 h-full w-full overflow-y-auto lg:overflow-hidden p-1 pb-20 lg:pb-1">
       
-      {/* --- LINHA 1: 6 CARDS --- */}
+      {/* LINHA 1: CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 shrink-0">
         <div className={`${cardStyle} ${realBalance >= 0 ? 'border-emerald-500/30' : 'border-rose-500/30'}`}>
             <div className="flex items-center mb-1"><div className={iconBoxStyle}><Wallet className={`w-4 h-4 ${realBalance >= 0 ? 'text-emerald-500' : 'text-rose-500'}`} /></div><span className={`${labelStyle} ${realBalance >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>Saldo</span></div>
@@ -106,10 +105,10 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments
         </div>
       </div>
 
-      {/* --- LINHA 2: 3 GRÁFICOS --- */}
+      {/* LINHA 2: GRÁFICOS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 shrink-0 lg:flex-1 lg:min-h-[180px]">
           
-          {/* Gráfico 1: Evolução */}
+          {/* Evolução */}
           <div className="bg-white dark:bg-slate-900/40 p-4 rounded-3xl shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
               <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><BarChart3 className="w-3 h-3" /> Evolução</h3>
               <div className="flex-1 w-full min-h-0">
@@ -125,19 +124,19 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments
               </div>
           </div>
 
-          {/* Gráfico 2: Categorias (AUMENTADO + LISTA MENOR) */}
+          {/* Categorias - AUMENTADO PARA OCUPAR MAIS ESPAÇO */}
           <div className="bg-white dark:bg-slate-900/40 p-4 rounded-3xl shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
               <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><PieChartIcon className="w-3 h-3" /> Categorias</h3>
               <div className="flex-1 flex items-center gap-2 min-h-0">
                    
-                   {/* 70% GRÁFICO (Raio Aumentado) */}
+                   {/* Gráfico 70% */}
                    <div className="h-full w-[70%] relative min-w-[120px]">
                        <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
                            <span className="text-2xl font-black text-slate-900 dark:text-white">{expenseByCategory.length}</span>
                        </div>
                        <ResponsiveContainer width="100%" height="100%">
                           <PieChart>
-                              <Pie data={expenseByCategory} innerRadius={75} outerRadius={95} paddingAngle={4} dataKey="value" stroke="none">
+                              <Pie data={expenseByCategory} innerRadius={65} outerRadius={85} paddingAngle={4} dataKey="value" stroke="none">
                                   {expenseByCategory.map((_, index) => <Cell key={`cell-${index}`} fill={CORES_MODERNAS[index % CORES_MODERNAS.length]} />)}
                               </Pie>
                               <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
@@ -145,10 +144,10 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments
                        </ResponsiveContainer>
                    </div>
                    
-                   {/* 30% LISTA (Compacta) */}
-                   <div className="w-[30%] h-full overflow-y-auto custom-scrollbar pr-1 flex flex-col justify-center space-y-1.5">
+                   {/* Lista 30% */}
+                   <div className="w-[30%] h-full overflow-y-auto custom-scrollbar pr-1 flex flex-col justify-center space-y-1">
                        {expenseByCategory.map((item, i) => (
-                           <div key={i} className="flex flex-col p-1 rounded-lg bg-slate-50 dark:bg-slate-800/30 border-l-2" style={{ borderLeftColor: CORES_MODERNAS[i % CORES_MODERNAS.length] }}>
+                           <div key={i} className="flex flex-col p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/30 border-l-2" style={{ borderLeftColor: CORES_MODERNAS[i % CORES_MODERNAS.length] }}>
                                <span className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase truncate w-full">{item.name}</span>
                                <span className="text-[9px] font-black text-slate-900 dark:text-white">R$ {item.value.toLocaleString()}</span>
                            </div>
@@ -157,7 +156,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments
               </div>
           </div>
 
-          {/* Gráfico 3: Juros */}
+          {/* Juros */}
           <div className="bg-white dark:bg-slate-900/40 p-4 rounded-3xl shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
               <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Flame className="w-3 h-3" /> Juros</h3>
               <div className="flex-1 w-full min-h-0">
@@ -174,9 +173,8 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments
           </div>
       </div>
 
-      {/* --- LINHA 3: 2 GRÁFICOS INFERIORES --- */}
+      {/* LINHA 3: PATRIMÔNIO E FLUXO */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0 lg:flex-1 lg:min-h-[180px]">
-          {/* Fluxo */}
           <div className="bg-white dark:bg-slate-900/40 p-4 rounded-3xl shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
                <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><TrendingUp className="w-3 h-3" /> Fluxo</h3>
                <div className="flex-1 w-full min-h-0">
@@ -196,7 +194,6 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments
                </div>
           </div>
 
-          {/* Alocação */}
           <div className="bg-white dark:bg-slate-900/40 p-4 rounded-3xl shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
                <div className="flex justify-between items-center mb-2">
                   <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><PieChartIcon className="w-3 h-3" /> Patrimônio</h3>
