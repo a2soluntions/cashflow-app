@@ -2,12 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   LayoutDashboard, ArrowLeftRight, TrendingUp, Plus, Menu, X,
   CalendarDays, LineChart, Search, Coins,
-  Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle, ArrowUpRight, ArrowDownRight, Layers
+  Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle, ArrowUpRight, ArrowDownRight, Layers, BarChart3
 } from 'lucide-react';
-// CORREÇÃO: Limpei imports não usados (AreaChart, etc.)
 import { 
   ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, Legend, CartesianGrid, XAxis, Tooltip
+  PieChart, Pie, Cell, BarChart, Bar, Legend, CartesianGrid, XAxis, YAxis, Tooltip, ComposedChart, Area
 } from 'recharts';
 import { supabase } from './supabase'; 
 import { Session } from '@supabase/supabase-js';
@@ -22,7 +21,7 @@ import DashboardHome from './components/DashboardHome';
 import Auth from './components/Auth';
 
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
-const CORES_MODERNAS = ['#0a0eebff', '#60f30aff', '#ec0c31ff', '#f59e0b', '#e9650dff', '#dc08f8ff', '#ec4899', '#cc1616ff'];
+const CORES_MODERNAS = ['#0e12e7ff', '#4dee0dff', '#f50c33ff', '#f38e09ff', '#f13f09ff', '#0bd3f7ff', '#d847b9ff', '#f5f109ff'];
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -178,6 +177,20 @@ const App: React.FC = () => {
       return data; 
   }, [investments]);
   
+  const patrimonyData = useMemo(() => {
+      if (investments.length === 0) return [];
+      const sortedInv = [...investments].sort((a, b) => new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime());
+      let cumulative = 0;
+      return sortedInv.map(inv => {
+          cumulative += inv.current_amount;
+          return { 
+              name: new Date(inv.created_at || '').toLocaleDateString('pt-BR', {month: 'short'}), 
+              total: cumulative,
+              aporte: inv.current_amount 
+          };
+      });
+  }, [investments]);
+  
   const comparativeData = useMemo(() => {
       const data: Record<string, {name: string, Investido: number, Atual: number}> = {};
       investments.forEach(inv => {
@@ -199,6 +212,7 @@ const App: React.FC = () => {
       return (
         <div className="h-full flex flex-col gap-4 min-h-0 min-w-0 overflow-y-auto pb-20 lg:pb-0 custom-scrollbar p-1">
             
+            {/* CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
                 <div className="bg-white dark:bg-slate-900/40 rounded-[2rem] p-5 shadow-sm border border-slate-100 dark:border-slate-800">
                     <div className="flex justify-between items-start mb-4">
@@ -235,24 +249,33 @@ const App: React.FC = () => {
                 </div>
             </div>
 
+            {/* GRÁFICOS */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 shrink-0 lg:h-[300px]">
                 
+                {/* 1. EVOLUÇÃO */}
                 <div className="lg:col-span-3 bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><LineChart className="w-4 h-4" /> Performance por Categoria</h3>
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Evolução do Patrimônio</h3>
                     <div className="flex-1 w-full min-h-0">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={comparativeData} barGap={4}>
+                            <ComposedChart data={patrimonyData}>
+                                <defs>
+                                    <linearGradient id="gradPatrimonio" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor={CORES_MODERNAS[1]} stopOpacity={0.2}/>
+                                        <stop offset="95%" stopColor={CORES_MODERNAS[1]} stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: '#64748b'}} />
-                                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
-                                <Legend wrapperStyle={{fontSize: '10px', paddingTop: '10px'}} />
-                                <Bar dataKey="Investido" fill="#94a3b8" radius={[4, 4, 0, 0]} barSize={12} name="Aplicado" />
-                                <Bar dataKey="Atual" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={12} name="Atual" />
-                            </BarChart>
+                                <YAxis hide />
+                                <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
+                                <Bar dataKey="aporte" barSize={12} fill={CORES_MODERNAS[0]} radius={[4, 4, 0, 0]} name="Aporte Mês" />
+                                <Area type="monotone" dataKey="total" stroke={CORES_MODERNAS[1]} strokeWidth={3} fill="url(#gradPatrimonio)" name="Total Acumulado" />
+                            </ComposedChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
+                {/* 2. ALOCAÇÃO (PIZZA) - USA A VARIÁVEL 'investmentAllocation' */}
                 <div className="lg:col-span-2 bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] flex flex-col shadow-sm h-[250px] lg:h-auto overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3>
                     <div className="flex-1 flex items-center gap-2 min-h-0">
@@ -278,6 +301,25 @@ const App: React.FC = () => {
                 </div>
             </div>
 
+            {/* 3. PERFORMANCE (BARRAS) - USA A VARIÁVEL 'comparativeData' */}
+            <div className="bg-white dark:bg-slate-900/40 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden shrink-0">
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><LineChart className="w-4 h-4" /> Performance</h3>
+                <div className="flex-1 w-full min-h-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={comparativeData} barGap={2} layout="vertical">
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} strokeOpacity={0.05} />
+                            <XAxis type="number" hide />
+                            <YAxis type="category" dataKey="name" width={60} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} axisLine={false} tickLine={false} />
+                            <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
+                            <Legend wrapperStyle={{fontSize: '9px'}} />
+                            <Bar dataKey="Investido" fill="#64748b" radius={[0, 4, 4, 0]} barSize={10} name="Investido" />
+                            <Bar dataKey="Atual" fill={CORES_MODERNAS[3]} radius={[0, 4, 4, 0]} barSize={10} name="Atual" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            {/* 4. TABELA DE ATIVOS */}
             <div className="flex-1 bg-white dark:bg-slate-900/40 rounded-[2.5rem] overflow-hidden flex flex-col min-h-[300px] shadow-sm shrink-0">
                 <div className="flex items-center justify-between p-6 pb-4 shrink-0"><div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div><button onClick={() => setIsInvestmentModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/30"><Plus className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-wider">Nova Aplicação</span></button></div>
                 <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0 custom-scrollbar"><table className="w-full text-left border-collapse"><thead><tr className="border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900/90 backdrop-blur-md z-10"><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Ativo</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Categoria</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Aplicado</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Atual</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest text-right">Rent.</th></tr></thead><tbody>{investments.map((inv) => { const profit = ((inv.current_amount / inv.invested_amount) - 1) * 100; return (<tr key={inv.id} className="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors"><td className="py-5 px-2 font-bold text-sm truncate max-w-[150px]">{inv.name}</td><td className="py-5 px-2 text-xs font-bold text-slate-500">{inv.category}</td><td className="py-5 px-2 text-sm font-bold text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td><td className="py-5 px-2 text-sm font-black text-indigo-600">R$ {inv.current_amount.toLocaleString()}</td><td className={`py-5 px-2 text-xs font-black text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td></tr>); })}</tbody></table></div>
