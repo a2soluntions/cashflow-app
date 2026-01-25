@@ -66,11 +66,22 @@ const App: React.FC = () => {
     name: '', amount: '', date: new Date().toISOString().split('T')[0], category: 'Ações'
   });
 
+  // ATUALIZA O TEMA E A COR DA BARRA DO CELULAR (PWA)
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => { setSession(session); });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { setSession(session); });
-    return () => subscription.unsubscribe();
-  }, []);
+    const root = window.document.documentElement;
+    // Pega a meta tag que controla a cor do navegador no celular
+    const metaThemeColor = document.querySelector("meta[name='theme-color']");
+
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      // Muda a barra do celular para Escuro (Azul Petróleo)
+      metaThemeColor?.setAttribute("content", "#0f172a"); 
+    } else {
+      root.classList.remove('dark');
+      // Muda a barra do celular para Claro (Branco Gelo)
+      metaThemeColor?.setAttribute("content", "#f8fafc"); 
+    }
+  }, [theme]);
 
   const fetchData = async () => {
     if (!session?.user) return;

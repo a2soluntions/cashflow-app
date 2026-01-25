@@ -1,31 +1,68 @@
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+
+
+<!doctype html>
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <meta name="theme-color" content="#0f172a" />
+    
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CashFlow" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+
     <title>CashFlow</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: { 950: '#020617', 900: '#0f172a', 800: '#1e293b' },
-                        emerald: { 500: '#10b981' },
-                        rose: { 500: '#f43f5e' },
-                        indigo: { 600: '#4f46e5', 500: '#6366f1' }
-                    }
-                }
-            }
-        }
-    </script>
+    
     <style>
-        body { background-color: #020617; color: #f8fafc; font-family: sans-serif; }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #fbbf24 0%, #ea580c 100%); border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #f59e0b 0%, #c2410c 100%); }
+      * { scrollbar-width: thin; scrollbar-color: #ea580c transparent; }
     </style>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/index.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CashFlow</title>
+    
+    <style>
+      /* Barra de rolagem laranja moderna */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #fbbf24 0%, #ea580c 100%);
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #f59e0b 0%, #c2410c 100%);
+      }
+      /* Ajuste para Firefox */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: #ea580c transparent;
+      }
+    </style>
+    </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
