@@ -6,7 +6,7 @@ import {
   Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle, ArrowUpRight, ArrowDownRight, Layers, BarChart3, CheckCircle2, Clock} from 'lucide-react';
 import { 
   ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, Legend, CartesianGrid, XAxis, YAxis, Tooltip, Area, ComposedChart
+  PieChart, Pie, Cell, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Area, ComposedChart
 } from 'recharts';
 import { supabase } from './supabase'; 
 import { Session } from '@supabase/supabase-js';
