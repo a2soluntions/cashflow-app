@@ -209,25 +209,7 @@ const App: React.FC = () => {
   const totalApplied = useMemo(() => investments.reduce((acc, curr) => acc + curr.invested_amount, 0), [investments]);
   const totalCurrent = useMemo(() => investments.reduce((acc, curr) => acc + curr.current_amount, 0), [investments]);
   const totalProfit = totalCurrent - totalApplied;
-  
-  // === CORREÇÃO URGÊNCIAS: Verifica Pendentes + Data Passada (Independente do Mês) ===
-  const urgencies = useMemo(() => { 
-      const today = new Date(); 
-      today.setHours(0,0,0,0); // Zera hora para comparar só data
-      
-      const pendingExpenses = transactions.filter(t => 
-          t.status === TransactionStatus.PENDING && 
-          t.type === TransactionType.EXPENSE
-      );
-      
-      const delayed = pendingExpenses.filter(t => {
-          // Fix: Adiciona hora ao meio dia para evitar fuso horário voltando dia
-          const tDate = new Date(t.date + 'T12:00:00');
-          return tDate < today; 
-      }); 
-      
-      return { delayedCount: delayed.length }; 
-  }, [transactions]);
+  const urgencies = useMemo(() => { const today = new Date(); today.setHours(0,0,0,0); const pendingExpenses = transactions.filter(t => t.status === TransactionStatus.PENDING && t.type === TransactionType.EXPENSE); const delayed = pendingExpenses.filter(t => { const tDate = new Date(t.date + 'T12:00:00'); return tDate < today; }); return { delayedCount: delayed.length }; }, [transactions]);
   
   const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 shadow-sm border border-emerald-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
   
@@ -277,16 +259,16 @@ const App: React.FC = () => {
     if (activeTab === 'categorias') return <CategoryManager categories={categories} onAdd={handleAddCategory} onDelete={(id) => requestDelete(id, 'category')} />;
     if (activeTab === 'metas') return <GoalsManager goals={goals} onAdd={handleAddGoal} onDeposit={handleDepositGoal} onDelete={(id) => requestDelete(id, 'goal')} />;
     
-    // === CORREÇÃO: Passando a lista completa para o BillsManager ===
-    // O filtro agora acontece DENTRO do BillsManager para ele não perder dados antigos.
     if (activeTab === 'contas') {
         const expenseTransactions = transactions.filter(t => t.type === TransactionType.EXPENSE && t.status === TransactionStatus.PENDING);
         return ( <BillsManager transactions={expenseTransactions} onDelete={(id) => requestDelete(id, 'transaction')} onEdit={openEditModal} onAddClick={() => setIsModalOpen(true)} onPay={(id) => { const tx = transactions.find(t => t.id === id); if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); } }} /> );
     }
 
+    // === INVESTIMENTOS COM SCROLL NO MOBILE ===
     if (activeTab === 'investimentos') {
       return (
-        <div className="h-full flex flex-col gap-4 overflow-hidden p-1">
+        <div className="h-full flex flex-col gap-4 overflow-y-auto lg:overflow-hidden p-1 pb-20 lg:pb-1">
+            {/* CARDS RESUMO */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
                 <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-5 shadow-sm border border-slate-100 dark:border-zinc-800">
                     <div className="flex justify-between items-start mb-4">
@@ -318,8 +300,11 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0 h-[250px]">
-                <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-full overflow-hidden">
+            {/* GRÁFICOS: Coluna no Mobile (h-auto), Grid no PC */}
+            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 shrink-0 lg:h-[250px]">
+                
+                {/* 1. EVOLUÇÃO */}
+                <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-[300px] lg:h-full overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Evolução</h3>
                     <div className="flex-1 w-full min-h-0">
                         <ResponsiveContainer width="100%" height="100%">
@@ -340,7 +325,8 @@ const App: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] flex flex-col shadow-sm h-full overflow-hidden">
+                {/* 2. ALOCAÇÃO */}
+                <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] flex flex-col shadow-sm h-[300px] lg:h-full overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3>
                     <div className="flex-1 flex flex-col items-center justify-between min-h-0">
                         <div className="h-[150px] w-full relative">
@@ -397,7 +383,8 @@ const App: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-full overflow-hidden">
+                {/* 3. PERFORMANCE */}
+                <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-[300px] lg:h-full overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1"><LineChart className="w-4 h-4" /> Performance</h3>
                     <div className="flex-1 w-full min-h-0">
                         <ResponsiveContainer width="100%" height="100%">
@@ -414,7 +401,8 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden flex flex-col min-h-0 shadow-sm border border-slate-100 dark:border-zinc-800">
+            {/* LISTA DE ATIVOS: Altura auto no Mobile */}
+            <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden flex flex-col min-h-0 shadow-sm border border-slate-100 dark:border-zinc-800 lg:h-auto h-auto shrink-0">
                 <div className="flex items-center justify-between p-6 pb-4 shrink-0">
                     <div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-emerald-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div>
                     <button onClick={() => setIsInvestmentModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-500/30"><Plus className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-wider">Nova Aplicação</span></button>
@@ -456,7 +444,7 @@ const App: React.FC = () => {
     const list = isHistory ? filteredTransactions.filter(t => t.status === TransactionStatus.COMPLETED) : [];
     return (
       <div className="h-full flex flex-col min-h-0 min-w-0 animate-in fade-in slide-in-from-bottom-2">
-        <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-y-auto p-6 custom-scrollbar min-h-0 shadow-sm border border-slate-100 dark:border-zinc-800">
+        <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-y-auto p-3 md:p-6 custom-scrollbar min-h-0 shadow-sm border border-slate-100 dark:border-zinc-800">
             {loading ? <p className="text-center p-10 text-slate-400">Carregando...</p> : <TransactionTable transactions={list} onDelete={!isHistory ? (id) => requestDelete(id, 'transaction') : undefined} onEdit={!isHistory ? openEditModal : undefined} onPay={!isHistory ? (id) => { const tx = transactions.find(t => t.id === id); if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); } } : undefined} />}
         </div>
       </div>
@@ -465,16 +453,12 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen w-full bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-200 flex overflow-hidden font-inter">
-      {/* ... (RESTO DO LAYOUT MANTIDO IGUAL) ... */}
-      {/* ... (MODAL EDITAR MANTIDO) ... */}
-      {/* ... (MODAL NOVO LANÇAMENTO MANTIDO) ... */}
-      {/* ... (MODAL INVESTIMENTO MANTIDO) ... */}
-      {/* ... (MODAL PAGAMENTO MANTIDO) ... */}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <ConfirmModal isOpen={!!deleteData} onClose={() => setDeleteData(null)} onConfirm={handleConfirmDelete} title={`Excluir ${deleteData?.type === 'category' ? 'Categoria' : deleteData?.type === 'goal' ? 'Meta' : 'Lançamento'}?`} message="Esta ação não pode ser desfeita." />
       {isSidebarOpen && ( <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" ></div> )}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-black lg:relative lg:translate-x-0 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
            <div className="p-8 flex flex-col h-full">
+             {/* ... SIDEBAR CONTENT ... */}
              <div className="flex items-center justify-between mb-10">
                <div className="flex items-center gap-4">
                  <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center">
@@ -500,6 +484,7 @@ const App: React.FC = () => {
       </aside>
       <main className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-black overflow-hidden relative min-w-0">
         <header className="h-20 flex items-center justify-between px-8 lg:px-12 shrink-0 z-40">
+           {/* ... HEADER CONTENT ... */}
            <div className="flex items-center gap-6"><button className="lg:hidden p-3 text-slate-500 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm" onClick={() => setSidebarOpen(true)}><Menu className="w-6 h-6" /></button><div className="hidden lg:flex items-center gap-2"><span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] opacity-50">Portal Financeiro Inteligente</span></div></div>
            <div className="flex-1"></div>
            <div className="flex items-center gap-3">
@@ -518,8 +503,10 @@ const App: React.FC = () => {
         <div className="flex-1 px-4 lg:px-12 pb-8 overflow-hidden flex flex-col min-h-0">{renderContent()}</div>
       </main>
 
+      {/* ... MODALS ... (Same as before) */}
       {editingTransaction && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          {/* ... Edit Modal Content ... */}
           <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-6">
             <div className="flex items-center justify-between mb-4"><h3 className="font-black text-xl uppercase tracking-tighter text-amber-500 flex items-center gap-2"><Edit3 className="w-5 h-5"/> Editar</h3><button onClick={() => setEditingTransaction(null)} className="p-2 text-slate-400 hover:text-slate-600 transition-all bg-slate-50 dark:bg-zinc-900 rounded-xl"><X className="w-5 h-5" /></button></div>
             <form onSubmit={handleUpdateTransaction} className="space-y-4">
@@ -535,6 +522,7 @@ const App: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
               <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-6">
+                {/* ... New Transaction Modal Content ... */}
                 <div className="flex items-center justify-between mb-4"><h3 className={`font-black text-xl uppercase tracking-tighter ${newTx.type === TransactionType.INCOME ? 'text-emerald-600' : 'text-orange-500'}`}>Novo Lançamento</h3><button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 transition-all bg-slate-50 dark:bg-zinc-900 rounded-xl"><X className="w-5 h-5" /></button></div>
                 <form onSubmit={handleAddTransaction} className="space-y-3">
                     <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Descrição</label><input type="text" className={`w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-medium outline-none border-2 border-transparent ${modalBorderClass} shadow-inner`} value={newTx.description} onChange={(e) => setNewTx({...newTx, description: e.target.value})} required /></div>
@@ -556,24 +544,9 @@ const App: React.FC = () => {
                     </div>
                     <div className="flex bg-slate-100 dark:bg-zinc-800 rounded-xl p-1 h-[48px]"><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.INCOME})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.INCOME ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500'}`}>Receita</button><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.EXPENSE})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.EXPENSE ? 'bg-orange-500 text-white shadow-md' : 'text-slate-500'}`}>Despesa</button></div>
                     
-                    {/* Botões de STATUS: Confirmado / Agendado */}
                     <div className="flex gap-2">
-                        <button 
-                          type="button" 
-                          onClick={() => setNewTx({...newTx, isPaid: true})} 
-                          className={`flex-1 py-3 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${newTx.isPaid ? `border-${modalAccentColor}-500 bg-${modalAccentColor}-50 dark:bg-${modalAccentColor}-900/20 text-${modalAccentColor}-600 dark:text-${modalAccentColor}-400` : 'border-slate-200 dark:border-zinc-800 text-slate-400'}`}
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span className="text-[10px] font-black uppercase">Confirmado</span>
-                        </button>
-                        <button 
-                          type="button" 
-                          onClick={() => setNewTx({...newTx, isPaid: false})} 
-                          className={`flex-1 py-3 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${!newTx.isPaid ? `border-${modalAccentColor}-500 bg-${modalAccentColor}-50 dark:bg-${modalAccentColor}-900/20 text-${modalAccentColor}-600 dark:text-${modalAccentColor}-400` : 'border-slate-200 dark:border-zinc-800 text-slate-400'}`}
-                        >
-                          <Clock className="w-4 h-4" />
-                          <span className="text-[10px] font-black uppercase">Agendado</span>
-                        </button>
+                        <button type="button" onClick={() => setNewTx({...newTx, isPaid: true})} className={`flex-1 py-3 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${newTx.isPaid ? `border-${modalAccentColor}-500 bg-${modalAccentColor}-50 dark:bg-${modalAccentColor}-900/20 text-${modalAccentColor}-600 dark:text-${modalAccentColor}-400` : 'border-slate-200 dark:border-zinc-800 text-slate-400'}`}><CheckCircle2 className="w-4 h-4" /><span className="text-[10px] font-black uppercase">Confirmado</span></button>
+                        <button type="button" onClick={() => setNewTx({...newTx, isPaid: false})} className={`flex-1 py-3 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${!newTx.isPaid ? `border-${modalAccentColor}-500 bg-${modalAccentColor}-50 dark:bg-${modalAccentColor}-900/20 text-${modalAccentColor}-600 dark:text-${modalAccentColor}-400` : 'border-slate-200 dark:border-zinc-800 text-slate-400'}`}><Clock className="w-4 h-4" /><span className="text-[10px] font-black uppercase">Agendado</span></button>
                     </div>
 
                     <button type="submit" className={`w-full py-4 rounded-xl text-white font-black uppercase text-xs tracking-[0.1em] shadow-xl active:scale-95 transition-all mt-2 ${newTx.type === TransactionType.INCOME ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-orange-500 hover:bg-orange-600'}`}>Lançar Agora</button>
@@ -582,10 +555,10 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* ... (Resto do JSX e Modais Mantidos) ... */}
       {isInvestmentModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
              <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[3.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-10 transform scale-100">
+                {/* ... Investment Modal Content ... */}
                 <div className="flex items-center justify-between mb-10"><div className="flex items-center gap-4"><div className="p-4 bg-emerald-600 rounded-3xl shadow-xl shadow-emerald-500/30"><Coins className="w-8 h-8 text-white" /></div><h3 className="font-black text-2xl lg:text-3xl uppercase tracking-tighter text-slate-900 dark:text-white">Nova Aplicação</h3></div><button onClick={() => setIsInvestmentModalOpen(false)} className="p-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all bg-slate-50 dark:bg-zinc-900 rounded-3xl"><X className="w-7 h-7" /></button></div>
                 <form onSubmit={handleAddInvestment} className="space-y-8">
                      <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Search className="w-4 h-4 text-emerald-500" /> Ativo Selecionado</label><input type="text" placeholder="Ticker ou Nome" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-8 py-6 text-lg font-medium outline-none" value={newInv.name} onChange={(e) => setNewInv({...newInv, name: e.target.value})} required /></div>
@@ -600,6 +573,7 @@ const App: React.FC = () => {
       {payingTransaction && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
            <div className="bg-white dark:bg-zinc-950 w-full max-w-xs rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-8">
+              {/* ... Confirm Payment Modal Content ... */}
               <h3 className="font-black text-sm uppercase tracking-widest mb-6 text-center text-slate-500">Confirmar Pagamento</h3>
               <div className="space-y-4">
                  <div className="p-4 bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800"><p className="text-[9px] font-black uppercase text-slate-400 mb-2">Lançamento</p><p className="font-medium text-sm text-slate-900 dark:text-white">{payingTransaction.description}</p></div>
