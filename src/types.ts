@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export enum TransactionType {
   INCOME = 'income',
   EXPENSE = 'expense',
@@ -48,6 +50,7 @@ export interface Category {
 
 // ADICIONE ISTO:
 export interface Goal {
+  description: ReactNode;
   id: string;
   name: string;
   target_amount: number;

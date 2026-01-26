@@ -1,6 +1,6 @@
-import React from 'react';
-import { Trash2, Edit3, DollarSign, ArrowUpCircle, ArrowDownCircle, Calendar, Tag } from 'lucide-react';
-import { Transaction, TransactionType } from '../types';
+import React, { useState } from 'react';
+import { Transaction, TransactionType, TransactionStatus } from '../types';
+import { Trash2, Edit2, Search, ArrowUpRight, ArrowDownRight, CheckCircle2, Clock } from 'lucide-react';
 
 interface TransactionTableProps {
   transactions: Transaction[];
@@ -10,91 +10,112 @@ interface TransactionTableProps {
 }
 
 const TransactionTable: React.FC<TransactionTableProps> = ({ transactions, onDelete, onEdit, onPay }) => {
-  
-  if (transactions.length === 0) {
-    return (
-      <div className="h-full w-full bg-white dark:bg-slate-900/40 rounded-[2.5rem] flex flex-col items-center justify-center text-slate-400 border border-slate-100 dark:border-slate-800 p-6 shadow-sm">
-        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-full mb-4">
-            <Tag className="w-8 h-8" />
-        </div>
-        <p className="font-bold text-sm uppercase tracking-widest">Sem registros</p>
-      </div>
-    );
-  }
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filtered = transactions.filter(t => 
+    (t.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (t.category || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-slate-900/40 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-      
-      {/* CABEÇALHO FIXO - NÃO ROLA */}
-      <div className="grid grid-cols-12 gap-4 p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm shrink-0 items-center">
-          <div className="col-span-6 sm:col-span-4 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">Descrição</div>
-          <div className="hidden sm:block sm:col-span-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Categoria</div>
-          <div className="hidden sm:block sm:col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Data</div>
-          <div className="col-span-4 sm:col-span-2 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Valor</div>
-          <div className="col-span-2 sm:col-span-1 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Ações</div>
+    <div className="h-full flex flex-col">
+      <div className="flex items-center gap-3 mb-4 bg-slate-100 dark:bg-zinc-900/50 p-2 rounded-2xl border border-slate-200 dark:border-zinc-800">
+        <Search className="w-5 h-5 text-slate-400 ml-2" />
+        <input 
+          type="text" 
+          placeholder="Buscar no histórico..." 
+          className="bg-transparent border-none outline-none text-sm font-medium text-slate-700 dark:text-slate-200 w-full placeholder:text-slate-400"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
-      {/* LISTA ROLÁVEL */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
-          {transactions.map((tx) => (
-            <div key={tx.id} className="grid grid-cols-12 gap-4 p-3 mb-1 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors items-center group border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
-              
-              {/* Descrição */}
-              <div className="col-span-6 sm:col-span-4 flex items-center gap-3 overflow-hidden">
-                  <div className={`p-2 rounded-xl shrink-0 ${tx.type === TransactionType.INCOME ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'}`}>
-                      {tx.type === TransactionType.INCOME ? <ArrowUpCircle className="w-4 h-4" /> : <ArrowDownCircle className="w-4 h-4" />}
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <table className="w-full border-collapse text-left">
+          <thead className="sticky top-0 bg-orange-50 dark:bg-orange-900/10 z-10 shadow-sm backdrop-blur-sm">
+            <tr>
+              <th className="py-4 px-4 text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 rounded-tl-2xl">Descrição</th>
+              <th className="py-4 px-4 text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">Categoria</th>
+              <th className="py-4 px-4 text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">Data</th>
+              <th className="py-4 px-4 text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">Status</th>
+              <th className="py-4 px-4 text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 text-right">Valor</th>
+              {(onEdit || onDelete) && <th className="py-4 px-4 text-right rounded-tr-2xl"></th>}
+            </tr>
+          </thead>
+          
+          <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+            {filtered.map((t) => (
+              <tr key={t.id} className="group hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
+                <td className="py-4 px-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-xl ${
+                      t.type === TransactionType.INCOME 
+                        ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500' 
+                        : 'bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500'
+                    }`}>
+                      {t.type === TransactionType.INCOME ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+                    </div>
+                    {/* Texto SEM NEGRITO (font-normal) */}
+                    <span className="font-normal text-sm text-slate-700 dark:text-slate-200">{t.description}</span>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-sm text-slate-700 dark:text-slate-200 truncate">{tx.description}</p>
-                    <p className="text-[10px] text-slate-400 sm:hidden flex items-center gap-1 mt-0.5">
-                      <Calendar className="w-3 h-3" /> {new Date(tx.date + 'T12:00:00').toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
-              </div>
-
-              {/* Categoria */}
-              <div className="hidden sm:block sm:col-span-3">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                  {tx.category}
-                </span>
-              </div>
-
-              {/* Data */}
-              <div className="hidden sm:block sm:col-span-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400">
-                    <Calendar className="w-3 h-3" />
-                    {new Date(tx.date + 'T12:00:00').toLocaleDateString('pt-BR')}
-                </div>
-              </div>
-
-              {/* Valor */}
-              <div className={`col-span-4 sm:col-span-2 text-right font-black text-sm whitespace-nowrap ${tx.type === TransactionType.INCOME ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}`}>
-                {tx.type === TransactionType.EXPENSE ? '- ' : '+ '}
-                R$ {tx.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </div>
-
-              {/* Ações */}
-              <div className="col-span-2 sm:col-span-1 flex justify-center">
-                <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                    {onPay && (
-                        <button onClick={() => onPay(tx.id)} title="Pagar" className="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-lg transition-colors">
-                            <DollarSign className="w-4 h-4" />
+                </td>
+                <td className="py-4 px-4">
+                  <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800 text-[10px] font-normal uppercase tracking-wider text-slate-500">
+                    {t.category || 'Geral'}
+                  </span>
+                </td>
+                <td className="py-4 px-4 text-xs font-normal text-slate-500">
+                  {new Date(t.date + 'T12:00:00').toLocaleDateString('pt-BR')}
+                </td>
+                <td className="py-4 px-4">
+                   {t.status === TransactionStatus.COMPLETED ? (
+                     <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-500">
+                       <CheckCircle2 className="w-3.5 h-3.5" />
+                       <span className="text-[10px] font-bold uppercase tracking-widest">Pago</span>
+                     </div>
+                   ) : (
+                     <div className="flex items-center gap-1.5 text-slate-400">
+                       <Clock className="w-3.5 h-3.5" />
+                       <span className="text-[10px] font-bold uppercase tracking-widest">Pendente</span>
+                     </div>
+                   )}
+                </td>
+                <td className={`py-4 px-4 text-right font-medium text-sm ${
+                  t.type === TransactionType.INCOME ? 'text-emerald-600 dark:text-emerald-500' : 'text-orange-600 dark:text-orange-500'
+                }`}>
+                  {t.type === TransactionType.INCOME ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </td>
+                
+                {(onEdit || onDelete) && (
+                  <td className="py-4 px-4 text-right">
+                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {t.status === TransactionStatus.PENDING && onPay && (
+                        <button onClick={() => onPay(t.id)} className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg" title="Confirmar Pagamento">
+                          <CheckCircle2 className="w-4 h-4" />
                         </button>
-                    )}
-                    {onEdit && (
-                        <button onClick={() => onEdit(tx)} title="Editar" className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                            <Edit3 className="w-4 h-4" />
+                      )}
+                      {onEdit && (
+                        <button onClick={() => onEdit(t)} className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg">
+                          <Edit2 className="w-4 h-4" />
                         </button>
-                    )}
-                    {onDelete && (
-                        <button onClick={() => onDelete(tx.id)} title="Excluir" className="p-2 text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                            <Trash2 className="w-4 h-4" />
+                      )}
+                      {onDelete && (
+                        <button onClick={() => onDelete(t.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg">
+                          <Trash2 className="w-4 h-4" />
                         </button>
-                    )}
-                </div>
-              </div>
-            </div>
-          ))}
+                      )}
+                    </div>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filtered.length === 0 && (
+          <div className="text-center py-10">
+            <p className="text-slate-400 font-medium">Nenhum lançamento encontrado.</p>
+          </div>
+        )}
       </div>
     </div>
   );

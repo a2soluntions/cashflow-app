@@ -3,10 +3,10 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   LayoutDashboard, ArrowLeftRight, TrendingUp, Plus, Menu, X,
   CalendarDays, LineChart, Search, Coins,
-  Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle, ArrowUpRight, ArrowDownRight, Layers, BarChart3} from 'lucide-react';
+  Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle, ArrowUpRight, ArrowDownRight, Layers, BarChart3, CheckCircle2, Clock} from 'lucide-react';
 import { 
   ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ComposedChart, Area
+  PieChart, Pie, Cell, BarChart, Bar, Legend, CartesianGrid, XAxis, YAxis, Tooltip, Area, ComposedChart
 } from 'recharts';
 import { supabase } from './supabase'; 
 import { Session } from '@supabase/supabase-js';
@@ -22,8 +22,7 @@ import DashboardHome from './components/DashboardHome';
 import Auth from './components/Auth';
 
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
-// Cores atualizadas para VittaCash
-const CORES_MODERNAS = ['#22C55E', '#FF8A00', '#0e12e7', '#f50c33', '#0bd3f7', '#d847b9', '#f5f109'];
+const CORES_VITTACASH = ['#22C55E', '#FF8A00', '#06b6d4', '#8b5cf6', '#f43f5e', '#eab308'];
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -34,6 +33,8 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
   
+  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(null);
+
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [editForm, setEditForm] = useState({ description: '', amountString: '', date: '', category: '', type: TransactionType.EXPENSE });
 
@@ -54,7 +55,7 @@ const App: React.FC = () => {
 
   const [newTx, setNewTx] = useState({
     description: '', totalAmount: '', installmentAmount: '', inputMode: 'total' as 'total' | 'installment',
-    type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], installments: '1', category: ''
+    type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], installments: '1', category: '', isPaid: true
   });
 
   const [newInv, setNewInv] = useState({
@@ -176,11 +177,29 @@ const App: React.FC = () => {
     for (let i = 0; i < qtdFinal; i++) { 
       const txDate = new Date(year, (month - 1) + i, day);
       const dateString = txDate.toLocaleDateString('en-CA'); 
-      newEntries.push({ user_id: session.user.id, account_id: 'acc1', category: finalCategory, amount: valorFinalParcela, description: qtdFinal > 1 ? `${newTx.description} (${i + 1}/${qtdFinal})` : newTx.description, type: newTx.type, status: TransactionStatus.PENDING, date: dateString, is_recurring: qtdFinal > 1 }); 
+      newEntries.push({ 
+        user_id: session.user.id, 
+        account_id: 'acc1', 
+        category: finalCategory, 
+        amount: valorFinalParcela, 
+        description: qtdFinal > 1 ? `${newTx.description} (${i + 1}/${qtdFinal})` : newTx.description, 
+        type: newTx.type, 
+        status: newTx.isPaid ? TransactionStatus.COMPLETED : TransactionStatus.PENDING,
+        paid_amount: newTx.isPaid ? valorFinalParcela : 0,
+        date: dateString, 
+        is_recurring: qtdFinal > 1 
+      }); 
     } 
     const { error } = await supabase.from('transactions').insert(newEntries); 
-    if (error) { showToast('Erro ao salvar.', 'error'); } 
-    else { fetchData(); setIsModalOpen(false); setNewTx({ description: '', category: '', totalAmount: '', installmentAmount: '', type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], installments: '1', inputMode: 'total' }); showToast(`Lançado ${qtdFinal}x com sucesso!`, 'success'); } 
+    if (error) { 
+        showToast('Erro ao salvar.', 'error'); 
+    } 
+    else { 
+        setIsModalOpen(false); 
+        setNewTx({ description: '', category: '', totalAmount: '', installmentAmount: '', type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], installments: '1', inputMode: 'total', isPaid: true }); 
+        showToast(`Lançado ${qtdFinal}x com sucesso!`, 'success'); 
+        await fetchData(); 
+    } 
   };
 
   const handleAddInvestment = async (e: React.FormEvent) => { e.preventDefault(); if (!session?.user) return; const amount = parseFloat(newInv.amount) / 100; const investment = { user_id: session.user.id, name: newInv.name, category: newInv.category, invested_amount: amount, current_amount: amount, created_at: new Date(newInv.date).toISOString() }; const { error } = await supabase.from('investments').insert([investment]); if (error) showToast('Erro ao salvar.', 'error'); else { fetchData(); setIsInvestmentModalOpen(false); setNewInv({ name: '', amount: '', date: new Date().toISOString().split('T')[0], category: 'Ações' }); showToast('Salvo!', 'success'); } };
@@ -190,7 +209,25 @@ const App: React.FC = () => {
   const totalApplied = useMemo(() => investments.reduce((acc, curr) => acc + curr.invested_amount, 0), [investments]);
   const totalCurrent = useMemo(() => investments.reduce((acc, curr) => acc + curr.current_amount, 0), [investments]);
   const totalProfit = totalCurrent - totalApplied;
-  const urgencies = useMemo(() => { const today = new Date(); today.setHours(0,0,0,0); const pending = transactions.filter(t => t.status === TransactionStatus.PENDING); const delayed = pending.filter(t => new Date(t.date) < today); return { delayedCount: delayed.length }; }, [transactions]);
+  
+  // === CORREÇÃO URGÊNCIAS: Verifica Pendentes + Data Passada (Independente do Mês) ===
+  const urgencies = useMemo(() => { 
+      const today = new Date(); 
+      today.setHours(0,0,0,0); // Zera hora para comparar só data
+      
+      const pendingExpenses = transactions.filter(t => 
+          t.status === TransactionStatus.PENDING && 
+          t.type === TransactionType.EXPENSE
+      );
+      
+      const delayed = pendingExpenses.filter(t => {
+          // Fix: Adiciona hora ao meio dia para evitar fuso horário voltando dia
+          const tDate = new Date(t.date + 'T12:00:00');
+          return tDate < today; 
+      }); 
+      
+      return { delayedCount: delayed.length }; 
+  }, [transactions]);
   
   const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 shadow-sm border border-emerald-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
   
@@ -222,6 +259,17 @@ const App: React.FC = () => {
       return Object.values(data);
   }, [investments]);
 
+  const totalInvested = investmentAllocation.reduce((acc, cur) => acc + (cur.name !== 'Sem ativos' ? cur.value : 0), 0);
+  const centerAsset = useMemo(() => {
+      if (selectedAssetIndex !== null && investmentAllocation[selectedAssetIndex]) {
+          return { label: investmentAllocation[selectedAssetIndex].name, value: investmentAllocation[selectedAssetIndex].value };
+      }
+      return { label: 'Total', value: totalInvested };
+  }, [selectedAssetIndex, investmentAllocation, totalInvested]);
+
+  const modalAccentColor = newTx.type === TransactionType.EXPENSE ? 'orange' : 'emerald';
+  const modalBorderClass = newTx.type === TransactionType.EXPENSE ? 'focus:border-orange-500' : 'focus:border-emerald-500';
+
   if (!session) return <Auth />;
 
   const renderContent = () => {
@@ -229,18 +277,16 @@ const App: React.FC = () => {
     if (activeTab === 'categorias') return <CategoryManager categories={categories} onAdd={handleAddCategory} onDelete={(id) => requestDelete(id, 'category')} />;
     if (activeTab === 'metas') return <GoalsManager goals={goals} onAdd={handleAddGoal} onDeposit={handleDepositGoal} onDelete={(id) => requestDelete(id, 'goal')} />;
     
+    // === CORREÇÃO: Passando a lista completa para o BillsManager ===
+    // O filtro agora acontece DENTRO do BillsManager para ele não perder dados antigos.
     if (activeTab === 'contas') {
-        const pendingBills = filteredTransactions.filter(t => t.status === TransactionStatus.PENDING && t.type === TransactionType.EXPENSE);
-        return ( <BillsManager transactions={pendingBills} onDelete={(id) => requestDelete(id, 'transaction')} onEdit={openEditModal} onAddClick={() => setIsModalOpen(true)} onPay={(id) => { const tx = transactions.find(t => t.id === id); if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); } }} /> );
+        const expenseTransactions = transactions.filter(t => t.type === TransactionType.EXPENSE && t.status === TransactionStatus.PENDING);
+        return ( <BillsManager transactions={expenseTransactions} onDelete={(id) => requestDelete(id, 'transaction')} onEdit={openEditModal} onAddClick={() => setIsModalOpen(true)} onPay={(id) => { const tx = transactions.find(t => t.id === id); if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); } }} /> );
     }
 
-    // === AQUI ESTÁ A MUDANÇA DA TELA DE INVESTIMENTOS ===
     if (activeTab === 'investimentos') {
       return (
-        // Container principal travado (sem scroll global)
         <div className="h-full flex flex-col gap-4 overflow-hidden p-1">
-            
-            {/* 1. CARDS DE RESUMO (Topo) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
                 <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-5 shadow-sm border border-slate-100 dark:border-zinc-800">
                     <div className="flex justify-between items-start mb-4">
@@ -272,9 +318,7 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            {/* 2. GRÁFICOS LADO A LADO (3 Colunas) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0 h-[220px]">
-                {/* Gráfico 1: Evolução */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0 h-[250px]">
                 <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-full overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Evolução</h3>
                     <div className="flex-1 w-full min-h-0">
@@ -288,40 +332,71 @@ const App: React.FC = () => {
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} />
-                                <YAxis hide />
-                                <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
-                                <Area type="monotone" dataKey="total" stroke="#22C55E" strokeWidth={3} fill="url(#gradPatrimonio)" />
+                                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
+                                <Bar dataKey="aporte" barSize={12} fill="#FF8A00" radius={[4, 4, 0, 0]} name="Aporte Mês" />
+                                <Area type="monotone" dataKey="total" stroke="#22C55E" strokeWidth={3} fill="url(#gradPatrimonio)" name="Patrimônio Total" />
                             </ComposedChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                {/* Gráfico 2: Alocação */}
                 <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] flex flex-col shadow-sm h-full overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3>
-                    <div className="flex-1 flex items-center gap-2 min-h-0">
-                        <div className="h-full w-1/2 min-w-[80px]">
-                            <ResponsiveContainer width="100%" height="100%">
+                    <div className="flex-1 flex flex-col items-center justify-between min-h-0">
+                        <div className="h-[150px] w-full relative">
+                             <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none z-10">
+                                 <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-0.5">{centerAsset.label}</span>
+                                 <span className="text-lg font-black text-slate-900 dark:text-white">
+                                      {centerAsset.value >= 1000 ? `${(centerAsset.value / 1000).toFixed(1)}k` : centerAsset.value.toLocaleString()}
+                                 </span>
+                             </div>
+                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={investmentAllocation} innerRadius={35} outerRadius={55} dataKey="value" stroke="none">
-                                        {investmentAllocation.map((_, i) => <Cell key={i} fill={CORES_MODERNAS[i % CORES_MODERNAS.length]} />)}
+                                    <Pie 
+                                      data={investmentAllocation} 
+                                      innerRadius={50} 
+                                      outerRadius={65} 
+                                      paddingAngle={4}
+                                      dataKey="value" 
+                                      stroke="none"
+                                      onClick={(_, index) => setSelectedAssetIndex(index === selectedAssetIndex ? null : index)}
+                                    >
+                                        {investmentAllocation.map((_, index) => (
+                                            <Cell 
+                                              key={`cell-${index}`} 
+                                              fill={CORES_VITTACASH[index % CORES_VITTACASH.length]} 
+                                              opacity={selectedAssetIndex === null || selectedAssetIndex === index ? 1 : 0.3}
+                                              style={{cursor: 'pointer'}}
+                                            />
+                                        ))}
                                     </Pie>
-                                    <Tooltip contentStyle={{ fontSize: '10px', borderRadius: '12px', fontWeight: 'bold', background: '#1e293b', border: 'none', color: '#fff' }} />
                                 </PieChart>
-                            </ResponsiveContainer>
+                             </ResponsiveContainer>
                         </div>
-                        <div className="flex-1 space-y-1 overflow-y-auto custom-scrollbar h-full pr-1 flex flex-col justify-center">
-                            {investmentAllocation.map((item, i) => (
-                                <div key={i} className="flex items-center justify-between p-1 rounded-lg bg-slate-50 dark:bg-slate-800/30 border-l-2" style={{ borderLeftColor: CORES_MODERNAS[i % CORES_MODERNAS.length] }}>
-                                    <span className="text-[9px] font-black uppercase text-slate-400 truncate max-w-[50px]">{item.name}</span>
-                                    <span className="text-[9px] font-black text-slate-900 dark:text-white">R$ {item.value.toLocaleString()}</span>
-                                </div>
-                            ))}
+                        <div className="w-full flex flex-wrap justify-center gap-1.5 overflow-y-auto custom-scrollbar max-h-[60px]">
+                             {investmentAllocation.map((item, i) => {
+                                 const isSelected = selectedAssetIndex === i;
+                                 return (
+                                     <button 
+                                         key={i} 
+                                         onClick={() => setSelectedAssetIndex(isSelected ? null : i)}
+                                         className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all ${
+                                             isSelected 
+                                             ? 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-600 scale-105 shadow-sm' 
+                                             : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-zinc-800/50'
+                                         }`}
+                                     >
+                                         <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{backgroundColor: CORES_VITTACASH[i % CORES_VITTACASH.length]}}></div>
+                                         <span className={`text-[8px] font-bold uppercase truncate max-w-[60px] ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+                                             {item.name}
+                                         </span>
+                                     </button>
+                                 )
+                             })}
                         </div>
                     </div>
                 </div>
 
-                {/* Gráfico 3: Performance (Agora aqui na linha) */}
                 <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-full overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1"><LineChart className="w-4 h-4" /> Performance</h3>
                     <div className="flex-1 w-full min-h-0">
@@ -339,23 +414,21 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            {/* 3. LISTA DE ATIVOS (Onde ocorre a rolagem) */}
-            <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden flex flex-col min-h-0 shadow-sm">
+            <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden flex flex-col min-h-0 shadow-sm border border-slate-100 dark:border-zinc-800">
                 <div className="flex items-center justify-between p-6 pb-4 shrink-0">
                     <div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-emerald-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div>
                     <button onClick={() => setIsInvestmentModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-500/30"><Plus className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-wider">Nova Aplicação</span></button>
                 </div>
                 
-                {/* AQUI ESTÁ A MÁGICA DO SCROLL: overflow-y-auto só nesta div */}
                 <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0 custom-scrollbar">
                     <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="border-b border-slate-100 dark:border-zinc-800 sticky top-0 bg-white dark:bg-zinc-900 z-10">
-                                <th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Ativo</th>
-                                <th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Categoria</th>
-                                <th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Aplicado</th>
-                                <th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Atual</th>
-                                <th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest text-right">Rent.</th>
+                        <thead className="sticky top-0 bg-orange-50 dark:bg-orange-900/10 z-10">
+                            <tr>
+                                <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 rounded-tl-2xl">Ativo</th>
+                                <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">Categoria</th>
+                                <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">Aplicado</th>
+                                <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">Atual</th>
+                                <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 text-right rounded-tr-2xl">Rent.</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -363,11 +436,11 @@ const App: React.FC = () => {
                                 const profit = ((inv.current_amount / inv.invested_amount) - 1) * 100; 
                                 return (
                                     <tr key={inv.id} className="border-b border-slate-50 dark:border-zinc-800/50 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
-                                        <td className="py-5 px-2 font-bold text-sm truncate max-w-[150px]">{inv.name}</td>
-                                        <td className="py-5 px-2 text-xs font-bold text-slate-500">{inv.category}</td>
-                                        <td className="py-5 px-2 text-sm font-bold text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td>
-                                        <td className="py-5 px-2 text-sm font-black text-emerald-600">R$ {inv.current_amount.toLocaleString()}</td>
-                                        <td className={`py-5 px-2 text-xs font-black text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td>
+                                        <td className="py-4 px-4 font-normal text-sm text-slate-700 dark:text-slate-200 truncate max-w-[150px]">{inv.name}</td>
+                                        <td className="py-4 px-4 text-xs font-normal text-slate-500">{inv.category}</td>
+                                        <td className="py-4 px-4 text-sm font-normal text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td>
+                                        <td className="py-4 px-4 text-sm font-medium text-emerald-600">R$ {inv.current_amount.toLocaleString()}</td>
+                                        <td className={`py-4 px-4 text-xs font-medium text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td>
                                     </tr>
                                 ); 
                             })}
@@ -383,7 +456,7 @@ const App: React.FC = () => {
     const list = isHistory ? filteredTransactions.filter(t => t.status === TransactionStatus.COMPLETED) : [];
     return (
       <div className="h-full flex flex-col min-h-0 min-w-0 animate-in fade-in slide-in-from-bottom-2">
-        <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-y-auto p-6 custom-scrollbar min-h-0 shadow-sm">
+        <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-y-auto p-6 custom-scrollbar min-h-0 shadow-sm border border-slate-100 dark:border-zinc-800">
             {loading ? <p className="text-center p-10 text-slate-400">Carregando...</p> : <TransactionTable transactions={list} onDelete={!isHistory ? (id) => requestDelete(id, 'transaction') : undefined} onEdit={!isHistory ? openEditModal : undefined} onPay={!isHistory ? (id) => { const tx = transactions.find(t => t.id === id); if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); } } : undefined} />}
         </div>
       </div>
@@ -392,11 +465,14 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen w-full bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-200 flex overflow-hidden font-inter">
+      {/* ... (RESTO DO LAYOUT MANTIDO IGUAL) ... */}
+      {/* ... (MODAL EDITAR MANTIDO) ... */}
+      {/* ... (MODAL NOVO LANÇAMENTO MANTIDO) ... */}
+      {/* ... (MODAL INVESTIMENTO MANTIDO) ... */}
+      {/* ... (MODAL PAGAMENTO MANTIDO) ... */}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <ConfirmModal isOpen={!!deleteData} onClose={() => setDeleteData(null)} onConfirm={handleConfirmDelete} title={`Excluir ${deleteData?.type === 'category' ? 'Categoria' : deleteData?.type === 'goal' ? 'Meta' : 'Lançamento'}?`} message="Esta ação não pode ser desfeita." />
-
       {isSidebarOpen && ( <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" ></div> )}
-
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-black lg:relative lg:translate-x-0 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
            <div className="p-8 flex flex-col h-full">
              <div className="flex items-center justify-between mb-10">
@@ -408,7 +484,6 @@ const App: React.FC = () => {
                </div>
                <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"><X className="w-6 h-6" /></button>
              </div>
-
              <nav className="space-y-3 flex-1">
                 <button onClick={() => { setIsModalOpen(true); setSidebarOpen(false); }} className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 bg-emerald-50/50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 shadow-sm"><Plus className="w-5 h-5" /><span>Lançamento</span></button>
                 <div className="py-2"><MonthSelector currentDate={currentDate} onMonthChange={setCurrentDate} /></div>
@@ -423,7 +498,6 @@ const App: React.FC = () => {
              <button onClick={handleLogout} className="flex items-center gap-4 px-5 py-4 rounded-2xl text-slate-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-black text-[12px] uppercase tracking-widest mt-auto"><LogOut className="w-5 h-5" /><span>Sair</span></button>
            </div>
       </aside>
-
       <main className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-black overflow-hidden relative min-w-0">
         <header className="h-20 flex items-center justify-between px-8 lg:px-12 shrink-0 z-40">
            <div className="flex items-center gap-6"><button className="lg:hidden p-3 text-slate-500 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm" onClick={() => setSidebarOpen(true)}><Menu className="w-6 h-6" /></button><div className="hidden lg:flex items-center gap-2"><span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] opacity-50">Portal Financeiro Inteligente</span></div></div>
@@ -461,40 +535,62 @@ const App: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
               <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-6">
-                <div className="flex items-center justify-between mb-4"><h3 className="font-black text-xl uppercase tracking-tighter text-emerald-600">Novo Lançamento</h3><button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 transition-all bg-slate-50 dark:bg-zinc-900 rounded-xl"><X className="w-5 h-5" /></button></div>
+                <div className="flex items-center justify-between mb-4"><h3 className={`font-black text-xl uppercase tracking-tighter ${newTx.type === TransactionType.INCOME ? 'text-emerald-600' : 'text-orange-500'}`}>Novo Lançamento</h3><button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 transition-all bg-slate-50 dark:bg-zinc-900 rounded-xl"><X className="w-5 h-5" /></button></div>
                 <form onSubmit={handleAddTransaction} className="space-y-3">
-                    <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Descrição</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-emerald-500 shadow-inner" value={newTx.description} onChange={(e) => setNewTx({...newTx, description: e.target.value})} required /></div>
-                    <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-emerald-500 shadow-inner" value={newTx.category} onChange={(e) => setNewTx({...newTx, category: e.target.value})}><option value="">Selecione uma Categoria...</option>{categories.filter(c => c.type === newTx.type).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
+                    <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Descrição</label><input type="text" className={`w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-medium outline-none border-2 border-transparent ${modalBorderClass} shadow-inner`} value={newTx.description} onChange={(e) => setNewTx({...newTx, description: e.target.value})} required /></div>
+                    <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className={`w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-medium outline-none border-2 border-transparent ${modalBorderClass} shadow-inner`} value={newTx.category} onChange={(e) => setNewTx({...newTx, category: e.target.value})}><option value="">Selecione uma Categoria...</option>{categories.filter(c => c.type === newTx.type).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
                     <div className="flex gap-2 mb-1">
-                        <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'total'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'total' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Total</button>
-                        <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'installment'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'installment' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Parcela</button>
+                        <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'total'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'total' ? `bg-${modalAccentColor}-100 text-${modalAccentColor}-600 dark:bg-${modalAccentColor}-900/30 dark:text-${modalAccentColor}-400` : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Total</button>
+                        <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'installment'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'installment' ? `bg-${modalAccentColor}-100 text-${modalAccentColor}-600 dark:bg-${modalAccentColor}-900/30 dark:text-${modalAccentColor}-400` : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Parcela</button>
                     </div>
-                    {newTx.inputMode === 'total' ? ( <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor Total</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-emerald-500 shadow-inner" value={formatCurrencyInput(newTx.totalAmount)} onChange={(e) => handleValueChange(e.target.value, 'total')} required /></div> ) : ( <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor da Parcela</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-emerald-500 shadow-inner" value={formatCurrencyInput(newTx.installmentAmount)} onChange={(e) => handleValueChange(e.target.value, 'installment')} required /></div> )}
+                    {newTx.inputMode === 'total' ? ( <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor Total</label><input type="text" className={`w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-${modalAccentColor}-500 shadow-inner`} value={formatCurrencyInput(newTx.totalAmount)} onChange={(e) => handleValueChange(e.target.value, 'total')} required /></div> ) : ( <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor da Parcela</label><input type="text" className={`w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-${modalAccentColor}-500 shadow-inner`} value={formatCurrencyInput(newTx.installmentAmount)} onChange={(e) => handleValueChange(e.target.value, 'installment')} required /></div> )}
                     <div className="grid grid-cols-2 gap-3 mt-2">
                         <div className="space-y-1">
                             <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Parcelas</label>
-                            <select className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-emerald-500 appearance-none shadow-inner cursor-pointer" value={newTx.installments} onChange={handleInstallmentsChange}>
+                            <select className={`w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-medium outline-none border-2 border-transparent ${modalBorderClass} appearance-none shadow-inner cursor-pointer`} value={newTx.installments} onChange={handleInstallmentsChange}>
                                 <option value="1">À Vista</option>
                                 {OPCOES_PARCELAS.map(n => <option key={n} value={n}>{n}x</option>)}
                             </select>
                         </div>
-                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Vencimento</label><input type="date" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-xs font-black outline-none border-2 border-transparent focus:border-emerald-500 shadow-inner" value={newTx.date} onChange={(e) => setNewTx({...newTx, date: e.target.value})} required /></div>
+                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Vencimento</label><input type="date" className={`w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-xs font-medium outline-none border-2 border-transparent ${modalBorderClass} shadow-inner`} value={newTx.date} onChange={(e) => setNewTx({...newTx, date: e.target.value})} required /></div>
                     </div>
-                    <div className="flex bg-slate-100 dark:bg-zinc-800 rounded-xl p-1 h-[48px]"><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.INCOME})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.INCOME ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500'}`}>Receita</button><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.EXPENSE})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.EXPENSE ? 'bg-rose-500 text-white shadow-md' : 'text-slate-500'}`}>Despesa</button></div>
-                    <button type="submit" className="w-full bg-emerald-600 py-4 rounded-xl text-white font-black uppercase text-xs tracking-[0.1em] shadow-xl active:scale-95 transition-all mt-2 hover:bg-emerald-700">Lançar Agora</button>
+                    <div className="flex bg-slate-100 dark:bg-zinc-800 rounded-xl p-1 h-[48px]"><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.INCOME})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.INCOME ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500'}`}>Receita</button><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.EXPENSE})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.EXPENSE ? 'bg-orange-500 text-white shadow-md' : 'text-slate-500'}`}>Despesa</button></div>
+                    
+                    {/* Botões de STATUS: Confirmado / Agendado */}
+                    <div className="flex gap-2">
+                        <button 
+                          type="button" 
+                          onClick={() => setNewTx({...newTx, isPaid: true})} 
+                          className={`flex-1 py-3 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${newTx.isPaid ? `border-${modalAccentColor}-500 bg-${modalAccentColor}-50 dark:bg-${modalAccentColor}-900/20 text-${modalAccentColor}-600 dark:text-${modalAccentColor}-400` : 'border-slate-200 dark:border-zinc-800 text-slate-400'}`}
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase">Confirmado</span>
+                        </button>
+                        <button 
+                          type="button" 
+                          onClick={() => setNewTx({...newTx, isPaid: false})} 
+                          className={`flex-1 py-3 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${!newTx.isPaid ? `border-${modalAccentColor}-500 bg-${modalAccentColor}-50 dark:bg-${modalAccentColor}-900/20 text-${modalAccentColor}-600 dark:text-${modalAccentColor}-400` : 'border-slate-200 dark:border-zinc-800 text-slate-400'}`}
+                        >
+                          <Clock className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase">Agendado</span>
+                        </button>
+                    </div>
+
+                    <button type="submit" className={`w-full py-4 rounded-xl text-white font-black uppercase text-xs tracking-[0.1em] shadow-xl active:scale-95 transition-all mt-2 ${newTx.type === TransactionType.INCOME ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-orange-500 hover:bg-orange-600'}`}>Lançar Agora</button>
                 </form>
               </div>
         </div>
       )}
 
+      {/* ... (Resto do JSX e Modais Mantidos) ... */}
       {isInvestmentModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
              <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[3.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-10 transform scale-100">
                 <div className="flex items-center justify-between mb-10"><div className="flex items-center gap-4"><div className="p-4 bg-emerald-600 rounded-3xl shadow-xl shadow-emerald-500/30"><Coins className="w-8 h-8 text-white" /></div><h3 className="font-black text-2xl lg:text-3xl uppercase tracking-tighter text-slate-900 dark:text-white">Nova Aplicação</h3></div><button onClick={() => setIsInvestmentModalOpen(false)} className="p-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all bg-slate-50 dark:bg-zinc-900 rounded-3xl"><X className="w-7 h-7" /></button></div>
                 <form onSubmit={handleAddInvestment} className="space-y-8">
-                     <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Search className="w-4 h-4 text-emerald-500" /> Ativo Selecionado</label><input type="text" placeholder="Ticker ou Nome" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-8 py-6 text-lg font-black outline-none" value={newInv.name} onChange={(e) => setNewInv({...newInv, name: e.target.value})} required /></div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Wallet className="w-4 h-4 text-emerald-500" /> Valor</label><input type="text" className="w-full bg-emerald-50/50 dark:bg-emerald-500/10 rounded-3xl px-6 py-6 text-xl font-black outline-none text-emerald-600" value={formatCurrencyInput(newInv.amount)} onChange={(e) => setNewInv({...newInv, amount: e.target.value.replace(/\D/g, '')})} required /></div><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Calendar className="w-4 h-4 text-emerald-500" /> Data</label><input type="date" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-6 py-6 text-sm font-black outline-none dark:text-white" value={newInv.date} onChange={(e) => setNewInv({...newInv, date: e.target.value})} required /></div></div>
-                     <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-8 py-6 text-sm font-black outline-none dark:text-white" value={newInv.category} onChange={(e) => setNewInv({...newInv, category: e.target.value})}><option>Ações</option><option>Renda Fixa</option><option>FIIs</option><option>Cripto</option><option>Tesouro</option><option>Fundos</option></select></div>
+                     <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Search className="w-4 h-4 text-emerald-500" /> Ativo Selecionado</label><input type="text" placeholder="Ticker ou Nome" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-8 py-6 text-lg font-medium outline-none" value={newInv.name} onChange={(e) => setNewInv({...newInv, name: e.target.value})} required /></div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Wallet className="w-4 h-4 text-emerald-500" /> Valor</label><input type="text" className="w-full bg-emerald-50/50 dark:bg-emerald-500/10 rounded-3xl px-6 py-6 text-xl font-medium outline-none text-emerald-600" value={formatCurrencyInput(newInv.amount)} onChange={(e) => setNewInv({...newInv, amount: e.target.value.replace(/\D/g, '')})} required /></div><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Calendar className="w-4 h-4 text-emerald-500" /> Data</label><input type="date" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-6 py-6 text-sm font-medium outline-none dark:text-white" value={newInv.date} onChange={(e) => setNewInv({...newInv, date: e.target.value})} required /></div></div>
+                     <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-8 py-6 text-sm font-medium outline-none dark:text-white" value={newInv.category} onChange={(e) => setNewInv({...newInv, category: e.target.value})}><option>Ações</option><option>Renda Fixa</option><option>FIIs</option><option>Cripto</option><option>Tesouro</option><option>Fundos</option></select></div>
                      <button type="submit" className="w-full bg-emerald-600 py-7 rounded-[2.5rem] text-white font-black uppercase text-sm tracking-[0.2em] shadow-2xl mt-6">Salvar Aplicação</button>
                 </form>
              </div>
@@ -506,8 +602,8 @@ const App: React.FC = () => {
            <div className="bg-white dark:bg-zinc-950 w-full max-w-xs rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-8">
               <h3 className="font-black text-sm uppercase tracking-widest mb-6 text-center text-slate-500">Confirmar Pagamento</h3>
               <div className="space-y-4">
-                 <div className="p-4 bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800"><p className="text-[9px] font-black uppercase text-slate-400 mb-2">Lançamento</p><p className="font-black text-sm text-slate-900 dark:text-white">{payingTransaction.description}</p></div>
-                 <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl border-2 border-emerald-200 dark:border-emerald-500/20"><p className="text-[9px] font-black uppercase text-emerald-500 mb-2">Valor Real</p><input autoFocus type="text" className="w-full bg-transparent border-none p-0 font-black text-lg text-emerald-600 outline-none" value={formatCurrencyInput(realValueInput)} onChange={(e) => setRealValueInput(e.target.value.replace(/\D/g, ''))} /></div>
+                 <div className="p-4 bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800"><p className="text-[9px] font-black uppercase text-slate-400 mb-2">Lançamento</p><p className="font-medium text-sm text-slate-900 dark:text-white">{payingTransaction.description}</p></div>
+                 <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl border-2 border-emerald-200 dark:border-emerald-500/20"><p className="text-[9px] font-black uppercase text-emerald-500 mb-2">Valor Real</p><input autoFocus type="text" className="w-full bg-transparent border-none p-0 font-medium text-lg text-emerald-600 outline-none" value={formatCurrencyInput(realValueInput)} onChange={(e) => setRealValueInput(e.target.value.replace(/\D/g, ''))} /></div>
                  <div className="grid grid-cols-2 gap-4 pt-2">
                     <button onClick={() => setPayingTransaction(null)} className="py-4 rounded-2xl bg-slate-100 dark:bg-zinc-800 text-slate-500 font-black uppercase text-xs tracking-widest hover:bg-slate-200 transition-colors">Voltar</button>
                     <button onClick={confirmPayment} className="py-4 rounded-2xl bg-emerald-600 text-white font-black uppercase text-xs tracking-widest hover:bg-emerald-700 shadow-xl shadow-emerald-500/20 transition-all active:scale-95">Confirmar</button>

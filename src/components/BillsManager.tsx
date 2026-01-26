@@ -1,138 +1,141 @@
-import React from 'react';
-import { CalendarClock, CheckCircle2, AlertTriangle, Clock, Trash2, Edit3, DollarSign, Plus, Calculator } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { Transaction } from '../types';
+import { CalendarClock, CheckCircle2, AlertCircle, Plus, Trash2, Edit2 } from 'lucide-react';
 
 interface BillsManagerProps {
   transactions: Transaction[];
-  onPay: (id: string) => void;
-  onEdit: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
+  onEdit: (transaction: Transaction) => void;
   onAddClick: () => void;
+  onPay: (id: string) => void;
 }
 
-const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onPay, onEdit, onDelete, onAddClick }) => {
-  
-  const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onDelete, onEdit, onAddClick, onPay }) => {
+  const [filter, setFilter] = useState<'all' | 'late' | 'today'>('all');
+  const [localTransactions, setLocalTransactions] = useState<Transaction[]>(transactions);
 
-  const getStatus = (dateString: string) => {
+  useEffect(() => {
+    setLocalTransactions(transactions);
+  }, [transactions]);
+
+  const getFilteredBills = () => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const billDate = new Date(dateString);
-    billDate.setMinutes(billDate.getMinutes() + billDate.getTimezoneOffset());
-    billDate.setHours(0, 0, 0, 0);
+    today.setHours(0,0,0,0);
 
-    if (billDate.getTime() < today.getTime()) return 'overdue';
-    if (billDate.getTime() === today.getTime()) return 'today';
-    return 'future';
-  };
+    const sorted = [...localTransactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  const getRemainingDebt = (description: string, currentAmount: number) => {
-      const match = description.match(/\((\d+)\/(\d+)\)/);
-      if (match) {
-          const currentInst = parseInt(match[1]);
-          const totalInst = parseInt(match[2]);
-          const remainingInst = totalInst - currentInst + 1; 
-          const totalRemaining = currentAmount * remainingInst;
-          
-          if (remainingInst > 1) {
-              return (
-                  <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md w-fit">
-                      <Calculator className="w-3 h-3" />
-                      <span>Restam: R$ {totalRemaining.toLocaleString('pt-BR')} ({remainingInst}x)</span>
-                  </div>
-              );
-          }
+    return sorted.filter(t => {
+      const tDate = new Date(t.date + 'T12:00:00');
+      if (filter === 'late') return tDate < today;
+      if (filter === 'today') {
+        return tDate.getDate() === today.getDate() && 
+               tDate.getMonth() === today.getMonth() && 
+               tDate.getFullYear() === today.getFullYear();
       }
-      return null;
+      return true;
+    });
   };
 
-  const totalPending = transactions.reduce((acc, t) => acc + t.amount, 0);
+  const filteredBills = getFilteredBills();
+  const totalValue = filteredBills.reduce((acc, t) => acc + t.amount, 0);
 
   return (
-    <div className="h-full flex flex-col gap-4 overflow-hidden p-1">
+    <div className="h-full flex flex-col gap-6 animate-in fade-in">
       
-      {/* HEADER FIXO - Não rola com a lista */}
-      <div className="bg-slate-900 rounded-3xl p-6 shadow-lg shrink-0 flex items-center justify-between relative overflow-hidden z-10">
-          <div className="relative z-10">
-              <span className="text-[10px] font-black uppercase text-indigo-400 tracking-widest">Total Pendente</span>
-              <h2 className="text-2xl font-black text-white tracking-tighter mt-1">
-                  R$ {totalPending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </h2>
-          </div>
-          <button onClick={onAddClick} className="p-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl shadow-xl shadow-indigo-500/30 transition-all active:scale-95 flex items-center gap-2 z-10">
-              <Plus className="w-5 h-5" />
-              <span className="text-xs font-black uppercase hidden sm:inline">Nova Conta</span>
-          </button>
-          
-          {/* Decoração de fundo */}
-          <div className="absolute top-0 right-20 p-3 bg-indigo-500/10 rounded-2xl rotate-12">
-              <CalendarClock className="w-12 h-12 text-indigo-500/20" />
-          </div>
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white dark:bg-zinc-900 p-5 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-zinc-800 shrink-0">
+        <div className="flex items-center gap-4">
+           <div className="p-3 bg-orange-100 dark:bg-orange-500/10 rounded-2xl">
+              <CalendarClock className="w-6 h-6 text-orange-600 dark:text-orange-500" />
+           </div>
+           <div>
+              <h2 className="text-xs font-black uppercase tracking-widest text-slate-500">A Pagar</h2>
+              <p className="text-xl font-black text-slate-900 dark:text-white">R$ {totalValue.toLocaleString()}</p>
+           </div>
+        </div>
+        
+        <div className="flex items-center gap-2 bg-slate-100 dark:bg-black p-1.5 rounded-2xl">
+           <div className="flex bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-1">
+               <button onClick={() => setFilter('all')} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${filter === 'all' ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600'}`}>Todas</button>
+               <button onClick={() => setFilter('today')} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${filter === 'today' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-500' : 'text-slate-400 hover:text-emerald-500'}`}>Hoje</button>
+               <button onClick={() => setFilter('late')} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${filter === 'late' ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-500' : 'text-slate-400 hover:text-orange-500'}`}>Atrasadas</button>
+           </div>
+           
+           <button onClick={onAddClick} className="w-10 h-10 flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-md transition-all active:scale-95" title="Adicionar Conta">
+             <Plus className="w-5 h-5" />
+           </button>
+        </div>
       </div>
 
-      {/* LISTA DE CONTAS - Apenas esta parte rola agora */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar pb-24 lg:pb-0 space-y-2 pr-1">
-        {sortedTransactions.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-50">
-                <CheckCircle2 className="w-12 h-12 mb-2 text-emerald-500" />
-                <p className="font-bold text-sm">Tudo pago!</p>
-            </div>
-        ) : (
-            sortedTransactions.map((tx) => {
-                const status = getStatus(tx.date);
-                const config = {
-                    overdue: { text: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-l-4 border-l-rose-500', icon: AlertTriangle },
-                    today: { text: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-l-4 border-l-amber-500', icon: Clock },
-                    future: { text: 'text-indigo-500', bg: 'bg-slate-50 dark:bg-slate-800/50', border: 'border-l-4 border-l-indigo-500', icon: CalendarClock },
-                }[status];
+      <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-zinc-800 overflow-hidden flex flex-col">
+         <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+             <table className="w-full text-left border-collapse">
+                <thead className="sticky top-0 bg-orange-50 dark:bg-orange-900/10 z-10 rounded-t-2xl">
+                   <tr>
+                      <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 rounded-tl-2xl">Descrição</th>
+                      <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 hidden sm:table-cell">Categoria</th>
+                      <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">Vencimento</th>
+                      <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 text-right">Valor</th>
+                      <th className="py-4 px-4 w-[100px] rounded-tr-2xl"></th>
+                   </tr>
+                </thead>
 
-                const Icon = config.icon;
-                const formattedDate = new Date(tx.date + 'T12:00:00').toLocaleDateString('pt-BR');
+                <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+                   {filteredBills.map(t => {
+                      const tDate = new Date(t.date + 'T12:00:00');
+                      const today = new Date();
+                      today.setHours(0,0,0,0);
+                      const isLate = tDate < today;
+                      const isToday = tDate.getTime() === today.getTime();
 
-                return (
-                    <div key={tx.id} className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 ${config.border} hover:translate-x-1 transition-transform gap-3`}>
-                        
-                        {/* Esquerda: Info */}
-                        <div className="flex items-start gap-3 overflow-hidden w-full">
-                            <div className={`p-2 rounded-lg ${config.bg} ${config.text} shrink-0 mt-1`}>
-                                <Icon className="w-4 h-4" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <div className="flex justify-between items-start">
-                                    <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">{tx.description}</h4>
-                                    <span className={`sm:hidden text-[10px] font-bold ${config.text}`}>{formattedDate}</span>
-                                </div>
-                                <div className="flex flex-wrap items-center gap-2 mt-0.5">
-                                    <span className="text-[10px] text-slate-400 uppercase font-bold bg-slate-50 dark:bg-slate-800 px-1.5 rounded">{tx.category}</span>
-                                    <span className="hidden sm:inline text-[10px] text-slate-300">•</span>
-                                    <span className={`hidden sm:inline text-[10px] font-bold ${config.text}`}>{formattedDate}</span>
-                                </div>
-                                {getRemainingDebt(tx.description, tx.amount)}
-                            </div>
-                        </div>
-
-                        {/* Direita: Valor + Ações */}
-                        <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 w-full sm:w-auto border-t sm:border-t-0 border-slate-100 dark:border-slate-800 pt-2 sm:pt-0">
-                            <span className="font-black text-sm text-slate-700 dark:text-slate-200">
-                                R$ {tx.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </span>
-                            
-                            <div className="flex items-center gap-1">
-                                <button onClick={() => onPay(tx.id)} title="Pagar" className="flex items-center gap-1 px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg shadow-md shadow-emerald-500/20 active:scale-95 transition-all text-[10px] font-black uppercase tracking-wide">
-                                    <DollarSign className="w-3 h-3" /> Pagar
-                                </button>
-                                <button onClick={() => onEdit(tx)} className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                                    <Edit3 className="w-4 h-4" />
-                                </button>
-                                <button onClick={() => onDelete(tx.id)} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                      return (
+                        <tr key={t.id} className="group hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                           <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                 <div className={`p-2 rounded-xl shrink-0 ${isLate ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-600' : 'bg-slate-100 dark:bg-zinc-800 text-slate-500'}`}>
+                                    {isLate ? <AlertCircle className="w-4 h-4" /> : <CalendarClock className="w-4 h-4" />}
+                                 </div>
+                                 <span className="font-medium text-sm text-slate-700 dark:text-slate-200 truncate max-w-[150px]">{t.description}</span>
+                              </div>
+                           </td>
+                           <td className="py-3 px-4 hidden sm:table-cell">
+                              <span className="text-[10px] font-normal uppercase text-slate-400 bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded-lg">{t.category}</span>
+                           </td>
+                           <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                 <span className={`text-xs font-normal ${isLate ? 'text-orange-500' : isToday ? 'text-emerald-500' : 'text-slate-500'}`}>
+                                    {tDate.toLocaleDateString('pt-BR', {day: '2-digit', month: 'short'})}
+                                 </span>
+                                 {isLate && <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>}
+                              </div>
+                           </td>
+                           <td className="py-3 px-4 text-right">
+                              <span className="font-medium text-sm text-slate-900 dark:text-white">R$ {t.amount.toLocaleString()}</span>
+                           </td>
+                           <td className="py-3 px-4 text-right">
+                              <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                 <button onClick={() => onPay(t.id)} className="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600 rounded-lg transition-colors" title="Pagar">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                 </button>
+                                 <button onClick={() => onEdit(t)} className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-400 hover:text-slate-600 rounded-lg transition-colors">
+                                    <Edit2 className="w-4 h-4" />
+                                 </button>
+                                 <button onClick={() => onDelete(t.id)} className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-500 rounded-lg transition-colors">
                                     <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                );
-            })
-        )}
+                                 </button>
+                              </div>
+                           </td>
+                        </tr>
+                      );
+                   })}
+                </tbody>
+             </table>
+             {filteredBills.length === 0 && (
+                <div className="text-center py-20 text-slate-400 text-sm font-medium">
+                    {filter === 'all' ? 'Nenhuma conta encontrada.' : 
+                     filter === 'today' ? 'Nenhuma conta para hoje.' : 'Nenhuma conta atrasada.'}
+                </div>
+             )}
+         </div>
       </div>
     </div>
   );

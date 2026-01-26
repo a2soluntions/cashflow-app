@@ -2,33 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  /* Fundo Totalmente Preto para destacar a Logo */
-  body {
-    @apply bg-black text-white;
-    background-color: #000000 !important; /* Remove o Vermelho de vez */
-  }
-
-  /* BARRA DE ROLAGEM (Degradê Laranja para Verde) */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    /* Cores da sua logo: Laranja em cima, Verde embaixo */
-    background: linear-gradient(180deg, #FF8A00 0%, #22C55E 100%);
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #f59e0b 0%, #16a34a 100%);
-  }
+/* === GLOBAL === */
+body {
+  @apply font-inter antialiased transition-colors duration-300;
 }
 
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #22C55E transparent;
+/* === MODO CLARO (Suave / Off-White) === */
+:root {
+  color-scheme: light;
+}
+body {
+  /* Fundo cinza bem clarinho, evita o branco gritante */
+  @apply bg-slate-50 text-slate-700; 
+}
+
+/* === MODO ESCURO (Black Piano) === */
+.dark body {
+  @apply bg-black text-zinc-300;
+}
+
+/* === SCROLLBAR PERSONALIZADA === */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-zinc-800 rounded-full;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400 dark:bg-zinc-700;
 }

@@ -1,6 +1,6 @@
-import React, { useState } from 'react'; // Removido useEffect
-import { Target, Plus, Trophy, X, Calendar, Wallet, CheckCircle2, PartyPopper, TrendingUp } from 'lucide-react'; // Removido AlertTriangle
+import React, { useState, useMemo } from 'react';
 import { Goal } from '../types';
+import { Target, Plus, Trash2, TrendingUp, Trophy, Wallet, PiggyBank } from 'lucide-react';
 
 interface GoalsManagerProps {
   goals: Goal[];
@@ -10,260 +10,200 @@ interface GoalsManagerProps {
 }
 
 const GoalsManager: React.FC<GoalsManagerProps> = ({ goals, onAdd, onDeposit, onDelete }) => {
-  const [depositModal, setDepositModal] = useState<string | null>(null);
-  const [depositValue, setDepositValue] = useState('');
-  
-  // Estado para controlar animação de celebração simples
-  const [celebrating, setCelebrating] = useState<string | null>(null);
+  const [newGoal, setNewGoal] = useState({ description: '', target_amount: '', date: '' });
+  const [depositData, setDepositData] = useState<{ id: string, amount: string } | null>(null);
 
-  const [newGoal, setNewGoal] = useState({
-    name: '',
-    target_amount: '',
-    deadline: ''
-  });
+  // --- CÁLCULOS ---
+  const totalAccumulated = useMemo(() => goals.reduce((acc, g) => acc + g.current_amount, 0), [goals]);
+  const totalTarget = useMemo(() => goals.reduce((acc, g) => acc + g.target_amount, 0), [goals]);
+  const totalProgress = totalTarget > 0 ? (totalAccumulated / totalTarget) * 100 : 0;
 
-  const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-  
-  const formatInputCurrency = (val: string) => {
-    if (!val) return 'R$ 0,00';
-    const num = parseFloat(val) / 100;
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGoal.name || !newGoal.target_amount || !newGoal.deadline) return;
-
-    const amount = parseFloat(newGoal.target_amount) / 100;
-    
+    if (!newGoal.description || !newGoal.target_amount) return;
     onAdd({
-      name: newGoal.name,
-      target_amount: amount,
-      deadline: newGoal.deadline
-    } as any); 
-
-    setNewGoal({ name: '', target_amount: '', deadline: '' });
+        description: newGoal.description,
+        target_amount: parseFloat(newGoal.target_amount),
+        name: ''
+    });
+    setNewGoal({ description: '', target_amount: '', date: '' });
   };
 
   const handleDepositSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (depositModal) {
-      const amount = parseFloat(depositValue) / 100;
-      onDeposit(depositModal, amount);
-      
-      // Verifica se completou para celebrar
-      const goal = goals.find(g => g.id === depositModal);
-      if (goal && (goal.current_amount + amount) >= goal.target_amount) {
-          setCelebrating(goal.id);
-          setTimeout(() => setCelebrating(null), 5000); // 5s de festa
-      }
-
-      setDepositModal(null);
-      setDepositValue('');
+    if (depositData) {
+      onDeposit(depositData.id, parseFloat(depositData.amount));
+      setDepositData(null);
     }
   };
 
-  const totalGuardado = goals.reduce((acc, g) => acc + g.current_amount, 0);
-  const metaGlobal = goals.reduce((acc, g) => acc + g.target_amount, 0);
-  const percentualGlobal = metaGlobal > 0 ? (totalGuardado / metaGlobal) * 100 : 0;
-
   return (
-    <div className="h-full flex flex-col gap-6 overflow-y-auto pb-24 lg:pb-0 custom-scrollbar p-1">
+    <div className="h-full flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 pb-8">
       
-      {/* CARDS DE RESUMO (TOPO) */}
+      {/* 1. LINHA DE RESUMO */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
-         <div className="bg-white dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-6 shadow-sm flex flex-col justify-center">
-            <div className="flex items-center gap-3 mb-2">
-               <div className="p-2 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl"><Wallet className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /></div>
-               <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Total Acumulado</span>
-            </div>
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{formatCurrency(totalGuardado)}</h3>
-         </div>
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] border border-slate-100 dark:border-zinc-800 shadow-sm relative overflow-hidden">
+              <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-slate-100 dark:bg-zinc-800 rounded-xl"><Wallet className="w-5 h-5 text-slate-500" /></div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Acumulado</span>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">R$ {totalAccumulated.toLocaleString()}</h3>
+          </div>
 
-         <div className="bg-white dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-6 shadow-sm flex flex-col justify-center">
-            <div className="flex items-center gap-3 mb-2">
-               <div className="p-2 bg-emerald-100 dark:bg-emerald-500/20 rounded-xl"><Target className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /></div>
-               <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Meta Global</span>
-            </div>
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{formatCurrency(metaGlobal)}</h3>
-         </div>
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] border border-slate-100 dark:border-zinc-800 shadow-sm relative overflow-hidden">
+              <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl"><Target className="w-5 h-5 text-emerald-500" /></div>
+                  <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-widest">Meta Global</span>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">R$ {totalTarget.toLocaleString()}</h3>
+          </div>
 
-         <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[2rem] p-6 text-white shadow-xl shadow-indigo-500/30 relative overflow-hidden flex flex-col justify-center">
-            <div className="absolute top-0 right-0 p-4 opacity-10"><Trophy className="w-16 h-16" /></div>
-            <div className="relative z-10">
-               <span className="text-[10px] font-black bg-white/20 px-3 py-1 rounded-lg uppercase tracking-widest">Progresso Total</span>
-               <div className="mt-3 flex items-end gap-2">
-                   <h3 className="text-3xl font-black tracking-tighter">{percentualGlobal.toFixed(0)}%</h3>
-                   <span className="text-xs font-bold mb-1 opacity-80">Concluído</span>
-               </div>
-               <div className="w-full h-1.5 bg-black/20 rounded-full mt-2 overflow-hidden">
-                   <div className="h-full bg-white transition-all duration-1000" style={{ width: `${percentualGlobal}%` }}></div>
-               </div>
-            </div>
-         </div>
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 p-6 rounded-[2rem] shadow-xl shadow-emerald-500/20 text-white relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute top-0 right-0 p-4 opacity-20"><Trophy className="w-16 h-16" /></div>
+              <span className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-2">Progresso Total</span>
+              <div>
+                  <div className="flex items-end gap-2 mb-2">
+                      <h3 className="text-4xl font-black tracking-tighter">{totalProgress.toFixed(0)}%</h3>
+                      <span className="text-xs font-bold mb-1.5 opacity-80">Concluído</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden">
+                      <div className="h-full bg-white/90 rounded-full" style={{ width: `${totalProgress}%` }}></div>
+                  </div>
+              </div>
+          </div>
       </div>
 
-      {/* ÁREA PRINCIPAL */}
+      {/* 2. ÁREA PRINCIPAL */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-        
-        {/* Formulário Fixo */}
-        <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-slate-900/40 rounded-[2.5rem] p-6 border border-slate-100 dark:border-slate-800 shadow-sm h-fit sticky top-0">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl"><Plus className="w-6 h-6 text-indigo-600 dark:text-indigo-400" /></div>
-                    <div>
-                        <h3 className="font-black text-lg text-slate-900 dark:text-white uppercase tracking-widest">Nova Meta</h3>
-                        <p className="text-xs text-slate-500">Defina seu próximo sonho.</p>
-                    </div>
-                </div>
-                
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Nome do Objetivo</label>
-                        <input 
-                          type="text" 
-                          placeholder="Ex: Viagem Disney, Carro Novo..." 
-                          className="w-full bg-slate-50 dark:bg-slate-950/50 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white outline-none border border-slate-200 dark:border-slate-800 focus:border-indigo-500 transition-all placeholder:text-slate-400" 
-                          value={newGoal.name} 
-                          onChange={(e) => setNewGoal({...newGoal, name: e.target.value})} 
-                          required 
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Valor Alvo</label>
-                        <input 
-                          type="text" 
-                          className="w-full bg-slate-50 dark:bg-slate-950/50 rounded-2xl px-5 py-4 text-lg font-black text-indigo-600 dark:text-indigo-400 outline-none border border-slate-200 dark:border-slate-800 focus:border-indigo-500 transition-all" 
-                          value={formatInputCurrency(newGoal.target_amount)} 
-                          onChange={(e) => setNewGoal({...newGoal, target_amount: e.target.value.replace(/\D/g, '')})} 
-                          required 
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Data Limite</label>
-                        <input 
-                          type="date" 
-                          className="w-full bg-slate-50 dark:bg-slate-950/50 rounded-2xl px-5 py-4 text-sm font-bold text-slate-700 dark:text-white outline-none border border-slate-200 dark:border-slate-800 focus:border-indigo-500 transition-all" 
-                          value={newGoal.deadline} 
-                          onChange={(e) => setNewGoal({...newGoal, deadline: e.target.value})} 
-                          required 
-                        />
-                    </div>
-                    <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-xl shadow-indigo-500/20 active:scale-95 transition-all mt-2">
-                        Criar Meta
-                    </button>
-                </form>
-            </div>
-        </div>
+          
+          {/* NOVA META */}
+          <div className="lg:col-span-1">
+              <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] border border-slate-100 dark:border-zinc-800 shadow-sm sticky top-0">
+                  <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+                          <Plus className="w-6 h-6 text-slate-400" />
+                      </div>
+                      <div>
+                          <h3 className="font-black text-lg text-slate-900 dark:text-white uppercase tracking-tighter">Nova Meta</h3>
+                          <p className="text-[10px] font-bold text-slate-400">Defina seu próximo sonho.</p>
+                      </div>
+                  </div>
 
-        {/* Lista de Metas */}
-        <div className="lg:col-span-2 space-y-4">
-            {goals.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-10 opacity-50 min-h-[300px] border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[3rem]">
-                    <div className="p-6 bg-slate-100 dark:bg-slate-900 rounded-full mb-4"><Target className="w-12 h-12 text-slate-400" /></div>
-                    <p className="text-sm font-bold text-slate-500">Nenhuma meta criada ainda.</p>
-                    <p className="text-xs text-slate-400 mt-1">Use o formulário ao lado para começar a poupar.</p>
-                </div>
-            ) : (
-                goals.map((goal) => {
+                  <form onSubmit={handleAdd} className="space-y-4">
+                      <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase text-slate-400 ml-2">Nome do Objetivo</label>
+                          <input 
+                              type="text" 
+                              placeholder="Ex: Viagem, Carro..." 
+                              className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-800 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500 text-sm font-bold text-slate-700 dark:text-white transition-colors placeholder:text-slate-400"
+                              value={newGoal.description}
+                              onChange={e => setNewGoal({...newGoal, description: e.target.value})}
+                              required
+                          />
+                      </div>
+                      <div className="space-y-1">
+                          <label className="text-[9px] font-black uppercase text-slate-400 ml-2">Valor Alvo</label>
+                          <input 
+                              type="number" 
+                              placeholder="R$ 0,00" 
+                              className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-800 rounded-2xl px-4 py-3 outline-none focus:border-emerald-500 text-sm font-bold text-slate-700 dark:text-white transition-colors placeholder:text-slate-400"
+                              value={newGoal.target_amount}
+                              onChange={e => setNewGoal({...newGoal, target_amount: e.target.value})}
+                              required
+                          />
+                      </div>
+                      <button type="submit" className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg shadow-emerald-500/20 transition-all active:scale-95 mt-2">Criar Meta</button>
+                  </form>
+              </div>
+          </div>
+
+          {/* LISTA DE METAS */}
+          <div className="lg:col-span-2 overflow-y-auto custom-scrollbar space-y-4 pr-1 pb-4">
+              {goals.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-20 text-slate-400 opacity-50">
+                      <Target className="w-16 h-16 mb-4" />
+                      <p className="font-bold">Nenhuma meta criada ainda.</p>
+                  </div>
+              )}
+
+              {goals.map(goal => {
                   const progress = Math.min((goal.current_amount / goal.target_amount) * 100, 100);
-                  const isCompleted = progress >= 100;
-                  const isCelebrating = celebrating === goal.id;
-                  
-                  // CORREÇÃO: Fallback seguro
-                  const goalName = (goal as any).name || (goal as any).description || 'Meta';
-                  const dateString = goal.deadline ? new Date(goal.deadline).toLocaleDateString('pt-BR') : '--/--/----';
-                  
+                  const remaining = goal.target_amount - goal.current_amount;
+
                   return (
-                    <div key={goal.id} className={`p-6 rounded-[2.5rem] shadow-sm border relative group transition-all duration-500 overflow-hidden ${isCompleted ? 'bg-amber-50 dark:bg-amber-950/10 border-amber-200 dark:border-amber-500/30' : 'bg-white dark:bg-slate-900/40 border-slate-100 dark:border-slate-800 hover:border-indigo-500/30'}`}>
-                        {/* EFEITO DE CELEBRAÇÃO */}
-                        {isCelebrating && (
-                            <div className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center bg-black/10 backdrop-blur-[1px]">
-                                <div className="text-6xl animate-bounce">🎉</div>
-                            </div>
-                        )}
+                      <div key={goal.id} className="bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] border border-slate-100 dark:border-zinc-800 shadow-sm relative group overflow-hidden">
+                          
+                          <div className="flex justify-between items-start mb-6">
+                              <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500">
+                                      <Target className="w-6 h-6" />
+                                  </div>
+                                  <div>
+                                      <h3 className="font-black text-lg text-slate-900 dark:text-white uppercase tracking-tighter">{goal.description}</h3>
+                                      <p className="text-[10px] font-bold text-slate-400">Em progresso</p>
+                                  </div>
+                              </div>
+                              <span className="px-3 py-1 bg-slate-100 dark:bg-zinc-800 rounded-lg text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                                  Faltam R$ {remaining.toLocaleString()}
+                              </span>
+                          </div>
 
-                        <button onClick={() => onDelete(goal.id)} className="absolute top-6 right-6 p-2 text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"><X className="w-4 h-4" /></button>
-                        
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 relative z-10">
-                            <div className="flex items-center gap-4">
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${isCompleted ? 'bg-amber-100 text-amber-500 dark:bg-amber-500/20' : 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10'}`}>
-                                    {isCompleted ? <Trophy className="w-7 h-7 animate-pulse" /> : <Target className="w-7 h-7" />}
-                                </div>
-                                <div>
-                                    <h4 className={`font-black text-lg ${isCompleted ? 'text-amber-600 dark:text-amber-400' : 'text-slate-700 dark:text-white'}`}>{goalName}</h4>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mt-1">
-                                       <Calendar className="w-3 h-3" /> {dateString}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="text-right w-full sm:w-auto">
-                                {isCompleted ? (
-                                    <span className="inline-flex items-center gap-2 text-[10px] font-black px-4 py-2 rounded-xl uppercase tracking-widest bg-amber-500 text-white shadow-lg shadow-amber-500/20">
-                                        <CheckCircle2 className="w-3 h-3" /> Conquista!
-                                    </span>
-                                ) : (
-                                    <span className="text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest bg-slate-100 dark:bg-slate-800 text-slate-500">
-                                        Faltam {formatCurrency(goal.target_amount - goal.current_amount)}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                        
-                        {/* BARRA DE PROGRESSO APRIMORADA */}
-                        <div className="relative h-6 w-full bg-slate-100 dark:bg-slate-950 rounded-full overflow-hidden mb-4 border border-slate-200 dark:border-slate-800/50 p-1">
-                            <div 
-                                className={`h-full rounded-full transition-all duration-1000 ease-out flex items-center justify-end pr-2 ${isCompleted ? 'bg-gradient-to-r from-amber-300 to-amber-500' : 'bg-gradient-to-r from-indigo-400 to-indigo-600'}`} 
-                                style={{ width: `${progress}%` }}
-                            >
-                                {progress > 15 && <span className="text-[9px] font-black text-white/90 drop-shadow-md">{progress.toFixed(0)}%</span>}
-                            </div>
-                        </div>
+                          {/* === MUDANÇA: Barra de Progresso Laranja === */}
+                          <div className="mb-6">
+                              <div className="h-4 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden p-0.5">
+                                  <div 
+                                      className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full transition-all duration-700 shadow-[0_0_10px_rgba(249,115,22,0.3)] relative" 
+                                      style={{ width: `${progress}%` }}
+                                  >
+                                      <div className="absolute top-0 left-0 w-full h-full bg-white/20 animate-pulse"></div>
+                                  </div>
+                              </div>
+                          </div>
 
-                        <div className="flex justify-between items-center bg-slate-50/50 dark:bg-slate-950/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50">
-                            <div className="flex flex-col">
-                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Atual</span>
-                                <span className="text-sm font-black text-slate-700 dark:text-white flex items-baseline gap-1">
-                                    {formatCurrency(goal.current_amount)} 
-                                    <span className="text-slate-400 text-xs font-bold">/ {formatCurrency(goal.target_amount)}</span>
-                                </span>
-                            </div>
-                            
-                            {!isCompleted ? (
-                                <button onClick={() => setDepositModal(goal.id)} className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all flex items-center gap-2">
-                                    <TrendingUp className="w-3 h-3" /> Depositar
-                                </button>
-                            ) : (
-                                <button disabled className="px-5 py-3 bg-amber-100 dark:bg-amber-900/30 text-amber-500 dark:text-amber-400 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-default flex items-center gap-2 opacity-70">
-                                    <PartyPopper className="w-3 h-3" /> Finalizada
-                                </button>
-                            )}
-                        </div>
-                    </div>
+                          <div className="flex items-end justify-between">
+                              <div>
+                                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Atual</p>
+                                  <div className="flex items-baseline gap-1">
+                                      <span className="text-xl font-black text-slate-900 dark:text-white">R$ {goal.current_amount.toLocaleString()}</span>
+                                      <span className="text-xs font-bold text-slate-500">/ R$ {goal.target_amount.toLocaleString()}</span>
+                                  </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                  {depositData?.id === goal.id ? (
+                                      <form onSubmit={handleDepositSubmit} className="flex gap-2 items-center animate-in fade-in slide-in-from-right-4">
+                                          <input 
+                                              autoFocus
+                                              type="number" 
+                                              className="w-24 bg-slate-50 dark:bg-black rounded-xl px-3 py-2 text-sm font-bold outline-none border border-emerald-500 text-slate-900 dark:text-white"
+                                              placeholder="R$..."
+                                              value={depositData.amount}
+                                              onChange={e => setDepositData({...depositData, amount: e.target.value})}
+                                          />
+                                          <button type="submit" className="bg-emerald-600 text-white p-2 rounded-xl hover:bg-emerald-700"><TrendingUp className="w-4 h-4" /></button>
+                                          <button type="button" onClick={() => setDepositData(null)} className="text-slate-400 p-2"><Trash2 className="w-4 h-4" /></button>
+                                      </form>
+                                  ) : (
+                                      <div className="flex gap-2">
+                                          <button onClick={() => onDelete(goal.id)} className="p-3 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all">
+                                              <Trash2 className="w-5 h-5" />
+                                          </button>
+                                          <button 
+                                              onClick={() => setDepositData({ id: goal.id, amount: '' })}
+                                              className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                                          >
+                                              <PiggyBank className="w-4 h-4" /> Depositar
+                                          </button>
+                                      </div>
+                                  )}
+                              </div>
+                          </div>
+
+                      </div>
                   );
-                })
-            )}
-        </div>
+              })}
+          </div>
       </div>
-
-      {depositModal && (
-        <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-slate-950 w-full sm:max-w-xs rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800">
-                <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600 dark:text-emerald-400"><Wallet className="w-8 h-8" /></div>
-                    <h3 className="font-black text-lg uppercase tracking-widest text-slate-900 dark:text-white">Fazer Depósito</h3>
-                    <p className="text-xs text-slate-500 mt-1">Quanto você vai guardar hoje?</p>
-                </div>
-                <form onSubmit={handleDepositSubmit} className="space-y-4">
-                    <input autoFocus type="text" className="w-full bg-slate-50 dark:bg-slate-900 rounded-2xl px-4 py-6 text-center text-2xl font-black outline-none border border-slate-200 dark:border-slate-800 focus:border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-inner" value={formatInputCurrency(depositValue)} onChange={(e) => setDepositValue(e.target.value.replace(/\D/g, ''))} />
-                    <div className="grid grid-cols-2 gap-3 pt-2">
-                        <button type="button" onClick={() => { setDepositModal(null); setDepositValue(''); }} className="py-4 rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-500 font-black uppercase text-xs tracking-widest hover:bg-slate-200 transition-colors">Cancelar</button>
-                        <button type="submit" className="py-4 rounded-2xl bg-emerald-500 text-white font-black uppercase text-xs tracking-widest hover:bg-emerald-400 shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">Confirmar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-      )}
     </div>
   );
 };
