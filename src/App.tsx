@@ -6,7 +6,7 @@ import {
   Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle, ArrowUpRight, ArrowDownRight, Layers, BarChart3} from 'lucide-react';
 import { 
   ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar, Legend, CartesianGrid, XAxis, YAxis, Tooltip, ComposedChart, Area
+  PieChart, Pie, Cell, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ComposedChart, Area
 } from 'recharts';
 import { supabase } from './supabase'; 
 import { Session } from '@supabase/supabase-js';
@@ -22,7 +22,7 @@ import DashboardHome from './components/DashboardHome';
 import Auth from './components/Auth';
 
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
-// Cores atualizadas para a marca VittaCash (Verde, Laranja e complementares)
+// Cores atualizadas para VittaCash
 const CORES_MODERNAS = ['#22C55E', '#FF8A00', '#0e12e7', '#f50c33', '#0bd3f7', '#d847b9', '#f5f109'];
 
 const App: React.FC = () => {
@@ -52,30 +52,21 @@ const App: React.FC = () => {
   const showToast = (message: string, type: 'success' | 'error') => { setToast({ message, type }); setTimeout(() => setToast(null), 3000); };
   const formatCurrencyInput = (val: string) => { if (!val || val === '0') return 'R$ 0,00'; const numberValue = parseFloat(val) / 100; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numberValue); };
 
-  // ESTADO APPRIMORADO: inputMode define quem manda no cálculo
   const [newTx, setNewTx] = useState({
-    description: '', 
-    totalAmount: '',       // Valor total da compra
-    installmentAmount: '', // Valor da parcela
-    inputMode: 'total' as 'total' | 'installment', // Quem está sendo digitado?
-    type: TransactionType.EXPENSE, 
-    date: new Date().toISOString().split('T')[0],
-    installments: '1', 
-    category: ''
+    description: '', totalAmount: '', installmentAmount: '', inputMode: 'total' as 'total' | 'installment',
+    type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], installments: '1', category: ''
   });
 
   const [newInv, setNewInv] = useState({
     name: '', amount: '', date: new Date().toISOString().split('T')[0], category: 'Ações'
   });
 
-  // ATUALIZA O TEMA E A COR DA BARRA DO CELULAR (PWA)
   useEffect(() => {
     const root = window.document.documentElement;
     const metaThemeColor = document.querySelector("meta[name='theme-color']");
-
     if (theme === 'dark') {
       root.classList.add('dark');
-      metaThemeColor?.setAttribute("content", "#000000"); // Preto Absoluto para VittaCash
+      metaThemeColor?.setAttribute("content", "#000000");
     } else {
       root.classList.remove('dark');
       metaThemeColor?.setAttribute("content", "#f8fafc"); 
@@ -101,14 +92,8 @@ const App: React.FC = () => {
   };
 
   useEffect(() => { 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-        setSession(session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setSession(session);
-    });
-
+    supabase.auth.getSession().then(({ data: { session } }) => { setSession(session); });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { setSession(session); });
     return () => subscription.unsubscribe();
   }, []);
 
@@ -136,41 +121,25 @@ const App: React.FC = () => {
     setDeleteData(null);
   };
 
-  const handleAddGoal = async (goal: Omit<Goal, 'id' | 'current_amount'>) => {
-    if (!session?.user) return;
-    const { data, error } = await supabase.from('goals').insert([{ ...goal, user_id: session.user.id, current_amount: 0 }]).select();
-    if (error) showToast('Erro ao criar.', 'error'); else { setGoals([data[0], ...goals]); showToast('Meta criada!', 'success'); }
-  };
-  const handleDepositGoal = async (id: string, amount: number) => {
-    const goal = goals.find(g => g.id === id); if (!goal) return;
-    const newAmount = goal.current_amount + amount;
-    const { error } = await supabase.from('goals').update({ current_amount: newAmount }).eq('id', id);
-    if (error) showToast('Erro ao depositar.', 'error'); else { setGoals(goals.map(g => g.id === id ? { ...g, current_amount: newAmount } : g)); showToast('Depósito realizado!', 'success'); }
-  };
-
+  const handleAddGoal = async (goal: Omit<Goal, 'id' | 'current_amount'>) => { if (!session?.user) return; const { data, error } = await supabase.from('goals').insert([{ ...goal, user_id: session.user.id, current_amount: 0 }]).select(); if (error) showToast('Erro ao criar.', 'error'); else { setGoals([data[0], ...goals]); showToast('Meta criada!', 'success'); } };
+  const handleDepositGoal = async (id: string, amount: number) => { const goal = goals.find(g => g.id === id); if (!goal) return; const newAmount = goal.current_amount + amount; const { error } = await supabase.from('goals').update({ current_amount: newAmount }).eq('id', id); if (error) showToast('Erro ao depositar.', 'error'); else { setGoals(goals.map(g => g.id === id ? { ...g, current_amount: newAmount } : g)); showToast('Depósito realizado!', 'success'); } };
   const openEditModal = (tx: Transaction) => { setEditingTransaction(tx); const amountStr = (tx.amount * 100).toFixed(0); setEditForm({ description: tx.description, amountString: amountStr, date: tx.date, category: tx.category || '', type: tx.type }); };
   const handleUpdateTransaction = async (e: React.FormEvent) => { e.preventDefault(); if (!editingTransaction) return; const updatedAmount = parseFloat(editForm.amountString) / 100; const { error } = await supabase.from('transactions').update({ description: editForm.description, amount: updatedAmount, date: editForm.date, category: editForm.category, type: editForm.type }).eq('id', editingTransaction.id); if (error) showToast('Erro ao atualizar.', 'error'); else { showToast('Atualizado!', 'success'); setEditingTransaction(null); fetchData(); } };
   const handleAddCategory = async (name: string, type: TransactionType) => { const { data, error } = await supabase.from('categories').insert([{ name, type }]).select(); if (error) showToast('Erro ao criar categoria.', 'error'); else if (data) { setCategories([...categories, data[0]]); showToast('Categoria criada!', 'success'); } };
   
-  // --- LÓGICA DE VALORES (Bidirecional) ---
   const handleValueChange = (val: string, mode: 'total' | 'installment') => {
       const numeric = val.replace(/\D/g, '');
       const installments = parseInt(newTx.installments) || 1;
-      
       setNewTx(prev => {
           const newState = { ...prev, inputMode: mode };
           if (mode === 'total') {
               newState.totalAmount = numeric;
               const totalVal = parseFloat(numeric);
-              if (!isNaN(totalVal)) {
-                  newState.installmentAmount = Math.round(totalVal / installments).toString();
-              }
+              if (!isNaN(totalVal)) newState.installmentAmount = Math.round(totalVal / installments).toString();
           } else {
               newState.installmentAmount = numeric;
               const instVal = parseFloat(numeric);
-              if (!isNaN(instVal)) {
-                  newState.totalAmount = (instVal * installments).toString();
-              }
+              if (!isNaN(instVal)) newState.totalAmount = (instVal * installments).toString();
           }
           return newState;
       });
@@ -179,7 +148,6 @@ const App: React.FC = () => {
   const handleInstallmentsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const countStr = e.target.value;
       const count = parseInt(countStr) || 1;
-      
       setNewTx(prev => {
           const newState = { ...prev, installments: countStr };
           if (prev.inputMode === 'total') {
@@ -196,52 +164,23 @@ const App: React.FC = () => {
   const handleAddTransaction = async (e: React.FormEvent) => { 
     e.preventDefault(); 
     if (!session?.user) return;
-
     const numParcelas = parseInt(newTx.installments);
     const qtdFinal = numParcelas > 0 ? numParcelas : 1;
     let valorFinalParcela = 0;
-
-    if (newTx.inputMode === 'total') {
-        valorFinalParcela = (parseFloat(newTx.totalAmount) / 100) / qtdFinal;
-    } else {
-        valorFinalParcela = parseFloat(newTx.installmentAmount) / 100;
-    }
+    if (newTx.inputMode === 'total') valorFinalParcela = (parseFloat(newTx.totalAmount) / 100) / qtdFinal;
+    else valorFinalParcela = parseFloat(newTx.installmentAmount) / 100;
 
     const newEntries = [];
     const finalCategory = newTx.category || (categories.find(c => c.type === newTx.type)?.name || 'Geral'); 
     const [year, month, day] = newTx.date.split('-').map(Number);
-
     for (let i = 0; i < qtdFinal; i++) { 
       const txDate = new Date(year, (month - 1) + i, day);
       const dateString = txDate.toLocaleDateString('en-CA'); 
-
-      newEntries.push({ 
-        user_id: session.user.id, 
-        account_id: 'acc1', 
-        category: finalCategory, 
-        amount: valorFinalParcela, 
-        description: qtdFinal > 1 ? `${newTx.description} (${i + 1}/${qtdFinal})` : newTx.description, 
-        type: newTx.type, 
-        status: TransactionStatus.PENDING, 
-        date: dateString, 
-        is_recurring: qtdFinal > 1 
-      }); 
+      newEntries.push({ user_id: session.user.id, account_id: 'acc1', category: finalCategory, amount: valorFinalParcela, description: qtdFinal > 1 ? `${newTx.description} (${i + 1}/${qtdFinal})` : newTx.description, type: newTx.type, status: TransactionStatus.PENDING, date: dateString, is_recurring: qtdFinal > 1 }); 
     } 
-    
     const { error } = await supabase.from('transactions').insert(newEntries); 
-    if (error) { 
-        showToast('Erro ao salvar.', 'error'); 
-    } 
-    else { 
-        fetchData(); 
-        setIsModalOpen(false); 
-        setNewTx({ 
-            description: '', category: '', totalAmount: '', installmentAmount: '',
-            type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], 
-            installments: '1', inputMode: 'total'
-        }); 
-        showToast(`Lançado ${qtdFinal}x com sucesso!`, 'success'); 
-    } 
+    if (error) { showToast('Erro ao salvar.', 'error'); } 
+    else { fetchData(); setIsModalOpen(false); setNewTx({ description: '', category: '', totalAmount: '', installmentAmount: '', type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], installments: '1', inputMode: 'total' }); showToast(`Lançado ${qtdFinal}x com sucesso!`, 'success'); } 
   };
 
   const handleAddInvestment = async (e: React.FormEvent) => { e.preventDefault(); if (!session?.user) return; const amount = parseFloat(newInv.amount) / 100; const investment = { user_id: session.user.id, name: newInv.name, category: newInv.category, invested_amount: amount, current_amount: amount, created_at: new Date(newInv.date).toISOString() }; const { error } = await supabase.from('investments').insert([investment]); if (error) showToast('Erro ao salvar.', 'error'); else { fetchData(); setIsInvestmentModalOpen(false); setNewInv({ name: '', amount: '', date: new Date().toISOString().split('T')[0], category: 'Ações' }); showToast('Salvo!', 'success'); } };
@@ -251,10 +190,8 @@ const App: React.FC = () => {
   const totalApplied = useMemo(() => investments.reduce((acc, curr) => acc + curr.invested_amount, 0), [investments]);
   const totalCurrent = useMemo(() => investments.reduce((acc, curr) => acc + curr.current_amount, 0), [investments]);
   const totalProfit = totalCurrent - totalApplied;
-  const totalProfitPercent = totalApplied > 0 ? (totalProfit / totalApplied) * 100 : 0;
-
   const urgencies = useMemo(() => { const today = new Date(); today.setHours(0,0,0,0); const pending = transactions.filter(t => t.status === TransactionStatus.PENDING); const delayed = pending.filter(t => new Date(t.date) < today); return { delayedCount: delayed.length }; }, [transactions]);
-  // CORRIGIDO: Botão da Navbar com cor Verde (Emerald) quando ativo
+  
   const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 shadow-sm border border-emerald-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
   
   const investmentAllocation = useMemo(() => { 
@@ -271,11 +208,7 @@ const App: React.FC = () => {
       let cumulative = 0;
       return sortedInv.map(inv => {
           cumulative += inv.current_amount;
-          return { 
-              name: new Date(inv.created_at || '').toLocaleDateString('pt-BR', {month: 'short'}), 
-              total: cumulative,
-              aporte: inv.current_amount 
-          };
+          return { name: new Date(inv.created_at || '').toLocaleDateString('pt-BR', {month: 'short'}), total: cumulative, aporte: inv.current_amount };
       });
   }, [investments]);
   
@@ -298,23 +231,16 @@ const App: React.FC = () => {
     
     if (activeTab === 'contas') {
         const pendingBills = filteredTransactions.filter(t => t.status === TransactionStatus.PENDING && t.type === TransactionType.EXPENSE);
-        return (
-            <BillsManager 
-                transactions={pendingBills}
-                onDelete={(id) => requestDelete(id, 'transaction')}
-                onEdit={openEditModal}
-                onAddClick={() => setIsModalOpen(true)}
-                onPay={(id) => {
-                    const tx = transactions.find(t => t.id === id);
-                    if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); }
-                }}
-            />
-        );
+        return ( <BillsManager transactions={pendingBills} onDelete={(id) => requestDelete(id, 'transaction')} onEdit={openEditModal} onAddClick={() => setIsModalOpen(true)} onPay={(id) => { const tx = transactions.find(t => t.id === id); if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); } }} /> );
     }
 
+    // === AQUI ESTÁ A MUDANÇA DA TELA DE INVESTIMENTOS ===
     if (activeTab === 'investimentos') {
       return (
-        <div className="h-full flex flex-col gap-4 min-h-0 min-w-0 overflow-y-auto pb-20 lg:pb-0 custom-scrollbar p-1">
+        // Container principal travado (sem scroll global)
+        <div className="h-full flex flex-col gap-4 overflow-hidden p-1">
+            
+            {/* 1. CARDS DE RESUMO (Topo) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
                 <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-5 shadow-sm border border-slate-100 dark:border-zinc-800">
                     <div className="flex justify-between items-start mb-4">
@@ -323,7 +249,6 @@ const App: React.FC = () => {
                     </div>
                     <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter mt-4">R$ {totalApplied.toLocaleString()}</h3>
                 </div>
-                {/* CORRIGIDO: Cartão Patrimônio agora é Verde (Emerald) */}
                 <div className="bg-emerald-600 rounded-[2rem] p-5 text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10"><Coins className="w-16 h-16" /></div>
                     <div className="relative z-10">
@@ -344,15 +269,14 @@ const App: React.FC = () => {
                     <h3 className={`text-2xl font-black tracking-tighter ${totalProfit >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
                         {totalProfit >= 0 ? '+' : ''} R$ {Math.abs(totalProfit).toLocaleString()}
                     </h3>
-                    <p className={`text-xs font-bold mt-1 ${totalProfit >= 0 ? 'text-emerald-600/70' : 'text-rose-600/70'}`}>
-                        {totalProfitPercent.toFixed(2)}% de retorno
-                    </p>
                 </div>
             </div>
-            {/* Gráficos e Tabelas */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 shrink-0 lg:h-[300px]">
-                <div className="lg:col-span-3 bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Evolução do Patrimônio</h3>
+
+            {/* 2. GRÁFICOS LADO A LADO (3 Colunas) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0 h-[220px]">
+                {/* Gráfico 1: Evolução */}
+                <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-full overflow-hidden">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Evolução</h3>
                     <div className="flex-1 w-full min-h-0">
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={patrimonyData}>
@@ -363,58 +287,93 @@ const App: React.FC = () => {
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: '#64748b'}} />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} />
                                 <YAxis hide />
                                 <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
-                                <Bar dataKey="aporte" barSize={12} fill="#FF8A00" radius={[4, 4, 0, 0]} name="Aporte Mês" />
-                                <Area type="monotone" dataKey="total" stroke="#22C55E" strokeWidth={3} fill="url(#gradPatrimonio)" name="Total Acumulado" />
+                                <Area type="monotone" dataKey="total" stroke="#22C55E" strokeWidth={3} fill="url(#gradPatrimonio)" />
                             </ComposedChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
-                <div className="lg:col-span-2 bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] flex flex-col shadow-sm h-[250px] lg:h-auto overflow-hidden">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3>
+
+                {/* Gráfico 2: Alocação */}
+                <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] flex flex-col shadow-sm h-full overflow-hidden">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3>
                     <div className="flex-1 flex items-center gap-2 min-h-0">
-                        <div className="h-full w-1/2 min-w-[100px]">
+                        <div className="h-full w-1/2 min-w-[80px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={investmentAllocation} innerRadius={50} outerRadius={70} dataKey="value" stroke="none">
+                                    <Pie data={investmentAllocation} innerRadius={35} outerRadius={55} dataKey="value" stroke="none">
                                         {investmentAllocation.map((_, i) => <Cell key={i} fill={CORES_MODERNAS[i % CORES_MODERNAS.length]} />)}
                                     </Pie>
                                     <Tooltip contentStyle={{ fontSize: '10px', borderRadius: '12px', fontWeight: 'bold', background: '#1e293b', border: 'none', color: '#fff' }} />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
-                        <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar h-full pr-1 flex flex-col justify-center">
+                        <div className="flex-1 space-y-1 overflow-y-auto custom-scrollbar h-full pr-1 flex flex-col justify-center">
                             {investmentAllocation.map((item, i) => (
-                                <div key={i} className="flex items-center justify-between p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/30 border-l-2" style={{ borderLeftColor: CORES_MODERNAS[i % CORES_MODERNAS.length] }}>
-                                    <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider truncate max-w-[70px]">{item.name}</span>
-                                    <span className="text-[10px] font-black text-slate-900 dark:text-white">R$ {item.value.toLocaleString()}</span>
+                                <div key={i} className="flex items-center justify-between p-1 rounded-lg bg-slate-50 dark:bg-slate-800/30 border-l-2" style={{ borderLeftColor: CORES_MODERNAS[i % CORES_MODERNAS.length] }}>
+                                    <span className="text-[9px] font-black uppercase text-slate-400 truncate max-w-[50px]">{item.name}</span>
+                                    <span className="text-[9px] font-black text-slate-900 dark:text-white">R$ {item.value.toLocaleString()}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
-            </div>
-            <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2.5rem] shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden shrink-0">
-                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1"><LineChart className="w-4 h-4" /> Performance</h3>
-                <div className="flex-1 w-full min-h-0">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={comparativeData} barGap={2} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" horizontal={false} strokeOpacity={0.05} />
-                            <XAxis type="number" hide />
-                            <YAxis type="category" dataKey="name" width={60} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} axisLine={false} tickLine={false} />
-                            <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
-                            <Legend wrapperStyle={{fontSize: '9px'}} />
-                            <Bar dataKey="Investido" fill="#64748b" radius={[0, 4, 4, 0]} barSize={10} name="Investido" />
-                            <Bar dataKey="Atual" fill="#22C55E" radius={[0, 4, 4, 0]} barSize={10} name="Atual" />
-                        </BarChart>
-                    </ResponsiveContainer>
+
+                {/* Gráfico 3: Performance (Agora aqui na linha) */}
+                <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-full overflow-hidden">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1"><LineChart className="w-4 h-4" /> Performance</h3>
+                    <div className="flex-1 w-full min-h-0">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={comparativeData} barGap={2} layout="vertical">
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} strokeOpacity={0.05} />
+                                <XAxis type="number" hide />
+                                <YAxis type="category" dataKey="name" width={50} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} axisLine={false} tickLine={false} />
+                                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
+                                <Bar dataKey="Investido" fill="#64748b" radius={[0, 4, 4, 0]} barSize={8} name="Investido" />
+                                <Bar dataKey="Atual" fill="#22C55E" radius={[0, 4, 4, 0]} barSize={8} name="Atual" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
             </div>
-            <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden flex flex-col min-h-[300px] shadow-sm shrink-0">
-                <div className="flex items-center justify-between p-6 pb-4 shrink-0"><div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-emerald-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div><button onClick={() => setIsInvestmentModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-500/30"><Plus className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-wider">Nova Aplicação</span></button></div>
-                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0 custom-scrollbar"><table className="w-full text-left border-collapse"><thead><tr className="border-b border-slate-100 dark:border-zinc-800 sticky top-0 bg-white dark:bg-zinc-900/90 backdrop-blur-md z-10"><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Ativo</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Categoria</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Aplicado</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Atual</th><th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest text-right">Rent.</th></tr></thead><tbody>{investments.map((inv) => { const profit = ((inv.current_amount / inv.invested_amount) - 1) * 100; return (<tr key={inv.id} className="border-b border-slate-50 dark:border-zinc-800/50 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors"><td className="py-5 px-2 font-bold text-sm truncate max-w-[150px]">{inv.name}</td><td className="py-5 px-2 text-xs font-bold text-slate-500">{inv.category}</td><td className="py-5 px-2 text-sm font-bold text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td><td className="py-5 px-2 text-sm font-black text-emerald-600">R$ {inv.current_amount.toLocaleString()}</td><td className={`py-5 px-2 text-xs font-black text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td></tr>); })}</tbody></table></div>
+
+            {/* 3. LISTA DE ATIVOS (Onde ocorre a rolagem) */}
+            <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden flex flex-col min-h-0 shadow-sm">
+                <div className="flex items-center justify-between p-6 pb-4 shrink-0">
+                    <div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-emerald-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div>
+                    <button onClick={() => setIsInvestmentModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-500/30"><Plus className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-wider">Nova Aplicação</span></button>
+                </div>
+                
+                {/* AQUI ESTÁ A MÁGICA DO SCROLL: overflow-y-auto só nesta div */}
+                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-0 custom-scrollbar">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-slate-100 dark:border-zinc-800 sticky top-0 bg-white dark:bg-zinc-900 z-10">
+                                <th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Ativo</th>
+                                <th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Categoria</th>
+                                <th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Aplicado</th>
+                                <th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">Atual</th>
+                                <th className="py-4 px-2 text-slate-500 text-[10px] font-black uppercase tracking-widest text-right">Rent.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {investments.map((inv) => { 
+                                const profit = ((inv.current_amount / inv.invested_amount) - 1) * 100; 
+                                return (
+                                    <tr key={inv.id} className="border-b border-slate-50 dark:border-zinc-800/50 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                                        <td className="py-5 px-2 font-bold text-sm truncate max-w-[150px]">{inv.name}</td>
+                                        <td className="py-5 px-2 text-xs font-bold text-slate-500">{inv.category}</td>
+                                        <td className="py-5 px-2 text-sm font-bold text-slate-500">R$ {inv.invested_amount.toLocaleString()}</td>
+                                        <td className="py-5 px-2 text-sm font-black text-emerald-600">R$ {inv.current_amount.toLocaleString()}</td>
+                                        <td className={`py-5 px-2 text-xs font-black text-right ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{profit >= 0 ? '↑' : '↓'} {Math.abs(profit).toFixed(1)}%</td>
+                                    </tr>
+                                ); 
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
       );
@@ -431,33 +390,23 @@ const App: React.FC = () => {
     );
   };
 
-  // --- RENDERIZAÇÃO PRINCIPAL DO APP ---
   return (
     <div className="h-screen w-full bg-slate-50 dark:bg-black text-slate-900 dark:text-slate-200 flex overflow-hidden font-inter">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <ConfirmModal isOpen={!!deleteData} onClose={() => setDeleteData(null)} onConfirm={handleConfirmDelete} title={`Excluir ${deleteData?.type === 'category' ? 'Categoria' : deleteData?.type === 'goal' ? 'Meta' : 'Lançamento'}?`} message="Esta ação não pode ser desfeita." />
 
-      {isSidebarOpen && (
-        <div 
-          onClick={() => setSidebarOpen(false)} 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
-        ></div>
-      )}
+      {isSidebarOpen && ( <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" ></div> )}
 
-      {/* SIDEBAR COM O VISUAL VITTACASH */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-black lg:relative lg:translate-x-0 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
            <div className="p-8 flex flex-col h-full">
              <div className="flex items-center justify-between mb-10">
                <div className="flex items-center gap-4">
-                 {/* LOGO NOVA AQUI */}
                  <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center">
                     <img src="/logo.png" alt="VittaCash" className="w-full h-full object-contain" />
                  </div>
                  <h1 className="text-2xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">VittaCash</h1>
                </div>
-               <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                 <X className="w-6 h-6" />
-               </button>
+               <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"><X className="w-6 h-6" /></button>
              </div>
 
              <nav className="space-y-3 flex-1">
@@ -495,7 +444,6 @@ const App: React.FC = () => {
         <div className="flex-1 px-4 lg:px-12 pb-8 overflow-hidden flex flex-col min-h-0">{renderContent()}</div>
       </main>
 
-      {/* Os modais continuam iguais abaixo... */}
       {editingTransaction && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-6">
@@ -510,7 +458,6 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL NOVO LANÇAMENTO - COM TOGGLE DE VALOR */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
               <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-6">
@@ -518,37 +465,21 @@ const App: React.FC = () => {
                 <form onSubmit={handleAddTransaction} className="space-y-3">
                     <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Descrição</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-emerald-500 shadow-inner" value={newTx.description} onChange={(e) => setNewTx({...newTx, description: e.target.value})} required /></div>
                     <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-emerald-500 shadow-inner" value={newTx.category} onChange={(e) => setNewTx({...newTx, category: e.target.value})}><option value="">Selecione uma Categoria...</option>{categories.filter(c => c.type === newTx.type).map(c => <option key={c.id} value={c.name}>{c.name}</option>)}</select></div>
-                    
-                    {/* TOGGLE: ESCOLHA ENTRE VALOR TOTAL OU PARCELA */}
                     <div className="flex gap-2 mb-1">
                         <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'total'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'total' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Total</button>
                         <button type="button" onClick={() => setNewTx({...newTx, inputMode: 'installment'})} className={`flex-1 text-[9px] font-black uppercase py-2 rounded-lg transition-all ${newTx.inputMode === 'installment' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Valor Parcela</button>
                     </div>
-
-                    {newTx.inputMode === 'total' ? (
-                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor Total</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-emerald-500 shadow-inner" value={formatCurrencyInput(newTx.totalAmount)} onChange={(e) => handleValueChange(e.target.value, 'total')} required /></div>
-                    ) : (
-                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor da Parcela</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-emerald-500 shadow-inner" value={formatCurrencyInput(newTx.installmentAmount)} onChange={(e) => handleValueChange(e.target.value, 'installment')} required /></div>
-                    )}
-
+                    {newTx.inputMode === 'total' ? ( <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor Total</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-emerald-500 shadow-inner" value={formatCurrencyInput(newTx.totalAmount)} onChange={(e) => handleValueChange(e.target.value, 'total')} required /></div> ) : ( <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Valor da Parcela</label><input type="text" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-emerald-500 shadow-inner" value={formatCurrencyInput(newTx.installmentAmount)} onChange={(e) => handleValueChange(e.target.value, 'installment')} required /></div> )}
                     <div className="grid grid-cols-2 gap-3 mt-2">
                         <div className="space-y-1">
                             <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Parcelas</label>
-                            <select 
-                                className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-emerald-500 appearance-none shadow-inner cursor-pointer" 
-                                value={newTx.installments} 
-                                onChange={handleInstallmentsChange}
-                            >
+                            <select className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-emerald-500 appearance-none shadow-inner cursor-pointer" value={newTx.installments} onChange={handleInstallmentsChange}>
                                 <option value="1">À Vista</option>
                                 {OPCOES_PARCELAS.map(n => <option key={n} value={n}>{n}x</option>)}
                             </select>
                         </div>
-                        <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Vencimento</label>
-                            <input type="date" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-xs font-black outline-none border-2 border-transparent focus:border-emerald-500 shadow-inner" value={newTx.date} onChange={(e) => setNewTx({...newTx, date: e.target.value})} required />
-                        </div>
+                        <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Vencimento</label><input type="date" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-xs font-black outline-none border-2 border-transparent focus:border-emerald-500 shadow-inner" value={newTx.date} onChange={(e) => setNewTx({...newTx, date: e.target.value})} required /></div>
                     </div>
-
                     <div className="flex bg-slate-100 dark:bg-zinc-800 rounded-xl p-1 h-[48px]"><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.INCOME})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.INCOME ? 'bg-emerald-500 text-white shadow-md' : 'text-slate-500'}`}>Receita</button><button type="button" onClick={() => setNewTx({...newTx, type: TransactionType.EXPENSE})} className={`flex-1 rounded-lg text-[9px] font-black uppercase transition-all ${newTx.type === TransactionType.EXPENSE ? 'bg-rose-500 text-white shadow-md' : 'text-slate-500'}`}>Despesa</button></div>
                     <button type="submit" className="w-full bg-emerald-600 py-4 rounded-xl text-white font-black uppercase text-xs tracking-[0.1em] shadow-xl active:scale-95 transition-all mt-2 hover:bg-emerald-700">Lançar Agora</button>
                 </form>
@@ -556,7 +487,6 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL NOVA APLICAÇÃO */}
       {isInvestmentModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
              <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[3.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-10 transform scale-100">
