@@ -3,7 +3,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   LayoutDashboard, ArrowLeftRight, TrendingUp, Plus, Menu, X,
   CalendarDays, LineChart, Search, Coins,
-  Calendar, Tag, Edit3, Target, LogOut, Wallet, PieChart as PieChartIcon, Sun, Moon, AlertCircle, ArrowUpRight, ArrowDownRight, Layers, BarChart3, CheckCircle2, Clock} from 'lucide-react';
+  Calendar, Tag, Edit3, Target, LogOut, Wallet, 
+  PieChart as PieChartIcon, Sun, Moon, AlertCircle, 
+  ArrowUpRight, ArrowDownRight, Layers, BarChart3, 
+  CheckCircle2, Clock, Settings 
+} from 'lucide-react';
 import { 
   ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Area, ComposedChart
@@ -19,6 +23,7 @@ import CategoryManager from './components/CategoryManager';
 import GoalsManager from './components/GoalsManager';
 import BillsManager from './components/BillsManager';
 import DashboardHome from './components/DashboardHome';
+import ProfileSettings from './components/ProfileSettings';
 import Auth from './components/Auth';
 
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
@@ -28,7 +33,7 @@ const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'transacoes' | 'contas' | 'investimentos' | 'categorias' | 'metas'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'transacoes' | 'contas' | 'investimentos' | 'categorias' | 'metas' | 'perfil'>('dashboard');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
@@ -45,6 +50,11 @@ const App: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  
+  // === NOVO ESTADO PARA O PERFIL ===
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [payingTransaction, setPayingTransaction] = useState<Transaction | null>(null);
   const [realValueInput, setRealValueInput] = useState('');
@@ -89,6 +99,19 @@ const App: React.FC = () => {
 
       const { data: goalData } = await supabase.from('goals').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
       if (goalData) setGoals(goalData.map((g: any) => ({ ...g, target_amount: Number(g.target_amount), current_amount: Number(g.current_amount) })));
+
+      // === BUSCA DADOS DO PERFIL (FOTO E NOME) ===
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('avatar_url, full_name')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (profileData) {
+        setUserAvatar(profileData.avatar_url);
+        setUserName(profileData.full_name);
+      }
+
     } catch (error) { console.error(error); showToast('Erro de conexão.', 'error'); } finally { setLoading(false); }
   };
 
@@ -98,7 +121,8 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => { if (session) fetchData(); }, [session]);
+  // Recarrega os dados quando a sessão muda ou quando voltamos da tela de perfil
+  useEffect(() => { if (session) fetchData(); }, [session, activeTab]);
   
   const handleLogout = async () => { await supabase.auth.signOut(); setSession(null); };
   const requestDelete = (id: string, type: 'transaction' | 'category' | 'goal') => { setDeleteData({ id, type }); };
@@ -209,7 +233,14 @@ const App: React.FC = () => {
   const totalApplied = useMemo(() => investments.reduce((acc, curr) => acc + curr.invested_amount, 0), [investments]);
   const totalCurrent = useMemo(() => investments.reduce((acc, curr) => acc + curr.current_amount, 0), [investments]);
   const totalProfit = totalCurrent - totalApplied;
-  const urgencies = useMemo(() => { const today = new Date(); today.setHours(0,0,0,0); const pendingExpenses = transactions.filter(t => t.status === TransactionStatus.PENDING && t.type === TransactionType.EXPENSE); const delayed = pendingExpenses.filter(t => { const tDate = new Date(t.date + 'T12:00:00'); return tDate < today; }); return { delayedCount: delayed.length }; }, [transactions]);
+  
+  const urgencies = useMemo(() => { 
+      const today = new Date(); 
+      today.setHours(0,0,0,0);
+      const pendingExpenses = transactions.filter(t => t.status === TransactionStatus.PENDING && t.type === TransactionType.EXPENSE);
+      const delayed = pendingExpenses.filter(t => { const tDate = new Date(t.date + 'T12:00:00'); return tDate < today; }); 
+      return { delayedCount: delayed.length }; 
+  }, [transactions]);
   
   const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 shadow-sm border border-emerald-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
   
@@ -256,6 +287,9 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     if (activeTab === 'dashboard') return <DashboardHome transactions={transactions} investments={investments} filteredTransactions={filteredTransactions} currentDate={currentDate} />;
+    
+    if (activeTab === 'perfil') return <ProfileSettings session={session} />;
+    
     if (activeTab === 'categorias') return <CategoryManager categories={categories} onAdd={handleAddCategory} onDelete={(id) => requestDelete(id, 'category')} />;
     if (activeTab === 'metas') return <GoalsManager goals={goals} onAdd={handleAddGoal} onDeposit={handleDepositGoal} onDelete={(id) => requestDelete(id, 'goal')} />;
     
@@ -264,11 +298,9 @@ const App: React.FC = () => {
         return ( <BillsManager transactions={expenseTransactions} onDelete={(id) => requestDelete(id, 'transaction')} onEdit={openEditModal} onAddClick={() => setIsModalOpen(true)} onPay={(id) => { const tx = transactions.find(t => t.id === id); if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); } }} /> );
     }
 
-    // === INVESTIMENTOS COM SCROLL NO MOBILE ===
     if (activeTab === 'investimentos') {
       return (
         <div className="h-full flex flex-col gap-4 overflow-y-auto lg:overflow-hidden p-1 pb-20 lg:pb-1">
-            {/* CARDS RESUMO */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
                 <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-5 shadow-sm border border-slate-100 dark:border-zinc-800">
                     <div className="flex justify-between items-start mb-4">
@@ -300,10 +332,8 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            {/* GRÁFICOS: Coluna no Mobile (h-auto), Grid no PC */}
             <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 shrink-0 lg:h-[250px]">
                 
-                {/* 1. EVOLUÇÃO */}
                 <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-[300px] lg:h-full overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Evolução</h3>
                     <div className="flex-1 w-full min-h-0">
@@ -325,7 +355,6 @@ const App: React.FC = () => {
                     </div>
                 </div>
 
-                {/* 2. ALOCAÇÃO */}
                 <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] flex flex-col shadow-sm h-[300px] lg:h-full overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1"><PieChartIcon className="w-4 h-4" /> Alocação</h3>
                     <div className="flex-1 flex flex-col items-center justify-between min-h-0">
@@ -383,7 +412,6 @@ const App: React.FC = () => {
                     </div>
                 </div>
 
-                {/* 3. PERFORMANCE */}
                 <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-[300px] lg:h-full overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1"><LineChart className="w-4 h-4" /> Performance</h3>
                     <div className="flex-1 w-full min-h-0">
@@ -401,7 +429,6 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            {/* LISTA DE ATIVOS: Altura auto no Mobile */}
             <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden flex flex-col min-h-0 shadow-sm border border-slate-100 dark:border-zinc-800 lg:h-auto h-auto shrink-0">
                 <div className="flex items-center justify-between p-6 pb-4 shrink-0">
                     <div className="flex items-center gap-2"><div className="w-1.5 h-6 bg-emerald-600 rounded-full"></div><h2 className="text-sm font-black uppercase tracking-widest text-slate-500">Meus Ativos</h2></div>
@@ -458,7 +485,6 @@ const App: React.FC = () => {
       {isSidebarOpen && ( <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" ></div> )}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-black lg:relative lg:translate-x-0 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
            <div className="p-8 flex flex-col h-full">
-             {/* ... SIDEBAR CONTENT ... */}
              <div className="flex items-center justify-between mb-10">
                <div className="flex items-center gap-4">
                  <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center">
@@ -478,35 +504,49 @@ const App: React.FC = () => {
                 <button onClick={() => { setActiveTab('investimentos'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'investimentos')}><LineChart className="w-5 h-5" /><span>Aplicações</span></button>
                 <button onClick={() => { setActiveTab('contas'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'contas')}><CalendarDays className="w-5 h-5" /><span>Contas</span></button>
                 <button onClick={() => { setActiveTab('transacoes'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'transacoes')}><ArrowLeftRight className="w-5 h-5" /><span>Histórico</span></button>
+                
+                {/* BOTÃO DE CONFIGURAÇÕES (PERFIL) */}
+                <div className="h-px bg-slate-200 dark:bg-zinc-800 my-2 opacity-30"></div>
+                <button onClick={() => { setActiveTab('perfil'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'perfil')}>
+                    <Settings className="w-5 h-5" />
+                    <span>Configurações</span>
+                </button>
+
              </nav>
              <button onClick={handleLogout} className="flex items-center gap-4 px-5 py-4 rounded-2xl text-slate-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-black text-[12px] uppercase tracking-widest mt-auto"><LogOut className="w-5 h-5" /><span>Sair</span></button>
            </div>
       </aside>
       <main className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-black overflow-hidden relative min-w-0">
         <header className="h-20 flex items-center justify-between px-8 lg:px-12 shrink-0 z-40">
-           {/* ... HEADER CONTENT ... */}
            <div className="flex items-center gap-6"><button className="lg:hidden p-3 text-slate-500 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm" onClick={() => setSidebarOpen(true)}><Menu className="w-6 h-6" /></button><div className="hidden lg:flex items-center gap-2"><span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] opacity-50">Portal Financeiro Inteligente</span></div></div>
            <div className="flex-1"></div>
            <div className="flex items-center gap-3">
               {urgencies.delayedCount > 0 && (<button onClick={() => setActiveTab('contas')} className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl hover:bg-rose-500/20 transition-all shadow-sm group"><AlertCircle className="w-4 h-4 group-hover:animate-shake" /><span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{urgencies.delayedCount} Atrasos</span></button>)}
               <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-3.5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all shadow-sm active:scale-90">{theme === 'dark' ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5" />}</button>
               <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 shadow-sm transition-all hover:border-emerald-500/30">
-                <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-sm">
-                  {session?.user?.email?.charAt(0).toUpperCase()}
+                {/* === AVATAR DO USUÁRIO === */}
+                <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-sm overflow-hidden border-2 border-emerald-500/30">
+                  {userAvatar ? (
+                      <img src={userAvatar} alt="User" className="w-full h-full object-cover" />
+                  ) : (
+                      session?.user?.email?.charAt(0).toUpperCase()
+                  )}
                 </div>
-                <p className="hidden md:block text-sm font-black uppercase truncate max-w-[200px] text-slate-700 dark:text-slate-200">
-                  {session?.user?.email}
-                </p>
+                <div className="hidden md:block">
+                    <p className="text-sm font-black uppercase truncate max-w-[200px] text-slate-700 dark:text-slate-200">
+                      {userName || session?.user?.email}
+                    </p>
+                </div>
               </div>
            </div>
         </header>
         <div className="flex-1 px-4 lg:px-12 pb-8 overflow-hidden flex flex-col min-h-0">{renderContent()}</div>
       </main>
 
-      {/* ... MODALS ... (Same as before) */}
+      {/* ... MODAIS (EDITAR, NOVO LANÇAMENTO, INVESTIMENTO, PAGAMENTO) ... */}
+      {/* ... (Todo o código dos modais permanece igual ao anterior) ... */}
       {editingTransaction && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-          {/* ... Edit Modal Content ... */}
           <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-6">
             <div className="flex items-center justify-between mb-4"><h3 className="font-black text-xl uppercase tracking-tighter text-amber-500 flex items-center gap-2"><Edit3 className="w-5 h-5"/> Editar</h3><button onClick={() => setEditingTransaction(null)} className="p-2 text-slate-400 hover:text-slate-600 transition-all bg-slate-50 dark:bg-zinc-900 rounded-xl"><X className="w-5 h-5" /></button></div>
             <form onSubmit={handleUpdateTransaction} className="space-y-4">
@@ -522,7 +562,6 @@ const App: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
               <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-6">
-                {/* ... New Transaction Modal Content ... */}
                 <div className="flex items-center justify-between mb-4"><h3 className={`font-black text-xl uppercase tracking-tighter ${newTx.type === TransactionType.INCOME ? 'text-emerald-600' : 'text-orange-500'}`}>Novo Lançamento</h3><button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 transition-all bg-slate-50 dark:bg-zinc-900 rounded-xl"><X className="w-5 h-5" /></button></div>
                 <form onSubmit={handleAddTransaction} className="space-y-3">
                     <div className="space-y-1"><label className="text-[9px] font-black uppercase text-slate-400 ml-1">Descrição</label><input type="text" className={`w-full bg-slate-50 dark:bg-zinc-900 rounded-xl px-4 py-3 text-sm font-medium outline-none border-2 border-transparent ${modalBorderClass} shadow-inner`} value={newTx.description} onChange={(e) => setNewTx({...newTx, description: e.target.value})} required /></div>
@@ -558,7 +597,6 @@ const App: React.FC = () => {
       {isInvestmentModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
              <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[3.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-10 transform scale-100">
-                {/* ... Investment Modal Content ... */}
                 <div className="flex items-center justify-between mb-10"><div className="flex items-center gap-4"><div className="p-4 bg-emerald-600 rounded-3xl shadow-xl shadow-emerald-500/30"><Coins className="w-8 h-8 text-white" /></div><h3 className="font-black text-2xl lg:text-3xl uppercase tracking-tighter text-slate-900 dark:text-white">Nova Aplicação</h3></div><button onClick={() => setIsInvestmentModalOpen(false)} className="p-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all bg-slate-50 dark:bg-zinc-900 rounded-3xl"><X className="w-7 h-7" /></button></div>
                 <form onSubmit={handleAddInvestment} className="space-y-8">
                      <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Search className="w-4 h-4 text-emerald-500" /> Ativo Selecionado</label><input type="text" placeholder="Ticker ou Nome" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-8 py-6 text-lg font-medium outline-none" value={newInv.name} onChange={(e) => setNewInv({...newInv, name: e.target.value})} required /></div>
@@ -573,7 +611,6 @@ const App: React.FC = () => {
       {payingTransaction && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
            <div className="bg-white dark:bg-zinc-950 w-full max-w-xs rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-8">
-              {/* ... Confirm Payment Modal Content ... */}
               <h3 className="font-black text-sm uppercase tracking-widest mb-6 text-center text-slate-500">Confirmar Pagamento</h3>
               <div className="space-y-4">
                  <div className="p-4 bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800"><p className="text-[9px] font-black uppercase text-slate-400 mb-2">Lançamento</p><p className="font-medium text-sm text-slate-900 dark:text-white">{payingTransaction.description}</p></div>
