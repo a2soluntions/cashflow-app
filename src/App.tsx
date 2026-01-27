@@ -6,7 +6,7 @@ import {
   Calendar, Tag, Edit3, Target, LogOut, Wallet, 
   PieChart as PieChartIcon, Sun, Moon, AlertCircle, 
   ArrowUpRight, ArrowDownRight, Layers, BarChart3, 
-  CheckCircle2, Clock, Settings 
+  CheckCircle2, Clock, Settings, GraduationCap 
 } from 'lucide-react';
 import { 
   ResponsiveContainer,
@@ -15,6 +15,8 @@ import {
 import { supabase } from './supabase'; 
 import { Session } from '@supabase/supabase-js';
 import { TransactionType, TransactionStatus, Transaction, Investment, Category, Goal } from './types';
+
+// Componentes
 import TransactionTable from './components/TransactionTable';
 import Toast from './components/Toast';
 import ConfirmModal from './components/ConfirmModal';
@@ -24,6 +26,7 @@ import GoalsManager from './components/GoalsManager';
 import BillsManager from './components/BillsManager';
 import DashboardHome from './components/DashboardHome';
 import ProfileSettings from './components/ProfileSettings';
+import FinancialAdvisor from './components/FinancialAdvisor';
 import Auth from './components/Auth';
 
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
@@ -33,7 +36,9 @@ const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'transacoes' | 'contas' | 'investimentos' | 'categorias' | 'metas' | 'perfil'>('dashboard');
+  
+  // Estado de navegação principal
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'transacoes' | 'contas' | 'investimentos' | 'categorias' | 'metas' | 'perfil' | 'ajuda'>('dashboard');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
@@ -51,7 +56,7 @@ const App: React.FC = () => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   
-  // === NOVO ESTADO PARA O PERFIL ===
+  // Perfil
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
 
@@ -100,7 +105,6 @@ const App: React.FC = () => {
       const { data: goalData } = await supabase.from('goals').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
       if (goalData) setGoals(goalData.map((g: any) => ({ ...g, target_amount: Number(g.target_amount), current_amount: Number(g.current_amount) })));
 
-      // === BUSCA DADOS DO PERFIL (FOTO E NOME) ===
       const { data: profileData } = await supabase
         .from('profiles')
         .select('avatar_url, full_name')
@@ -121,7 +125,6 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Recarrega os dados quando a sessão muda ou quando voltamos da tela de perfil
   useEffect(() => { if (session) fetchData(); }, [session, activeTab]);
   
   const handleLogout = async () => { await supabase.auth.signOut(); setSession(null); };
@@ -241,6 +244,18 @@ const App: React.FC = () => {
       const delayed = pendingExpenses.filter(t => { const tDate = new Date(t.date + 'T12:00:00'); return tDate < today; }); 
       return { delayedCount: delayed.length }; 
   }, [transactions]);
+
+  const currentBalance = useMemo(() => {
+    const income = transactions
+      .filter(t => t.type === TransactionType.INCOME && t.status === TransactionStatus.COMPLETED)
+      .reduce((acc, t) => acc + t.amount, 0);
+      
+    const expense = transactions
+      .filter(t => t.type === TransactionType.EXPENSE && t.status === TransactionStatus.COMPLETED)
+      .reduce((acc, t) => acc + t.amount, 0);
+      
+    return income - expense;
+  }, [transactions]);
   
   const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 shadow-sm border border-emerald-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
   
@@ -289,6 +304,7 @@ const App: React.FC = () => {
     if (activeTab === 'dashboard') return <DashboardHome transactions={transactions} investments={investments} filteredTransactions={filteredTransactions} currentDate={currentDate} />;
     
     if (activeTab === 'perfil') return <ProfileSettings session={session} />;
+    if (activeTab === 'ajuda') return <FinancialAdvisor transactions={transactions} currentBalance={currentBalance} />;
     
     if (activeTab === 'categorias') return <CategoryManager categories={categories} onAdd={handleAddCategory} onDelete={(id) => requestDelete(id, 'category')} />;
     if (activeTab === 'metas') return <GoalsManager goals={goals} onAdd={handleAddGoal} onDeposit={handleDepositGoal} onDelete={(id) => requestDelete(id, 'goal')} />;
@@ -347,7 +363,11 @@ const App: React.FC = () => {
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} />
-                                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
+                                <Tooltip 
+                                    cursor={{fill: 'transparent'}} 
+                                    contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} 
+                                    formatter={(value: any) => [`R$ ${Number(value).toLocaleString()}`, '']}
+                                />
                                 <Bar dataKey="aporte" barSize={12} fill="#FF8A00" radius={[4, 4, 0, 0]} name="Aporte Mês" />
                                 <Area type="monotone" dataKey="total" stroke="#22C55E" strokeWidth={3} fill="url(#gradPatrimonio)" name="Patrimônio Total" />
                             </ComposedChart>
@@ -420,7 +440,11 @@ const App: React.FC = () => {
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} strokeOpacity={0.05} />
                                 <XAxis type="number" hide />
                                 <YAxis type="category" dataKey="name" width={50} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} axisLine={false} tickLine={false} />
-                                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} />
+                                <Tooltip 
+                                    cursor={{fill: 'transparent'}} 
+                                    contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} 
+                                    formatter={(value: any) => [`R$ ${Number(value).toLocaleString()}`, '']}
+                                />
                                 <Bar dataKey="Investido" fill="#64748b" radius={[0, 4, 4, 0]} barSize={8} name="Investido" />
                                 <Bar dataKey="Atual" fill="#22C55E" radius={[0, 4, 4, 0]} barSize={8} name="Atual" />
                             </BarChart>
@@ -499,19 +523,14 @@ const App: React.FC = () => {
                 <div className="py-2"><MonthSelector currentDate={currentDate} onMonthChange={setCurrentDate} /></div>
                 <div className="h-px bg-slate-200 dark:bg-zinc-800 my-4 opacity-30"></div>
                 <button onClick={() => { setActiveTab('dashboard'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'dashboard')}><LayoutDashboard className="w-5 h-5" /><span>Dashboard</span></button>
+                <button onClick={() => { setActiveTab('ajuda'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'ajuda')}><GraduationCap className="w-5 h-5" /><span>Consultor</span></button>
                 <button onClick={() => { setActiveTab('categorias'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'categorias')}><Tag className="w-5 h-5" /><span>Categorias</span></button>
                 <button onClick={() => { setActiveTab('metas'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'metas')}><Target className="w-5 h-5" /><span>Metas</span></button>
                 <button onClick={() => { setActiveTab('investimentos'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'investimentos')}><LineChart className="w-5 h-5" /><span>Aplicações</span></button>
                 <button onClick={() => { setActiveTab('contas'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'contas')}><CalendarDays className="w-5 h-5" /><span>Contas</span></button>
                 <button onClick={() => { setActiveTab('transacoes'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'transacoes')}><ArrowLeftRight className="w-5 h-5" /><span>Histórico</span></button>
-                
-                {/* BOTÃO DE CONFIGURAÇÕES (PERFIL) */}
                 <div className="h-px bg-slate-200 dark:bg-zinc-800 my-2 opacity-30"></div>
-                <button onClick={() => { setActiveTab('perfil'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'perfil')}>
-                    <Settings className="w-5 h-5" />
-                    <span>Configurações</span>
-                </button>
-
+                <button onClick={() => { setActiveTab('perfil'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'perfil')}><Settings className="w-5 h-5" /><span>Configurações</span></button>
              </nav>
              <button onClick={handleLogout} className="flex items-center gap-4 px-5 py-4 rounded-2xl text-slate-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-black text-[12px] uppercase tracking-widest mt-auto"><LogOut className="w-5 h-5" /><span>Sair</span></button>
            </div>
@@ -524,7 +543,6 @@ const App: React.FC = () => {
               {urgencies.delayedCount > 0 && (<button onClick={() => setActiveTab('contas')} className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl hover:bg-rose-500/20 transition-all shadow-sm group"><AlertCircle className="w-4 h-4 group-hover:animate-shake" /><span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{urgencies.delayedCount} Atrasos</span></button>)}
               <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-3.5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all shadow-sm active:scale-90">{theme === 'dark' ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5" />}</button>
               <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 shadow-sm transition-all hover:border-emerald-500/30">
-                {/* === AVATAR DO USUÁRIO === */}
                 <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-sm overflow-hidden border-2 border-emerald-500/30">
                   {userAvatar ? (
                       <img src={userAvatar} alt="User" className="w-full h-full object-cover" />
@@ -543,8 +561,9 @@ const App: React.FC = () => {
         <div className="flex-1 px-4 lg:px-12 pb-8 overflow-hidden flex flex-col min-h-0">{renderContent()}</div>
       </main>
 
-      {/* ... MODAIS (EDITAR, NOVO LANÇAMENTO, INVESTIMENTO, PAGAMENTO) ... */}
-      {/* ... (Todo o código dos modais permanece igual ao anterior) ... */}
+      {/* MODAIS (EDIÇÃO, NOVO, INVEST, PAGAR) */}
+      {/* ... (O código dos modais continua igual ao que você já tinha, mantido aqui para brevidade e não causar erro de 'missing jsx') ... */}
+      
       {editingTransaction && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[2.5rem] shadow-3xl border border-slate-100 dark:border-zinc-800 p-6">
