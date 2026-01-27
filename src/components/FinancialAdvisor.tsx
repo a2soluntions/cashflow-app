@@ -31,9 +31,9 @@ const marketData = [
 
 const powerQuotes = [
     { text: "Preço é o que você paga. Valor é o que você leva.", author: "Warren Buffett" },
-    { text: "Não trabalhe pelo dinheiro. Faça ele trabalhar por você.", author: "R. Kiyosaki" },
+    { text: "Não trabalhe pelo dinheiro. Faça ele trabalhar por você.", author: "Robert Kiyosaki" },
     { text: "Invista em si mesmo. É o melhor retorno.", author: "Paul Clitheroe" },
-    { text: "Jamais gaste seu dinheiro antes de tê-lo.", author: "T. Jefferson" },
+    { text: "Jamais gaste seu dinheiro antes de tê-lo.", author: "Thomas Jefferson" },
 ];
 
 const FinancialAdvisor: React.FC<FinancialAdvisorProps> = ({ currentBalance }) => {
@@ -45,7 +45,6 @@ const FinancialAdvisor: React.FC<FinancialAdvisorProps> = ({ currentBalance }) =
       setCurrentQuote(powerQuotes[randomIndex]);
   }, [activeContent]);
   
-  // === ESTADOS DO SIMULADOR ===
   const [simInitial, setSimInitial] = useState(1000);
   const [simMonthly, setSimMonthly] = useState(500);
   const [simYears, setSimYears] = useState(10);
@@ -98,7 +97,7 @@ const FinancialAdvisor: React.FC<FinancialAdvisorProps> = ({ currentBalance }) =
   return (
     <div className="h-full flex flex-col gap-3 animate-in fade-in p-1 overflow-hidden">
       
-      {/* 1. TOPO: DIAGNÓSTICO COMPACTO (Menor ainda) */}
+      {/* 1. TOPO: DIAGNÓSTICO COMPACTO */}
       <div className="shrink-0">
           <div className={`w-full p-4 rounded-2xl relative overflow-hidden shadow-sm transition-colors duration-500 flex flex-row items-center justify-between ${
             financialStatus === 'debt' ? 'bg-rose-600' : 
@@ -125,16 +124,14 @@ const FinancialAdvisor: React.FC<FinancialAdvisorProps> = ({ currentBalance }) =
       </div>
 
       {/* 2. MENU + CONTEÚDO */}
-      <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-12 gap-4 pb-20 lg:pb-0 overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-12 gap-4 pb-0 lg:pb-0 overflow-hidden">
         
-        {/* MENU LATERAL (Mobile: Grade / Desktop: Lateral) */}
+        {/* MENU LATERAL */}
         <div className="lg:col-span-3 shrink-0 flex flex-col max-h-[30vh] lg:max-h-full">
-            {/* MOBILE: GRADE DE ÍCONES (TUDO JUNTO) */}
-            <div className="grid grid-cols-5 gap-2 lg:hidden p-2 bg-slate-50 dark:bg-zinc-800/50 rounded-2xl border border-slate-100 dark:border-zinc-800 overflow-y-auto custom-scrollbar">
+            {/* MOBILE: GRADE DE ÍCONES */}
+            <div className="grid grid-cols-5 gap-2 lg:hidden p-2 bg-slate-50 dark:bg-zinc-800/50 rounded-2xl border border-slate-100 dark:border-zinc-800 overflow-y-auto custom-scrollbar shrink-0">
                 <MobileIconItem icon={<Home className="w-4 h-4"/>} label="Início" active={activeContent === 'welcome'} onClick={() => setActiveContent('welcome')} />
-                {/* PRÓXIMOS PASSOS (CHECKLIST) AGORA NO MENU */}
                 <MobileIconItem icon={<Target className="w-4 h-4 text-emerald-500"/>} label="Metas" active={activeContent === 'checklist'} onClick={() => setActiveContent('checklist')} />
-                
                 <MobileIconItem icon={<Activity className="w-4 h-4"/>} label="Mercado" active={activeContent === 'market'} onClick={() => setActiveContent('market')} />
                 <MobileIconItem icon={<Calculator className="w-4 h-4"/>} label="Juros" active={activeContent === 'juros'} onClick={() => setActiveContent('juros')} />
                 <MobileIconItem icon={<TrendingUp className="w-4 h-4"/>} label="50/30/20" active={activeContent === 'rule'} onClick={() => setActiveContent('rule')} />
@@ -145,7 +142,7 @@ const FinancialAdvisor: React.FC<FinancialAdvisorProps> = ({ currentBalance }) =
                 <MobileIconItem icon={<Zap className="w-4 h-4"/>} label="Renda" active={activeContent === 'income'} onClick={() => setActiveContent('income')} />
             </div>
 
-            {/* DESKTOP: MENU LATERAL PADRÃO */}
+            {/* DESKTOP */}
             <div className="hidden lg:flex flex-col gap-3 h-full overflow-y-auto custom-scrollbar pr-1">
                 <div className="bg-white dark:bg-zinc-900 rounded-[2rem] border-l-[6px] border-orange-500 shadow-sm p-1 flex-1 flex flex-col justify-center">
                     <div className="px-4 py-2 mb-1"><h3 className="text-xs font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest flex items-center gap-2"><Calculator className="w-4 h-4"/> Ferramentas</h3></div>
@@ -170,59 +167,82 @@ const FinancialAdvisor: React.FC<FinancialAdvisorProps> = ({ currentBalance }) =
             </div>
         </div>
 
-        {/* VISOR PRINCIPAL (Scroll Vertical Garantido) */}
-        <div className={`flex-1 lg:col-span-9 lg:bg-white lg:dark:bg-zinc-900 lg:p-6 lg:rounded-[2.5rem] lg:border lg:border-slate-100 lg:dark:border-zinc-800 lg:shadow-sm overflow-hidden relative flex flex-col`}>
+        {/* VISOR PRINCIPAL */}
+        <div className={`flex-1 lg:col-span-9 lg:bg-white lg:dark:bg-zinc-900 lg:p-6 lg:rounded-[2.5rem] lg:border lg:border-slate-100 lg:dark:border-zinc-800 lg:shadow-sm overflow-hidden relative flex flex-col h-full`}>
            
-           {/* FRASE DE EFEITO */}
+           {/* FRASE DE EFEITO (COM AUTOR COMPLETO) */}
            {activeContent !== 'welcome' && (
              <div className="mb-4 p-4 bg-slate-50 dark:bg-zinc-900/80 rounded-2xl border border-slate-100 dark:border-zinc-700 relative overflow-hidden shrink-0 flex items-center justify-between shadow-sm">
-                 <div className="flex items-center gap-3 max-w-[85%]">
+                 <div className="flex items-center gap-3 max-w-[70%]">
                     <Quote className="w-5 h-5 text-emerald-500/50 rotate-180 shrink-0" />
                     <p className="text-sm font-medium text-slate-700 dark:text-slate-200 italic leading-snug">"{currentQuote.text}"</p>
                  </div>
-                 <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-500 whitespace-nowrap pl-2 border-l border-slate-200 dark:border-zinc-700">{currentQuote.author.split(' ')[0]}</p>
+                 {/* CORREÇÃO: Mostrando o nome completo do autor */}
+                 <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-500 whitespace-nowrap pl-2 border-l border-slate-200 dark:border-zinc-700">{currentQuote.author}</p>
              </div>
            )}
 
-           {/* ÁREA DE CONTEÚDO COM SCROLL */}
-           <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-4">
+           {/* ÁREA DE CONTEÚDO */}
+           <div className={`flex-1 overflow-y-auto custom-scrollbar lg:pr-1 ${activeContent === 'welcome' ? 'pb-0' : 'pb-4'}`}>
                
                {/* 0. WELCOME */}
                {activeContent === 'welcome' && (
-                   <div className="h-full flex flex-col justify-between animate-in fade-in zoom-in-95 duration-500 gap-4">
-                       <div className="text-center flex flex-col items-center justify-center flex-1 p-2 bg-white dark:bg-zinc-900 rounded-[2rem] lg:bg-transparent lg:dark:bg-transparent shadow-sm lg:shadow-none border lg:border-none border-slate-100 dark:border-zinc-800">
-                           <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4 shadow-xl">
-                                <TrendingUp className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+                   <div className="h-full flex flex-col justify-between animate-in fade-in zoom-in-95 duration-500">
+                       
+                       {/* CONTEÚDO CENTRAL */}
+                       <div className="flex-1 flex flex-col items-center justify-center p-2 text-center lg:p-6">
+                           <div className="w-16 h-16 lg:w-28 lg:h-28 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4 lg:mb-8 shadow-xl">
+                                <TrendingUp className="w-8 h-8 lg:w-14 lg:h-14 text-emerald-600 dark:text-emerald-400" />
                            </div>
-                           <h1 className="text-2xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-4">
+                           <h1 className="text-2xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tighter mb-3 lg:mb-6">
                                Bem-vindo ao <span className="text-emerald-500">VittaCash</span>
                            </h1>
-                           <div className="max-w-4xl text-slate-600 dark:text-slate-300 text-xs lg:text-base leading-relaxed space-y-3 px-4">
+                           <div className="max-w-3xl text-slate-600 dark:text-slate-300 text-xs lg:text-lg leading-relaxed space-y-2 lg:space-y-4 px-2">
                                <p>
                                    O <strong>VittaCash</strong> é a sua central de comando para a liberdade financeira. Nossa missão é simples: tirar você da estagnação e colocá-lo na rota da prosperidade.
                                </p>
-                               <p>
+                               <p className="hidden sm:block">
                                    Aqui transformamos números frios em estratégias. Use nossos simuladores para ver o futuro do seu dinheiro e explore a Universidade para blindar sua mente contra o consumismo.
                                </p>
                            </div>
                        </div>
-                       {/* FOOTER */}
-                       <div className="pt-4 border-t border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 lg:bg-transparent lg:dark:bg-transparent rounded-2xl p-4 lg:p-0 shadow-sm lg:shadow-none">
-                           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+
+                       {/* FOOTER A2 SOLUTIONS */}
+                       <div className="shrink-0 mt-auto bg-slate-50 dark:bg-zinc-900/50 border-t border-slate-100 dark:border-zinc-800 p-3 lg:p-6 rounded-t-2xl lg:rounded-none">
+                           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 lg:gap-6">
                                <div className="flex items-center gap-3">
-                                   <div className="w-10 h-10 rounded-xl overflow-hidden bg-black flex items-center justify-center border border-zinc-800 shadow-md"><img src="/logo-a2.jpg" alt="A2" className="w-full h-full object-cover" /></div>
-                                   <div className="text-left"><h4 className="text-sm font-black text-slate-900 dark:text-white">A2 Solutions</h4><p className="text-[9px] text-slate-500">Tecnologia</p></div>
+                                   <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-xl overflow-hidden bg-black flex items-center justify-center border border-zinc-800 shadow-md">
+                                       <img src="/logo-a2.jpg" alt="A2" className="w-full h-full object-cover" />
+                                   </div>
+                                   <div className="text-left">
+                                       <p className="text-[8px] lg:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Desenvolvido por</p>
+                                       <h4 className="text-sm lg:text-xl font-black text-slate-900 dark:text-white tracking-tight">A2 Solutions</h4>
+                                   </div>
                                </div>
-                               <div className="flex gap-2 w-full md:w-auto">
-                                   <a href="https://instagram.com/a2soluntions" target="_blank" className="flex-1 flex justify-center items-center gap-2 px-3 py-2 bg-gradient-to-tr from-purple-600 to-rose-500 text-white rounded-xl font-bold text-[10px] hover:opacity-90"><Instagram className="w-3 h-3" /> Instagram</a>
-                                   <a href="https://wa.me/5534998408962" target="_blank" className="flex-1 flex justify-center items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-xl font-bold text-[10px] hover:bg-emerald-700"><MessageCircle className="w-3 h-3" /> WhatsApp</a>
+                               <div className="flex gap-2 w-full sm:w-auto">
+                                   <a 
+                                       href="https://instagram.com/a2soluntions" 
+                                       target="_blank" 
+                                       rel="noopener noreferrer" 
+                                       className="flex-1 flex justify-center items-center gap-2 px-3 py-2 bg-gradient-to-tr from-purple-600 to-rose-500 text-white rounded-xl font-bold text-[10px] lg:text-xs hover:opacity-90 transition-all shadow-lg shadow-purple-500/20"
+                                   >
+                                       <Instagram className="w-3 h-3 lg:w-4 lg:h-4" /> Instagram
+                                   </a>
+                                   <a 
+                                       href="https://wa.me/5534998408962?text=Ol%C3%A1%2C%20vim%20pelo%20App%20VittaCash%20e%20gostaria%20de%20conhecer%20as%20solu%C3%A7%C3%B5es%20da%20A2%20Solutions!" 
+                                       target="_blank" 
+                                       rel="noopener noreferrer" 
+                                       className="flex-1 flex justify-center items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-xl font-bold text-[10px] lg:text-xs hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
+                                   >
+                                       <MessageCircle className="w-3 h-3 lg:w-4 lg:h-4" /> WhatsApp
+                                   </a>
                                </div>
                            </div>
                        </div>
                    </div>
                )}
 
-               {/* NOVO: CHECKLIST / PRÓXIMOS PASSOS (MOVIDO PARA CÁ) */}
+               {/* CHECKLIST / PRÓXIMOS PASSOS */}
                {activeContent === 'checklist' && (
                    <div className="animate-in fade-in zoom-in-95">
                         <HeaderContent icon={<Target className="w-6 h-6 text-emerald-500" />} title="Próximos Passos" subtitle="Sua lista de tarefas prioritárias." />
@@ -349,7 +369,6 @@ const FinancialAdvisor: React.FC<FinancialAdvisorProps> = ({ currentBalance }) =
                            <BookRecommendation title="Psicologia Financeira" author="Morgan Housel" desc="O comportamento é mais importante que a inteligência técnica." />
                            <BookRecommendation title="Pai Rico, Pai Pobre" author="Robert Kiyosaki" desc="A diferença crucial entre Ativos (põe dinheiro) e Passivos (tiram)." />
                            <BookRecommendation title="Homem Mais Rico da Babilônia" author="George Clason" desc="Leis antigas do dinheiro: pague-se primeiro e viva com menos." />
-                           <BookRecommendation title="Segredos da Mente" author="T. Harv Eker" desc="Como reprogramar seu 'termostato financeiro' interno." />
                        </div>
                    </div>
                )}
