@@ -16,8 +16,7 @@ import { supabase } from './supabase';
 import { Session } from '@supabase/supabase-js';
 import { TransactionType, TransactionStatus, Transaction, Investment, Category, Goal } from './types';
 
-// --- IMPORTAÇÃO CORRETA DA LOGO (Para funcionar no .exe) ---
-// Certifique-se de que o arquivo 'logo.png' está dentro de src/assets/
+// --- IMPORTAÇÃO CORRETA DA LOGO ---
 import logoVitta from './assets/logo.png'; 
 
 // Componentes
@@ -32,6 +31,8 @@ import DashboardHome from './components/DashboardHome';
 import ProfileSettings from './components/ProfileSettings';
 import FinancialAdvisor from './components/FinancialAdvisor';
 import Auth from './components/Auth';
+
+// --- IMPORTANTE: O GUARDIÃO DA LICENÇA ---
 import LicenseGuard from './components/LicenseGuard';
 
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
@@ -42,8 +43,8 @@ const isDesktop = !!(window as any).electronAPI;
 
 const App: React.FC = () => {
   // --- ESTADOS GERAIS ---
-  // Se for Desktop, começa bloqueado (!true = false). Se for Web, começa liberado (!false = true).
-  const [isLicensed, setIsLicensed] = useState(!isDesktop); 
+  // ALTERAÇÃO IMPORTANTE: Começa como 'false' (bloqueado) para forçar a verificação da licença
+  const [isLicensed, setIsLicensed] = useState(false); 
   
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -478,9 +479,10 @@ const App: React.FC = () => {
   const modalAccentColor = newTx.type === TransactionType.EXPENSE ? 'orange' : 'emerald';
   const modalBorderClass = newTx.type === TransactionType.EXPENSE ? 'focus:border-orange-500' : 'focus:border-emerald-500';
 
+  // 1. PRIMEIRO: Verifica se está logado (para Web)
   if (!session && !isDesktop) return <Auth />;
 
-  // --- TRAVA DE SEGURANÇA (Inserida aqui no final para checar antes de renderizar) ---
+  // 2. SEGUNDO: Verifica se tem a Licença (A catraca do SaaS)
   if (!isLicensed) {
     return <LicenseGuard onUnlock={() => setIsLicensed(true)} />;
   }
@@ -639,7 +641,6 @@ const App: React.FC = () => {
     }
 
     const isHistory = activeTab === 'transacoes';
-    // MOSTRA TUDO NO HISTÓRICO DO MÊS (Não filtra mais por COMPLETED)
     const list = isHistory ? filteredTransactions : []; 
     
     return (
@@ -671,7 +672,6 @@ const App: React.FC = () => {
              <div className="flex items-center justify-between mb-10">
                <div className="flex items-center gap-4">
                  <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center overflow-hidden">
-                    {/* AQUI ESTAVA O ERRO DO .EXE -> AGORA USA A VARIÁVEL IMPORTADA */}
                     <img src={logoVitta} alt="VittaCash" className="w-full h-full object-cover" />
                  </div>
                  <h1 className="text-2xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">VittaCash</h1>
