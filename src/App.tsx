@@ -2,11 +2,11 @@ import './index.css';
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   LayoutDashboard, ArrowLeftRight, TrendingUp, Plus, Menu, X,
-  CalendarDays, LineChart, Search, Coins,
-  Calendar, Tag, Edit3, Target, LogOut, Wallet, 
+  CalendarDays, LineChart, Coins,
+  Calendar as CalendarIcon, Tag, Edit3, Target, LogOut, Wallet, 
   PieChart as PieChartIcon, Sun, Moon, AlertCircle, 
   ArrowUpRight, ArrowDownRight, Layers, BarChart3, 
-  CheckCircle2, Clock, Settings, GraduationCap 
+  CheckCircle2, Clock, Settings, GraduationCap, Search
 } from 'lucide-react';
 import { 
   ResponsiveContainer,
@@ -15,6 +15,10 @@ import {
 import { supabase } from './supabase'; 
 import { Session } from '@supabase/supabase-js';
 import { TransactionType, TransactionStatus, Transaction, Investment, Category, Goal } from './types';
+
+// --- IMPORTAÇÃO CORRETA DA LOGO (Para funcionar no .exe) ---
+// Certifique-se de que o arquivo 'logo.png' está dentro de src/assets/
+import logoVitta from './assets/logo.png'; 
 
 // Componentes
 import TransactionTable from './components/TransactionTable';
@@ -28,16 +32,23 @@ import DashboardHome from './components/DashboardHome';
 import ProfileSettings from './components/ProfileSettings';
 import FinancialAdvisor from './components/FinancialAdvisor';
 import Auth from './components/Auth';
+import LicenseGuard from './components/LicenseGuard';
 
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
 const CORES_VITTACASH = ['#22C55E', '#FF8A00', '#06b6d4', '#8b5cf6', '#f43f5e', '#eab308'];
 
+// --- VERIFICAÇÃO DO MODO DESKTOP ---
+const isDesktop = !!(window as any).electronAPI;
+
 const App: React.FC = () => {
+  // --- ESTADOS GERAIS ---
+  // Se for Desktop, começa bloqueado (!true = false). Se for Web, começa liberado (!false = true).
+  const [isLicensed, setIsLicensed] = useState(!isDesktop); 
+  
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   
-  // Estado de navegação principal
   const [activeTab, setActiveTab] = useState<'dashboard' | 'transacoes' | 'contas' | 'investimentos' | 'categorias' | 'metas' | 'perfil' | 'ajuda'>('dashboard');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -89,45 +100,87 @@ const App: React.FC = () => {
     }
   }, [theme]);
 
+  // --- FUNÇÃO CENTRAL DE BUSCA DE DADOS ---
   const fetchData = async () => {
     if (!session?.user) return;
     try {
       setLoading(true);
-      const { data: txData } = await supabase.from('transactions').select('*').eq('user_id', session.user.id).order('date', { ascending: false });
-      if (txData) setTransactions(txData.map((t: any) => ({ ...t, amount: Number(t.amount || 0), paid_amount: Number(t.paid_amount || 0) })));
 
-      const { data: catData } = await supabase.from('categories').select('*').order('name', { ascending: true });
+      let txData, catData, invData, goalData, profileData;
+
+      if (isDesktop) {
+        const api = (window as any).electronAPI;
+        txData = await api.getAll('transactions');
+        catData = await api.getAll('categories');
+        invData = await api.getAll('investments');
+        goalData = await api.getAll('goals');
+        const profiles = await api.getAll('profiles');
+        profileData = profiles && profiles.length > 0 ? profiles[0] : null;
+      } else {
+        const txRes = await supabase.from('transactions').select('*').eq('user_id', session.user.id).order('date', { ascending: false });
+        txData = txRes.data;
+        const catRes = await supabase.from('categories').select('*').order('name', { ascending: true });
+        catData = catRes.data;
+        const invRes = await supabase.from('investments').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
+        invData = invRes.data;
+        const goalRes = await supabase.from('goals').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
+        goalData = goalRes.data;
+        const pRes = await supabase.from('profiles').select('avatar_url, full_name').eq('id', session.user.id).single();
+        profileData = pRes.data;
+      }
+
+      if (txData) {
+        const normalizedTx = txData.map((t: any) => ({
+            ...t,
+            amount: Number(t.amount || 0),
+            paid_amount: Number(t.paid_amount || 0),
+            status: (t.status || 'pending').toLowerCase() === 'completed' ? TransactionStatus.COMPLETED : TransactionStatus.PENDING,
+            type: (t.type || 'expense').toLowerCase() === 'income' ? TransactionType.INCOME : TransactionType.EXPENSE
+        }));
+        setTransactions(normalizedTx);
+      }
+
       if (catData) setCategories(catData);
-
-      const { data: invData } = await supabase.from('investments').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
       if (invData) setInvestments(invData.map((i: any) => ({ ...i, invested_amount: Number(i.invested_amount || 0), current_amount: Number(i.current_amount || 0) })));
-
-      const { data: goalData } = await supabase.from('goals').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
       if (goalData) setGoals(goalData.map((g: any) => ({ ...g, target_amount: Number(g.target_amount), current_amount: Number(g.current_amount) })));
-
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('avatar_url, full_name')
-        .eq('id', session.user.id)
-        .single();
       
       if (profileData) {
         setUserAvatar(profileData.avatar_url);
         setUserName(profileData.full_name);
       }
 
-    } catch (error) { console.error(error); showToast('Erro de conexão.', 'error'); } finally { setLoading(false); }
+    } catch (error) { 
+      console.error(error); 
+      showToast('Erro ao carregar dados.', 'error'); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   useEffect(() => { 
-    supabase.auth.getSession().then(({ data: { session } }) => { setSession(session); });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { setSession(session); });
-    return () => subscription.unsubscribe();
+    if (isDesktop) {
+      setSession({
+        user: { id: 'offline_user', email: 'desktop@vittacash.local' }
+      } as Session);
+      setLoading(false);
+    } else {
+      supabase.auth.getSession().then(({ data: { session } }) => { setSession(session); });
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { setSession(session); });
+      return () => subscription.unsubscribe();
+    }
   }, []);
 
   useEffect(() => { if (session) fetchData(); }, [session, activeTab]);
   
-  const handleLogout = async () => { await supabase.auth.signOut(); setSession(null); };
+  const handleLogout = async () => { 
+    if (isDesktop) {
+      alert("No modo Desktop, basta fechar a janela para sair.");
+    } else {
+      await supabase.auth.signOut(); 
+      setSession(null); 
+    }
+  };
+
   const requestDelete = (id: string, type: 'transaction' | 'category' | 'goal') => { setDeleteData({ id, type }); };
 
   const handleConfirmDelete = async () => {
@@ -138,22 +191,97 @@ const App: React.FC = () => {
     if (type === 'category') table = 'categories';
     if (type === 'goal') table = 'goals';
 
-    const { error } = await supabase.from(table).delete().eq('id', id);
-    if (error) { showToast('Erro ao excluir.', 'error'); } 
-    else {
+    try {
+      if (isDesktop) {
+        await (window as any).electronAPI.delete(table, id);
+      } else {
+        const { error } = await supabase.from(table).delete().eq('id', id);
+        if (error) throw error;
+      }
+
       if (type === 'transaction') setTransactions(prev => prev.filter(t => t.id !== id));
       if (type === 'category') setCategories(prev => prev.filter(c => c.id !== id));
       if (type === 'goal') setGoals(prev => prev.filter(g => g.id !== id));
       showToast('Item removido!', 'success');
+      fetchData();
+    } catch (error) {
+      showToast('Erro ao excluir.', 'error');
     }
     setDeleteData(null);
   };
 
-  const handleAddGoal = async (goal: Omit<Goal, 'id' | 'current_amount'>) => { if (!session?.user) return; const { data, error } = await supabase.from('goals').insert([{ ...goal, user_id: session.user.id, current_amount: 0 }]).select(); if (error) showToast('Erro ao criar.', 'error'); else { setGoals([data[0], ...goals]); showToast('Meta criada!', 'success'); } };
-  const handleDepositGoal = async (id: string, amount: number) => { const goal = goals.find(g => g.id === id); if (!goal) return; const newAmount = goal.current_amount + amount; const { error } = await supabase.from('goals').update({ current_amount: newAmount }).eq('id', id); if (error) showToast('Erro ao depositar.', 'error'); else { setGoals(goals.map(g => g.id === id ? { ...g, current_amount: newAmount } : g)); showToast('Depósito realizado!', 'success'); } };
+  const handleAddGoal = async (goal: any) => { 
+    if (!session?.user) return; 
+    const newGoal = { 
+        title: goal.title || goal.description || 'Meta Sem Nome',
+        target_amount: Number(goal.target_amount),
+        deadline: goal.deadline,
+        user_id: session.user.id, 
+        current_amount: 0 
+    };
+    try {
+      if (isDesktop) {
+        await (window as any).electronAPI.insert('goals', newGoal);
+        fetchData(); 
+      } else {
+        const { data, error } = await supabase.from('goals').insert([newGoal]).select();
+        if (error) throw error;
+        setGoals([data[0], ...goals]);
+      }
+      showToast('Meta criada!', 'success');
+    } catch (e) { showToast('Erro ao criar.', 'error'); }
+  };
+
+  const handleDepositGoal = async (id: string, amount: number) => { 
+    const goal = goals.find(g => g.id === id); 
+    if (!goal) return; 
+    const newAmount = goal.current_amount + amount; 
+    try {
+      if (isDesktop) {
+        await (window as any).electronAPI.update('goals', id, { current_amount: newAmount });
+      } else {
+        const { error } = await supabase.from('goals').update({ current_amount: newAmount }).eq('id', id);
+        if (error) throw error;
+      }
+      setGoals(goals.map(g => g.id === id ? { ...g, current_amount: newAmount } : g)); 
+      showToast('Depósito realizado!', 'success'); 
+    } catch (e) { showToast('Erro ao depositar.', 'error'); }
+  };
+
   const openEditModal = (tx: Transaction) => { setEditingTransaction(tx); const amountStr = (tx.amount * 100).toFixed(0); setEditForm({ description: tx.description, amountString: amountStr, date: tx.date, category: tx.category || '', type: tx.type }); };
-  const handleUpdateTransaction = async (e: React.FormEvent) => { e.preventDefault(); if (!editingTransaction) return; const updatedAmount = parseFloat(editForm.amountString) / 100; const { error } = await supabase.from('transactions').update({ description: editForm.description, amount: updatedAmount, date: editForm.date, category: editForm.category, type: editForm.type }).eq('id', editingTransaction.id); if (error) showToast('Erro ao atualizar.', 'error'); else { showToast('Atualizado!', 'success'); setEditingTransaction(null); fetchData(); } };
-  const handleAddCategory = async (name: string, type: TransactionType) => { const { data, error } = await supabase.from('categories').insert([{ name, type }]).select(); if (error) showToast('Erro ao criar categoria.', 'error'); else if (data) { setCategories([...categories, data[0]]); showToast('Categoria criada!', 'success'); } };
+  
+  const handleUpdateTransaction = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    if (!editingTransaction) return; 
+    const updatedAmount = parseFloat(editForm.amountString) / 100; 
+    const updateData = { description: editForm.description, amount: updatedAmount, date: editForm.date, category: editForm.category, type: editForm.type };
+    try {
+      if (isDesktop) {
+        await (window as any).electronAPI.update('transactions', editingTransaction.id, updateData);
+      } else {
+        const { error } = await supabase.from('transactions').update(updateData).eq('id', editingTransaction.id);
+        if (error) throw error;
+      }
+      showToast('Atualizado!', 'success'); 
+      setEditingTransaction(null); 
+      fetchData(); 
+    } catch (e) { showToast('Erro ao atualizar.', 'error'); }
+  };
+
+  const handleAddCategory = async (name: string, type: TransactionType) => { 
+    const newCat = { name, type, user_id: session?.user.id };
+    try {
+      if (isDesktop) {
+        await (window as any).electronAPI.insert('categories', newCat);
+        fetchData();
+      } else {
+        const { data, error } = await supabase.from('categories').insert([newCat]).select();
+        if (error) throw error;
+        setCategories([...categories, data[0]]); 
+      }
+      showToast('Categoria criada!', 'success'); 
+    } catch (e) { showToast('Erro ao criar categoria.', 'error'); }
+  };
   
   const handleValueChange = (val: string, mode: 'total' | 'installment') => {
       const numeric = val.replace(/\D/g, '');
@@ -201,42 +329,100 @@ const App: React.FC = () => {
     const newEntries = [];
     const finalCategory = newTx.category || (categories.find(c => c.type === newTx.type)?.name || 'Geral'); 
     const [year, month, day] = newTx.date.split('-').map(Number);
+    const status = newTx.isPaid ? 'completed' : 'pending';
+    const typeLower = newTx.type.toLowerCase();
+    
     for (let i = 0; i < qtdFinal; i++) { 
       const txDate = new Date(year, (month - 1) + i, day);
       const dateString = txDate.toLocaleDateString('en-CA'); 
       newEntries.push({ 
         user_id: session.user.id, 
-        account_id: 'acc1', 
         category: finalCategory, 
         amount: valorFinalParcela, 
         description: qtdFinal > 1 ? `${newTx.description} (${i + 1}/${qtdFinal})` : newTx.description, 
-        type: newTx.type, 
-        status: newTx.isPaid ? TransactionStatus.COMPLETED : TransactionStatus.PENDING,
+        type: typeLower, 
+        status: status,
         paid_amount: newTx.isPaid ? valorFinalParcela : 0,
         date: dateString, 
-        is_recurring: qtdFinal > 1 
       }); 
     } 
-    const { error } = await supabase.from('transactions').insert(newEntries); 
-    if (error) { 
-        showToast('Erro ao salvar.', 'error'); 
-    } 
-    else { 
-        setIsModalOpen(false); 
-        setNewTx({ description: '', category: '', totalAmount: '', installmentAmount: '', type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], installments: '1', inputMode: 'total', isPaid: true }); 
-        showToast(`Lançado ${qtdFinal}x com sucesso!`, 'success'); 
-        await fetchData(); 
-    } 
+
+    try {
+      if (isDesktop) {
+        for (const entry of newEntries) {
+          await (window as any).electronAPI.insert('transactions', entry);
+        }
+      } else {
+        const { error } = await supabase.from('transactions').insert(newEntries); 
+        if (error) throw error;
+      }
+      setIsModalOpen(false); 
+      setNewTx({ description: '', category: '', totalAmount: '', installmentAmount: '', type: TransactionType.EXPENSE, date: new Date().toISOString().split('T')[0], installments: '1', inputMode: 'total', isPaid: true }); 
+      showToast(`Lançado ${qtdFinal}x com sucesso!`, 'success'); 
+      await fetchData(); 
+    } catch (error) {
+      showToast('Erro ao salvar.', 'error');
+    }
   };
 
-  const handleAddInvestment = async (e: React.FormEvent) => { e.preventDefault(); if (!session?.user) return; const amount = parseFloat(newInv.amount) / 100; const investment = { user_id: session.user.id, name: newInv.name, category: newInv.category, invested_amount: amount, current_amount: amount, created_at: new Date(newInv.date).toISOString() }; const { error } = await supabase.from('investments').insert([investment]); if (error) showToast('Erro ao salvar.', 'error'); else { fetchData(); setIsInvestmentModalOpen(false); setNewInv({ name: '', amount: '', date: new Date().toISOString().split('T')[0], category: 'Ações' }); showToast('Salvo!', 'success'); } };
-  const confirmPayment = async () => { if (!payingTransaction) return; const paid = parseFloat(realValueInput) / 100; const { error } = await supabase.from('transactions').update({ status: TransactionStatus.COMPLETED, paid_amount: paid }).eq('id', payingTransaction.id); if (error) showToast('Erro ao confirmar.', 'error'); else { fetchData(); setPayingTransaction(null); showToast('Confirmado!', 'success'); } };
+  const handleAddInvestment = async (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    if (!session?.user) return; 
+    const amount = parseFloat(newInv.amount) / 100; 
+    const investment = { 
+      user_id: session.user.id, 
+      name: newInv.name, 
+      category: newInv.category, 
+      invested_amount: amount, 
+      current_amount: amount, 
+      created_at: new Date(newInv.date).toISOString() 
+    }; 
+    try {
+      if (isDesktop) {
+        await (window as any).electronAPI.insert('investments', investment);
+      } else {
+        const { error } = await supabase.from('investments').insert([investment]);
+        if (error) throw error;
+      }
+      fetchData(); 
+      setIsInvestmentModalOpen(false); 
+      setNewInv({ name: '', amount: '', date: new Date().toISOString().split('T')[0], category: 'Ações' }); 
+      showToast('Salvo!', 'success'); 
+    } catch (e) { showToast('Erro ao salvar.', 'error'); }
+  };
+
+  const confirmPayment = async () => { 
+    if (!payingTransaction) return; 
+    const paid = parseFloat(realValueInput) / 100; 
+    const today = new Date().toISOString().split('T')[0];
+
+    try {
+      if (isDesktop) {
+        await (window as any).electronAPI.update('transactions', payingTransaction.id, { 
+            status: 'completed', 
+            paid_amount: paid,
+            date: today 
+        });
+      } else {
+        const { error } = await supabase.from('transactions').update({ 
+            status: 'completed', 
+            paid_amount: paid,
+            date: today 
+        }).eq('id', payingTransaction.id);
+        if (error) throw error;
+      }
+      fetchData(); 
+      setPayingTransaction(null); 
+      showToast('Confirmado!', 'success'); 
+    } catch (e) { showToast('Erro ao confirmar.', 'error'); }
+  };
 
   const filteredTransactions = useMemo(() => { return transactions.filter(t => { const tDate = new Date(t.date); tDate.setMinutes(tDate.getMinutes() + tDate.getTimezoneOffset()); return tDate.getMonth() === currentDate.getMonth() && tDate.getFullYear() === currentDate.getFullYear(); }); }, [transactions, currentDate]);
+  
   const totalApplied = useMemo(() => investments.reduce((acc, curr) => acc + curr.invested_amount, 0), [investments]);
   const totalCurrent = useMemo(() => investments.reduce((acc, curr) => acc + curr.current_amount, 0), [investments]);
   const totalProfit = totalCurrent - totalApplied;
-  
+
   const urgencies = useMemo(() => { 
       const today = new Date(); 
       today.setHours(0,0,0,0);
@@ -246,14 +432,8 @@ const App: React.FC = () => {
   }, [transactions]);
 
   const currentBalance = useMemo(() => {
-    const income = transactions
-      .filter(t => t.type === TransactionType.INCOME && t.status === TransactionStatus.COMPLETED)
-      .reduce((acc, t) => acc + t.amount, 0);
-      
-    const expense = transactions
-      .filter(t => t.type === TransactionType.EXPENSE && t.status === TransactionStatus.COMPLETED)
-      .reduce((acc, t) => acc + t.amount, 0);
-      
+    const income = transactions.filter(t => t.type === TransactionType.INCOME && t.status === TransactionStatus.COMPLETED).reduce((acc, t) => acc + t.amount, 0);
+    const expense = transactions.filter(t => t.type === TransactionType.EXPENSE && t.status === TransactionStatus.COMPLETED).reduce((acc, t) => acc + t.amount, 0);
     return income - expense;
   }, [transactions]);
   
@@ -298,12 +478,17 @@ const App: React.FC = () => {
   const modalAccentColor = newTx.type === TransactionType.EXPENSE ? 'orange' : 'emerald';
   const modalBorderClass = newTx.type === TransactionType.EXPENSE ? 'focus:border-orange-500' : 'focus:border-emerald-500';
 
-  if (!session) return <Auth />;
+  if (!session && !isDesktop) return <Auth />;
+
+  // --- TRAVA DE SEGURANÇA (Inserida aqui no final para checar antes de renderizar) ---
+  if (!isLicensed) {
+    return <LicenseGuard onUnlock={() => setIsLicensed(true)} />;
+  }
 
   const renderContent = () => {
     if (activeTab === 'dashboard') return <DashboardHome transactions={transactions} investments={investments} filteredTransactions={filteredTransactions} currentDate={currentDate} />;
     
-    if (activeTab === 'perfil') return <ProfileSettings session={session} />;
+    if (activeTab === 'perfil') return <ProfileSettings session={session} onUpdate={fetchData} />;
     if (activeTab === 'ajuda') return <FinancialAdvisor transactions={transactions} currentBalance={currentBalance} />;
     
     if (activeTab === 'categorias') return <CategoryManager categories={categories} onAdd={handleAddCategory} onDelete={(id) => requestDelete(id, 'category')} />;
@@ -349,27 +534,16 @@ const App: React.FC = () => {
             </div>
 
             <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 shrink-0 lg:h-[250px]">
-                
                 <div className="bg-white dark:bg-zinc-900 p-4 rounded-[2.5rem] shadow-sm flex flex-col h-[300px] lg:h-full overflow-hidden">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><BarChart3 className="w-4 h-4" /> Evolução</h3>
                     <div className="flex-1 w-full min-h-0">
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={patrimonyData}>
-                                <defs>
-                                    <linearGradient id="gradPatrimonio" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#22C55E" stopOpacity={0.2}/>
-                                        <stop offset="95%" stopColor="#22C55E" stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} />
-                                <Tooltip 
-                                    cursor={{fill: 'transparent'}} 
-                                    contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} 
-                                    formatter={(value: any) => [`R$ ${Number(value).toLocaleString()}`, '']}
-                                />
+                                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} formatter={(value: any) => [`R$ ${Number(value).toLocaleString()}`, '']} />
                                 <Bar dataKey="aporte" barSize={12} fill="#FF8A00" radius={[4, 4, 0, 0]} name="Aporte Mês" />
-                                <Area type="monotone" dataKey="total" stroke="#22C55E" strokeWidth={3} fill="url(#gradPatrimonio)" name="Patrimônio Total" />
+                                <Area type="monotone" dataKey="total" stroke="#22C55E" strokeWidth={3} fill="#22C55E" fillOpacity={0.1} name="Patrimônio Total" />
                             </ComposedChart>
                         </ResponsiveContainer>
                     </div>
@@ -382,27 +556,14 @@ const App: React.FC = () => {
                              <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none z-10">
                                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-0.5">{centerAsset.label}</span>
                                  <span className="text-lg font-black text-slate-900 dark:text-white">
-                                      {centerAsset.value >= 1000 ? `${(centerAsset.value / 1000).toFixed(1)}k` : centerAsset.value.toLocaleString()}
+                                       {centerAsset.value >= 1000 ? `${(centerAsset.value / 1000).toFixed(1)}k` : centerAsset.value.toLocaleString()}
                                  </span>
                              </div>
                              <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie 
-                                      data={investmentAllocation} 
-                                      innerRadius={50} 
-                                      outerRadius={65} 
-                                      paddingAngle={4}
-                                      dataKey="value" 
-                                      stroke="none"
-                                      onClick={(_, index) => setSelectedAssetIndex(index === selectedAssetIndex ? null : index)}
-                                    >
+                                    <Pie data={investmentAllocation} innerRadius={50} outerRadius={65} paddingAngle={4} dataKey="value" stroke="none" onClick={(_, index) => setSelectedAssetIndex(index === selectedAssetIndex ? null : index)}>
                                         {investmentAllocation.map((_, index) => (
-                                            <Cell 
-                                              key={`cell-${index}`} 
-                                              fill={CORES_VITTACASH[index % CORES_VITTACASH.length]} 
-                                              opacity={selectedAssetIndex === null || selectedAssetIndex === index ? 1 : 0.3}
-                                              style={{cursor: 'pointer'}}
-                                            />
+                                            <Cell key={`cell-${index}`} fill={CORES_VITTACASH[index % CORES_VITTACASH.length]} opacity={selectedAssetIndex === null || selectedAssetIndex === index ? 1 : 0.3} style={{cursor: 'pointer'}} />
                                         ))}
                                     </Pie>
                                 </PieChart>
@@ -412,19 +573,9 @@ const App: React.FC = () => {
                              {investmentAllocation.map((item, i) => {
                                  const isSelected = selectedAssetIndex === i;
                                  return (
-                                     <button 
-                                         key={i} 
-                                         onClick={() => setSelectedAssetIndex(isSelected ? null : i)}
-                                         className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all ${
-                                             isSelected 
-                                             ? 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-600 scale-105 shadow-sm' 
-                                             : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-zinc-800/50'
-                                         }`}
-                                     >
-                                         <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{backgroundColor: CORES_VITTACASH[i % CORES_VITTACASH.length]}}></div>
-                                         <span className={`text-[8px] font-bold uppercase truncate max-w-[60px] ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
-                                             {item.name}
-                                         </span>
+                                     <button key={i} onClick={() => setSelectedAssetIndex(isSelected ? null : i)} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all ${isSelected ? 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-600 scale-105 shadow-sm' : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-zinc-800/50'}`}>
+                                           <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{backgroundColor: CORES_VITTACASH[i % CORES_VITTACASH.length]}}></div>
+                                           <span className={`text-[8px] font-bold uppercase truncate max-w-[60px] ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>{item.name}</span>
                                      </button>
                                  )
                              })}
@@ -440,11 +591,7 @@ const App: React.FC = () => {
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} strokeOpacity={0.05} />
                                 <XAxis type="number" hide />
                                 <YAxis type="category" dataKey="name" width={50} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} axisLine={false} tickLine={false} />
-                                <Tooltip 
-                                    cursor={{fill: 'transparent'}} 
-                                    contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} 
-                                    formatter={(value: any) => [`R$ ${Number(value).toLocaleString()}`, '']}
-                                />
+                                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} formatter={(value: any) => [`R$ ${Number(value).toLocaleString()}`, '']} />
                                 <Bar dataKey="Investido" fill="#64748b" radius={[0, 4, 4, 0]} barSize={8} name="Investido" />
                                 <Bar dataKey="Atual" fill="#22C55E" radius={[0, 4, 4, 0]} barSize={8} name="Atual" />
                             </BarChart>
@@ -492,11 +639,21 @@ const App: React.FC = () => {
     }
 
     const isHistory = activeTab === 'transacoes';
-    const list = isHistory ? filteredTransactions.filter(t => t.status === TransactionStatus.COMPLETED) : [];
+    // MOSTRA TUDO NO HISTÓRICO DO MÊS (Não filtra mais por COMPLETED)
+    const list = isHistory ? filteredTransactions : []; 
+    
     return (
       <div className="h-full flex flex-col min-h-0 min-w-0 animate-in fade-in slide-in-from-bottom-2">
         <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-y-auto p-3 md:p-6 custom-scrollbar min-h-0 shadow-sm border border-slate-100 dark:border-zinc-800">
-            {loading ? <p className="text-center p-10 text-slate-400">Carregando...</p> : <TransactionTable transactions={list} onDelete={!isHistory ? (id) => requestDelete(id, 'transaction') : undefined} onEdit={!isHistory ? openEditModal : undefined} onPay={!isHistory ? (id) => { const tx = transactions.find(t => t.id === id); if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); } } : undefined} />}
+            {loading ? <p className="text-center p-10 text-slate-400">Carregando...</p> : (
+              <TransactionTable 
+                  transactions={list} 
+                  allTransactions={transactions} // Passa o histórico completo
+                  onDelete={!isHistory ? (id) => requestDelete(id, 'transaction') : undefined} 
+                  onEdit={!isHistory ? openEditModal : undefined} 
+                  onPay={!isHistory ? (id) => { const tx = transactions.find(t => t.id === id); if (tx) { setPayingTransaction(tx); setRealValueInput((tx.amount * 100).toString()); } } : undefined} 
+              />
+            )}
         </div>
       </div>
     );
@@ -507,12 +664,15 @@ const App: React.FC = () => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <ConfirmModal isOpen={!!deleteData} onClose={() => setDeleteData(null)} onConfirm={handleConfirmDelete} title={`Excluir ${deleteData?.type === 'category' ? 'Categoria' : deleteData?.type === 'goal' ? 'Meta' : 'Lançamento'}?`} message="Esta ação não pode ser desfeita." />
       {isSidebarOpen && ( <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" ></div> )}
+      
+      {/* BARRA LATERAL (Sidebar) */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-black lg:relative lg:translate-x-0 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
            <div className="p-8 flex flex-col h-full">
              <div className="flex items-center justify-between mb-10">
                <div className="flex items-center gap-4">
-                 <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center">
-                    <img src="/logo.png" alt="VittaCash" className="w-full h-full object-contain" />
+                 <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center overflow-hidden">
+                    {/* AQUI ESTAVA O ERRO DO .EXE -> AGORA USA A VARIÁVEL IMPORTADA */}
+                    <img src={logoVitta} alt="VittaCash" className="w-full h-full object-cover" />
                  </div>
                  <h1 className="text-2xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">VittaCash</h1>
                </div>
@@ -535,6 +695,7 @@ const App: React.FC = () => {
              <button onClick={handleLogout} className="flex items-center gap-4 px-5 py-4 rounded-2xl text-slate-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-black text-[12px] uppercase tracking-widest mt-auto"><LogOut className="w-5 h-5" /><span>Sair</span></button>
            </div>
       </aside>
+
       <main className="flex-1 flex flex-col h-full bg-slate-50 dark:bg-black overflow-hidden relative min-w-0">
         <header className="h-20 flex items-center justify-between px-8 lg:px-12 shrink-0 z-40">
            <div className="flex items-center gap-6"><button className="lg:hidden p-3 text-slate-500 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm" onClick={() => setSidebarOpen(true)}><Menu className="w-6 h-6" /></button><div className="hidden lg:flex items-center gap-2"><span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] opacity-50">Portal Financeiro Inteligente</span></div></div>
@@ -562,7 +723,6 @@ const App: React.FC = () => {
       </main>
 
       {/* MODAIS (EDIÇÃO, NOVO, INVEST, PAGAR) */}
-      {/* ... (O código dos modais continua igual ao que você já tinha, mantido aqui para brevidade e não causar erro de 'missing jsx') ... */}
       
       {editingTransaction && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
@@ -619,7 +779,7 @@ const App: React.FC = () => {
                 <div className="flex items-center justify-between mb-10"><div className="flex items-center gap-4"><div className="p-4 bg-emerald-600 rounded-3xl shadow-xl shadow-emerald-500/30"><Coins className="w-8 h-8 text-white" /></div><h3 className="font-black text-2xl lg:text-3xl uppercase tracking-tighter text-slate-900 dark:text-white">Nova Aplicação</h3></div><button onClick={() => setIsInvestmentModalOpen(false)} className="p-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all bg-slate-50 dark:bg-zinc-900 rounded-3xl"><X className="w-7 h-7" /></button></div>
                 <form onSubmit={handleAddInvestment} className="space-y-8">
                      <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Search className="w-4 h-4 text-emerald-500" /> Ativo Selecionado</label><input type="text" placeholder="Ticker ou Nome" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-8 py-6 text-lg font-medium outline-none" value={newInv.name} onChange={(e) => setNewInv({...newInv, name: e.target.value})} required /></div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Wallet className="w-4 h-4 text-emerald-500" /> Valor</label><input type="text" className="w-full bg-emerald-50/50 dark:bg-emerald-500/10 rounded-3xl px-6 py-6 text-xl font-medium outline-none text-emerald-600" value={formatCurrencyInput(newInv.amount)} onChange={(e) => setNewInv({...newInv, amount: e.target.value.replace(/\D/g, '')})} required /></div><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Calendar className="w-4 h-4 text-emerald-500" /> Data</label><input type="date" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-6 py-6 text-sm font-medium outline-none dark:text-white" value={newInv.date} onChange={(e) => setNewInv({...newInv, date: e.target.value})} required /></div></div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Wallet className="w-4 h-4 text-emerald-500" /> Valor</label><input type="text" className="w-full bg-emerald-50/50 dark:bg-emerald-500/10 rounded-3xl px-6 py-6 text-xl font-medium outline-none text-emerald-600" value={formatCurrencyInput(newInv.amount)} onChange={(e) => setNewInv({...newInv, amount: e.target.value.replace(/\D/g, '')})} required /></div><div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><CalendarIcon className="w-4 h-4 text-emerald-500" /> Data</label><input type="date" className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-6 py-6 text-sm font-medium outline-none dark:text-white" value={newInv.date} onChange={(e) => setNewInv({...newInv, date: e.target.value})} required /></div></div>
                      <div className="space-y-3"><label className="text-[11px] font-black uppercase text-slate-400 ml-1">Categoria</label><select className="w-full bg-slate-50 dark:bg-zinc-900 rounded-3xl px-8 py-6 text-sm font-medium outline-none dark:text-white" value={newInv.category} onChange={(e) => setNewInv({...newInv, category: e.target.value})}><option>Ações</option><option>Renda Fixa</option><option>FIIs</option><option>Cripto</option><option>Tesouro</option><option>Fundos</option></select></div>
                      <button type="submit" className="w-full bg-emerald-600 py-7 rounded-[2.5rem] text-white font-black uppercase text-sm tracking-[0.2em] shadow-2xl mt-6">Salvar Aplicação</button>
                 </form>

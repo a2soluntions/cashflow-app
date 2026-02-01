@@ -1,11 +1,26 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
-// O "import.meta.env" é o jeito do Vite ler as variáveis
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// --- ÁREA DE CONFIGURAÇÃO (Hardcode) ---
+// Substitua o texto entre aspas pelas suas credenciais do Supabase
+// Não deixe espaços em branco antes ou depois da chave!
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Faltam as variáveis de ambiente do Supabase (.env.local)')
+// Substitua as linhas fixas por isso:
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Mantenha o resto da verificação abaixo, mas garanta que ela usa essas variáveis acima.
+// ---------------------------------------
+
+console.log("--- DEBUG DE CONEXÃO ---");
+console.log("Tentando conectar em:", SUPABASE_URL);
+
+if (!SUPABASE_URL || SUPABASE_URL.includes("SUA_URL")) {
+  console.error("ERRO CRÍTICO: As chaves do Supabase não foram configuradas!");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});

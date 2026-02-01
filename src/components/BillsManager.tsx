@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction } from '../types';
-import { CalendarClock, CheckCircle2, AlertCircle, Plus, Trash2 } from 'lucide-react';
+import { CalendarClock, CheckCircle2, AlertCircle, Plus, Trash2, Edit3 } from 'lucide-react';
 
 interface BillsManagerProps {
   transactions: Transaction[];
@@ -10,7 +10,7 @@ interface BillsManagerProps {
   onPay: (id: string) => void;
 }
 
-const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onDelete, onAddClick, onPay }) => {
+const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onDelete, onEdit, onAddClick, onPay }) => {
   const [filter, setFilter] = useState<'all' | 'late' | 'today'>('all');
   const [localTransactions, setLocalTransactions] = useState<Transaction[]>(transactions);
 
@@ -40,8 +40,9 @@ const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onDelete, onA
   const totalValue = filteredBills.reduce((acc, t) => acc + t.amount, 0);
 
   return (
-    <div className="h-full flex flex-col gap-4 animate-in fade-in pb-20 lg:pb-0">
+    <div className="h-full flex flex-col gap-6 animate-in fade-in pb-20 lg:pb-0 overflow-hidden">
       
+      {/* CABEÇALHO */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white dark:bg-zinc-900 p-5 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-zinc-800 shrink-0">
         <div className="flex items-center gap-4 w-full md:w-auto">
            <div className="p-3 bg-orange-100 dark:bg-orange-500/10 rounded-2xl">
@@ -49,7 +50,10 @@ const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onDelete, onA
            </div>
            <div>
               <h2 className="text-xs font-black uppercase tracking-widest text-slate-500">A Pagar</h2>
-              <p className="text-xl font-black text-slate-900 dark:text-white">R$ {totalValue.toLocaleString()}</p>
+              {/* Formatação corrigida no total também */}
+              <p className="text-xl font-black text-slate-900 dark:text-white">
+                {totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </p>
            </div>
         </div>
         
@@ -65,6 +69,7 @@ const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onDelete, onA
         </div>
       </div>
 
+      {/* LISTA DE CONTAS */}
       <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-zinc-800 overflow-hidden flex flex-col min-h-0">
          <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
              <table className="w-full text-left border-collapse">
@@ -95,8 +100,6 @@ const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onDelete, onA
                                  </div>
                                  <div className="flex flex-col min-w-0">
                                      <span className="font-medium text-sm text-slate-700 dark:text-slate-200 truncate max-w-[130px] md:max-w-none">{t.description}</span>
-                                     
-                                     {/* Informações Extras no Mobile */}
                                      <div className="md:hidden flex items-center gap-2 mt-0.5">
                                          <span className={`text-[10px] font-medium ${isLate ? 'text-orange-500' : 'text-slate-400'}`}>
                                             {tDate.toLocaleDateString('pt-BR', {day: '2-digit', month: 'short'})}
@@ -118,14 +121,20 @@ const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onDelete, onA
                               </div>
                            </td>
                            <td className="py-3 px-4 text-right">
-                              <span className="font-medium text-sm text-slate-900 dark:text-white whitespace-nowrap">R$ {t.amount.toLocaleString()}</span>
+                              {/* AQUI ESTÁ A MUDANÇA: FORMATAÇÃO DE MOEDA PT-BR */}
+                              <span className="font-bold text-sm text-slate-900 dark:text-white whitespace-nowrap">
+                                {t.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                              </span>
                            </td>
                            <td className="py-3 px-4 text-right">
                               <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                  <button onClick={() => onPay(t.id)} className="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600 rounded-lg transition-colors" title="Pagar">
                                     <CheckCircle2 className="w-4 h-4" />
                                  </button>
-                                 <button onClick={() => onDelete(t.id)} className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-500 rounded-lg transition-colors">
+                                 <button onClick={() => onEdit(t)} className="p-2 hover:bg-slate-50 dark:hover:bg-zinc-700 text-slate-500 rounded-lg transition-colors" title="Editar">
+                                    <Edit3 className="w-4 h-4" />
+                                 </button>
+                                 <button onClick={() => onDelete(t.id)} className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-500 rounded-lg transition-colors" title="Excluir">
                                     <Trash2 className="w-4 h-4" />
                                  </button>
                               </div>
@@ -137,7 +146,7 @@ const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onDelete, onA
              </table>
              {filteredBills.length === 0 && (
                 <div className="text-center py-20 text-slate-400 text-sm font-medium">
-                    {filter === 'all' ? 'Nenhuma conta encontrada.' : 
+                    {filter === 'all' ? 'Tudo pago! Nenhuma conta pendente.' : 
                      filter === 'today' ? 'Nenhuma conta para hoje.' : 'Nenhuma conta atrasada.'}
                 </div>
              )}

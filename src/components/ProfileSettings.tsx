@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
-import { User, Building2, Lock, Save, Mail, ShieldCheck, Camera } from 'lucide-react';
+import { 
+  User, Building2, Lock, Save, Mail, ShieldCheck, Camera, 
+  Laptop, Cloud, CheckCircle2, AlertTriangle, Database, Smartphone} from 'lucide-react';
+
+// Verifica se está no modo Desktop
+const isDesktop = !!(window as any).electronAPI;
 
 interface ProfileSettingsProps {
   session: any;
+  onUpdate?: () => void; // Função para avisar o App que o perfil mudou (atualizar cabeçalho)
 }
 
-const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
+const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session, onUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   
@@ -19,28 +25,41 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
   
   const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
-  // Carregar dados ao abrir
+  // --- 1. CARREGAR DADOS (HÍBRIDO) ---
   useEffect(() => {
     const getProfile = async () => {
       try {
         setLoading(true);
         const { user } = session;
 
-        let { data, error, status } = await supabase
-          .from('profiles')
-          .select('full_name, company_name, role, avatar_url')
-          .eq('id', user.id)
-          .single();
+        if (isDesktop) {
+          // MODO DESKTOP: Busca do Banco Local (SQLite)
+          const profiles = await (window as any).electronAPI.getAll('profiles');
+          if (profiles && profiles.length > 0) {
+            const data = profiles[0]; // Pega o primeiro usuário encontrado
+            setFullName(data.full_name || '');
+            setCompanyName(data.company_name || '');
+            setRole(data.role || '');
+            setAvatarUrl(data.avatar_url || null);
+          }
+        } else {
+          // MODO WEB: Busca do Supabase
+          let { data, error, status } = await supabase
+            .from('profiles')
+            .select('full_name, company_name, role, avatar_url')
+            .eq('id', user.id)
+            .single();
 
-        if (error && status !== 406) {
-          throw error;
-        }
+          if (error && status !== 406) {
+            throw error;
+          }
 
-        if (data) {
-          setFullName(data.full_name || '');
-          setCompanyName(data.company_name || '');
-          setRole(data.role || '');
-          setAvatarUrl(data.avatar_url || null);
+          if (data) {
+            setFullName(data.full_name || '');
+            setCompanyName(data.company_name || '');
+            setRole(data.role || '');
+            setAvatarUrl(data.avatar_url || null);
+          }
         }
       } catch (error) {
         console.log('Erro ao carregar perfil', error);
@@ -52,7 +71,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
     getProfile();
   }, [session]);
 
-  // Função de Upload de Foto
+  // --- 2. UPLOAD DE FOTO (HÍBRIDO) ---
   const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
@@ -62,25 +81,35 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
       }
 
       const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${session.user.id}-${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
 
-      // 1. Upload para o Supabase Storage
-      let { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
+      if (isDesktop) {
+        // MODO DESKTOP: Converte a imagem para Base64 (Texto) e salva localmente
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          setAvatarUrl(base64String); // Mostra na hora para o usuário ver
+          setMessage({ text: 'Foto selecionada! Clique em Salvar para confirmar.', type: 'success' });
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // MODO WEB: Upload para o Supabase Storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${session.user.id}-${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
 
-      if (uploadError) {
-        throw uploadError;
+        let { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // Pegar a URL pública
+        const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+        
+        // Atualizar estado local para preview
+        setAvatarUrl(data.publicUrl);
+        setMessage({ text: 'Foto carregada! Clique em Salvar para confirmar.', type: 'success' });
       }
-
-      // 2. Pegar a URL pública
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      
-      // 3. Atualizar estado local para preview imediato
-      setAvatarUrl(data.publicUrl);
-      setMessage({ text: 'Foto carregada! Clique em Salvar para confirmar.', type: 'success' });
 
     } catch (error) {
       setMessage({ text: 'Erro ao fazer upload da imagem.', type: 'error' });
@@ -91,6 +120,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
     }
   };
 
+  // --- 3. SALVAR DADOS (HÍBRIDO) ---
   const updateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -98,27 +128,44 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
       const { user } = session;
 
       const updates = {
-        id: user.id,
         full_name: fullName,
         company_name: companyName,
         role: role,
-        avatar_url: avatarUrl, // Salva a URL da foto
-        updated_at: new Date(),
+        avatar_url: avatarUrl,
+        // updated_at: new Date(),
       };
 
-      let { error } = await supabase.from('profiles').upsert(updates);
+      if (isDesktop) {
+        // MODO DESKTOP: Salva no SQLite
+        // Usamos o ID fixo 'offline_user' conforme definimos no db.cjs
+        await (window as any).electronAPI.update('profiles', 'offline_user', updates);
+      } else {
+        // MODO WEB: Salva no Supabase
+        const updatesWeb = {
+            id: user.id,
+            ...updates,
+            updated_at: new Date(),
+        };
+        let { error } = await supabase.from('profiles').upsert(updatesWeb);
+        if (error) throw error;
 
-      if (error) throw error;
-      
-      // Se tiver senha para alterar
-      if (password) {
-          const { error: passError } = await supabase.auth.updateUser({ password: password });
-          if (passError) throw passError;
-          setPassword('');
+        // Alterar senha (apenas Web)
+        if (password) {
+            const { error: passError } = await supabase.auth.updateUser({ password: password });
+            if (passError) throw passError;
+            setPassword('');
+        }
       }
 
       setMessage({ text: 'Perfil atualizado com sucesso!', type: 'success' });
+      
+      // AVISAR O APP PARA ATUALIZAR O CABEÇALHO (IMPORTANTE)
+      if (onUpdate) {
+        onUpdate();
+      }
+
     } catch (error) {
+      console.error(error);
       setMessage({ text: 'Erro ao atualizar.', type: 'error' });
     } finally {
       setLoading(false);
@@ -141,7 +188,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
                   {avatarUrl ? (
                       <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                      <span>{fullName ? fullName.charAt(0).toUpperCase() : session.user.email?.charAt(0).toUpperCase()}</span>
+                      <span>{fullName ? fullName.charAt(0).toUpperCase() : (session.user.email?.charAt(0).toUpperCase() || 'U')}</span>
                   )}
                   
                   {/* Overlay de Loading durante Upload */}
@@ -168,7 +215,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
           <div className="text-center md:text-left z-10">
               <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">{fullName || 'Usuário VittaCash'}</h2>
               <p className="text-sm font-medium text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-1">{companyName || 'Sua Empresa'}</p>
-              <p className="text-xs text-slate-400">{session.user.email}</p>
+              <p className="text-xs text-slate-400">{session?.user?.email}</p>
           </div>
       </div>
 
@@ -221,7 +268,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
                       <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Email (Login)</label>
                       <div className="flex items-center gap-3 w-full bg-slate-100 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 rounded-2xl px-4 py-3 text-slate-500 cursor-not-allowed">
                           <Mail className="w-4 h-4" />
-                          <span className="text-sm font-medium">{session.user.email}</span>
+                          <span className="text-sm font-medium">{session?.user?.email}</span>
                       </div>
                   </div>
               </div>
@@ -240,8 +287,9 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
                         type="password" 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-800 rounded-2xl px-4 py-3 outline-none focus:border-orange-500 text-sm font-medium text-slate-700 dark:text-white transition-colors"
-                        placeholder="Deixe em branco para manter a atual"
+                        disabled={isDesktop} // Desabilita troca de senha no desktop
+                        className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-800 rounded-2xl px-4 py-3 outline-none focus:border-orange-500 text-sm font-medium text-slate-700 dark:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        placeholder={isDesktop ? "Troca de senha indisponível offline" : "Deixe em branco para manter a atual"}
                       />
                   </div>
               </div>
@@ -264,33 +312,98 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ session }) => {
               </div>
           </form>
 
-          {/* PLANO / INFO EXTRA */}
-          <div className="bg-emerald-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden flex flex-col justify-between shadow-2xl shadow-emerald-900/20 h-full min-h-[300px]">
-              <div className="absolute top-0 right-0 p-8 opacity-10"><ShieldCheck className="w-40 h-40" /></div>
-              
-              <div className="relative z-10">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-800/50 rounded-xl mb-4 border border-emerald-500/30">
-                      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                      <span className="text-[10px] font-black uppercase tracking-widest">Plano Pro</span>
-                  </div>
-                  <h3 className="text-3xl font-black tracking-tighter mb-2">VittaCash <br/>Enterprise</h3>
-                  <p className="text-emerald-200/80 text-sm font-medium max-w-xs">
-                      Sua licença vitalícia está ativa. Você tem acesso a todos os recursos de gestão financeira e relatórios avançados.
-                  </p>
-              </div>
+          {/* CARD DE PLANO (AQUI ESTÁ A MUDANÇA PARA DESKTOP) */}
+          <div className="flex flex-col gap-6">
+            {isDesktop ? (
+                // --- VERSÃO DESKTOP (LICENÇA VITALÍCIA) ---
+                <div className="bg-slate-900 dark:bg-zinc-950 p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden border border-slate-800 h-full flex flex-col justify-between">
+                    <div className="absolute top-0 right-0 p-8 opacity-5"><Laptop className="w-32 h-32 text-white" /></div>
+                    
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-3 bg-emerald-500/20 rounded-2xl text-emerald-400 border border-emerald-500/20">
+                                <Database className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-1 rounded-lg">Vitalício</span>
+                                <h3 className="text-xl font-black text-white uppercase tracking-tighter mt-1">Licença Desktop</h3>
+                            </div>
+                        </div>
 
-              <div className="relative z-10 pt-8 border-t border-emerald-800/50 mt-auto">
-                  <div className="flex justify-between items-end">
-                      <div>
-                          <p className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mb-1">Status da Conta</p>
-                          <p className="font-bold text-white flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Verificada</p>
-                      </div>
-                      <div className="text-right">
-                          <p className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mb-1">Membro desde</p>
-                          <p className="font-bold text-white">Jan, 2026</p>
-                      </div>
-                  </div>
-              </div>
+                        <div className="space-y-3 mb-8">
+                            <p className="text-slate-400 text-xs font-bold uppercase tracking-wide mb-4">Funcionalidades Ativas:</p>
+                            <div className="flex items-center gap-3 text-slate-300 text-sm font-medium"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Banco de Dados Local (SQLite)</div>
+                            <div className="flex items-center gap-3 text-slate-300 text-sm font-medium"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Acesso Offline Completo</div>
+                            <div className="flex items-center gap-3 text-slate-300 text-sm font-medium"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Sem Mensalidades</div>
+                            <div className="flex items-center gap-3 text-slate-300 text-sm font-medium"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Registros Ilimitados</div>
+                        </div>
+
+                        <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-2xl mb-6">
+                            <div className="flex items-center gap-2 mb-2 text-rose-400">
+                                <ShieldCheck className="w-5 h-5" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Licença de Uso</span>
+                            </div>
+                            <p className="text-xs text-rose-200/80 leading-relaxed font-medium">
+                                Esta licença é concedida para <strong>uso único e exclusivo</strong>. É estritamente proibida a revenda, cópia, aluguel ou comercialização deste software sem autorização expressa da A2 Solutions.
+                            </p>
+                        </div>
+
+                        <div className="border-t border-slate-800 pt-6 mt-auto">
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Suporte Técnico</p>
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-3 text-white text-sm font-bold">
+                                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs">AA</div>
+                                    <div>
+                                        <p>Aristides de Araújo</p>
+                                        <p className="text-[10px] text-slate-400 font-medium">Consultor A2 Solutions</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2 mt-2">
+                                    <a href="#" className="flex-1 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30 rounded-xl flex items-center justify-center gap-2 text-emerald-400 text-xs font-bold transition-all">
+                                        <Smartphone className="w-3.5 h-3.5" /> (34) 99840-8962
+                                    </a>
+                                    <a href="#" className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center gap-2 text-slate-300 text-xs font-bold transition-all">
+                                        <Mail className="w-3.5 h-3.5" /> suporte@a2solutions.com
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                // --- VERSÃO WEB (NUVEM) ---
+                <div className="bg-gradient-to-br from-indigo-600 to-indigo-900 p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden text-white h-full flex flex-col justify-between">
+                    <div className="absolute top-0 right-0 p-8 opacity-10"><Cloud className="w-32 h-32" /></div>
+                    
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                                <Cloud className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Plano Atual</span>
+                                <h3 className="text-xl font-black uppercase tracking-tighter mt-1">VittaCash Cloud</h3>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 mb-8">
+                            <div className="flex items-center gap-3 text-indigo-100 text-sm font-medium"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Acesso em Qualquer Lugar</div>
+                            <div className="flex items-center gap-3 text-indigo-100 text-sm font-medium"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Backup Automático</div>
+                            <div className="flex items-center gap-3 text-indigo-100 text-sm font-medium"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Sincronização em Tempo Real</div>
+                        </div>
+
+                        <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/10 mt-auto">
+                            <div className="flex items-center gap-2 mb-1 text-orange-300">
+                                <AlertTriangle className="w-4 h-4" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Migração</span>
+                            </div>
+                            <p className="text-xs text-indigo-100/80 leading-relaxed">
+                                Deseja migrar para a versão Desktop offline sem mensalidades? Entre em contato com o suporte.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
           </div>
       </div>
     </div>

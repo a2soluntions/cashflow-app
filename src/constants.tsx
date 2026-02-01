@@ -1,4 +1,3 @@
-
 import { TransactionType, TransactionStatus, Transaction, Investment } from './types';
 
 export const MOCK_TRANSACTIONS: Transaction[] = [
@@ -6,7 +5,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     id: '1',
     user_id: 'user1',
     account_id: 'acc1',
-    category_id: 'cat1',
+    category: 'Alimentação', // Estava correto
     amount: 5000,
     type: TransactionType.INCOME,
     status: TransactionStatus.COMPLETED,
@@ -19,7 +18,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     id: '2',
     user_id: 'user1',
     account_id: 'acc1',
-    category_id: 'cat2',
+    category: 'Moradia', // CORRIGIDO: De category_id para category
     amount: 1200,
     type: TransactionType.EXPENSE,
     status: TransactionStatus.COMPLETED,
@@ -32,7 +31,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     id: '3',
     user_id: 'user1',
     account_id: 'acc1',
-    category_id: 'cat3',
+    category: 'Alimentação', // CORRIGIDO: De category_id para category
     amount: 450,
     type: TransactionType.EXPENSE,
     status: TransactionStatus.COMPLETED,
@@ -45,7 +44,7 @@ export const MOCK_TRANSACTIONS: Transaction[] = [
     id: '4',
     user_id: 'user1',
     account_id: 'acc1',
-    category_id: 'cat4',
+    category: 'Eletrônicos', // CORRIGIDO: De category_id para category
     amount: 3000,
     type: TransactionType.EXPENSE,
     status: TransactionStatus.COMPLETED,
