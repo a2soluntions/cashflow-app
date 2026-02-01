@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,12 +8,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Cores baseadas na sua logo
         brand: {
-          orange: '#FF8A00', // Laranja vibrante
-          green: '#22C55E',  // Verde saudável
+          orange: '#FF8A00',
+          green: '#22C55E',
           black: '#000000',
-          dark: '#0A0A0A',   // Cinza quase preto para cards
+          dark: '#0A0A0A',
         }
       },
       fontFamily: {

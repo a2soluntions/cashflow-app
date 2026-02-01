@@ -11,6 +11,10 @@ import {
   Area, CartesianGrid, XAxis, Tooltip
 } from 'recharts';
 
+// --- IMPORTAÇÃO DA LOGO A2 (CRUCIAL PARA O .EXE) ---
+// Certifique-se de ter o arquivo 'logo-a2.png' na pasta src/assets
+import logoA2 from '../assets/logo-a2.png'; 
+
 interface FinancialAdvisorProps {
   transactions: Transaction[];
   currentBalance: number;
@@ -177,7 +181,6 @@ const FinancialAdvisor: React.FC<FinancialAdvisorProps> = ({ currentBalance }) =
                     <Quote className="w-5 h-5 text-emerald-500/50 rotate-180 shrink-0" />
                     <p className="text-sm font-medium text-slate-700 dark:text-slate-200 italic leading-snug">"{currentQuote.text}"</p>
                  </div>
-                 {/* CORREÇÃO: Mostrando o nome completo do autor */}
                  <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-500 whitespace-nowrap pl-2 border-l border-slate-200 dark:border-zinc-700">{currentQuote.author}</p>
              </div>
            )}
@@ -212,7 +215,8 @@ const FinancialAdvisor: React.FC<FinancialAdvisorProps> = ({ currentBalance }) =
                            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 lg:gap-6">
                                <div className="flex items-center gap-3">
                                    <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-xl overflow-hidden bg-black flex items-center justify-center border border-zinc-800 shadow-md">
-                                       <img src="/logo-a2.jpg" alt="A2" className="w-full h-full object-cover" />
+                                       {/* AQUI ESTÁ O AJUSTE PRINCIPAL - USA A VARIÁVEL IMPORTADA */}
+                                       <img src={logoA2} alt="A2" className="w-full h-full object-cover" />
                                    </div>
                                    <div className="text-left">
                                        <p className="text-[8px] lg:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Desenvolvido por</p>
@@ -285,8 +289,8 @@ const FinancialAdvisor: React.FC<FinancialAdvisorProps> = ({ currentBalance }) =
                                    <p className="text-[9px] font-black uppercase text-slate-400 mb-1">{item.name}</p>
                                    <h3 className="text-lg font-black text-slate-900 dark:text-white">{item.price}</h3>
                                    <div className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold ${item.up ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
-                                       {item.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                                       {item.change}
+                                           {item.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                           {item.change}
                                    </div>
                                </div>
                            ))}
