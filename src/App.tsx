@@ -438,7 +438,8 @@ const App: React.FC = () => {
     return income - expense;
   }, [transactions]);
   
-  const navButtonClass = (active: boolean) => `w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest ${active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 shadow-sm border border-emerald-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
+  // AQUI FOI O AJUSTE PRINCIPAL: gap menor (gap-3), padding menor (px-4 py-3) e fonte levemente menor (text-[11px])
+  const navButtonClass = (active: boolean) => `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-black text-[11px] uppercase tracking-widest ${active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 shadow-sm border border-emerald-200/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-100/5'}`;
   
   const investmentAllocation = useMemo(() => { 
       const allocation: Record<string, number> = {}; 
@@ -678,43 +679,54 @@ const App: React.FC = () => {
       <ConfirmModal isOpen={!!deleteData} onClose={() => setDeleteData(null)} onConfirm={handleConfirmDelete} title={`Excluir ${deleteData?.type === 'category' ? 'Categoria' : deleteData?.type === 'goal' ? 'Meta' : 'Lançamento'}?`} message="Esta ação não pode ser desfeita." />
       {isSidebarOpen && ( <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" ></div> )}
       
-      {/* BARRA LATERAL (Sidebar) */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-black lg:relative lg:translate-x-0 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-           <div className="p-8 flex flex-col h-full">
-             <div className="flex items-center justify-between mb-10">
-               <div className="flex items-center gap-4">
-                 <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center overflow-hidden">
+      {/* BARRA LATERAL (Sidebar) - VERSÃO COMPACTA E RESPONSIVA */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-black lg:relative lg:translate-x-0 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} border-r border-slate-200 dark:border-zinc-800 lg:border-none`}>
+           <div className="p-5 flex flex-col h-full"> 
+             
+             {/* LOGO - Fixa no topo */}
+             <div className="flex items-center justify-between mb-6 shrink-0">
+               <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center overflow-hidden shrink-0">
                     <img src={logoVitta} alt="VittaCash" className="w-full h-full object-cover" />
                  </div>
-                 <h1 className="text-2xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">VittaCash</h1>
+                 <h1 className="text-xl font-black tracking-tighter uppercase text-slate-900 dark:text-white">VittaCash</h1>
                </div>
                <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"><X className="w-6 h-6" /></button>
              </div>
-             <nav className="space-y-3 flex-1">
-                <button onClick={() => { setIsModalOpen(true); setSidebarOpen(false); }} className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 bg-emerald-50/50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 shadow-sm"><Plus className="w-5 h-5" /><span>Lançamento</span></button>
+
+             {/* NAV - Com rolagem se a tela for pequena */}
+             <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-2">
+                
+                <button onClick={() => { setIsModalOpen(true); setSidebarOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 mb-4 rounded-xl transition-all font-black text-[11px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 bg-emerald-50/50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 shadow-sm"><Plus className="w-4 h-4" /><span>Lançamento</span></button>
 
                 {/* --- BOTÃO SECRETO DO DONO --- */}
                 {isMasterUser && (
-                   <button onClick={() => { setActiveTab('admin'); setSidebarOpen(false); }} className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest border border-amber-500/20 ${activeTab === 'admin' ? 'bg-amber-500/10 text-amber-500' : 'text-amber-600 hover:bg-amber-500/5'}`}>
-                      <ShieldAlert className="w-5 h-5" />
+                   <button onClick={() => { setActiveTab('admin'); setSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-black text-[11px] uppercase tracking-widest border border-amber-500/20 ${activeTab === 'admin' ? 'bg-amber-500/10 text-amber-500' : 'text-amber-600 hover:bg-amber-500/5'}`}>
+                      <ShieldAlert className="w-4 h-4" />
                       <span>Painel Admin</span>
                    </button>
                 )}
-                {/* ----------------------------- */}
-
+                
                 <div className="py-2"><MonthSelector currentDate={currentDate} onMonthChange={setCurrentDate} /></div>
-                <div className="h-px bg-slate-200 dark:bg-zinc-800 my-4 opacity-30"></div>
-                <button onClick={() => { setActiveTab('dashboard'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'dashboard')}><LayoutDashboard className="w-5 h-5" /><span>Dashboard</span></button>
-                <button onClick={() => { setActiveTab('ajuda'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'ajuda')}><GraduationCap className="w-5 h-5" /><span>Consultor</span></button>
-                <button onClick={() => { setActiveTab('categorias'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'categorias')}><Tag className="w-5 h-5" /><span>Categorias</span></button>
-                <button onClick={() => { setActiveTab('metas'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'metas')}><Target className="w-5 h-5" /><span>Metas</span></button>
-                <button onClick={() => { setActiveTab('investimentos'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'investimentos')}><LineChart className="w-5 h-5" /><span>Aplicações</span></button>
-                <button onClick={() => { setActiveTab('contas'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'contas')}><CalendarDays className="w-5 h-5" /><span>Contas</span></button>
-                <button onClick={() => { setActiveTab('transacoes'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'transacoes')}><ArrowLeftRight className="w-5 h-5" /><span>Histórico</span></button>
+                
                 <div className="h-px bg-slate-200 dark:bg-zinc-800 my-2 opacity-30"></div>
-                <button onClick={() => { setActiveTab('perfil'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'perfil')}><Settings className="w-5 h-5" /><span>Configurações</span></button>
+                
+                {/* BOTÕES DE NAVEGAÇÃO - Compactos */}
+                <button onClick={() => { setActiveTab('dashboard'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'dashboard')}><LayoutDashboard className="w-4 h-4" /><span>Dashboard</span></button>
+                <button onClick={() => { setActiveTab('ajuda'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'ajuda')}><GraduationCap className="w-4 h-4" /><span>Consultor</span></button>
+                <button onClick={() => { setActiveTab('categorias'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'categorias')}><Tag className="w-4 h-4" /><span>Categorias</span></button>
+                <button onClick={() => { setActiveTab('metas'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'metas')}><Target className="w-4 h-4" /><span>Metas</span></button>
+                <button onClick={() => { setActiveTab('investimentos'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'investimentos')}><LineChart className="w-4 h-4" /><span>Aplicações</span></button>
+                <button onClick={() => { setActiveTab('contas'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'contas')}><CalendarDays className="w-4 h-4" /><span>Contas</span></button>
+                <button onClick={() => { setActiveTab('transacoes'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'transacoes')}><ArrowLeftRight className="w-4 h-4" /><span>Histórico</span></button>
+                
+                <div className="h-px bg-slate-200 dark:bg-zinc-800 my-2 opacity-30"></div>
+                
+                <button onClick={() => { setActiveTab('perfil'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'perfil')}><Settings className="w-4 h-4" /><span>Configurações</span></button>
              </nav>
-             <button onClick={handleLogout} className="flex items-center gap-4 px-5 py-4 rounded-2xl text-slate-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-black text-[12px] uppercase tracking-widest mt-auto"><LogOut className="w-5 h-5" /><span>Sair</span></button>
+
+             {/* BOTÃO SAIR - Fixo no rodapé */}
+             <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 mt-4 rounded-xl text-slate-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-black text-[11px] uppercase tracking-widest shrink-0"><LogOut className="w-4 h-4" /><span>Sair</span></button>
            </div>
       </aside>
 
