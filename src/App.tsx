@@ -6,7 +6,7 @@ import {
   Calendar as CalendarIcon, Tag, Edit3, Target, LogOut, Wallet, 
   PieChart as PieChartIcon, Sun, Moon, AlertCircle, 
   ArrowUpRight, ArrowDownRight, Layers, BarChart3, 
-  CheckCircle2, Clock, Settings, GraduationCap, Search
+  CheckCircle2, Clock, Settings, GraduationCap, Search, ShieldAlert 
 } from 'lucide-react';
 import { 
   ResponsiveContainer,
@@ -16,7 +16,6 @@ import { supabase } from './supabase';
 import { Session } from '@supabase/supabase-js';
 import { TransactionType, TransactionStatus, Transaction, Investment, Category, Goal } from './types';
 
-// --- IMPORTAÇÃO CORRETA DA LOGO ---
 import logoVitta from './assets/logo.png'; 
 
 // Componentes
@@ -31,26 +30,27 @@ import DashboardHome from './components/DashboardHome';
 import ProfileSettings from './components/ProfileSettings';
 import FinancialAdvisor from './components/FinancialAdvisor';
 import Auth from './components/Auth';
-
-// --- IMPORTANTE: O GUARDIÃO DA LICENÇA ---
 import LicenseGuard from './components/LicenseGuard';
+import AdminDashboard from './components/AdminDashboard'; 
 
 const OPCOES_PARCELAS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24, 36, 48, 60, 72];
 const CORES_VITTACASH = ['#22C55E', '#FF8A00', '#06b6d4', '#8b5cf6', '#f43f5e', '#eab308'];
+
+// --- CONFIGURAÇÃO DO EMAIL MESTRE ---
+const ADMIN_EMAIL = 'a2soluntions@gmail.com'; 
 
 // --- VERIFICAÇÃO DO MODO DESKTOP ---
 const isDesktop = !!(window as any).electronAPI;
 
 const App: React.FC = () => {
   // --- ESTADOS GERAIS ---
-  // ALTERAÇÃO IMPORTANTE: Começa como 'false' (bloqueado) para forçar a verificação da licença
   const [isLicensed, setIsLicensed] = useState(false); 
   
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'transacoes' | 'contas' | 'investimentos' | 'categorias' | 'metas' | 'perfil' | 'ajuda'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'transacoes' | 'contas' | 'investimentos' | 'categorias' | 'metas' | 'perfil' | 'ajuda' | 'admin'>('dashboard');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
@@ -479,15 +479,27 @@ const App: React.FC = () => {
   const modalAccentColor = newTx.type === TransactionType.EXPENSE ? 'orange' : 'emerald';
   const modalBorderClass = newTx.type === TransactionType.EXPENSE ? 'focus:border-orange-500' : 'focus:border-emerald-500';
 
-  // 1. PRIMEIRO: Verifica se está logado (para Web)
+  // =========================================================================
+  // LOGICA DE SEGURANÇA E ADMIN
+  // =========================================================================
+
+  // 1. PRIMEIRO: Verifica se está logado
   if (!session && !isDesktop) return <Auth />;
 
-  // 2. SEGUNDO: Verifica se tem a Licença (A catraca do SaaS)
-  if (!isLicensed) {
+  // 2. VERIFICA SE É O DONO
+  const isMasterUser = session?.user?.email === ADMIN_EMAIL;
+
+  // 3. SEGUNDO: Verifica se tem a Licença (SE NÃO FOR O DONO)
+  // O dono (isMasterUser) pula essa verificação
+  if (!isLicensed && !isMasterUser) {
     return <LicenseGuard onUnlock={() => setIsLicensed(true)} />;
   }
 
+  // 4. RENDERIZAÇÃO
   const renderContent = () => {
+    // Se clicou na aba Admin, mostra o painel
+    if (activeTab === 'admin') return <AdminDashboard />;
+
     if (activeTab === 'dashboard') return <DashboardHome transactions={transactions} investments={investments} filteredTransactions={filteredTransactions} currentDate={currentDate} />;
     
     if (activeTab === 'perfil') return <ProfileSettings session={session} onUpdate={fetchData} />;
@@ -680,6 +692,16 @@ const App: React.FC = () => {
              </div>
              <nav className="space-y-3 flex-1">
                 <button onClick={() => { setIsModalOpen(true); setSidebarOpen(false); }} className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 bg-emerald-50/50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 shadow-sm"><Plus className="w-5 h-5" /><span>Lançamento</span></button>
+
+                {/* --- BOTÃO SECRETO DO DONO --- */}
+                {isMasterUser && (
+                   <button onClick={() => { setActiveTab('admin'); setSidebarOpen(false); }} className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all font-black text-[12px] uppercase tracking-widest border border-amber-500/20 ${activeTab === 'admin' ? 'bg-amber-500/10 text-amber-500' : 'text-amber-600 hover:bg-amber-500/5'}`}>
+                      <ShieldAlert className="w-5 h-5" />
+                      <span>Painel Admin</span>
+                   </button>
+                )}
+                {/* ----------------------------- */}
+
                 <div className="py-2"><MonthSelector currentDate={currentDate} onMonthChange={setCurrentDate} /></div>
                 <div className="h-px bg-slate-200 dark:bg-zinc-800 my-4 opacity-30"></div>
                 <button onClick={() => { setActiveTab('dashboard'); setSidebarOpen(false); }} className={navButtonClass(activeTab === 'dashboard')}><LayoutDashboard className="w-5 h-5" /><span>Dashboard</span></button>
@@ -701,6 +723,9 @@ const App: React.FC = () => {
            <div className="flex items-center gap-6"><button className="lg:hidden p-3 text-slate-500 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm" onClick={() => setSidebarOpen(true)}><Menu className="w-6 h-6" /></button><div className="hidden lg:flex items-center gap-2"><span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] opacity-50">Portal Financeiro Inteligente</span></div></div>
            <div className="flex-1"></div>
            <div className="flex items-center gap-3">
+              {/* ETIQUETA DE ADMIN */}
+              {isMasterUser && <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest mr-4">Modo Administrador</span>}
+              
               {urgencies.delayedCount > 0 && (<button onClick={() => setActiveTab('contas')} className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl hover:bg-rose-500/20 transition-all shadow-sm group"><AlertCircle className="w-4 h-4 group-hover:animate-shake" /><span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">{urgencies.delayedCount} Atrasos</span></button>)}
               <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-3.5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all shadow-sm active:scale-90">{theme === 'dark' ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5" />}</button>
               <div className="flex items-center gap-4 px-4 py-2 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 shadow-sm transition-all hover:border-emerald-500/30">
