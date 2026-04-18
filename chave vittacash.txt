@@ -1,0 +1,5 @@
+chave do VittaCash 
+
+  VITTA-PRO-2026-X79
+
+%appdata%

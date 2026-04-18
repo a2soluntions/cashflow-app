@@ -2,36 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === GLOBAL === */
-body {
-  @apply font-inter antialiased transition-colors duration-300;
-}
-
-/* === MODO CLARO (Suave / Off-White) === */
-:root {
-  color-scheme: light;
-}
-body {
-  /* Fundo cinza bem clarinho, evita o branco gritante */
-  @apply bg-slate-50 text-slate-700; 
-}
-
-/* === MODO ESCURO (Black Piano) === */
-.dark body {
-  @apply bg-black text-zinc-300;
-}
-
-/* === SCROLLBAR PERSONALIZADA === */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-zinc-800 rounded-full;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400 dark:bg-zinc-700;
+@layer base {
+  body {
+    @apply transition-colors duration-500;
+  }
+  
+  /* Garante que o fundo mude mesmo fora da div principal */
+  html.dark body {
+    background-color: #09090b;
+  }
+  
+  html.light body {
+    background-color: #f8fafc;
+  }
 }

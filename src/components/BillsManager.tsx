@@ -1,159 +1,248 @@
 import React, { useState, useEffect } from 'react';
-import { Transaction } from '../types';
-import { CalendarClock, CheckCircle2, AlertCircle, Plus, Trash2, Edit3 } from 'lucide-react';
+import { 
+  CalendarDays, ArrowUpCircle, ArrowDownCircle, CheckCircle2, 
+  AlertCircle, Search, Calendar, Filter 
+} from 'lucide-react';
 
-interface BillsManagerProps {
-  transactions: Transaction[];
-  onDelete: (id: string) => void;
-  onEdit: (transaction: Transaction) => void;
-  onAddClick: () => void;
-  onPay: (id: string) => void;
+interface Transaction {
+  id: string;
+  type: 'income' | 'expense';
+  amount: number;
+  description: string;
+  category: string;
+  date: string;
+  status: 'COMPLETED' | 'PENDING';
+  installment?: { current: number; total: number };
 }
 
-const BillsManager: React.FC<BillsManagerProps> = ({ transactions, onDelete, onEdit, onAddClick, onPay }) => {
-  const [filter, setFilter] = useState<'all' | 'late' | 'today'>('all');
-  const [localTransactions, setLocalTransactions] = useState<Transaction[]>(transactions);
+export default function BillsManager() {
+  const [activeTab, setActiveTab] = useState<'expense' | 'income'>('expense');
+  const [bills, setBills] = useState<Transaction[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
+  // Carrega e Filtra (Apenas PENDING) do novo Cofre PRO
   useEffect(() => {
-    setLocalTransactions(transactions);
-  }, [transactions]);
+    const loadData = () => {
+        const saved = localStorage.getItem('vittacash_pro_transactions');
+        if (saved) {
+            const allTxs: Transaction[] = JSON.parse(saved);
+            // Filtra apenas o que está Pendente
+            const pending = allTxs.filter(t => t.status === 'PENDING');
+            // Ordena por data (mais antigas/próximas primeiro)
+            pending.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            setBills(pending);
+        }
+    };
+    loadData();
+    
+    window.addEventListener('storage', loadData);
+    return () => window.removeEventListener('storage', loadData);
+  }, []);
 
-  const getFilteredBills = () => {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    const sorted = [...localTransactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    return sorted.filter(t => {
-      const tDate = new Date(t.date + 'T12:00:00');
-      if (filter === 'late') return tDate < today;
-      if (filter === 'today') {
-        return tDate.getDate() === today.getDate() && 
-               tDate.getMonth() === today.getMonth() && 
-               tDate.getFullYear() === today.getFullYear();
+  const handleMarkAsPaid = (id: string) => {
+      const saved = localStorage.getItem('vittacash_pro_transactions');
+      if (saved) {
+          const allTxs: Transaction[] = JSON.parse(saved);
+          const updatedTxs = allTxs.map(t => 
+              t.id === id ? { ...t, status: 'COMPLETED' } : t
+          );
+          
+          localStorage.setItem('vittacash_pro_transactions', JSON.stringify(updatedTxs));
+          setBills(prev => prev.filter(b => b.id !== id));
+          window.dispatchEvent(new Event('storage')); // Avisa o resto do app para atualizar
       }
-      return true;
-    });
   };
 
-  const filteredBills = getFilteredBills();
-  const totalValue = filteredBills.reduce((acc, t) => acc + t.amount, 0);
+  const filteredBills = bills.filter(b => 
+      b.type === activeTab && 
+      b.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalValue = filteredBills.reduce((acc, b) => acc + b.amount, 0);
+
+  const formatCurrency = (val: number) => 
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+  const formatDate = (dateString: string) => {
+      const [year, month, day] = dateString.split('-');
+      return `${day}/${month}`; 
+  };
 
   return (
-    <div className="h-full flex flex-col gap-6 animate-in fade-in pb-20 lg:pb-0 overflow-hidden">
+    <div className="h-full w-full flex flex-col gap-4 overflow-hidden font-sans">
       
-      {/* CABEÇALHO */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white dark:bg-zinc-900 p-5 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-zinc-800 shrink-0">
-        <div className="flex items-center gap-4 w-full md:w-auto">
-           <div className="p-3 bg-orange-100 dark:bg-orange-500/10 rounded-2xl">
-              <CalendarClock className="w-6 h-6 text-orange-600 dark:text-orange-500" />
+      {/* 🔝 CABEÇALHO AJUSTADO */}
+      <div className="flex justify-between items-end shrink-0 px-2 h-[8%] min-h-[60px]">
+        <div>
+           <div className="flex items-center gap-2 mb-1">
+              <div className={`w-2 h-2 rounded-full animate-pulse ${activeTab === 'expense' ? 'bg-rose-500 shadow-rose-500/50' : 'bg-emerald-500 shadow-emerald-500/50'} shadow-lg`}/>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-white/60">
+                Gestão de Vencimentos
+              </span>
            </div>
-           <div>
-              <h2 className="text-xs font-black uppercase tracking-widest text-slate-500">A Pagar</h2>
-              {/* Formatação corrigida no total também */}
-              <p className="text-xl font-black text-slate-900 dark:text-white">
-                {totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </p>
-           </div>
+           <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter flex items-center gap-3">
+             {activeTab === 'expense' ? 'Contas a Pagar' : 'Valores a Receber'}
+           </h2>
         </div>
-        
-        <div className="flex items-center gap-2 bg-slate-100 dark:bg-black p-1.5 rounded-2xl w-full md:w-auto overflow-x-auto">
-           <div className="flex bg-white dark:bg-zinc-900 rounded-xl shadow-sm p-1 flex-1 md:flex-none justify-between">
-               <button onClick={() => setFilter('all')} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all whitespace-nowrap ${filter === 'all' ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600'}`}>Todas</button>
-               <button onClick={() => setFilter('today')} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all whitespace-nowrap ${filter === 'today' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-500' : 'text-slate-400 hover:text-emerald-500'}`}>Hoje</button>
-               <button onClick={() => setFilter('late')} className={`px-3 py-2 rounded-lg text-[9px] font-black uppercase transition-all whitespace-nowrap ${filter === 'late' ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-500' : 'text-slate-400 hover:text-orange-500'}`}>Atrasadas</button>
-           </div>
-           <button onClick={onAddClick} className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-md transition-all active:scale-95">
-             <Plus className="w-5 h-5" />
-           </button>
+
+        {/* Toggle de Abas */}
+        <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/10">
+            <button 
+                onClick={() => setActiveTab('expense')}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2
+                    ${activeTab === 'expense' 
+                    ? 'bg-white text-rose-600 shadow-lg dark:bg-rose-500 dark:text-white' 
+                    : 'text-slate-400 hover:text-rose-500 dark:text-white/40'}
+                `}
+            >
+                <ArrowDownCircle size={12} /> A Pagar
+            </button>
+            <button 
+                onClick={() => setActiveTab('income')}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2
+                    ${activeTab === 'income' 
+                    ? 'bg-white text-emerald-600 shadow-lg dark:bg-emerald-500 dark:text-white' 
+                    : 'text-slate-400 hover:text-emerald-500 dark:text-white/40'}
+                `}
+            >
+                <ArrowUpCircle size={12} /> A Receber
+            </button>
         </div>
       </div>
 
-      {/* LISTA DE CONTAS */}
-      <div className="flex-1 bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-zinc-800 overflow-hidden flex flex-col min-h-0">
-         <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
-             <table className="w-full text-left border-collapse">
-                <thead className="sticky top-0 bg-orange-50 dark:bg-orange-900/10 z-10 rounded-t-2xl">
-                   <tr>
-                      <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 rounded-tl-2xl">Descrição</th>
-                      <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 hidden md:table-cell">Categoria</th>
-                      <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 hidden md:table-cell">Vencimento</th>
-                      <th className="py-4 px-4 text-[9px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400 text-right">Valor</th>
-                      <th className="py-4 px-4 w-[100px] rounded-tr-2xl"></th>
-                   </tr>
-                </thead>
+      {/* ⚡ CONTEÚDO PRINCIPAL */}
+      <div className="flex-1 min-h-0 grid grid-cols-12 gap-6 pb-4">
+        
+        {/* COLUNA ESQUERDA: Resumo e Filtros */}
+        <div className="col-span-12 md:col-span-4 flex flex-col gap-4 min-h-0">
+            {/* Card de Total */}
+            <div className={`p-6 rounded-[2rem] shadow-xl border relative overflow-hidden group transition-all shrink-0
+                bg-white border-slate-200
+                dark:bg-black/20 dark:backdrop-blur-xl dark:border-white/10
+            `}>
+                <div className={`absolute top-0 right-0 p-32 rounded-full blur-[80px] opacity-20 pointer-events-none transition-colors duration-500
+                    ${activeTab === 'expense' ? 'bg-rose-500' : 'bg-emerald-500'}
+                `} />
+                
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/60 mb-2">Total Pendente</p>
+                <h1 className={`text-3xl font-black tracking-tighter ${activeTab === 'expense' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    {formatCurrency(totalValue)}
+                </h1>
+                <p className="text-[9px] font-bold uppercase mt-2 text-slate-400 dark:text-white/30">
+                    {filteredBills.length} lançamentos futuros
+                </p>
+            </div>
 
-                <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-                   {filteredBills.map(t => {
-                      const tDate = new Date(t.date + 'T12:00:00');
-                      const today = new Date();
-                      today.setHours(0,0,0,0);
-                      const isLate = tDate < today;
-                      const isToday = tDate.getTime() === today.getTime();
-
-                      return (
-                        <tr key={t.id} className="group hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
-                           <td className="py-3 px-4">
-                              <div className="flex items-center gap-3">
-                                 <div className={`p-2 rounded-xl shrink-0 ${isLate ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-600' : 'bg-slate-100 dark:bg-zinc-800 text-slate-500'}`}>
-                                    {isLate ? <AlertCircle className="w-4 h-4" /> : <CalendarClock className="w-4 h-4" />}
-                                 </div>
-                                 <div className="flex flex-col min-w-0">
-                                     <span className="font-medium text-sm text-slate-700 dark:text-slate-200 truncate max-w-[130px] md:max-w-none">{t.description}</span>
-                                     <div className="md:hidden flex items-center gap-2 mt-0.5">
-                                         <span className={`text-[10px] font-medium ${isLate ? 'text-orange-500' : 'text-slate-400'}`}>
-                                            {tDate.toLocaleDateString('pt-BR', {day: '2-digit', month: 'short'})}
-                                         </span>
-                                         {isLate && <span className="text-[9px] bg-orange-100 text-orange-600 px-1.5 rounded-full">Atrasada</span>}
-                                     </div>
-                                 </div>
-                              </div>
-                           </td>
-                           <td className="py-3 px-4 hidden md:table-cell">
-                              <span className="text-[10px] font-bold uppercase text-slate-400 bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded-lg">{t.category}</span>
-                           </td>
-                           <td className="py-3 px-4 hidden md:table-cell">
-                              <div className="flex items-center gap-2">
-                                 <span className={`text-xs font-normal ${isLate ? 'text-orange-500' : isToday ? 'text-emerald-500' : 'text-slate-500'}`}>
-                                    {tDate.toLocaleDateString('pt-BR', {day: '2-digit', month: 'short'})}
-                                 </span>
-                                 {isLate && <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>}
-                              </div>
-                           </td>
-                           <td className="py-3 px-4 text-right">
-                              {/* AQUI ESTÁ A MUDANÇA: FORMATAÇÃO DE MOEDA PT-BR */}
-                              <span className="font-bold text-sm text-slate-900 dark:text-white whitespace-nowrap">
-                                {t.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                              </span>
-                           </td>
-                           <td className="py-3 px-4 text-right">
-                              <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                 <button onClick={() => onPay(t.id)} className="p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600 rounded-lg transition-colors" title="Pagar">
-                                    <CheckCircle2 className="w-4 h-4" />
-                                 </button>
-                                 <button onClick={() => onEdit(t)} className="p-2 hover:bg-slate-50 dark:hover:bg-zinc-700 text-slate-500 rounded-lg transition-colors" title="Editar">
-                                    <Edit3 className="w-4 h-4" />
-                                 </button>
-                                 <button onClick={() => onDelete(t.id)} className="p-2 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-500 rounded-lg transition-colors" title="Excluir">
-                                    <Trash2 className="w-4 h-4" />
-                                 </button>
-                              </div>
-                           </td>
-                        </tr>
-                      );
-                   })}
-                </tbody>
-             </table>
-             {filteredBills.length === 0 && (
-                <div className="text-center py-20 text-slate-400 text-sm font-medium">
-                    {filter === 'all' ? 'Tudo pago! Nenhuma conta pendente.' : 
-                     filter === 'today' ? 'Nenhuma conta para hoje.' : 'Nenhuma conta atrasada.'}
+            {/* Filtros / Busca */}
+            <div className="flex-1 p-6 rounded-[2rem] shadow-xl border flex flex-col gap-4 min-h-0
+                 bg-white border-slate-200
+                 dark:bg-black/20 dark:backdrop-blur-xl dark:border-white/10
+            ">
+                <div className="relative group shrink-0">
+                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input 
+                        type="text" 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Buscar conta..." 
+                        className="w-full pl-10 pr-4 py-3 rounded-xl text-xs font-bold uppercase outline-none border transition-all
+                            bg-slate-50 border-slate-100 text-slate-600 focus:border-indigo-500
+                            dark:bg-white/5 dark:border-white/5 dark:text-white dark:focus:border-white/20
+                        "
+                    />
                 </div>
-             )}
-         </div>
+                
+                {/* Dica Visual */}
+                <div className="mt-auto p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 flex gap-3 items-start overflow-hidden">
+                    <AlertCircle size={20} className="text-indigo-500 shrink-0 mt-0.5"/>
+                    <div>
+                        <p className="text-[9px] font-black uppercase text-indigo-500 mb-1">Dica Pro</p>
+                        <p className="text-[9px] text-slate-500 dark:text-white/60 leading-relaxed">
+                            Use o botão ao lado da conta para confirmar o pagamento.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* COLUNA DIREITA: Lista de Contas */}
+        <div className="col-span-12 md:col-span-8 p-6 rounded-[2rem] shadow-xl border flex flex-col min-h-0
+             bg-white border-slate-200
+             dark:bg-black/20 dark:backdrop-blur-xl dark:border-white/10
+        ">
+            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
+                {filteredBills.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center opacity-40">
+                        <CheckCircle2 size={40} className={`mb-3 ${activeTab === 'expense' ? 'text-rose-300' : 'text-emerald-300'}`} />
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40">
+                            {searchTerm ? 'Nenhum resultado' : 'Tudo em dia por aqui!'}
+                        </p>
+                    </div>
+                ) : (
+                    filteredBills.map((bill) => {
+                        const isOverdue = new Date(bill.date) < new Date() && new Date(bill.date).toDateString() !== new Date().toDateString();
+                        
+                        return (
+                        <div key={bill.id} className="group flex items-center justify-between p-3 rounded-2xl border transition-all hover:scale-[1.01]
+                            bg-slate-50 border-slate-100 hover:bg-white hover:shadow-md
+                            dark:bg-white/5 dark:border-transparent dark:hover:bg-white/10 dark:hover:border-white/10
+                        ">
+                            {/* Data e Ícone */}
+                            <div className="flex items-center gap-4">
+                                <div className={`flex flex-col items-center justify-center w-12 h-12 rounded-xl border
+                                    ${isOverdue 
+                                        ? 'bg-rose-100 border-rose-200 text-rose-600 dark:bg-rose-500/20 dark:border-rose-500/30 dark:text-rose-400' 
+                                        : 'bg-white border-slate-200 text-slate-500 dark:bg-white/5 dark:border-white/10 dark:text-white/60'}
+                                `}>
+                                    <span className="text-[9px] font-black uppercase">{formatDate(bill.date).split('/')[1]}</span> {/* Mês */}
+                                    <span className="text-sm font-black">{formatDate(bill.date).split('/')[0]}</span> {/* Dia */}
+                                </div>
+                                
+                                <div>
+                                    <h4 className="text-xs font-black text-slate-700 dark:text-white uppercase mb-0.5">{bill.description}</h4>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40 px-1.5 py-0.5 rounded border border-slate-200 dark:border-white/10">
+                                            {bill.category}
+                                        </span>
+                                        {bill.installment && (
+                                            <span className="text-[8px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-50 dark:bg-indigo-500/20 px-1.5 py-0.5 rounded">
+                                                {bill.installment.current}/{bill.installment.total}
+                                            </span>
+                                        )}
+                                        {isOverdue && (
+                                            <span className="text-[8px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400 animate-pulse">
+                                                Atrasado
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Valor e Ação */}
+                            <div className="flex items-center gap-4">
+                                <span className={`text-sm font-black ${activeTab === 'expense' ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                    {formatCurrency(bill.amount)}
+                                </span>
+                                
+                                <button 
+                                    onClick={() => handleMarkAsPaid(bill.id)}
+                                    title={activeTab === 'expense' ? "Pagar Conta" : "Confirmar Recebimento"}
+                                    className={`p-3 rounded-xl transition-all shadow-sm active:scale-95
+                                        ${activeTab === 'expense'
+                                            ? 'bg-white border border-rose-100 text-rose-300 hover:bg-rose-500 hover:text-white hover:border-rose-500 dark:bg-white/5 dark:border-white/5 dark:hover:bg-rose-500'
+                                            : 'bg-white border border-emerald-100 text-emerald-300 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 dark:bg-white/5 dark:border-white/5 dark:hover:bg-emerald-500'}
+                                    `}
+                                >
+                                    <CheckCircle2 size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    )})
+                )}
+            </div>
+        </div>
+
       </div>
     </div>
   );
-};
-
-export default BillsManager;
+}

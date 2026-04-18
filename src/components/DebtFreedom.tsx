@@ -1,0 +1,357 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  ShieldAlert, Plus, Trash2, Target, MessageSquare, Copy, 
+  TrendingUp, Calculator, PieChart as PieIcon, Wallet
+} from 'lucide-react';
+import { 
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip 
+} from 'recharts';
+// --- TIPOS ---
+interface Debt {
+  id: number;
+  name: string;
+  amount: number;
+  interest: number;
+}
+
+type StrategyType = 'avalanche' | 'snowball';
+type TabType = 'debt' | 'invest';
+type ProfileType = 'conservative' | 'moderate' | 'bold';
+
+const DebtFreedom = () => {
+  // --- ESTADOS GERAIS ---
+  const [activeTab, setActiveTab] = useState<TabType>('debt');
+
+  // --- ESTADOS DE DÍVIDAS ---
+  const [debts, setDebts] = useState<Debt[]>(() => {
+    const saved = localStorage.getItem('vittacash_debts_desktop');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [strategy, setStrategy] = useState<StrategyType>('avalanche');
+  const [newName, setNewName] = useState('');
+  const [newAmount, setNewAmount] = useState('');
+  const [newInterest, setNewInterest] = useState('');
+  const [activeScript, setActiveScript] = useState<string | null>(null);
+
+  // --- ESTADOS DE INVESTIMENTO ---
+  const [invMonthly, setInvMonthly] = useState(500);
+  const [invYears, setInvYears] = useState(10);
+  const [invRate, setInvRate] = useState(10); // 10% a.a.
+  const [profile, setProfile] = useState<ProfileType>('conservative');
+
+  // --- EFEITOS ---
+  useEffect(() => {
+    localStorage.setItem('vittacash_debts_desktop', JSON.stringify(debts));
+  }, [debts]);
+
+  // --- LÓGICA DE DÍVIDAS ---
+  const handleAddDebt = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName || !newAmount) return;
+    setDebts([...debts, { id: Date.now(), name: newName, amount: Number(newAmount), interest: Number(newInterest) }]);
+    setNewName(''); setNewAmount(''); setNewInterest('');
+  };
+
+  const sortedDebts = [...debts].sort((a, b) => strategy === 'avalanche' ? b.interest - a.interest : a.amount - b.amount);
+  const totalDebt = debts.reduce((a, b) => a + b.amount, 0);
+  const avgDebtInterest = debts.length > 0 ? debts.reduce((a, b) => a + b.interest, 0) / debts.length : 0;
+
+  // --- LÓGICA DE INVESTIMENTO ---
+  const investmentResult = useMemo(() => {
+    const rateMonth = Math.pow(1 + (invRate / 100), 1 / 12) - 1;
+    const months = invYears * 12;
+    
+    // Fórmula Juros Compostos com Aporte Mensal (FV)
+    // FV = P * (((1 + r)^n - 1) / r) * (1+r) (para aportes no início do período)
+    const total = invMonthly * ( (Math.pow(1 + rateMonth, months) - 1) / rateMonth ) * (1 + rateMonth);
+    const invested = invMonthly * months;
+    const interest = total - invested;
+
+    return { total: total || 0, invested: invested || 0, interest: interest || 0 };
+  }, [invMonthly, invYears, invRate]);
+
+  const allocationData = useMemo(() => {
+    if (profile === 'conservative') {
+      return [
+        { name: 'Tesouro Selic/CDB', value: 80, color: '#10b981' },
+        { name: 'LCI/LCA (Isento)', value: 20, color: '#34d399' }
+      ];
+    } else if (profile === 'moderate') {
+      return [
+        { name: 'Renda Fixa', value: 50, color: '#10b981' },
+        { name: 'Crédito Privado', value: 30, color: '#3b82f6' },
+        { name: 'FIIs/Ações', value: 20, color: '#f59e0b' }
+      ];
+    } else {
+      return [
+        { name: 'Reserva', value: 30, color: '#94a3b8' },
+        { name: 'IPCA+', value: 30, color: '#3b82f6' },
+        { name: 'Renda Variável', value: 40, color: '#8b5cf6' }
+      ];
+    }
+  }, [profile]);
+
+  // Scripts
+  const scriptsText = {
+    discount: "Olá,\n\nEstou entrando em contato para negociar a quitação do contrato [Número]. Tenho interesse em regularizar minha situação e possuo um valor para pagamento à vista.\n\nQual o desconto máximo para quitação total hoje?",
+    parcel: "Prezados,\n\nGostaria de propor um parcelamento. Reconheço a dívida, mas os juros atuais inviabilizam o pagamento mensal.\n\nProponho uma entrada de R$ [Valor] e parcelas fixas que caibam no meu orçamento, sem juros abusivos.",
+    fees: "Olá,\n\nNotei a incidência de juros excessivos na minha fatura.\n\nSolicito o recálculo da dívida considerando apenas o valor principal e correção monetária justa (INPC), retirando juros de mora acumulados."
+  };
+
+  const DEBT_COLORS = ['#ef4444', '#f97316', '#f59e0b', '#8b5cf6', '#3b82f6', '#10b981'];
+
+  return (
+    <div className="animate-in fade-in zoom-in-95 h-full flex flex-col gap-6 p-1 pb-10">
+      
+      {/* HEADER + TABS */}
+      <div className="flex flex-col sm:flex-row justify-between items-center border-b border-slate-100 dark:border-zinc-800 pb-4 gap-4">
+        <div>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Wallet className="w-6 h-6 text-emerald-600" />
+            Gestão & Futuro
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Resolva o passado ou planeje o futuro.</p>
+        </div>
+
+        <div className="flex bg-slate-100 dark:bg-zinc-900 p-1 rounded-xl">
+          <button 
+            onClick={() => setActiveTab('debt')}
+            className={`px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'debt' ? 'bg-white dark:bg-zinc-800 text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+          >
+            <ShieldAlert className="w-4 h-4"/> Sair das Dívidas
+          </button>
+          <button 
+            onClick={() => setActiveTab('invest')}
+            className={`px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'invest' ? 'bg-white dark:bg-zinc-800 text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+          >
+            <TrendingUp className="w-4 h-4"/> Começar a Investir
+          </button>
+        </div>
+      </div>
+
+      {/* ======================= */}
+      {/* ABA 1: SAIR DAS DÍVIDAS */}
+      {/* ======================= */}
+      {activeTab === 'debt' && (
+        <div className="grid grid-cols-12 gap-6 animate-in slide-in-from-bottom-4 duration-500">
+          
+          {/* Coluna Esquerda: Cadastro */}
+          <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-rose-100 dark:border-rose-900/20 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-rose-500"></div>
+                <h3 className="font-bold text-slate-700 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                  <Plus className="w-4 h-4 text-rose-500"/> Cadastrar Pendência
+                </h3>
+                <form onSubmit={handleAddDebt} className="space-y-4">
+                    <input type="text" placeholder="Nome (Ex: Cartão Visa)" value={newName} onChange={e => setNewName(e.target.value)} className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-500 dark:text-white" />
+                    <div className="grid grid-cols-2 gap-3">
+                        <input type="number" placeholder="Valor (R$)" value={newAmount} onChange={e => setNewAmount(e.target.value)} className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-500 dark:text-white" />
+                        <input type="number" placeholder="Juros %" value={newInterest} onChange={e => setNewInterest(e.target.value)} className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-500 dark:text-white" />
+                    </div>
+                    <button className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-rose-500/20">Adicionar</button>
+                </form>
+            </div>
+
+            {/* Card Totais */}
+            <div className="bg-rose-50 dark:bg-rose-900/10 p-6 rounded-3xl border border-rose-100 dark:border-rose-900/30 flex justify-between items-center">
+               <div>
+                 <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase">Total Devido</p>
+                 <p className="text-2xl font-black text-rose-700 dark:text-rose-500">R$ {totalDebt.toLocaleString()}</p>
+               </div>
+               <div className="text-right">
+                 <p className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase">Juros Médio</p>
+                 <p className="text-xl font-black text-rose-700 dark:text-rose-500">{avgDebtInterest.toFixed(1)}%</p>
+               </div>
+            </div>
+          </div>
+
+          {/* Coluna Direita: Estratégia */}
+          <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
+             <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm flex-1">
+                 <div className="flex justify-between items-center mb-6">
+                     <h3 className="font-bold text-slate-700 dark:text-white flex items-center gap-2"><Target className="w-5 h-5 text-rose-500"/> Plano de Ataque</h3>
+                     <div className="flex bg-slate-100 dark:bg-black p-1 rounded-lg">
+                         <button onClick={() => setStrategy('avalanche')} className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${strategy === 'avalanche' ? 'bg-white dark:bg-zinc-800 shadow text-slate-900 dark:text-white' : 'text-slate-500'}`}>Avalanche (Matemático)</button>
+                         <button onClick={() => setStrategy('snowball')} className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${strategy === 'snowball' ? 'bg-white dark:bg-zinc-800 shadow text-slate-900 dark:text-white' : 'text-slate-500'}`}>Bola de Neve (Psicológico)</button>
+                     </div>
+                 </div>
+
+                 <div className="flex flex-col lg:flex-row gap-6">
+                    {/* Lista */}
+                    <div className="flex-1 space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                       {debts.length === 0 ? <p className="text-center text-slate-400 py-10 text-sm">Adicione dívidas ao lado para gerar o plano.</p> : sortedDebts.map((d, i) => (
+                           <div key={d.id} className={`flex items-center p-3 rounded-2xl border ${i===0 ? 'bg-rose-50 dark:bg-rose-900/10 border-rose-200 dark:border-rose-800' : 'bg-slate-50 dark:bg-zinc-800/50 border-slate-100 dark:border-zinc-800'}`}>
+                               <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs mr-3 ${i===0 ? 'bg-rose-500 text-white' : 'bg-slate-200 text-slate-500'}`}>{i+1}</div>
+                               <div className="flex-1">
+                                   <div className="flex justify-between">
+                                       <span className="font-bold text-sm text-slate-800 dark:text-white">{d.name}</span>
+                                       <span className="font-bold text-sm text-slate-800 dark:text-white">R$ {d.amount.toLocaleString()}</span>
+                                   </div>
+                                   <div className="flex justify-between mt-1">
+                                      <span className="text-[10px] text-slate-500">Juros: {d.interest}% a.m.</span>
+                                      <button onClick={() => setDebts(debts.filter(x => x.id !== d.id))} className="text-red-400 hover:text-red-600"><Trash2 className="w-3 h-3"/></button>
+                                   </div>
+                               </div>
+                           </div>
+                       ))}
+                    </div>
+                    {/* Gráfico Dívidas */}
+                    {debts.length > 0 && (
+                      <div className="w-full lg:w-1/3 h-[200px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                  <Pie data={debts} dataKey="amount" innerRadius={40} outerRadius={60} paddingAngle={5}>
+                                      {debts.map((_, i) => <Cell key={i} fill={DEBT_COLORS[i % DEBT_COLORS.length]} />)}
+                                  </Pie>
+                                  <Tooltip />
+                              </PieChart>
+                          </ResponsiveContainer>
+                      </div>
+                    )}
+                 </div>
+             </div>
+
+             {/* Scripts */}
+             <div className="bg-slate-50 dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800">
+                 <h3 className="font-bold text-slate-700 dark:text-white mb-3 text-sm flex items-center gap-2"><MessageSquare className="w-4 h-4"/> Scripts de Negociação</h3>
+                 <div className="flex gap-2 mb-3 flex-wrap">
+                     {Object.keys(scriptsText).map(key => (
+                         <button key={key} onClick={() => setActiveScript(key)} className={`px-3 py-1.5 text-xs font-bold border rounded-lg capitalize transition-all ${activeScript === key ? 'bg-white dark:bg-black border-rose-500 text-rose-600' : 'border-slate-200 text-slate-500'}`}>{key}</button>
+                     ))}
+                 </div>
+                 <div className="relative">
+                     <textarea readOnly value={activeScript ? scriptsText[activeScript as keyof typeof scriptsText] : "Selecione um script..."} className="w-full h-20 p-3 text-sm bg-white dark:bg-black border border-slate-200 dark:border-zinc-800 rounded-xl resize-none outline-none dark:text-slate-300"></textarea>
+                     {activeScript && <button onClick={() => {navigator.clipboard.writeText(scriptsText[activeScript as keyof typeof scriptsText]); alert('Copiado!')}} className="absolute top-2 right-2 p-1.5 bg-slate-100 hover:bg-slate-200 rounded-md"><Copy className="w-3 h-3 text-slate-600"/></button>}
+                 </div>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================== */}
+      {/* ABA 2: COMEÇAR A INVESTIR  */}
+      {/* ========================== */}
+      {activeTab === 'invest' && (
+        <div className="grid grid-cols-12 gap-6 animate-in slide-in-from-bottom-4 duration-500">
+          
+          {/* Coluna Esquerda: Calculadora */}
+          <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+             <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-900/20 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                <h3 className="font-bold text-slate-700 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                  <Calculator className="w-4 h-4 text-emerald-500"/> Simulador de Futuro
+                </h3>
+                
+                <div className="space-y-4">
+                   <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase ml-1">Aporte Mensal (R$)</label>
+                      <input type="number" value={invMonthly} onChange={e => setInvMonthly(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm font-bold text-emerald-600 outline-none focus:border-emerald-500" />
+                   </div>
+                   <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Anos</label>
+                        <input type="number" value={invYears} onChange={e => setInvYears(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500 dark:text-white" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Taxa Anual %</label>
+                        <input type="number" value={invRate} onChange={e => setInvRate(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500 dark:text-white" />
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+             {/* Resultado Calc */}
+             <div className="bg-slate-800 text-white p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10"><TrendingUp className="w-24 h-24"/></div>
+                <p className="text-xs font-bold text-slate-400 uppercase mb-1">Você terá acumulado</p>
+                <p className="text-3xl font-black text-emerald-400 mb-4">R$ {investmentResult.total.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                
+                <div className="pt-4 border-t border-slate-700 flex justify-between text-xs">
+                   <span>Investido: <b className="text-white">R$ {investmentResult.invested.toLocaleString()}</b></span>
+                   <span className="text-emerald-400">Juros: <b>R$ {investmentResult.interest.toLocaleString(undefined, {maximumFractionDigits: 0})}</b></span>
+                </div>
+             </div>
+          </div>
+
+          {/* Coluna Direita: Perfil e Alocação */}
+          <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
+             <div className="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm flex-1">
+                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                     <h3 className="font-bold text-slate-700 dark:text-white flex items-center gap-2"><PieIcon className="w-5 h-5 text-blue-500"/> Sugestão de Carteira</h3>
+                     
+                     <div className="flex bg-slate-100 dark:bg-black p-1 rounded-lg w-full sm:w-auto">
+                         <button onClick={() => setProfile('conservative')} className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-xs font-bold transition-all ${profile === 'conservative' ? 'bg-emerald-100 text-emerald-700 shadow-sm' : 'text-slate-500'}`}>🛡️ Conservador</button>
+                         <button onClick={() => setProfile('moderate')} className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-xs font-bold transition-all ${profile === 'moderate' ? 'bg-blue-100 text-blue-700 shadow-sm' : 'text-slate-500'}`}>⚖️ Moderado</button>
+                         <button onClick={() => setProfile('bold')} className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-xs font-bold transition-all ${profile === 'bold' ? 'bg-purple-100 text-purple-700 shadow-sm' : 'text-slate-500'}`}>🚀 Arrojado</button>
+                     </div>
+                 </div>
+
+                 <div className="flex flex-col lg:flex-row gap-8 items-center">
+                     <div className="w-full lg:w-1/2 space-y-4">
+                        {profile === 'conservative' && (
+                           <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/20 text-sm text-emerald-800 dark:text-emerald-200">
+                              <p className="font-bold mb-1">Perfil Segurança Total</p>
+                              <p className="opacity-80 text-xs">Foco em não perder dinheiro. Ideal para Reserva de Emergência ou objetivos de curto prazo (até 2 anos).</p>
+                           </div>
+                        )}
+                        {profile === 'moderate' && (
+                           <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20 text-sm text-blue-800 dark:text-blue-200">
+                              <p className="font-bold mb-1">Perfil Equilibrado</p>
+                              <p className="opacity-80 text-xs">Aceita um pouco de risco para ganhar acima da inflação. Carteira clássica de diversificação.</p>
+                           </div>
+                        )}
+                        {profile === 'bold' && (
+                           <div className="p-4 bg-purple-50 dark:bg-purple-900/10 rounded-2xl border border-purple-100 dark:border-purple-900/20 text-sm text-purple-800 dark:text-purple-200">
+                              <p className="font-bold mb-1">Perfil Construtor de Riqueza</p>
+                              <p className="opacity-80 text-xs">Foco no longo prazo (5+ anos). Aceita oscilações mensais em troca de maior rentabilidade final.</p>
+                           </div>
+                        )}
+
+                        {/* Lista Dinâmica */}
+                        <ul className="space-y-2 mt-4">
+                           {allocationData.map((item, i) => (
+                              <li key={i} className="flex items-center justify-between text-sm p-2 hover:bg-slate-50 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                                 <div className="flex items-center gap-3">
+                                    <span className="w-3 h-3 rounded-full shadow-sm" style={{backgroundColor: item.color}}></span>
+                                    <span className="text-slate-700 dark:text-slate-300 font-medium">{item.name}</span>
+                                 </div>
+                                 <span className="font-bold text-slate-900 dark:text-white">{item.value}%</span>
+                              </li>
+                           ))}
+                        </ul>
+                     </div>
+
+                     {/* Gráfico Alocação */}
+                     <div className="w-full lg:w-1/2 h-[220px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                           <PieChart>
+                              <Pie data={allocationData} dataKey="value" innerRadius={60} outerRadius={80} paddingAngle={5}>
+                                 {allocationData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
+                              </Pie>
+                              <Tooltip contentStyle={{backgroundColor: '#18181b', borderRadius: '8px', border: 'none', color: '#fff'}} />
+                           </PieChart>
+                        </ResponsiveContainer>
+                     </div>
+                 </div>
+             </div>
+
+             {/* Cards Educativos Rápidos */}
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border-l-4 border-green-500 shadow-sm">
+                   <h4 className="font-bold text-slate-800 dark:text-white text-sm mb-1">Tesouro Selic / CDB</h4>
+                   <p className="text-xs text-slate-500 dark:text-slate-400">O porto seguro. Você empresta dinheiro para o governo ou banco. Risco baixíssimo.</p>
+                </div>
+                <div className="bg-white dark:bg-zinc-900 p-4 rounded-2xl border-l-4 border-purple-500 shadow-sm">
+                   <h4 className="font-bold text-slate-800 dark:text-white text-sm mb-1">FIIs (Fundos Imobiliários)</h4>
+                   <p className="text-xs text-slate-500 dark:text-slate-400">Compre pedaços de shoppings e galpões. Receba aluguéis isentos de IR todo mês.</p>
+                </div>
+             </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+export default DebtFreedom;

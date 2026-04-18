@@ -1,0 +1,146 @@
+import React from 'react';
+import { 
+  ShieldCheck, ArrowUpRight, Lightbulb, Target, 
+  ChevronRight, Gem, BarChart3, GraduationCap, 
+  Zap, Brain, Timer, TrendingUp 
+} from 'lucide-react';
+
+export function AdvisorHome() {
+  return (
+    <div className="h-full w-full flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      
+      {/* HEADER DE BOAS-VINDAS */}
+      <div className="px-2">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="h-2 w-8 bg-indigo-500 rounded-full" />
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400">
+            Painel do Consultor IA
+          </span>
+        </div>
+        <h1 className="text-4xl font-black text-white uppercase tracking-tighter leading-none">
+          Sua Jornada para a <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">
+            Liberdade Real
+          </span>
+        </h1>
+      </div>
+
+      {/* ÁREA DE CONTEÚDO COM SCROLL INVISÍVEL */}
+      <div className="flex-1 overflow-y-auto pr-1 pb-10 space-y-12 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+        
+        {/* 1. O MANIFESTO VITTACASH */}
+        <section className="relative">
+          <div className="bg-white/5 border border-white/10 p-8 rounded-[3rem] backdrop-blur-md relative overflow-hidden">
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/10 blur-[50px] rounded-full" />
+            <h2 className="text-xl font-black text-white uppercase mb-4 flex items-center gap-2">
+              <ShieldCheck className="text-indigo-400" /> A Proposta VittaCash
+            </h2>
+            <p className="text-slate-300 text-sm leading-relaxed font-medium">
+              Economizar não é sobre "cortar o cafézinho", é sobre **comprar sua liberdade futura**. 
+              O VittaCash foi desenhado para ser o seu escudo contra o sistema de consumo desenfreado. 
+              Nossa proposta é simples: transformar consciência em patrimônio através de três pilares: 
+              <span className="text-white font-bold italic ml-1">Diagnóstico Preciso, Blindagem Psicológica e Aceleração de Renda.</span>
+            </p>
+          </div>
+        </section>
+
+        {/* 2. O QUE VOCÊ TEM EM MÃOS (GUIA DE FERRAMENTAS) */}
+        <section>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-6 px-4">
+            Suas Ferramentas de Guerra
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <div className="p-6 bg-white/[0.03] border border-white/5 rounded-[2rem] hover:bg-white/[0.06] transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <BarChart3 className="text-blue-400" size={20} />
+                <h4 className="text-sm font-black text-white uppercase">Diagnóstico IA</h4>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">Analisa seus gastos e aponta onde o dinheiro está vazando sem você perceber.</p>
+            </div>
+
+            <div className="p-6 bg-white/[0.03] border border-white/5 rounded-[2rem] hover:bg-white/[0.06] transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <Timer className="text-rose-400" size={20} />
+                <h4 className="text-sm font-black text-white uppercase">Máquina do Tempo</h4>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">Calcula matematicamente o impacto de cada dívida quitada no seu futuro.</p>
+            </div>
+
+            <div className="p-6 bg-white/[0.03] border border-white/5 rounded-[2rem] hover:bg-white/[0.06] transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <Brain className="text-purple-400" size={20} />
+                <h4 className="text-sm font-black text-white uppercase">Hack Mental</h4>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">20 armadilhas psicológicas mapeadas para você nunca mais ser enganado pelo marketing.</p>
+            </div>
+
+            <div className="p-6 bg-white/[0.03] border border-white/5 rounded-[2rem] hover:bg-white/[0.06] transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <Zap className="text-yellow-400" size={20} />
+                <h4 className="text-sm font-black text-white uppercase">Acelerador de Renda</h4>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">20 fontes reais de renda extra para injetar capital novo no seu plano de liberdade.</p>
+            </div>
+
+          </div>
+        </section>
+
+        {/* 3. CONHECIMENTO DE INVESTIMENTOS (O PRÓXIMO NÍVEL) */}
+        <section className="bg-gradient-to-br from-indigo-900/20 to-emerald-900/20 border border-white/10 p-8 rounded-[3rem] relative overflow-hidden">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
+              <TrendingUp className="text-emerald-400" /> Pílulas de Investimento
+            </h2>
+            <Gem className="text-emerald-500/20 absolute -right-4 -bottom-4" size={120} />
+          </div>
+
+          <div className="space-y-6 relative z-10">
+            <div className="flex gap-4">
+                <div className="h-full w-1 bg-emerald-500 rounded-full" />
+                <div>
+                    <h5 className="text-xs font-black text-white uppercase mb-1">Juros Compostos: A 8ª Maravilha</h5>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                        Não é sobre quanto você investe, mas por quanto **tempo**. R$ 100 investidos por 30 anos valem mais do que R$ 1.000 investidos nos últimos 5. Comece com o que tiver, mas comece hoje.
+                    </p>
+                </div>
+            </div>
+
+            <div className="flex gap-4">
+                <div className="h-full w-1 bg-blue-500 rounded-full" />
+                <div>
+                    <h5 className="text-xs font-black text-white uppercase mb-1">A Regra da Diversificação</h5>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                        "Nunca coloque todos os ovos na mesma cesta". Divida seu dinheiro entre Renda Fixa (segurança), Ações (crescimento) e FIIs (renda mensal). Isso protege você de crises.
+                    </p>
+                </div>
+            </div>
+
+            <div className="flex gap-4">
+                <div className="h-full w-1 bg-purple-500 rounded-full" />
+                <div>
+                    <h5 className="text-xs font-black text-white uppercase mb-1">Investir é Comprar Tempo</h5>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                        Pare de olhar para os investimentos como números. Olhe como dias, meses ou anos de liberdade que você está comprando para nunca mais ser obrigado a trabalhar por necessidade.
+                    </p>
+                </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA FINAL */}
+        <div className="text-center py-6">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-600 mb-4 italic">
+              "A riqueza é o que você não vê. São os carros que não comprou e as roupas que não ostentou."
+            </p>
+            <div className="flex justify-center gap-2">
+                <div className="h-1 w-1 bg-indigo-500 rounded-full" />
+                <div className="h-1 w-1 bg-indigo-500 rounded-full" />
+                <div className="h-1 w-1 bg-indigo-500 rounded-full" />
+            </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}

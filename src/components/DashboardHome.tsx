@@ -1,297 +1,477 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Wallet, TrendingUp, Flame, CalendarClock, PieChart as PieChartIcon, AlertCircle, BarChart3, Hourglass, Target, Globe, Calendar
+  TrendingUp, TrendingDown, Wallet, Activity, 
+  AlertTriangle, BrainCircuit, Target, CheckCircle2,
+  Skull, Percent, ArrowUpRight, Zap
 } from 'lucide-react';
-import { 
-  AreaChart, Area, XAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell, PieChart, Pie, LineChart, Line
-} from 'recharts';
-import { Transaction, Investment, TransactionType, TransactionStatus } from '../types';
 
-interface DashboardHomeProps {
-  transactions: Transaction[];        
-  investments: Investment[];          
-  filteredTransactions: Transaction[]; 
-  currentDate: Date;
+interface Transaction {
+  id: string;
+  type: 'income' | 'expense';
+  amount: number;
+  description: string;
+  category: string;
+  date: string;
+  status?: 'COMPLETED' | 'PENDING' | 'pending'; 
+  interest?: number;
 }
 
-const CORES_VITTACASH = ['#22C55E', '#FF8A00', '#06b6d4', '#8b5cf6', '#f43f5e', '#eab308'];
+interface BudgetGoal {
+  id: string;
+  category: string;
+  limitAmount: number;
+}
 
-const DashboardHome: React.FC<DashboardHomeProps> = ({ transactions, investments, filteredTransactions }) => {
+interface DashboardProps {
+  transactions: Transaction[]; 
+}
+
+// --- COMPONENTE DE VELOCÍMETRO ---
+const Gauge = ({ value, label, subtitle, type = 'normal' }: { value: number, label: string, subtitle: string, type?: 'normal' | 'inverse' }) => {
+  const radius = 40;
+  const circ = Math.PI * radius; 
+  const boundedValue = Math.min(Math.max(value, 0), 100); 
+  const dashoffset = circ - (boundedValue / 100) * circ;
+
+  let color = '#10b981'; // verde
+  let glow = 'rgba(16, 185, 129, 0.4)';
   
-  const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<number | null>(null);
-  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(null);
-  const [showMonthlyBalance, setShowMonthlyBalance] = useState(false);
-  const [showMonthlyPayable, setShowMonthlyPayable] = useState(true);
-
-  // --- HELPER DE FORMATAÇÃO (CORRIGIDO) ---
-  const formatCurrency = (val: any) => {
-    const num = Number(val);
-    if (isNaN(num)) return 'R$ 0,00';
-    return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  };
-
-  // --- CÁLCULOS GLOBAIS ---
-  const globalBalance = useMemo(() => {
-    const income = transactions
-      .filter(t => t.type === TransactionType.INCOME && t.status === TransactionStatus.COMPLETED)
-      .reduce((acc, t) => acc + (t.paid_amount || t.amount), 0);
-    const expense = transactions
-      .filter(t => t.type === TransactionType.EXPENSE && t.status === TransactionStatus.COMPLETED)
-      .reduce((acc, t) => acc + (t.paid_amount || t.amount), 0);
-    return income - expense;
-  }, [transactions]);
-
-  const globalPayable = useMemo(() => {
-    return transactions
-      .filter(t => t.type === TransactionType.EXPENSE && t.status === TransactionStatus.PENDING)
-      .reduce((acc, t) => acc + t.amount, 0);
-  }, [transactions]);
-
-  // --- CÁLCULOS DO MÊS ---
-  const completedFiltered = useMemo(() => filteredTransactions.filter(t => t.status === TransactionStatus.COMPLETED), [filteredTransactions]);
-  const pendingFiltered = useMemo(() => filteredTransactions.filter(t => t.status === TransactionStatus.PENDING), [filteredTransactions]);
-
-  const monthRealIncome = completedFiltered.filter(t => t.type === TransactionType.INCOME).reduce((acc, curr) => acc + (curr.paid_amount || curr.amount), 0);
-  const monthRealExpense = completedFiltered.filter(t => t.type === TransactionType.EXPENSE).reduce((acc, curr) => acc + (curr.paid_amount || curr.amount), 0);
-  const monthBalance = monthRealIncome - monthRealExpense;
-
-  const forecastExpense = pendingFiltered.filter(t => t.type === TransactionType.EXPENSE).reduce((acc, curr) => acc + curr.amount, 0);
-  const forecastIncome = pendingFiltered.filter(t => t.type === TransactionType.INCOME).reduce((acc, curr) => acc + curr.amount, 0);
-
-  const displayBalance = showMonthlyBalance ? monthBalance : globalBalance;
-  const displayPayable = showMonthlyPayable ? forecastExpense : globalPayable;
-
-  // --- DADOS PARA GRÁFICOS ---
-  const evolutionData = useMemo(() => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const today = new Date();
-    const result = [];
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        const monthTransactions = transactions.filter(t => {
-            const tDate = new Date(t.date);
-            tDate.setMinutes(tDate.getMinutes() + tDate.getTimezoneOffset());
-            return tDate.getMonth() === d.getMonth() && tDate.getFullYear() === d.getFullYear() && t.status === TransactionStatus.COMPLETED;
-        });
-        const ent = monthTransactions.filter(t => t.type === TransactionType.INCOME).reduce((acc, curr) => acc + (curr.paid_amount || curr.amount), 0);
-        const sai = monthTransactions.filter(t => t.type === TransactionType.EXPENSE).reduce((acc, curr) => acc + (curr.paid_amount || curr.amount), 0);
-        result.push({ name: months[d.getMonth()], entrada: ent, saida: sai });
-    }
-    return result;
-  }, [transactions]);
-
-  const expenseByCategory = useMemo(() => {
-    const data: Record<string, number> = {};
-    completedFiltered.filter(t => t.type === TransactionType.EXPENSE).forEach(t => { 
-        data[t.category || 'Outros'] = (data[t.category || 'Outros'] || 0) + (t.paid_amount || t.amount); 
-    });
-    return Object.entries(data).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 6);
-  }, [completedFiltered]);
-
-  const jurosData = useMemo(() => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const today = new Date();
-    const result = [];
-    for (let i = 5; i >= 0; i--) {
-        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        const monthExpenses = transactions.filter(t => {
-            const tDate = new Date(t.date);
-            tDate.setMinutes(tDate.getMinutes() + tDate.getTimezoneOffset());
-            return tDate.getMonth() === d.getMonth() && tDate.getFullYear() === d.getFullYear() && t.status === TransactionStatus.COMPLETED && t.type === TransactionType.EXPENSE;
-        });
-        const totalInterest = monthExpenses.reduce((acc, t) => {
-            const original = t.amount || 0;
-            const paid = t.paid_amount || 0;
-            return paid > original ? acc + (paid - original) : acc;
-        }, 0);
-        result.push({ name: months[d.getMonth()], valor: totalInterest });
-    }
-    return result;
-  }, [transactions]);
-
-  const totalInterestPeriod = jurosData.reduce((acc, item) => acc + item.valor, 0);
-
-  const investmentAllocation = useMemo(() => { 
-      const allocation: Record<string, number> = {}; 
-      investments.forEach(inv => { allocation[inv.category] = (allocation[inv.category] || 0) + inv.current_amount; }); 
-      const data = Object.entries(allocation).map(([name, value]) => ({ name, value })); 
-      if (data.length === 0) return [{ name: 'Sem ativos', value: 1 }]; 
-      return data; 
-  }, [investments]);
-
-  const totalExpenseMonth = expenseByCategory.reduce((acc, cur) => acc + cur.value, 0);
-  const totalInvested = investmentAllocation.reduce((acc, cur) => acc + (cur.name !== 'Sem ativos' ? cur.value : 0), 0);
-
-  const getCenterLabel = (data: any[], selectedIndex: number | null, defaultLabel: string, totalValue: number) => {
-      if (selectedIndex !== null && data[selectedIndex]) return { label: data[selectedIndex].name, value: data[selectedIndex].value };
-      return { label: defaultLabel, value: totalValue };
-  };
-
-  const centerCategory = getCenterLabel(expenseByCategory, selectedCategoryIndex, "Total Mês", totalExpenseMonth);
-  const centerAsset = getCenterLabel(investmentAllocation, selectedAssetIndex, "Patrimônio", totalInvested);
-
-  // Estilos
-  const cardStyle = "bg-white dark:bg-zinc-900 rounded-3xl p-4 shadow-sm border border-slate-100 dark:border-zinc-800 flex flex-col justify-center min-h-[90px]";
-  const iconBoxStyle = "p-2 rounded-xl bg-slate-50 dark:bg-zinc-800 shrink-0";
-  const labelStyle = "text-[9px] font-black uppercase tracking-widest ml-2 opacity-70";
-  const valueStyle = "text-lg font-black tracking-tighter mt-1 truncate";
+  // SE O SISTEMA ESTIVER ZERADO, FICA NEUTRO (CINZA) PARA NÃO ASSUSTAR
+  if (value === 0) {
+      color = '#64748b'; 
+      glow = 'rgba(100, 116, 139, 0.4)';
+  } else if (type === 'normal') {
+      if (boundedValue < 40) { color = '#f43f5e'; glow = 'rgba(244, 63, 94, 0.4)'; } 
+      else if (boundedValue < 70) { color = '#f59e0b'; glow = 'rgba(245, 158, 11, 0.4)'; } 
+  } else {
+      if (boundedValue > 85) { color = '#f43f5e'; glow = 'rgba(244, 63, 94, 0.4)'; }
+      else if (boundedValue > 60) { color = '#f59e0b'; glow = 'rgba(245, 158, 11, 0.4)'; }
+  }
 
   return (
-    <div className="flex flex-col gap-3 h-full w-full overflow-y-auto lg:overflow-hidden p-1 pb-20 lg:pb-1">
-      
-      {/* LINHA 1: CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 shrink-0">
-        
-        {/* CARD 1: SALDO */}
-        <div className={`${cardStyle} ${displayBalance >= 0 ? 'border-emerald-500/30' : 'border-orange-500/30'} relative group`}>
-            <button onClick={() => setShowMonthlyBalance(!showMonthlyBalance)} className="absolute top-2 right-2 p-1.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-emerald-500 transition-all z-10" title={showMonthlyBalance ? "Ver Saldo Global" : "Ver Saldo do Mês"}>
-                {showMonthlyBalance ? <Globe className="w-3 h-3" /> : <Calendar className="w-3 h-3" />}
-            </button>
-            <div className="flex items-center mb-1"><div className={iconBoxStyle}><Wallet className={`w-4 h-4 ${displayBalance >= 0 ? 'text-emerald-500' : 'text-orange-500'}`} /></div><span className={`${labelStyle} ${displayBalance >= 0 ? 'text-emerald-500' : 'text-orange-500'}`}>{showMonthlyBalance ? "Saldo Mês" : "Saldo Global"}</span></div>
-            <h3 className={`${valueStyle} ${displayBalance >= 0 ? 'text-slate-900 dark:text-white' : 'text-orange-600 dark:text-orange-400'}`}>{formatCurrency(displayBalance)}</h3>
-        </div>
-
-        {/* CARD 2: RECEITAS */}
-        <div className={cardStyle}>
-            <div className="flex items-center mb-1"><div className={iconBoxStyle}><TrendingUp className="w-4 h-4 text-emerald-500" /></div><span className={`${labelStyle} text-emerald-500`}>Receitas (Mês)</span></div>
-            <h3 className={`${valueStyle} text-slate-900 dark:text-white`}>{formatCurrency(monthRealIncome)}</h3>
-        </div>
-
-        {/* CARD 3: PAGOS */}
-        <div className={cardStyle}>
-            <div className="flex items-center mb-1"><div className={iconBoxStyle}><Flame className="w-4 h-4 text-orange-500" /></div><span className={`${labelStyle} text-orange-500`}>Pagos (Mês)</span></div>
-            <h3 className={`${valueStyle} text-slate-900 dark:text-white`}>{formatCurrency(monthRealExpense)}</h3>
-        </div>
-
-        {/* CARD 4: A RECEBER */}
-        <div className={cardStyle}>
-            <div className="flex items-center mb-1"><div className={iconBoxStyle}><Hourglass className="w-4 h-4 text-emerald-400" /></div><span className={`${labelStyle} text-emerald-400`}>A Receber</span></div>
-            <h3 className={`${valueStyle} text-slate-900 dark:text-white`}>{formatCurrency(forecastIncome)}</h3>
-        </div>
-        
-        {/* CARD 5: A PAGAR */}
-        <div className={`${cardStyle} relative group`}>
-             <button onClick={() => setShowMonthlyPayable(!showMonthlyPayable)} className="absolute top-2 right-2 p-1.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-orange-500 transition-all z-10" title={showMonthlyPayable ? "Ver A Pagar do Mês" : "Ver Dívida Total"}>
-                {showMonthlyPayable ? <Globe className="w-3 h-3" /> : <Calendar className="w-3 h-3" />}
-             </button>
-             <div className="flex items-center mb-1"><div className={iconBoxStyle}><CalendarClock className="w-4 h-4 text-orange-400" /></div><span className={`${labelStyle} text-orange-400`}>{showMonthlyPayable ? "A Pagar (Mês)" : "Dívida Global"}</span></div>
-             <h3 className={`${valueStyle} text-slate-900 dark:text-white`}>{formatCurrency(displayPayable)}</h3>
-        </div>
-
-        {/* CARD 6: STATUS */}
-        <div className="bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-3xl p-3 flex flex-col justify-center relative overflow-hidden min-h-[90px]">
-            <div className="absolute top-2 right-2"><AlertCircle className="w-3 h-3 text-zinc-400" /></div>
-            <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Previsão Mês</p>
-            <p className={`text-xs font-bold leading-tight ${forecastIncome > forecastExpense ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-600 dark:text-orange-400'}`}>{(monthRealIncome + forecastIncome) > (monthRealExpense + forecastExpense) ? "Sobra prevista! 🤑" : "Atenção contas"}</p>
-            <p className="text-[10px] text-zinc-500 mt-1">Saldo Mês: {formatCurrency((monthRealIncome + forecastIncome) - (monthRealExpense + forecastExpense))}</p>
-        </div>
-      </div>
-
-      {/* LINHA 2: GRÁFICOS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 shrink-0 lg:flex-1 lg:min-h-[180px]">
+      <div className="flex flex-col items-center justify-center p-3 h-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-[2rem] w-full relative overflow-hidden group shadow-sm hover:shadow-lg transition-all">
+          <div className="absolute bottom-0 w-24 h-12 blur-2xl opacity-50 transition-colors duration-1000" style={{ backgroundColor: glow }} />
           
-          {/* Evolução */}
-          <div className="bg-white dark:bg-zinc-900 p-4 rounded-3xl shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden border border-slate-100 dark:border-zinc-800">
-              <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><BarChart3 className="w-3 h-3" /> Evolução Semestral</h3>
-              <div className="flex-1 w-full min-h-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={evolutionData} barSize={12}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} />
-                          <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px'}} formatter={(value: any) => [formatCurrency(Number(value)), '']} />
-                          <Bar dataKey="entrada" fill="#22C55E" radius={[4, 4, 0, 0]} name="Receitas" />
-                          <Bar dataKey="saida" fill="#FF8A00" radius={[4, 4, 0, 0]} name="Despesas" />
-                      </BarChart>
-                  </ResponsiveContainer>
+          <div className="relative w-28 h-16 mt-2">
+              <svg viewBox="0 0 100 55" className="w-full h-full overflow-visible">
+                  <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" className="text-slate-100 dark:text-white/5" />
+                  <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke={color} strokeWidth="8" strokeLinecap="round" 
+                        strokeDasharray={circ} strokeDashoffset={dashoffset} 
+                        className="transition-all duration-1000 ease-out" 
+                        style={{ filter: `drop-shadow(0 0 6px ${glow})` }} />
+              </svg>
+              <div className="absolute bottom-0 left-0 w-full text-center flex flex-col translate-y-2">
+                  <span className="text-2xl font-black tracking-tighter" style={{ color }}>{boundedValue.toFixed(0)}%</span>
               </div>
           </div>
-
-          {/* Categorias */}
-          <div className="bg-white dark:bg-zinc-900 p-4 rounded-3xl shadow-sm flex flex-col h-[280px] lg:h-auto overflow-hidden border border-slate-100 dark:border-zinc-800">
-              <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><PieChartIcon className="w-3 h-3" /> Categorias (Mês)</h3>
-              <div className="flex-1 flex flex-col items-center justify-between min-h-0">
-                   <div className="h-[180px] w-full relative">
-                       <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none z-10">
-                           <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-0.5">{centerCategory.label}</span>
-                           <span className="text-xl font-black text-slate-900 dark:text-white">{centerCategory.value >= 1000 ? `${(centerCategory.value / 1000).toFixed(1)}k` : formatCurrency(centerCategory.value)}</span>
-                       </div>
-                       <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                              <Pie data={expenseByCategory} innerRadius={60} outerRadius={80} paddingAngle={4} dataKey="value" stroke="none" onClick={(_, index) => setSelectedCategoryIndex(index === selectedCategoryIndex ? null : index)}>
-                                  {expenseByCategory.map((_, index) => (<Cell key={`cell-${index}`} fill={CORES_VITTACASH[index % CORES_VITTACASH.length]} opacity={selectedCategoryIndex === null || selectedCategoryIndex === index ? 1 : 0.3} style={{cursor: 'pointer'}} />))}
-                              </Pie>
-                          </PieChart>
-                       </ResponsiveContainer>
-                   </div>
-                   <div className="w-full flex flex-wrap justify-center gap-2 mt-2 overflow-y-auto custom-scrollbar max-h-[80px]">
-                       {expenseByCategory.map((item, i) => { 
-                           const isSelected = selectedCategoryIndex === i; 
-                           return (
-                               <button key={i} onClick={() => setSelectedCategoryIndex(isSelected ? null : i)} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${isSelected ? 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-600 scale-105 shadow-sm' : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-zinc-800/50'}`}>
-                                   <div className="w-2 h-2 rounded-full shrink-0" style={{backgroundColor: CORES_VITTACASH[i % CORES_VITTACASH.length]}}></div>
-                                   <span className={`text-[9px] font-bold uppercase truncate max-w-[80px] ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>{item.name}</span>
-                               </button>
-                           )
-                       })}
-                   </div>
-              </div>
-          </div>
-
-          {/* Juros */}
-          <div className="bg-white dark:bg-zinc-900 p-4 rounded-3xl shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden border border-slate-100 dark:border-zinc-800">
-              <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Flame className="w-3 h-3 text-orange-500" /> Juros Pagos</h3>
-                  {totalInterestPeriod > 0 && <span className="text-[9px] font-black bg-orange-100 text-orange-600 px-2 py-0.5 rounded-lg">Total: {formatCurrency(totalInterestPeriod)}</span>}
-              </div>
-              <div className="flex-1 w-full min-h-0 relative">
-                  {totalInterestPeriod === 0 && <div className="absolute inset-0 flex items-center justify-center text-slate-300 text-xs font-medium">Sem juros no período! 🎉</div>}
-                  <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={jurosData}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                          <XAxis dataKey="name" hide />
-                          <Tooltip contentStyle={{backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff', fontSize: '10px'}} formatter={(value: any) => [formatCurrency(Number(value)), 'Juros']} />
-                          <Line type="monotone" dataKey="valor" stroke="#f97316" strokeWidth={3} dot={{r: 3, fill: "#f97316"}} />
-                      </LineChart>
-                  </ResponsiveContainer>
-              </div>
+          <div className="text-center mt-3 z-10">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-white truncate px-1">{label}</p>
+              <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-white/40 truncate">{subtitle}</p>
           </div>
       </div>
-
-      {/* LINHA 3: PATRIMÔNIO E FLUXO */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 shrink-0 lg:flex-1 lg:min-h-[180px]">
-          <div className="bg-white dark:bg-zinc-900 p-4 rounded-3xl shadow-sm flex flex-col h-[250px] lg:h-auto overflow-hidden border border-slate-100 dark:border-zinc-800">
-               <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><TrendingUp className="w-3 h-3" /> Fluxo de Caixa</h3>
-               <div className="flex-1 w-full min-h-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={evolutionData}>
-                          <defs>
-                              <linearGradient id="colorFlowEntrada" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#22C55E" stopOpacity={0.2}/><stop offset="95%" stopColor="#22C55E" stopOpacity={0}/></linearGradient>
-                              <linearGradient id="colorFlowSaida" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#FF8A00" stopOpacity={0.2}/><stop offset="95%" stopColor="#FF8A00" stopOpacity={0}/></linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 9, fontWeight: 700, fill: '#64748b'}} />
-                          <Tooltip contentStyle={{backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff', fontSize: '10px'}} formatter={(value: any) => formatCurrency(Number(value))} />
-                          <Area type="monotone" dataKey="entrada" stroke="#22C55E" strokeWidth={2} strokeDasharray="5 5" fill="url(#colorFlowEntrada)" name="Receitas" />
-                          <Area type="monotone" dataKey="saida" stroke="#FF8A00" strokeWidth={2} strokeDasharray="5 5" fill="url(#colorFlowSaida)" name="Despesas" />
-                      </AreaChart>
-                  </ResponsiveContainer>
-               </div>
-          </div>
-
-          <div className="bg-white dark:bg-zinc-900 p-4 rounded-3xl shadow-sm flex flex-col h-[280px] lg:h-auto overflow-hidden border border-slate-100 dark:border-zinc-800">
-               <div className="flex justify-between items-center mb-2"><h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Target className="w-3 h-3" /> Patrimônio</h3></div>
-               <div className="flex-1 flex flex-col items-center justify-between min-h-0">
-                   <div className="h-[180px] w-full relative">
-                       <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none z-10"><span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-0.5">{centerAsset.label}</span><span className="text-xl font-black text-slate-900 dark:text-white">{centerAsset.value >= 1000 ? `${(centerAsset.value / 1000).toFixed(1)}k` : formatCurrency(centerAsset.value)}</span></div>
-                       <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={investmentAllocation} innerRadius={60} outerRadius={80} dataKey="value" stroke="none" onClick={(_, index) => setSelectedAssetIndex(index === selectedAssetIndex ? null : index)}>{investmentAllocation.map((_, index) => (<Cell key={`cell-${index}`} fill={CORES_VITTACASH[index % CORES_VITTACASH.length]} opacity={selectedAssetIndex === null || selectedAssetIndex === index ? 1 : 0.3} style={{cursor: 'pointer'}} />))}</Pie></PieChart></ResponsiveContainer>
-                   </div>
-                   <div className="w-full flex flex-wrap justify-center gap-2 mt-2 overflow-y-auto custom-scrollbar max-h-[80px]">{investmentAllocation.map((item, i) => { const isSelected = selectedAssetIndex === i; return (<button key={i} onClick={() => setSelectedAssetIndex(isSelected ? null : i)} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${isSelected ? 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-600 scale-105 shadow-sm' : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-zinc-800/50'}`}><div className="w-2 h-2 rounded-full shrink-0" style={{backgroundColor: CORES_VITTACASH[i % CORES_VITTACASH.length]}}></div><span className={`text-[9px] font-bold uppercase truncate max-w-[80px] ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>{item.name}</span></button>) })}</div>
-               </div>
-          </div>
-      </div>
-    </div>
   );
 };
 
-export default DashboardHome;
+export default function DashboardHome({ transactions }: DashboardProps) {
+  const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
+  const [financialData, setFinancialData] = useState({
+    balance: 0,
+    cashFlow: 0,
+    income: 0,
+    expense: 0,
+    savingsRate: 0,
+    expenseRatio: 0, 
+    debtRatio: 0, 
+    totalInterest: 0,
+    healthScore: 0,
+    healthStatus: 'neutral',
+    diagnostico: '',
+    proximosPassos: [] as string[],
+    chartData: [] as any[], 
+    villains: [] as { category: string, amount: number, percent: number }[],
+    categoryImpact: [] as { category: string, percent: number }[],
+    budgetStatus: [] as any[], 
+    totalPendingAmount: 0
+  });
+
+  useEffect(() => {
+    const processData = () => {
+      try {
+        const rawTxs = localStorage.getItem('vittacash_pro_transactions');
+        const allTxs: Transaction[] = rawTxs ? JSON.parse(rawTxs) : (transactions || []);
+        
+        const rawBudgets = localStorage.getItem('vittacash_pro_budgets');
+        const budgetGoals: BudgetGoal[] = rawBudgets ? JSON.parse(rawBudgets) : [];
+        
+        const now = new Date();
+        const curYear = now.getFullYear();
+        const curMonth = now.getMonth() + 1;
+        const curMonthKey = `${curYear}-${String(curMonth).padStart(2, '0')}`;
+        
+        const periodTxs = allTxs.filter(t => {
+            if (viewMode === 'monthly') return t.date && t.date.startsWith(curMonthKey);
+            return t.date && t.date.startsWith(String(curYear));
+        });
+
+        const realizedAll = allTxs.filter(t => t.status === 'COMPLETED' || !t.status);
+        const pendingTxs = allTxs.filter(t => (t.status === 'PENDING' || t.status === 'pending') && t.type === 'expense');
+
+        const pInc = periodTxs.filter(t => t.type === 'income').reduce((a, b) => a + Number(b.amount), 0);
+        const pExp = periodTxs.filter(t => t.type === 'expense').reduce((a, b) => a + Number(b.amount), 0);
+        const pendingTotal = pendingTxs.reduce((a, b) => a + Number(b.amount), 0);
+
+        // --- GRÁFICO ---
+        const chartData = [];
+        if (viewMode === 'monthly') {
+          const daysInMonth = new Date(curYear, curMonth, 0).getDate();
+          for (let i = 1; i <= daysInMonth; i++) {
+            const dayStr = String(i).padStart(2, '0');
+            const datePrefix = `${curMonthKey}-${dayStr}`;
+            const dayTxs = periodTxs.filter(t => t.date && t.date.startsWith(datePrefix));
+            chartData.push({
+              label: dayStr,
+              in: dayTxs.filter(t => t.type === 'income').reduce((a, b) => a + Number(b.amount), 0),
+              out: dayTxs.filter(t => t.type === 'expense').reduce((a, b) => a + Number(b.amount), 0),
+            });
+          }
+        } else {
+          for (let i = 1; i <= 12; i++) {
+            const monthStr = String(i).padStart(2, '0');
+            const monthPrefix = `${curYear}-${monthStr}`;
+            const monthTxs = periodTxs.filter(t => t.date && t.date.startsWith(monthPrefix));
+            const mDate = new Date(curYear, i - 1, 1);
+            chartData.push({
+              label: mDate.toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase().replace('.', ''),
+              in: monthTxs.filter(t => t.type === 'income').reduce((a, b) => a + Number(b.amount), 0),
+              out: monthTxs.filter(t => t.type === 'expense').reduce((a, b) => a + Number(b.amount), 0),
+            });
+          }
+        }
+
+        // Metas e Vilões
+        const budgetComparison = budgetGoals.map(bg => {
+          const spent = periodTxs.filter(t => t.type === 'expense' && t.category === bg.category).reduce((a, b) => a + Number(b.amount), 0);
+          const percent = bg.limitAmount > 0 ? (spent / bg.limitAmount) * 100 : 0;
+          return { category: bg.category, limit: bg.limitAmount, spent: spent, percent: percent, isOver: percent > 100, isWarning: percent >= 80 && percent <= 100 };
+        }).sort((a, b) => b.percent - a.percent); 
+
+        const expTxs = periodTxs.filter(t => t.type === 'expense');
+        const catMap: Record<string, number> = {};
+        expTxs.forEach(t => { catMap[t.category || 'GERAL'] = (catMap[t.category || 'GERAL'] || 0) + Number(t.amount); });
+        const impact = Object.entries(catMap).map(([category, amount]) => ({
+            category, amount, percent: pExp > 0 ? (amount / pExp) * 100 : 0
+        })).sort((a,b) => b.amount - a.amount);
+
+        // --- CÁLCULOS MATEMÁTICOS BLINDADOS ---
+        const hasData = pInc > 0 || pExp > 0;
+        
+        const currentScore = hasData ? (pInc >= pExp ? 85 : 35) : 0;
+        const currentExpenseRatio = pInc > 0 ? (pExp / pInc) * 100 : (pExp > 0 ? 100 : 0);
+        const currentDebtRatio = pInc > 0 ? (pendingTotal / pInc) * 100 : (pendingTotal > 0 ? 100 : 0);
+        
+        const healthStatus = hasData ? (pInc >= pExp ? 'good' : 'danger') : 'neutral';
+        const diagnosticoTexto = hasData 
+            ? (pExp > pInc ? "ALERTA: Seus gastos superaram sua renda." : "ESTABILIDADE: Orçamento sob controle.")
+            : "SISTEMA ZERADO: Aguardando lançamentos.";
+            
+        const passosTexto = hasData 
+            ? (pExp > pInc ? ["Cortar compras não essenciais", "Revisar assinaturas ativas"] : ["Manter tetos de gastos", "Aumentar valor investido"])
+            : ["Adicionar primeira receita", "Registrar despesas"];
+
+        setFinancialData({
+          balance: realizedAll.filter(t => t.type === 'income').reduce((a, b) => a + Number(b.amount), 0) - realizedAll.filter(t => t.type === 'expense').reduce((a, b) => a + Number(b.amount), 0),
+          cashFlow: pInc - pExp,
+          income: pInc,
+          expense: pExp,
+          savingsRate: pInc > 0 ? Math.max(((pInc - pExp) / pInc) * 100, 0) : 0,
+          expenseRatio: currentExpenseRatio,
+          debtRatio: currentDebtRatio,
+          totalInterest: realizedAll.reduce((a, b) => a + (Number(b.interest) || 0), 0),
+          healthScore: currentScore,
+          healthStatus: healthStatus,
+          diagnostico: diagnosticoTexto,
+          proximosPassos: passosTexto,
+          chartData: chartData,
+          villains: impact.slice(0, 5),
+          categoryImpact: impact.slice(0, 4),
+          budgetStatus: budgetComparison,
+          totalPendingAmount: pendingTotal
+        });
+      } catch (e) { console.error(e); }
+    };
+
+    processData();
+    window.addEventListener('storage', processData);
+    return () => window.removeEventListener('storage', processData);
+  }, [transactions, viewMode]);
+
+  const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(val);
+  
+  // SVGs Gráfico
+  const maxVal = Math.max(...financialData.chartData.map(d => Math.max(d.in, d.out))) || 1;
+  const getLinePath = (data: any[], type: 'in' | 'out') => {
+    if(data.length === 0) return "";
+    const points = data.map((d, i) => `${(i / (data.length - 1)) * 100},${40 - ((d[type] / maxVal) * 40)}`);
+    return `M ${points.join(' L ')}`;
+  };
+  const getAreaPath = (data: any[], type: 'in' | 'out') => {
+    if(data.length === 0) return "";
+    const points = data.map((d, i) => `${(i / (data.length - 1)) * 100},${40 - ((d[type] / maxVal) * 40)}`);
+    return `M 0,40 L ${points.join(' L ')} L 100,40 Z`;
+  };
+
+  const peakOutIndex = financialData.chartData.reduce((maxIdx, d, i, arr) => d.out > arr[maxIdx].out ? i : maxIdx, 0);
+  const peakOutData = financialData.chartData[peakOutIndex];
+  const peakOutX = financialData.chartData.length > 1 ? (peakOutIndex / (financialData.chartData.length - 1)) * 100 : 0;
+  const peakOutY = peakOutData ? 40 - ((peakOutData.out / maxVal) * 40) : 40;
+
+  return (
+    <div className="h-full w-full flex flex-col gap-4 overflow-hidden font-sans pb-2">
+      
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+
+      {/* 1. TOP HEADER */}
+      <div className="flex justify-between items-center shrink-0">
+          <h1 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter flex items-center gap-2">
+              <Activity className="text-indigo-500" /> Cockpit VittaCash
+          </h1>
+          <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/10">
+              <button onClick={() => setViewMode('monthly')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${viewMode === 'monthly' ? 'bg-white dark:bg-white/10 shadow-sm text-indigo-600 dark:text-white' : 'text-slate-400'}`}>Mensal</button>
+              <button onClick={() => setViewMode('yearly')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${viewMode === 'yearly' ? 'bg-white dark:bg-white/10 shadow-sm text-indigo-600 dark:text-white' : 'text-slate-400'}`}>Anual</button>
+          </div>
+      </div>
+
+      {/* 2. CARDS SUPERIORES */}
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3 shrink-0">
+          {[
+            { label: 'Saldo Total', val: financialData.balance, icon: Wallet, color: 'bg-slate-900' },
+            { label: 'Fluxo Caixa', val: financialData.cashFlow, icon: ArrowUpRight, color: 'bg-indigo-600' },
+            { label: 'Entradas', val: financialData.income, icon: TrendingUp, color: 'bg-emerald-500' },
+            { label: 'Saídas', val: financialData.expense, icon: TrendingDown, color: 'bg-rose-500' },
+            { label: 'Retenção', val: `${financialData.savingsRate.toFixed(1)}%`, icon: Percent, color: 'bg-amber-500' },
+            { label: 'Juros Pagos', val: financialData.totalInterest, icon: AlertTriangle, color: 'bg-orange-600' }
+          ].map((card, i) => (
+            <div key={i} className={`p-4 rounded-2xl ${card.color} text-white shadow-xl flex flex-col justify-between h-24`}>
+                <span className="text-[9px] font-black uppercase opacity-60 flex items-center gap-1"><card.icon size={12}/> {card.label}</span>
+                <p className="text-xl font-black truncate">{typeof card.val === 'number' ? formatCurrency(card.val) : card.val}</p>
+            </div>
+          ))}
+      </div>
+
+      {/* 3. CONTEÚDO PRINCIPAL (BLINDADO COM MIN-H-0 PARA EVITAR VAZAMENTOS) */}
+      <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
+          
+          {/* COLUNA ESQUERDA */}
+          <div className="col-span-12 md:col-span-3 flex flex-col gap-4 min-h-0">
+              <div className="shrink-0 h-[150px] rounded-[2rem] border p-5 bg-white dark:bg-black/20 dark:border-white/10 flex flex-col justify-between shadow-lg">
+                  <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase text-slate-500 flex items-center gap-2"><BrainCircuit size={16} className="text-indigo-500"/> Saúde</span>
+                      <span className={`text-xl font-black ${financialData.healthStatus === 'neutral' ? 'text-slate-500' : (financialData.healthStatus === 'good' ? 'text-emerald-500' : 'text-rose-500')}`}>{financialData.healthScore}%</span>
+                  </div>
+                  <p className="text-[10px] font-black leading-tight text-slate-800 dark:text-white">{financialData.diagnostico}</p>
+                  <div className="flex gap-2">
+                      {financialData.proximosPassos.map((step, i) => (
+                          <div key={i} className="flex-1 p-2 rounded-lg bg-indigo-50 dark:bg-white/5 border border-indigo-100 dark:border-white/5 flex items-center justify-center text-center gap-2">
+                              <span className="text-[8px] font-bold uppercase text-slate-500 dark:text-white/60">{step}</span>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+
+              <div className="flex-1 rounded-[2rem] border p-5 bg-white dark:bg-black/20 dark:border-white/10 overflow-hidden flex flex-col shadow-lg min-h-0">
+                  <div className="flex items-center gap-2 mb-4 text-rose-500 shrink-0">
+                      <Skull size={18} /><span className="text-[10px] font-black uppercase">Maiores Gastos</span>
+                  </div>
+                  <div className="flex-1 space-y-4 overflow-y-auto no-scrollbar pr-1">
+                      {financialData.villains.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center opacity-40">
+                            <p className="text-[8px] uppercase font-black text-center text-slate-400">Sem dados</p>
+                        </div>
+                      ) : financialData.villains.map((v, i) => (
+                          <div key={i} className="space-y-1">
+                              <div className="flex justify-between text-[10px] font-black uppercase">
+                                  <span className="text-slate-500 truncate w-24">{v.category}</span>
+                                  <span className="text-rose-600">{formatCurrency(v.amount)}</span>
+                              </div>
+                              <div className="w-full h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                  <div style={{width: `${v.percent}%`}} className="h-full bg-rose-500 rounded-full" />
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+          </div>
+
+          {/* COLUNA CENTRAL (A GRANDE CULPADA RESOLVIDA) */}
+          <div className="col-span-12 md:col-span-6 rounded-[2rem] border p-5 bg-white dark:bg-black/20 dark:border-white/10 flex flex-col relative overflow-hidden shadow-lg min-h-0">
+              <div className="flex justify-between items-center mb-4 text-[10px] font-black uppercase tracking-widest relative z-10 shrink-0">
+                  <span className="flex items-center gap-2">
+                      <Activity size={16} className="text-indigo-500" /> 
+                      {viewMode === 'monthly' ? 'Fluxo Diário' : 'Fluxo Mensal'}
+                  </span>
+                  <div className="flex gap-4 text-[8px]">
+                      <div className="flex items-center gap-2"><div className="w-4 h-0.5 bg-emerald-500"/> Entradas</div>
+                      <div className="flex items-center gap-2"><div className="w-4 h-0.5 bg-rose-500"/> Saídas</div>
+                  </div>
+              </div>
+
+              {/* GRÁFICO SVG COM GAIOLA (ABSOLUTE INSET-0) */}
+              <div className="flex-1 min-h-0 relative w-full group mb-4">
+                  <div className="absolute inset-0">
+                      <svg viewBox="0 0 100 40" className="w-full h-full overflow-visible" preserveAspectRatio="none">
+                          <defs>
+                              <linearGradient id="gradIn" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.2"/>
+                                  <stop offset="100%" stopColor="#10b981" stopOpacity="0"/>
+                              </linearGradient>
+                              <linearGradient id="gradOut" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.2"/>
+                                  <stop offset="100%" stopColor="#f43f5e" stopOpacity="0"/>
+                              </linearGradient>
+                          </defs>
+                          <path d={getAreaPath(financialData.chartData, 'in')} fill="url(#gradIn)" className="transition-all duration-700" />
+                          <path d={getAreaPath(financialData.chartData, 'out')} fill="url(#gradOut)" className="transition-all duration-700" />
+                          <path d={getLinePath(financialData.chartData, 'in')} fill="none" stroke="#10b981" strokeWidth="0.3" className="transition-all duration-700" />
+                          <path d={getLinePath(financialData.chartData, 'out')} fill="none" stroke="#f43f5e" strokeWidth="0.4" className="transition-all duration-700 drop-shadow-[0_0_5px_rgba(244,63,94,0.5)]" />
+
+                          {peakOutData && peakOutData.out > 0 && (
+                              <g className="transition-all duration-700 origin-center" style={{ transform: `translate(${peakOutX}px, ${peakOutY}px) scale(0.1)` }}>
+                                  <circle cx="0" cy="0" r="1.5" fill="#f43f5e" className="animate-ping" opacity="0.5"/>
+                                  <circle cx="0" cy="0" r="0.8" fill="#f43f5e" />
+                              </g>
+                          )}
+                      </svg>
+                      
+                      {peakOutData && peakOutData.out > 0 && (
+                          <div 
+                            className="absolute flex flex-col items-center pointer-events-none transition-all duration-700 -translate-x-1/2 -translate-y-[120%]"
+                            style={{ left: `${peakOutX}%`, top: `${(peakOutY / 40) * 100}%` }}
+                          >
+                              <div className="bg-rose-500 text-white px-2 py-0.5 rounded-md text-[6px] font-black uppercase whitespace-nowrap shadow-lg shadow-rose-500/30">
+                                  {viewMode === 'monthly' ? `Dia ${peakOutData.label}` : peakOutData.label} • {formatCurrency(peakOutData.out)}
+                              </div>
+                              <div className="w-[1px] h-4 bg-rose-500/50 mt-1" />
+                          </div>
+                      )}
+
+                      <div className="absolute bottom-0 left-0 w-full flex justify-between px-1 translate-y-full pt-2 text-[6px] font-black text-slate-400 uppercase tracking-widest">
+                          <span>{financialData.chartData[0]?.label}</span>
+                          <span>{financialData.chartData[financialData.chartData.length - 1]?.label}</span>
+                      </div>
+                  </div>
+              </div>
+              
+              {/* STATUS PENDENTE */}
+              <div className="shrink-0 grid grid-cols-2 gap-3 relative z-10 mt-auto">
+                   <div className="p-4 rounded-2xl bg-indigo-600 text-white flex flex-col justify-between shadow-md h-20">
+                        <p className="text-[8px] font-black uppercase opacity-60">Pendente no Período</p>
+                        <h4 className="text-sm font-black">{formatCurrency(financialData.totalPendingAmount)}</h4>
+                   </div>
+                   <div className="p-4 rounded-2xl border bg-white dark:bg-white/5 dark:border-white/10 flex flex-col justify-between shadow-md h-20">
+                        <p className="text-[8px] font-black uppercase text-slate-400">Status Quitação</p>
+                        <h4 className={`text-sm font-black ${financialData.totalPendingAmount > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                            {financialData.totalPendingAmount > 0 ? 'Existem Pendências' : 'Tudo em dia'}
+                        </h4>
+                   </div>
+              </div>
+          </div>
+
+          {/* COLUNA DIREITA */}
+          <div className="col-span-12 md:col-span-3 flex flex-col gap-4 min-h-0">
+              <div className="shrink-0 h-[150px] rounded-[2rem] border p-5 bg-white dark:bg-black/20 dark:border-white/10 flex flex-col shadow-lg">
+                  <div className="flex items-center gap-2 mb-4 text-amber-500 shrink-0">
+                      <Percent size={18} /><span className="text-[10px] font-black uppercase tracking-widest">% Distribuição</span>
+                  </div>
+                  <div className="space-y-3 overflow-y-auto no-scrollbar pr-1 flex-1">
+                      {financialData.categoryImpact.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center opacity-40">
+                            <p className="text-[8px] uppercase font-black text-center text-slate-400">Sem dados</p>
+                        </div>
+                      ) : financialData.categoryImpact.map((item, i) => (
+                          <div key={i} className="space-y-1">
+                              <div className="flex justify-between text-[9px] font-black uppercase">
+                                  <span className="text-slate-500 truncate w-20">{item.category}</span>
+                                  <span className="text-amber-500">{item.percent.toFixed(1)}%</span>
+                              </div>
+                              <div className="w-full h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                                  <div style={{width: `${item.percent}%`}} className="h-full bg-amber-500 rounded-full" />
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+
+              <div className="flex-1 rounded-[2rem] border p-5 bg-white dark:bg-black/20 dark:border-white/10 flex flex-col shadow-lg min-h-0">
+                  <div className="flex items-center gap-2 mb-4 text-indigo-500 shrink-0">
+                      <Target size={18} /><span className="text-[10px] font-black uppercase tracking-widest">Monitor de Metas</span>
+                  </div>
+                  <div className="flex-1 space-y-4 overflow-y-auto no-scrollbar pr-1">
+                      {financialData.budgetStatus.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center opacity-40">
+                            <CheckCircle2 size={24} className="mb-2 text-slate-400" />
+                            <p className="text-[8px] uppercase font-black text-center text-slate-400">Nenhum Teto</p>
+                        </div>
+                      ) : financialData.budgetStatus.map((budget, i) => (
+                          <div key={i} className={`p-3 rounded-2xl border transition-all ${budget.isOver ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20 shadow-sm' : budget.isWarning ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 shadow-sm' : 'bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5'}`}>
+                              <div className="flex justify-between items-center mb-1.5">
+                                  <div className="flex items-center gap-1.5">
+                                      {(budget.isOver || budget.isWarning) && (
+                                          <Zap size={10} className={budget.isOver ? 'text-rose-500' : 'text-amber-500'} />
+                                      )}
+                                      <span className="text-[9px] font-black uppercase text-slate-600 dark:text-white truncate max-w-[80px]">{budget.category}</span>
+                                  </div>
+                                  <span className={`text-[10px] font-black ${budget.isOver ? 'text-rose-600' : budget.isWarning ? 'text-amber-600' : 'text-indigo-500'}`}>{budget.percent.toFixed(0)}%</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-slate-200 dark:bg-black/40 rounded-full overflow-hidden mb-2">
+                                  <div style={{width: `${Math.min(budget.percent, 100)}%`}} className={`h-full transition-all duration-1000 ${budget.isOver ? 'bg-rose-500' : budget.isWarning ? 'bg-amber-500' : 'bg-indigo-500'}`} />
+                              </div>
+                              <div className="flex justify-between text-[7px] font-black text-slate-400 uppercase tracking-widest">
+                                  <span>G: {formatCurrency(budget.spent)}</span>
+                                  <span>T: {formatCurrency(budget.limit)}</span>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      {/* 4. ÁREA: 4 VELOCÍMETROS */}
+      <div className="shrink-0 h-[120px] grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Gauge 
+             value={financialData.healthScore} 
+             label="Saúde Financeira" 
+             subtitle="Score do Mês" 
+             type="normal" 
+          />
+          <Gauge 
+             value={financialData.expenseRatio} 
+             label="Uso da Renda" 
+             subtitle="Despesas vs Receitas" 
+             type="inverse" 
+          />
+          <Gauge 
+             value={financialData.debtRatio} 
+             label="Endividamento" 
+             subtitle="Pendentes vs Renda" 
+             type="inverse" 
+          />
+          <Gauge 
+             value={financialData.savingsRate} 
+             label="Poder de Retenção" 
+             subtitle="Economia Gerada" 
+             type="normal" 
+          />
+      </div>
+
+    </div>
+  );
+}

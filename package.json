@@ -1,66 +1,66 @@
 {
-  "name": "vitta-cash-desktop",
+  "name": "vittacash",
   "private": true,
   "version": "1.0.0",
-  "description": "Sistema de Gestão Financeira VittaCash",
+  "type": "module",
+  "main": "electron.cjs",
   "author": "A2 Solutions",
-  "main": "electron/main.cjs",
+  "description": "Consultor Financeiro Pessoal Desktop",
+  "homepage": "./",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
-    "electron": "electron .",
-    "dist": "npm run build && electron-builder"
+    "electron:dev": "vite",
+    "electron:build": "npm run build && electron-builder"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.344.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^3.7.0",
+    "tailwind-merge": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.9",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.18",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^29.4.6",
+    "electron-builder": "^24.13.3",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.4.2",
+    "vite": "^5.1.5",
+    "vite-plugin-electron": "^0.29.0",
+    "wait-on": "^7.2.0"
   },
   "build": {
-    "appId": "com.a2solutions.vittacash",
+    "appId": "com.vittacash.desktop",
     "productName": "VittaCash",
-    "copyright": "Copyright © 2026 A2 Solutions",
     "directories": {
       "output": "release"
     },
     "files": [
       "dist/**/*",
-      "electron/**/*",
-      "package.json"
-    ],
-    "asarUnpack": [
-      "**/node_modules/better-sqlite3/**/*"
+      "electron.cjs"
     ],
     "win": {
       "target": "nsis",
       "icon": "public/icon.png"
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
+      "oneClick": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "VittaCash"
     }
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.39.3",
-    "better-sqlite3": "^9.4.0",
-    "dotenv": "^16.4.1",
-    "lucide-react": "^0.323.0",
-    "node-machine-id": "^1.1.12",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "recharts": "^2.11.0"
-  },
-  "devDependencies": {
-    "@types/react": "^18.2.55",
-    "@types/react-dom": "^18.2.19",
-    "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.4.17",
-    "concurrently": "^8.2.2",
-    "electron": "^28.2.1",
-    "electron-builder": "^24.9.1",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.2.2",
-    "vite": "^5.1.0"
   }
 }
