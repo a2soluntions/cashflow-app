@@ -5,7 +5,7 @@
   "type": "module",
   "main": "electron.cjs",
   "author": "A2 Solutions",
-  "description": "Consultor Financeiro Pessoal Desktop",
+  "description": "Sistema de Gestão Financeira VittaCash",
   "homepage": "./",
   "scripts": {
     "dev": "vite",
@@ -15,9 +15,11 @@
     "electron:build": "npm run build && electron-builder"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.3",
     "better-sqlite3": "^9.4.3",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.0",
+    "dotenv": "^16.4.1",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -40,6 +42,7 @@
     "typescript": "^5.4.2",
     "vite": "^5.1.5",
     "vite-plugin-electron": "^0.29.0",
+    "vite-plugin-pwa": "^1.2.0",
     "wait-on": "^7.2.0"
   },
   "build": {
