@@ -28,6 +28,7 @@ const AdminDashboard: React.FC = () => {
   const [newsTitle, setNewsTitle] = useState('');
   const [newsDesc, setNewsDesc] = useState('');
   const [newsImg, setNewsImg] = useState('');
+  const [newsUrl, setNewsUrl] = useState('');
   const [indicators, setIndicators] = useState<any>({
     SELIC: { value: '', symbol: '%' },
     IPCA: { value: '', symbol: '%' },
@@ -105,8 +106,14 @@ const AdminDashboard: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-        await supabase.from('site_content').insert([{ content_type: 'news', title: newsTitle, description: newsDesc, image_url: newsImg }]);
-        setNewsTitle(''); setNewsDesc(''); setNewsImg(''); fetchData();
+        await supabase.from('site_content').insert([{ 
+          content_type: 'news', 
+          title: newsTitle, 
+          description: newsDesc, 
+          image_url: newsImg,
+          meta_value: { external_url: newsUrl }
+        }]);
+        setNewsTitle(''); setNewsDesc(''); setNewsImg(''); setNewsUrl(''); fetchData();
     } catch (e) { alert("Erro ao salvar notícia."); } finally { setLoading(false); }
   };
 
@@ -236,6 +243,7 @@ const AdminDashboard: React.FC = () => {
                         <input className="w-full bg-black border border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none" placeholder="Título" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} required />
                         <textarea className="w-full bg-black border border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none h-24" placeholder="Descrição curta" value={newsDesc} onChange={e => setNewsDesc(e.target.value)} required />
                         <input className="w-full bg-black border border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none" placeholder="Link da Imagem" value={newsImg} onChange={e => setNewsImg(e.target.value)} />
+                        <input className="w-full bg-black border border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none" placeholder="Link Externo (Fonte)" value={newsUrl} onChange={e => setNewsUrl(e.target.value)} />
                         <button className="w-full bg-emerald-500 text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95">Publicar no Radar</button>
                     </form>
                 </div>

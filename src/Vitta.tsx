@@ -34,7 +34,6 @@ export default function Vitta() {
   const [authLoading, setAuthLoading] = useState(false);
 
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  const [showWelcome, setShowWelcome] = useState(true);
   
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -87,8 +86,6 @@ export default function Vitta() {
 
   useEffect(() => {
     if (session) loadAllData();
-    const timer = setTimeout(() => setShowWelcome(false), 5500);
-    return () => clearTimeout(timer);
   }, [loadAllData, session]);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -131,13 +128,6 @@ export default function Vitta() {
     </div>
   );
 
-  if (showWelcome) {
-    return (
-      <div className="w-screen h-screen bg-black flex items-center justify-center">
-        <video src="/splash-vitta.mp4" autoPlay muted className="w-[800px] h-auto mix-blend-screen" />
-      </div>
-    );
-  }
 
   // --- COMPONENTE DE LOGIN ---
   const LoginPage = () => (
