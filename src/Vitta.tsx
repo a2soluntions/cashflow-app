@@ -129,23 +129,6 @@ export default function Vitta() {
   );
 
 
-  // --- COMPONENTE DE LOGIN ---
-  const LoginPage = () => (
-    <div className="w-screen h-screen bg-black flex items-center justify-center p-6">
-        <form onSubmit={handleAuth} className="w-full max-w-sm bg-zinc-900 border border-white/10 p-10 rounded-[3rem] text-center">
-            <h2 className="text-2xl font-black text-white uppercase italic mb-8">{isSignUp ? 'Nova Conta' : 'Acesso VittaCash'}</h2>
-            <input type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-black border border-white/10 p-4 rounded-xl text-white mb-4 outline-none focus:border-emerald-500" />
-            <input type="password" placeholder="Senha" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-black border border-white/10 p-4 rounded-xl text-white mb-8 outline-none focus:border-emerald-500" />
-            <button className="w-full py-4 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-400 transition-all">
-                {authLoading ? 'Verificando...' : (isSignUp ? 'Cadastrar' : 'Entrar')}
-            </button>
-            <p onClick={() => setIsSignUp(!isSignUp)} className="mt-8 text-[10px] text-slate-500 uppercase font-black cursor-pointer hover:text-white">
-                {isSignUp ? 'Já possuo acesso' : 'Criar minha conta'}
-            </p>
-            {authError && <p className="mt-4 text-rose-500 text-[10px] font-bold uppercase">{authError}</p>}
-        </form>
-    </div>
-  );
 
   return (
     <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-slate-50' : 'bg-[#050505] text-white'} ${location.pathname === '/' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
@@ -169,7 +152,19 @@ export default function Vitta() {
         <Route path="/" element={<SalesPage onSelectPlan={() => navigate('/login')} />} />
         
         {/* ROTA DE LOGIN */}
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : <LoginPage />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : (
+            <LoginPage 
+                email={email} 
+                setEmail={setEmail} 
+                password={password} 
+                setPassword={setPassword} 
+                isSignUp={isSignUp} 
+                setIsSignUp={setIsSignUp} 
+                handleAuth={handleAuth} 
+                authLoading={authLoading} 
+                authError={authError} 
+            />
+        )} />
 
         {/* ROTA DO APP (PROTEGIDA) */}
         <Route path="/app" element={
@@ -210,6 +205,63 @@ export default function Vitta() {
     </div>
   );
 }
+
+// --- NOVO COMPONENTE DE LOGIN (EXTERNO PARA EVITAR PERDA DE FOCO) ---
+const LoginPage = ({ email, setEmail, password, setPassword, isSignUp, setIsSignUp, handleAuth, authLoading, authError }: any) => {
+    const [showPass, setShowPass] = useState(false);
+    
+    return (
+        <div className="w-screen h-screen bg-black flex items-center justify-center p-6 animate-in fade-in duration-700">
+            <form onSubmit={handleAuth} className="w-full max-w-sm bg-zinc-900 border border-white/10 p-10 rounded-[3rem] text-center shadow-2xl">
+                <h2 className="text-2xl font-black text-white uppercase italic mb-8">{isSignUp ? 'Nova Conta' : 'Acesso VittaCash'}</h2>
+                
+                <div className="space-y-4 mb-8">
+                    <input 
+                        type="email" 
+                        placeholder="E-mail" 
+                        value={email} 
+                        onChange={e => setEmail(e.target.value)} 
+                        className="w-full bg-black border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-all" 
+                    />
+                    
+                    <div className="relative">
+                        <input 
+                            type={showPass ? "text" : "password"} 
+                            placeholder="Senha" 
+                            value={password} 
+                            onChange={e => setPassword(e.target.value)} 
+                            className="w-full bg-black border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-all pr-12" 
+                        />
+                        <button 
+                            type="button"
+                            onClick={() => setShowPass(!showPass)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                        >
+                            {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
+                </div>
+
+                <button className="w-full py-4 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                    {authLoading ? 'Verificando...' : (isSignUp ? 'Cadastrar' : 'Entrar')}
+                </button>
+                
+                <p 
+                    onClick={() => setIsSignUp(!isSignUp)} 
+                    className="mt-8 text-[10px] text-slate-500 uppercase font-black cursor-pointer hover:text-white transition-colors tracking-widest"
+                >
+                    {isSignUp ? 'Já possuo acesso' : 'Quero criar uma conta'}
+                </p>
+                
+                {authError && (
+                    <div className="mt-6 flex items-center justify-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+                        <p className="text-rose-500 text-[10px] font-bold uppercase">{authError}</p>
+                    </div>
+                )}
+            </form>
+        </div>
+    );
+};
 
 function Lock(props: any) {
     return (
