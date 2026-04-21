@@ -33,7 +33,7 @@ export default defineConfig({
       registerType: 'reloadPrompt',
       strategies: 'injectManifest',
       srcDir: 'src',
-      filename: 'sw.ts',
+      filename: 'sw-v2.ts',
       manifest: {
         name: 'VittaCash',
         short_name: 'VittaCash',
