@@ -24,11 +24,16 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const scrollToPlans = () => {
+    const el = document.getElementById('pricing');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
   useEffect(() => {
     async function loadDynamicContent() {
       try {
-        // Tenta buscar da nossa API com cache
         const res = await fetch('/api/get-financial-data');
+        if (!res.ok) throw new Error("API Offline");
         const data = await res.json();
         
         if (data.selic) {
@@ -37,9 +42,19 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
                 { title: 'IPCA', value: data.ipca.value, symbol: '%' },
                 { title: 'DÓLAR', value: data.dolar.value, symbol: 'R$' },
             ]);
+        } else {
+            throw new Error("Dados incompletos");
         }
+      } catch (e) {
+        console.error("Erro ao carregar conteúdo dinâmico", e);
+        setIndicators([
+            { title: 'SELIC', value: '10.75', symbol: '%' },
+            { title: 'IPCA', value: '4.50', symbol: '%' },
+            { title: 'DÓLAR', value: '5.45', symbol: 'R$' },
+        ]);
+      }
 
-        // Busca notícias do Supabase
+      try {
         const { data: newsData } = await supabase
             .from('site_content')
             .select('*')
@@ -49,7 +64,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         
         if (newsData) setNews(newsData);
       } catch (e) {
-        console.error("Erro ao carregar conteúdo dinâmico", e);
+         console.error("Erro ao carregar notícias", e);
       } finally {
         setLoading(false);
       }
@@ -58,7 +73,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-emerald-500/30">
+    <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-emerald-500/30 scroll-smooth">
       
       {/* 🚀 HERO SECTION: NARRATIVA DE IMPACTO */}
       <section className="relative pt-24 pb-20 px-6 overflow-hidden">
@@ -87,10 +102,16 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
           </p>
 
           <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <button className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-emerald-500/20 active:scale-95">
+            <button 
+                onClick={() => onSelectPlan('start')}
+                className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-emerald-500/20 active:scale-95"
+            >
               Assumir o Controle
             </button>
-            <button className="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95">
+            <button 
+                onClick={scrollToPlans}
+                className="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95"
+            >
               Ver Planos
             </button>
           </div>
@@ -102,7 +123,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {loading ? (
-                Array(3).fill(0).map((_, i) => <div key={i} className="h-20 bg-white/5 animate-pulse rounded-2xl" />)
+                Array(3).fill(0).map((_, i) => <div key={i} className="h-24 bg-white/5 animate-pulse rounded-2xl" />)
             ) : (
                 indicators.map((ind) => (
                     <div key={ind.title} className="flex items-center justify-between p-6 bg-black/40 border border-white/5 rounded-3xl group hover:border-emerald-500/30 transition-all">
@@ -155,7 +176,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
       </section>
 
       {/* 💎 SEÇÃO: PLANOS E PREÇOS */}
-      <section className="py-24 px-6 bg-gradient-to-b from-black to-emerald-950/20">
+      <section id="pricing" className="py-24 px-6 bg-gradient-to-b from-black to-emerald-950/20">
         <div className="max-w-6xl mx-auto text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter italic">VittaCash <span className="text-emerald-500">Pro</span></h2>
             <p className="text-slate-400 text-sm font-medium mt-4">Escolha a ferramenta certa para o seu nível de ambição.</p>
