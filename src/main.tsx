@@ -22,11 +22,14 @@ const updateSW = registerSW({
 });
 
 import { AuthProvider } from './components/AuthProvider'
+import { BrowserRouter } from 'react-router-dom'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
-      <Vitta />
+      <BrowserRouter>
+        <Vitta />
+      </BrowserRouter>
     </AuthProvider>
   </React.StrictMode>,
 )

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { 
   Plus, Settings, LayoutGrid, Target, 
-  BarChart3, GraduationCap, Sun, CheckCircle2, 
+  BarChart3, Brain, Sun, CheckCircle2, 
   Calendar, AppWindow, Fingerprint, Moon, LogOut,
-  ShieldAlert, X
+  ShieldAlert, X, TrendingUp, ShieldCheck, Zap
 } from 'lucide-react';
 
 interface HomeHubProps {
@@ -11,9 +11,10 @@ interface HomeHubProps {
   onNewTransaction: () => void; 
   currentTheme: 'light' | 'dark';
   onToggleTheme: () => void;
+  isAdmin?: boolean;
 }
 
-export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTheme }: HomeHubProps) {
+export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTheme, isAdmin }: HomeHubProps) {
   const isLight = currentTheme === 'light';
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
@@ -21,14 +22,18 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
   const menuItems = [
     { id: 'add', label: 'Lançar', icon: <Plus size={22} />, color: 'bg-[#00f2ad]', action: onNewTransaction },
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutGrid size={20} />, color: 'bg-blue-500', action: () => onNavigate('dashboard') },
+    { id: 'investments', label: 'Carteira', icon: <TrendingUp size={20} />, color: 'bg-sky-500', action: () => onNavigate('investments') },
     { id: 'categories', label: 'Categorias', icon: <AppWindow size={20} />, color: 'bg-pink-500', action: () => onNavigate('categories') },
     { id: 'contas', label: 'Contas', icon: <CheckCircle2 size={20} />, color: 'bg-emerald-500', action: () => onNavigate('contas') },
     { id: 'history', label: 'Histórico', icon: <Calendar size={20} />, color: 'bg-rose-500', action: () => onNavigate('history') },
     { id: 'theme', label: 'Alternar Tema', icon: isLight ? <Moon size={20} /> : <Sun size={20} />, color: 'bg-amber-500', action: onToggleTheme },
-    { id: 'overview', label: 'Manifesto', icon: <GraduationCap size={20} />, color: 'bg-blue-600', action: () => onNavigate('overview') },
+    { id: 'advisor', label: 'Consultor IA', icon: <Brain size={20} />, color: 'bg-violet-600', action: () => onNavigate('advisor') },
     { id: 'report', label: 'Relatórios', icon: <BarChart3 size={20} />, color: 'bg-indigo-500', action: () => onNavigate('report') },
+    { id: 'freedom', label: 'Liberdade $', icon: <ShieldAlert size={20} />, color: 'bg-teal-600', action: () => onNavigate('freedom') },
     { id: 'target', label: 'Vitta Horizons', icon: <Target size={20} />, color: 'bg-orange-600', action: () => onNavigate('target') },
     { id: 'settings', label: 'Ajustes', icon: <Settings size={20} />, color: 'bg-slate-500', action: () => onNavigate('settings') },
+    ...(isAdmin ? [{ id: 'admin', label: 'Admin', icon: <ShieldCheck size={20} />, color: 'bg-amber-600', action: () => onNavigate('admin') }] : []),
+    {id: 'sales', label: 'Planos & Pro', icon: <Zap size={20} />, color: 'bg-emerald-600', action: () => onNavigate('sales') },
     { id: 'exit', label: 'Sair', icon: <LogOut size={20} />, color: 'bg-rose-600', action: () => setShowExitConfirm(true) }, 
   ];
 
@@ -37,7 +42,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
     window.location.reload(); 
   };
 
-  const radius = 240; 
+  const radius = isAdmin ? 290 : 265; 
   const totalItems = menuItems.length;
 
   return (

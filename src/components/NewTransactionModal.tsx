@@ -22,9 +22,10 @@ interface NewTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (transactions: any[]) => void;
+  isLimitReached?: boolean;
 }
 
-export default function NewTransactionModal({ isOpen, onClose, onSave }: NewTransactionModalProps) {
+export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitReached = false }: NewTransactionModalProps) {
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [displayValue, setDisplayValue] = useState(''); 
   const [rawValue, setRawValue] = useState(0); 
@@ -301,21 +302,41 @@ export default function NewTransactionModal({ isOpen, onClose, onSave }: NewTran
                    </div>
               </div>
 
-              {/* BOTÕES DE AÇÃO (CANCELAR / CONFIRMAR) */}
-              <div className="flex gap-3 mt-2">
-                  <button 
-                      onClick={onClose} 
-                      className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all active:scale-95 bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10"
-                  >
-                      Cancelar
-                  </button>
-                  
-                  <button 
-                      onClick={handleSave} 
-                      className={`flex-[2] py-4 rounded-2xl font-black uppercase tracking-widest text-xs text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${type === 'income' ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-rose-500 hover:bg-rose-400'}`}
-                  >
-                      <Check size={18} strokeWidth={3} /> {paymentMethod === 'installment' ? 'Confirmar Parcelamento' : 'Confirmar'}
-                  </button>
+              {/* BOTÕES DE AÇÃO (CANCELAR / CONFIRMAR OU UPGRADE) */}
+              <div className="flex flex-col gap-3 mt-2">
+                  {isLimitReached ? (
+                      <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-[2rem] text-center animate-in zoom-in-95 duration-500">
+                          <AlertTriangle className="text-rose-500 mx-auto mb-2" size={32} />
+                          <h4 className="text-sm font-black text-rose-500 uppercase tracking-tighter italic">Limite de Dados Atingido</h4>
+                          <p className="text-[9px] text-slate-500 mt-2 uppercase font-black tracking-widest leading-relaxed">
+                              Seu plano Básico permite até 50 transações. <br />
+                              Faça o upgrade para Premium e tenha banco de dados <span className="text-emerald-500">ilimitado</span>.
+                          </p>
+                          <button 
+                            onClick={onClose}
+                            className="w-full mt-4 py-4 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest rounded-2xl active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
+                          >
+                             Liberar Acesso Total
+                          </button>
+                          <button onClick={onClose} className="mt-2 text-[9px] text-slate-500 uppercase font-bold hover:text-white transition-colors">Voltar</button>
+                      </div>
+                  ) : (
+                    <div className="flex gap-3">
+                        <button 
+                            onClick={onClose} 
+                            className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all active:scale-95 bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10"
+                        >
+                            Cancelar
+                        </button>
+                        
+                        <button 
+                            onClick={handleSave} 
+                            className={`flex-[2] py-4 rounded-2xl font-black uppercase tracking-widest text-xs text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${type === 'income' ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-rose-500 hover:bg-rose-400'}`}
+                        >
+                            <Check size={18} strokeWidth={3} /> {paymentMethod === 'installment' ? 'Confirmar Parcelamento' : 'Confirmar'}
+                        </button>
+                    </div>
+                  )}
               </div>
 
           </div>

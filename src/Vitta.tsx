@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from './components/AuthProvider';
 import { appApi } from './services/api';
 import { supabase } from './supabase';
@@ -12,35 +13,50 @@ import TransactionTable from './components/TransactionTable';
 import ProfileSettings from './components/ProfileSettings'; 
 import HorizonsManager from './components/HorizonsManager'; 
 import Reports from './components/Reports'; 
-import { Transaction, Category, Goal } from './types'; 
-import { User, Bell, Eye, EyeOff } from 'lucide-react'; 
+import { Transaction, Category, Goal, Investment } from './types'; 
+import { User, Bell, Eye, EyeOff, ShieldCheck, Zap } from 'lucide-react'; 
+import InvestmentsManager from './components/InvestmentsManager';
+import DebtFreedom from './components/DebtFreedom';
+import SubscriptionWall from './components/SubscriptionWall';
+import AdminDashboard from './components/AdminDashboard';
+import SalesPage from './components/SalesPage';
 
 export default function Vitta() {
-  // --- SISTEMA DE LOGIN SUPABASE ---
   const { session } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const isAuthenticated = !!session;
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  // --------------------------------------------------
 
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  const [currentTab, setCurrentTab] = useState('hub');
   const [showWelcome, setShowWelcome] = useState(true);
   
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [investments, setInvestments] = useState<Investment[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
-  const [userName, setUserName] = useState('');
+
+  // --- ASSINATURA ---
+  const [trialDaysLeft, setTrialDaysLeft] = useState<number>(999);
+  const [subscriptionActive, setSubscriptionActive] = useState(true);
+  const [subscriptionPlan, setSubscriptionPlan] = useState<'free' | 'basic' | 'premium'>('free');
+  const ADMIN_EMAIL = 'a2soluntions@gmail.com';
+
+  const isLimitReached = useMemo(() => {
+    if (subscriptionPlan === 'premium' || session?.user?.email === ADMIN_EMAIL) return false;
+    if (subscriptionPlan === 'basic') return transactions.length >= 50;
+    return false;
+  }, [subscriptionPlan, transactions.length, session?.user?.email]);
 
   const loadAllData = useCallback(async () => {
     if (!session?.user?.id) return;
-
     try {
       const dbTransactions = await appApi.getTransactions(session.user.id);
       setTransactions(dbTransactions);
@@ -48,310 +64,165 @@ export default function Vitta() {
       setCategories(dbCategories);
       const dbGoals = await appApi.getGoals(session.user.id);
       setGoals(dbGoals);
-    } catch (err) {
-      console.error("Erro ao carregar dados", err);
-    }
+      const dbInvestments = await appApi.getInvestments(session.user.id);
+      setInvestments(dbInvestments);
 
-    const savedAvatar = localStorage.getItem('vittacash_user_avatar');
-    const savedName = localStorage.getItem('vittacash_user_name');
-    setUserAvatar(savedAvatar);
-    setUserName(savedName || 'Comandante');
-  }, [session]);
+      const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', session.user.id).single();
+      if (profile) {
+        const now = new Date();
+        setSubscriptionPlan((profile.subscription_tier || 'free') as any);
+        const isSubActive = profile.subscription_status === 'active' && (!profile.subscription_expires_at || new Date(profile.subscription_expires_at) > now);
+        if (isSubActive || session.user.email === ADMIN_EMAIL) {
+          setSubscriptionActive(true);
+          setTrialDaysLeft(999);
+        } else {
+          const trialEnd = profile.trial_expires_at ? new Date(profile.trial_expires_at) : new Date(0);
+          const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          setTrialDaysLeft(daysLeft);
+          setSubscriptionActive(daysLeft > 0);
+        }
+      }
+    } catch (err) { console.error("Erro ao carregar dados", err); }
+  }, [session, ADMIN_EMAIL]);
 
-  const handleAuth = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  useEffect(() => {
+    if (session) loadAllData();
+    const timer = setTimeout(() => setShowWelcome(false), 5500);
+    return () => clearTimeout(timer);
+  }, [loadAllData, session]);
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
     setAuthLoading(true);
-    setAuthError('');
-    
     try {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        alert('Cadastro realizado com sucesso! Você já pode fazer login.');
-        setIsSignUp(false);
+        alert('Cadastro realizado!'); setIsSignUp(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        navigate('/app');
       }
-    } catch (error: any) {
-      let errorMessage = error.message || 'Erro na autenticação';
-      
-      // Tradução de erros comuns do Supabase
-      if (errorMessage.includes('Email not confirmed')) {
-        errorMessage = 'Por favor, confirme seu e-mail clicando no link que enviamos antes de fazer login. (Ou desative a "Confirmação de E-mail" no painel do Supabase)';
-      } else if (errorMessage.includes('Invalid login credentials')) {
-        errorMessage = 'E-mail ou senha incorretos.';
-      } else if (errorMessage.includes('User already registered')) {
-        errorMessage = 'Este e-mail já está cadastrado.';
-      } else if (errorMessage.includes('Password should be at least')) {
-        errorMessage = 'A senha deve ter pelo menos 6 caracteres.';
-      } else if (errorMessage.includes('Email address "') && errorMessage.includes('is invalid')) {
-        errorMessage = 'O endereço de e-mail fornecido é inválido.';
-      }
-
-      setAuthError(errorMessage);
-      setTimeout(() => setAuthError(''), 6000);
-    } finally {
-      setAuthLoading(false);
-    }
+    } catch (error: any) { setAuthError(error.message); setTimeout(() => setAuthError(''), 6000); } finally { setAuthLoading(false); }
   };
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-    
-    if (session) {
-      loadAllData();
-    }
-
-    const timer = setTimeout(() => {
-      setShowWelcome(false);
-    }, 5500);
-    return () => clearTimeout(timer);
-  }, [theme, loadAllData, session]);
 
   const overdueCount = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return transactions.filter(t => {
-      const status = (t as any).status;
-      if (status !== 'PENDING') return false;
-      return new Date(t.date) < today;
-    }).length;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    return transactions.filter(t => (t as any).status === 'PENDING' && new Date(t.date) < today).length;
   }, [transactions]);
 
-  const handleNavigate = (tabId: string) => setCurrentTab(tabId);
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
-
-  const handleSaveTransaction = async (newTransactions: any[]) => {
-      if (!session?.user?.id) return;
-
-      const updatedList = [...newTransactions, ...transactions];
-      // Optmistic UI Update
-      setTransactions(updatedList);
-      
-      // Persist in Backend / Offline Queue
-      for (const tx of newTransactions) {
-        await appApi.addTransaction({ ...tx, user_id: session.user.id });
-      }
-      
-      loadAllData();
-  };
-
-  // ==================================================================================
-  // TELA 1: DE BOAS-VINDAS (SPLASH SCREEN) COM VÍDEO
-  // ==================================================================================
-  if (showWelcome) {
-    return (
-      <div className="w-screen h-screen bg-[#020202] flex flex-col items-center justify-center overflow-hidden font-sans relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-600/20 blur-[150px] rounded-full animate-pulse mix-blend-screen pointer-events-none" />
-        
-        <div className="z-10 flex flex-col items-center text-center">
-          <div className="relative mb-50 flex items-center justify-center w-90 h-90 md:w-[750px] md:h-[750px]">
-            <div className="absolute inset-0 bg-indigo-500/30 blur-[250px] rounded-full animate-pulse" />
-            
-            <video 
-              src="./splash-vitta.mp4" 
-              autoPlay 
-              muted 
-              playsInline
-              className="relative w-full h-full object-cover mix-blend-screen scale-850"
-              style={{
-                maskImage: 'radial-gradient(circle, black 100%, transparent 100%)',
-                WebkitMaskImage: 'radial-gradient(circle, black 100%, transparent 100%)'
-              }}
-            />
-          </div>
-          
-          <div className="space-y-4 animate-[fadeUp_1.5s_ease-out_forwards] -mt-4">
-            <div className="flex flex-col items-center gap-2 mt-4">
-              <p className="text-lg md:text-xl text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-zinc-400 font-black uppercase tracking-widest px-4 drop-shadow-md">
-                O Verdadeiro Poder
-              </p>
-              <div className="h-[2px] w-24 bg-gradient-to-r from-transparent via-indigo-500 to-transparent my-1 opacity-50" />
-              <p className="text-sm md:text-base text-[#00d06c] font-bold uppercase tracking-[0.3em] drop-shadow-[0_0_10px_rgba(0,208,108,0.5)]">
-                da Sua Liberdade Financeira.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-20 w-64 h-[3px] bg-zinc-900/50 rounded-full overflow-hidden border border-white/5">
-          <div className="h-full bg-gradient-to-r from-indigo-600 to-[#00d06c] animate-[progress_5.5s_ease-in-out_forwards] shadow-[0_0_15px_rgba(0,208,108,0.5)]" />
-        </div>
-
-        <style>{`
-          @keyframes progress { 0% { width: 0%; } 100% { width: 100%; } }
-          @keyframes fadeUp {
-            0% { opacity: 0; transform: translateY(30px); }
-            100% { opacity: 1; transform: translateY(0); }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  // ==================================================================================
-  // TELA 2: PORTÃO DE SEGURANÇA (ANTI-PIRATARIA)
-  // ==================================================================================
-  if (!isAuthenticated) {
-    return (
-      <div className="w-screen h-screen bg-[#050505] flex items-center justify-center relative overflow-hidden font-sans">
-        <div className="absolute w-[600px] h-[600px] bg-[#00d06c]/10 blur-[150px] rounded-full" />
-        
-        <form onSubmit={handleAuth} className="relative z-10 w-full max-w-md p-8 bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl flex flex-col items-center text-center mx-4">
-          <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
-            <User className="text-[#00d06c]" size={30} />
-          </div>
-          
-          <h2 className="text-2xl font-black text-white uppercase tracking-widest mb-2">{isSignUp ? 'Criar Conta' : 'Acesso Restrito'}</h2>
-          <p className="text-sm text-zinc-400 mb-8">{isSignUp ? 'Crie sua nova conta' : 'Insira seu e-mail e senha para acessar'}</p>
-          
-          <div className="w-full space-y-4 mb-8">
-            <input 
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              className={`w-full bg-black/50 border ${authError ? 'border-rose-500 text-rose-500' : 'border-white/10 text-white'} rounded-xl px-4 py-3 text-center text-sm tracking-widest focus:outline-none focus:border-[#00d06c] transition-colors`}
-              required
-            />
-            
-            <div className="relative w-full">
-              <input 
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Senha"
-                className={`w-full bg-black/50 border ${authError ? 'border-rose-500 text-rose-500' : 'border-white/10 text-white'} rounded-xl px-4 py-3 text-center text-sm tracking-widest focus:outline-none focus:border-[#00d06c] transition-colors pr-10`}
-                required
-              />
-              <button 
-                type="button" 
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-          
-          {authError && <p className="text-rose-500 text-xs font-bold uppercase mb-4 animate-pulse">{authError}</p>}
-          
-          <button 
-            type="submit"
-            disabled={authLoading}
-            className="w-full py-4 bg-gradient-to-r from-[#00d06c] to-emerald-700 hover:opacity-90 transition-opacity rounded-xl text-white font-black uppercase tracking-widest shadow-[0_0_20px_rgba(0,208,108,0.4)] disabled:opacity-50"
-          >
-            {authLoading ? 'Aguarde...' : (isSignUp ? 'Cadastrar' : 'Entrar no Sistema')}
-          </button>
-
-          <button 
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="mt-6 text-xs text-zinc-400 hover:text-white uppercase tracking-widest transition-colors"
-          >
-            {isSignUp ? 'Já tem conta? Faça Login' : 'Ainda não tem conta? Cadastre-se'}
-          </button>
-        </form>
-      </div>
-    );
-  }
-
-  // ==================================================================================
-  // TELA 3: SISTEMA PRINCIPAL VITTACASH
-  // ==================================================================================
   const NavigationHeader = () => (
     <div className="absolute top-5 left-4 md:top-12 md:left-10 z-[50] pointer-events-none flex items-center gap-4 md:gap-8">
       <button 
-        onClick={() => setCurrentTab('hub')}
+        onClick={() => navigate('/app')}
         className={`px-4 md:px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex items-center gap-2 group backdrop-blur-md pointer-events-auto shadow-lg
-          ${theme === 'light' 
-            ? 'bg-white border-slate-300 text-slate-900 hover:bg-slate-50' 
-            : 'bg-black/40 border-white/10 text-white/70 hover:text-white hover:bg-black/60'}
+          ${theme === 'light' ? 'bg-white border-slate-300 text-slate-900 shadow-slate-200' : 'bg-black/40 border-white/10 text-white/70 hover:text-white'}
         `}
       >
-        <span className="group-hover:-translate-x-1 transition-transform">←</span> <span className="hidden md:inline">Menu Hub</span>
+        <span className="group-hover:-translate-x-1 transition-transform">←</span> Hub
       </button>
-
       {overdueCount > 0 && (
-        <button 
-          onClick={() => setCurrentTab('bills')}
-          className="pointer-events-auto relative flex items-center justify-center text-rose-500 hover:scale-110 transition-transform group"
-        >
-          <Bell size={32} className="animate-ring drop-shadow-[0_0_15px_rgba(244,63,94,0.4)]" />
-          <span className="absolute -top-1 -right-1 w-6 h-6 bg-rose-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-[#050505] shadow-xl">
-            {overdueCount}
-          </span>
+         <button onClick={() => navigate('/app?tab=bills')} className="pointer-events-auto relative text-rose-500 animate-pulse">
+           <Bell size={24} />
+           <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white text-[9px] font-black rounded-full flex items-center justify-center">{overdueCount}</span>
         </button>
       )}
+    </div>
+  );
+
+  if (showWelcome) {
+    return (
+      <div className="w-screen h-screen bg-black flex items-center justify-center">
+        <video src="/splash-vitta.mp4" autoPlay muted className="w-[800px] h-auto mix-blend-screen" />
+      </div>
+    );
+  }
+
+  // --- COMPONENTE DE LOGIN ---
+  const LoginPage = () => (
+    <div className="w-screen h-screen bg-black flex items-center justify-center p-6">
+        <form onSubmit={handleAuth} className="w-full max-w-sm bg-zinc-900 border border-white/10 p-10 rounded-[3rem] text-center">
+            <h2 className="text-2xl font-black text-white uppercase italic mb-8">{isSignUp ? 'Nova Conta' : 'Acesso VittaCash'}</h2>
+            <input type="email" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-black border border-white/10 p-4 rounded-xl text-white mb-4 outline-none focus:border-emerald-500" />
+            <input type="password" placeholder="Senha" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-black border border-white/10 p-4 rounded-xl text-white mb-8 outline-none focus:border-emerald-500" />
+            <button className="w-full py-4 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-400 transition-all">
+                {authLoading ? 'Verificando...' : (isSignUp ? 'Cadastrar' : 'Entrar')}
+            </button>
+            <p onClick={() => setIsSignUp(!isSignUp)} className="mt-8 text-[10px] text-slate-500 uppercase font-black cursor-pointer hover:text-white">
+                {isSignUp ? 'Já possuo acesso' : 'Criar minha conta'}
+            </p>
+            {authError && <p className="mt-4 text-rose-500 text-[10px] font-bold uppercase">{authError}</p>}
+        </form>
     </div>
   );
 
   return (
-    <div className={`w-screen h-screen overflow-hidden font-sans relative transition-all duration-500
-      ${theme === 'light' ? 'bg-[#f8fafc] text-slate-900' : 'bg-[#050505] text-white'}
-    `}>
+    <div className={`w-screen h-screen overflow-hidden font-sans relative ${theme === 'light' ? 'bg-slate-50' : 'bg-[#050505] text-white'}`}>
       
-      <style>{`
-        * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
-        *::-webkit-scrollbar { display: none !important; }
-        .light h1, .light h2, .light h3, .light h4, .light p, .light span:not(.text-white), .light label { color: #1e293b !important; }
-        .light .text-white, .light .text-zinc-100, .light .text-zinc-200 { color: #0f172a !important; }
-        .light .bg-white\\/5, .light .bg-white\\/\\[0\\.01\\], .light .bg-zinc-900\\/50 { background-color: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important; }
-        .light .border-white\\/10 { border-color: #e2e8f0 !important; }
-        @keyframes ring { 0% { transform: rotate(0); } 5% { transform: rotate(20deg); } 10% { transform: rotate(-20deg); } 15% { transform: rotate(15deg); } 20% { transform: rotate(-15deg); } 25% { transform: rotate(0); } 100% { transform: rotate(0); } }
-        .animate-ring { animation: ring 3s infinite ease-in-out; }
-      `}</style>
-      
-      {theme === 'dark' && (
-        <>
-          <div className="absolute top-[-30%] left-[-10%] w-[60%] h-[60%] bg-indigo-600/20 blur-[180px] rounded-full pointer-events-none mix-blend-screen" />
-          <div className="absolute bottom-[-30%] right-[-10%] w-[60%] h-[60%] bg-[#00d06c]/10 blur-[180px] rounded-full pointer-events-none mix-blend-screen" />
-        </>
+      {isAuthenticated && (
+          <div className="absolute top-5 right-4 z-[100]">
+            <button onClick={() => navigate('/app?tab=settings')} className="w-12 h-12 rounded-full border-2 border-emerald-500/20 overflow-hidden">
+                {userAvatar ? <img src={userAvatar} className="w-full h-full object-cover" alt="User" /> : <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-emerald-500 font-black">VC</div>}
+            </button>
+          </div>
       )}
 
-      {/* AVATAR DE USUÁRIO COM BOTÃO ACESSÍVEL */}
-      <div className="absolute top-5 right-4 md:top-8 md:left-1/2 md:-translate-x-1/2 z-[100] flex flex-col items-center group">
-        <button
-          onClick={() => setCurrentTab('settings')}
-          className={`relative p-1 rounded-full border-2 transition-all duration-700 shadow-2xl active:scale-95
-            ${theme === 'light' ? 'border-slate-300 bg-white shadow-slate-200' : 'border-[#00d06c]/20 bg-black group-hover:border-[#00d06c]'}
-          `}
-        >
-          <div className="w-12 h-12 md:w-20 md:h-20 rounded-full overflow-hidden bg-zinc-900 flex items-center justify-center border border-white/5">
-            {userAvatar ? <img src={userAvatar} className="w-full h-full object-cover" alt="Avatar" /> : <User className="w-6 h-6 md:w-8 md:h-8 text-[#00d06c]" />}
-          </div>
-          <div className={`absolute bottom-0 right-0 md:bottom-1 md:right-1 w-3 h-3 md:w-4 md:h-4 bg-[#00d06c] rounded-full border-2 ${theme === 'light' ? 'border-white' : 'border-[#050505]'}`} />
-        </button>
-      </div>
+      {location.pathname !== '/' && location.pathname !== '/login' && <NavigationHeader />}
 
-      {currentTab === 'hub' ? (
-        <HomeHub 
-          onNavigate={handleNavigate} 
-          onNewTransaction={() => setIsModalOpen(true)}
-          currentTheme={theme}
-          onToggleTheme={toggleTheme}
-        />
-      ) : (
-        <div className="h-full w-full flex flex-col relative z-10 animate-in fade-in duration-500">
-          <NavigationHeader />
-          <div className="flex-1 w-full overflow-y-auto overflow-x-hidden md:overflow-hidden p-4 md:p-6 pt-24 md:pt-36">
-            {currentTab === 'dashboard' && <DashboardHome transactions={transactions as any} />}
-            {currentTab === 'categories' && <CategoryManager categories={categories} onUpdate={loadAllData} currentUserId={session?.user?.id} />}
-            {currentTab === 'target' && <HorizonsManager goals={goals} onUpdate={loadAllData} currentUserId={session?.user?.id} />} 
-            {currentTab === 'report' && <Reports transactions={transactions as any} />} 
-            {currentTab === 'settings' && <ProfileSettings onUpdate={loadAllData} onClose={() => setCurrentTab('hub')} />}
-            {(currentTab === 'contas' || currentTab === 'bills') && <BillsManager mode={currentTab === 'bills' ? 'overdue' : 'normal'} />}
-            {currentTab === 'history' && <TransactionTable />}
-            {(currentTab === 'overview' || currentTab === 'edu') && <FinancialAdvisor currentBalance={0} transactions={transactions} categories={[]} />}
-          </div>
-        </div>
+      {!subscriptionActive && isAuthenticated && (
+        <SubscriptionWall userEmail={session?.user?.email || ''} userId={session?.user?.id || ''} trialDaysLeft={trialDaysLeft} onSuccess={loadAllData} />
       )}
 
-      <NewTransactionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveTransaction} />
+      <Routes>
+        {/* ROTA INICIAL: SALES PAGE (MARKETING) */}
+        <Route path="/" element={<SalesPage onSelectPlan={() => navigate('/login')} />} />
+        
+        {/* ROTA DE LOGIN */}
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : <LoginPage />} />
+
+        {/* ROTA DO APP (PROTEGIDA) */}
+        <Route path="/app" element={
+            !isAuthenticated ? <Navigate to="/login" /> : (
+                <div className="h-full w-full">
+                    {/* Renderiza o conteúdo baseado no Query Param ?tab=... */}
+                    {(() => {
+                        const tab = new URLSearchParams(location.search).get('tab') || 'hub';
+                        if (tab === 'hub') return <HomeHub onNavigate={(t) => navigate(`/app?tab=${t}`)} onNewTransaction={() => setIsModalOpen(true)} currentTheme={theme} onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} isAdmin={session?.user?.email === ADMIN_EMAIL} />;
+                        if (tab === 'sales') return <SalesPage onSelectPlan={() => navigate('/app?tab=settings')} />;
+                        if (tab === 'dashboard') return <DashboardHome transactions={transactions as any} />;
+                        if (tab === 'history') return <TransactionTable />;
+                        if (tab === 'investments') return <InvestmentsManager investments={investments} onAdd={async(v) => { await appApi.addInvestment({...v, id: crypto.randomUUID(), user_id: session?.user?.id}); loadAllData(); }} onDelete={async(id) => { await appApi.deleteInvestment(id); loadAllData(); }} />;
+                        if (tab === 'freedom') return <DebtFreedom />;
+                        if (tab === 'settings') return <ProfileSettings onUpdate={loadAllData} onClose={() => navigate('/app')} subscriptionPlan={subscriptionPlan} onNavigate={(t) => navigate(`/app?tab=${t}`)} />;
+                        if (tab === 'admin') return session?.user?.email === ADMIN_EMAIL ? <AdminDashboard /> : <Navigate to="/app" />;
+                        if (tab === 'categories') return <CategoryManager categories={categories} onUpdate={loadAllData} currentUserId={session?.user?.id} />;
+                        if (tab === 'target') return <HorizonsManager goals={goals} onUpdate={loadAllData} currentUserId={session?.user?.id} />;
+                        if (tab === 'report') return <Reports transactions={transactions as any} />;
+                        if (tab === 'contas' || tab === 'bills') return <BillsManager mode={tab === 'bills' ? 'overdue' : 'normal'} />;
+                        if (tab === 'advisor') return (subscriptionPlan === 'premium' || session?.user?.email === ADMIN_EMAIL) ? <FinancialAdvisor currentBalance={0} transactions={transactions} categories={[]} theme={theme} /> : <div className="h-full flex flex-col items-center justify-center text-center p-6"><Lock size={64} className="text-blue-400 mb-4" /><h2 className="text-2xl font-black uppercase italic">Advisor Premium</h2><p className="text-zinc-500 mb-6 text-xs uppercase font-bold tracking-widest">Upgrade para liberar o cérebro da rede.</p><button onClick={() => navigate('/app?tab=sales')} className="px-8 py-4 bg-blue-600 rounded-2xl font-black text-white uppercase text-[10px]">Ver Planos</button></div>;
+                        return <div>Não encontrado</div>;
+                    })()}
+                </div>
+            )
+        } />
+
+        {/* REDIRECIONAMENTO DE SEGURANÇA */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+
+      <NewTransactionModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSave={async (txs) => { if(!isLimitReached) { for(const tx of txs) await appApi.addTransaction({...tx, user_id: session?.user?.id}); loadAllData(); } }}
+        isLimitReached={isLimitReached}
+      />
     </div>
   );
+}
+
+function Lock(props: any) {
+    return (
+      <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+    )
 }

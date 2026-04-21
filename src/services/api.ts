@@ -1,5 +1,5 @@
 import { supabase } from '../supabase';
-import { Transaction, Category, Goal } from '../types';
+import { Transaction, Category, Goal, Investment } from '../types';
 
 interface SyncAction {
   id: string;
@@ -153,6 +153,25 @@ class ApiService {
 
   async deleteGoal(id: string) {
     await this.mutateWithSync('goals', 'DELETE', { id });
+  }
+  // INVESTMENTS (CARTEIRA DE ATIVOS)
+  async getInvestments(userId: string): Promise<Investment[]> {
+    if (!navigator.onLine) {
+      const fallback = localStorage.getItem('vittacash_pro_investments');
+      return fallback ? JSON.parse(fallback) : [];
+    }
+    const { data, error } = await supabase.from('investments').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+    if (error) throw error;
+    localStorage.setItem('vittacash_pro_investments', JSON.stringify(data || []));
+    return data as Investment[];
+  }
+
+  async addInvestment(investment: Investment) {
+    await this.mutateWithSync('investments', 'INSERT', investment);
+  }
+
+  async deleteInvestment(id: string) {
+    await this.mutateWithSync('investments', 'DELETE', { id });
   }
   // Podem seguir exatamente o mesmo padrão do mutateWithSync!
 }

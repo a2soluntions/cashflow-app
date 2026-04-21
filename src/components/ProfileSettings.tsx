@@ -2,17 +2,21 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   User, Save, Camera, Mail, ShieldCheck, 
   MessageCircle, CheckCircle2, ArrowLeft, 
-  Download, Upload, AlertOctagon, Database, X, AlertCircle
+  Download, Upload, AlertOctagon, Database, X, AlertCircle,
+  BellRing, BellOff, Loader2
 } from 'lucide-react';
 import logoA2 from '../assets/logo-a2.png'; 
+import { useAuth } from './AuthProvider';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 interface ProfileSettingsProps {
   onUpdate: () => void;
   onClose: () => void;
-  // Removido o showToast das props pois vamos gerenciar internamente para garantir o padrão visual
+  subscriptionPlan?: string;
+  onNavigate?: (tab: string) => void;
 }
 
-const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose }) => {
+const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, subscriptionPlan, onNavigate }) => {
   const [loading, setLoading] = useState(false);
   const [fullName, setFullName] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -20,6 +24,9 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose }) 
   const [userPhone, setUserPhone] = useState('');
   const [notificationChannel, setNotificationChannel] = useState<'email'|'whatsapp'|'both'>('both');
   const [avatarUrl, setAvatarUrl] = useState('');
+  
+  const { session } = useAuth();
+  const { permission, subscribeUser, unsubscribeUser, loading: pushLoading } = usePushNotifications(session?.user?.id);
   
   // --- ESTADO DO TOAST CUSTOMIZADO (PADRÃO VITTA) ---
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -154,6 +161,31 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose }) 
 
       {/* GRID DE CONTEÚDO */}
       <div className="flex-1 overflow-y-auto no-scrollbar pb-10">
+        
+        {/* BANNER DE ASSINATURA */}
+        <div className="mb-10 p-8 rounded-[2.5rem] bg-gradient-to-r from-emerald-500/10 to-indigo-500/10 border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-6">
+                <div className="w-16 h-16 rounded-2xl bg-black flex items-center justify-center text-emerald-500">
+                    <Database size={28} />
+                </div>
+                <div>
+                    <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Status da Assinatura</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                        <span className="px-2 py-0.5 rounded bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest leading-none">
+                            Plano {subscriptionPlan || 'Free'}
+                        </span>
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Ativo</span>
+                    </div>
+                </div>
+            </div>
+            <button 
+                onClick={() => onNavigate?.('sales')}
+                className="px-8 py-3 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-400 transition-all shadow-xl active:scale-95"
+            >
+                Ver Vantagens & Planos
+            </button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
             
             {/* LADO A: FORMULÁRIO */}
@@ -267,6 +299,37 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose }) 
                                     >
                                         Em Ambos
                                     </button>
+                                </div>
+                            </div>
+
+                            {/* NOTIFICAÇÃO PUSH PWA */}
+                            <div className="pt-6 border-t border-white/5 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h4 className="text-[11px] font-black text-white uppercase tracking-wider flex items-center gap-2">
+                                            {permission === 'granted' ? <BellRing size={14} className="text-[#00d06c]" /> : <BellOff size={14} className="text-zinc-500" />}
+                                            Notificações Push (PWA)
+                                        </h4>
+                                        <p className="text-[10px] text-zinc-500 mt-1 uppercase font-bold">Alertas diretos no aparelho</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        disabled={pushLoading}
+                                        onClick={permission === 'granted' ? unsubscribeUser : subscribeUser}
+                                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
+                                            permission === 'granted' 
+                                                ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20' 
+                                                : 'bg-[#00d06c]/10 border border-[#00d06c]/20 text-[#00d06c] hover:bg-[#00d06c]/20'
+                                        }`}
+                                    >
+                                        {pushLoading ? <Loader2 size={12} className="animate-spin" /> : (permission === 'granted' ? 'Desativar' : 'Ativar')}
+                                    </button>
+                                </div>
+                                <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 mb-4">
+                                    <p className="text-[9px] text-orange-400/80 leading-relaxed font-medium">
+                                        <AlertCircle size={10} className="inline mr-1 mb-0.5" />
+                                        Para receber em tempo real, certifique-se de que as notificações do navegador estão permitidas no sistema operacional.
+                                    </p>
                                 </div>
                             </div>
                         </div>
