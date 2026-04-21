@@ -16,6 +16,9 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose }) 
   const [loading, setLoading] = useState(false);
   const [fullName, setFullName] = useState('');
   const [companyName, setCompanyName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPhone, setUserPhone] = useState('');
+  const [notificationChannel, setNotificationChannel] = useState<'email'|'whatsapp'|'both'>('both');
   const [avatarUrl, setAvatarUrl] = useState('');
   
   // --- ESTADO DO TOAST CUSTOMIZADO (PADRÃO VITTA) ---
@@ -37,9 +40,15 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose }) 
   const loadProfile = async () => {
     const savedName = localStorage.getItem('vittacash_user_name');
     const savedCompany = localStorage.getItem('vittacash_user_company');
+    const savedEmail = localStorage.getItem('vittacash_user_email');
+    const savedPhone = localStorage.getItem('vittacash_user_phone');
+    const savedChannel = localStorage.getItem('vittacash_notification_channel');
     const savedAvatar = localStorage.getItem('vittacash_user_avatar');
     if (savedName) setFullName(savedName);
     if (savedCompany) setCompanyName(savedCompany);
+    if (savedEmail) setUserEmail(savedEmail);
+    if (savedPhone) setUserPhone(savedPhone);
+    if (savedChannel) setNotificationChannel(savedChannel as 'email'|'whatsapp'|'both');
     if (savedAvatar) setAvatarUrl(savedAvatar);
   };
 
@@ -54,14 +63,26 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose }) 
     }
   };
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length <= 11) {
+      v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
+      v = v.replace(/(\d)(\d{4})$/, '$1-$2');
+      setUserPhone(v);
+    }
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     try {
       localStorage.setItem('vittacash_user_name', fullName);
       localStorage.setItem('vittacash_user_company', companyName);
+      localStorage.setItem('vittacash_user_email', userEmail);
+      localStorage.setItem('vittacash_user_phone', userPhone);
+      localStorage.setItem('vittacash_notification_channel', notificationChannel);
       if (avatarUrl) localStorage.setItem('vittacash_user_avatar', avatarUrl);
       onUpdate(); 
-      showInternalToast('Perfil atualizado com sucesso!', 'success');
+      showInternalToast('Perfil e Notificações atualizados com sucesso!', 'success');
     } catch (err) {
       showInternalToast('Erro ao salvar dados.', 'error');
     }
@@ -184,40 +205,70 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose }) 
                 </section>
             </div>
 
-            {/* LADO B: LICENÇA (O TEXTO QUE DEFINIMOS) */}
+            {/* LADO B: NOTIFICAÇÕES WEB/PWA */}
             <div className="space-y-12">
                 <section>
                     <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
-                        <div className="w-6 h-[1px] bg-zinc-800" /> Autenticação da Licença
+                        <div className="w-6 h-[1px] bg-zinc-800" /> Central de Notificações
                     </h2>
                     <div className="flex flex-col gap-6">
                         <div>
-                            <h3 className="text-2xl font-black text-white tracking-tighter uppercase italic">VittaCash Intelligent</h3>
-                            <p className="text-[#00d06c] text-[10px] font-black uppercase tracking-[0.3em] mt-1">Status: Ativo & Vitalício</p>
+                            <h3 className="text-2xl font-black text-white tracking-tighter uppercase italic">Alertas VittaCash</h3>
+                            <p className="text-[#00d06c] text-[10px] font-black uppercase tracking-[0.3em] mt-1 flex items-center gap-2"><CheckCircle2 size={12}/> Sincronização Web Ativa</p>
+                            <p className="text-xs text-zinc-500 mt-3 leading-relaxed">
+                                Cadastre seus contatos para receber relatórios de desempenho e ser alertado sobre contas próximas do vencimento diretamente no seu aparelho.
+                            </p>
                         </div>
                         
-                        <div className="space-y-5">
-                            <div className="flex items-start gap-4">
-                                <div className="mt-1 p-1 rounded-md bg-[#00d06c]/10 text-[#00d06c]"><CheckCircle2 className="w-4 h-4" /></div>
-                                <div>
-                                    <p className="text-sm text-white font-bold italic">Gestão Financeira Inteligente</p>
-                                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Arquitetura desktop para processamento de fluxos financeiros complexos.</p>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-zinc-600 uppercase ml-2 flex items-center gap-2"><Mail size={12}/> E-mail Principal</label>
+                                <input 
+                                    type="email" 
+                                    value={userEmail} 
+                                    onChange={e => setUserEmail(e.target.value)} 
+                                    placeholder="seu@email.com"
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-[#00d06c]/40 focus:bg-white/[0.07] transition-all"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-zinc-600 uppercase ml-2 flex items-center gap-2"><MessageCircle size={12}/> WhatsApp (Com DDD)</label>
+                                <input 
+                                    type="tel" 
+                                    value={userPhone} 
+                                    onChange={handlePhoneChange} 
+                                    placeholder="(11) 99999-9999"
+                                    maxLength={15}
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-white font-bold outline-none focus:border-[#00d06c]/40 focus:bg-white/[0.07] transition-all"
+                                />
+                            </div>
+                            
+                            <div className="space-y-3 pt-4">
+                                <label className="text-[9px] font-black text-zinc-600 uppercase ml-2 flex items-center gap-2">Canal Preferencial de Alertas</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setNotificationChannel('email')}
+                                        className={`py-3 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 ${notificationChannel === 'email' ? 'bg-[#00d06c]/20 border-[#00d06c] text-[#00d06c] shadow-[#00d06c]/10' : 'bg-white/[0.02] border-white/10 text-zinc-500 hover:bg-white/[0.05]'}`}
+                                    >
+                                        E-mail
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={() => setNotificationChannel('whatsapp')}
+                                        className={`py-3 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 ${notificationChannel === 'whatsapp' ? 'bg-[#00d06c]/20 border-[#00d06c] text-[#00d06c] shadow-[#00d06c]/10' : 'bg-white/[0.02] border-white/10 text-zinc-500 hover:bg-white/[0.05]'}`}
+                                    >
+                                        WhatsApp
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={() => setNotificationChannel('both')}
+                                        className={`py-3 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 ${notificationChannel === 'both' ? 'bg-[#00d06c]/20 border-[#00d06c] text-[#00d06c] shadow-[#00d06c]/10' : 'bg-white/[0.02] border-white/10 text-zinc-500 hover:bg-white/[0.05]'}`}
+                                    >
+                                        Em Ambos
+                                    </button>
                                 </div>
                             </div>
-                            <div className="flex items-start gap-4">
-                                <div className="mt-1 p-1 rounded-md bg-[#00d06c]/10 text-[#00d06c]"><CheckCircle2 className="w-4 h-4" /></div>
-                                <div>
-                                    <p className="text-sm text-white font-bold italic">Licença Vitalícia Mono-ID</p>
-                                    <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Software vinculado exclusivamente a este ID de hardware. Uso local e privado.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-4 bg-black/40 rounded-2xl border border-white/5 mt-2">
-                            <p className="text-[9px] text-zinc-600 uppercase font-black mb-2 tracking-widest">Fingerprint do Dispositivo</p>
-                            <code className="text-[10px] text-[#00d06c]/60 font-mono break-all italic">
-                                {PROFILE_ID}_HW{window.navigator.hardwareConcurrency || '8'}_SECURE_V2
-                            </code>
                         </div>
                     </div>
                 </section>

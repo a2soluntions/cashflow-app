@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   FileText, Brain, TrendingUp, TrendingDown, Target, 
   PieChart, CheckCircle2, XCircle, 
@@ -13,14 +13,29 @@ interface ConsultantReportProps {
 
 export default function ConsultantReport({ theme, transactions }: ConsultantReportProps) {
   const isLight = theme === 'light';
+  const [timeFilter, setTimeFilter] = useState<'month' | 'year'>('month');
 
   const analysis = useMemo(() => {
+    const today = new Date();
+    // Filtro temporal
+    const targetTransactions = transactions.filter(t => {
+        if (!t.date) return true; // fallback
+        const parts = t.date.split('-');
+        const tDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        
+        if (timeFilter === 'month') {
+            return tDate.getMonth() === today.getMonth() && tDate.getFullYear() === today.getFullYear();
+        } else {
+            return tDate.getFullYear() === today.getFullYear(); // year filter or all-time if you prefer
+        }
+    });
+
     // 1. CÁLCULO DE RECEITAS E DESPESAS
-    const income = transactions
+    const income = targetTransactions
       .filter(t => t.type === 'income' || t.type === 'receita' || t.type === 'entrada')
       .reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
       
-    const expense = transactions
+    const expense = targetTransactions
       .filter(t => t.type === 'expense' || t.type === 'despesa' || t.type === 'saída')
       .reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
     
@@ -28,7 +43,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
 
     // 2. IDENTIFICAÇÃO DE DÍVIDAS (Comprometimento de Renda)
     const debtKeywords = ['empréstimo', 'financiamento', 'parcela', 'fatura', 'dívida', 'consignado', 'juros', 'banco', 'cartão'];
-    const debtPayments = transactions
+    const debtPayments = targetTransactions
       .filter(t => t.type === 'expense' || t.type === 'despesa' || t.type === 'saída')
       .filter(t => 
         debtKeywords.some(kw => (t.description || '').toLowerCase().includes(kw)) || 
@@ -43,7 +58,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
     let actualNeeds = 0; 
     let actualWants = 0;
 
-    const expensesByCategory = transactions
+    const expensesByCategory = targetTransactions
       .filter(t => t.type === 'expense' || t.type === 'despesa' || t.type === 'saída')
       .reduce((acc, t) => {
         const catName = t.category || 'Outros';
@@ -55,10 +70,13 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
         return acc;
       }, {} as Record<string, number>);
 
+    // Base de cálculo flexível: Se o usuário não registrou Receita, o gráfico usa a Despesa Total para mostrar a proporção de vazamento!
+    const baseValue = income > 0 ? income : (expense > 0 ? expense : 1);
+
     const rule503020 = {
-        needs: { actual: actualNeeds, percent: income > 0 ? (actualNeeds / income) * 100 : 0, targetPercent: 50 },
-        wants: { actual: actualWants, percent: income > 0 ? (actualWants / income) * 100 : 0, targetPercent: 30 },
-        savings: { actual: Math.max(0, income - expense), percent: income > 0 ? ((income - expense) / income) * 100 : 0, targetPercent: 20 }
+        needs: { actual: actualNeeds, percent: (actualNeeds / baseValue) * 100, targetPercent: 50 },
+        wants: { actual: actualWants, percent: (actualWants / baseValue) * 100, targetPercent: 30 },
+        savings: { actual: Math.max(0, income - expense), percent: income > 0 ? ((Math.max(0, income - expense)) / income) * 100 : 0, targetPercent: 20 }
     };
 
     const topCategories = Object.entries(expensesByCategory)
@@ -97,7 +115,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
     }
 
     return { income, expense, realBalance, topCategories, savingsRate, healthScore, survivalMonths, message, status, rule503020, debtRatio };
-  }, [transactions]);
+  }, [transactions, timeFilter]);
 
   // COMPONENTE INTERNO: VELOCÍMETRO
   const MiniGauge = ({ value, label, color }: any) => (
@@ -117,7 +135,24 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
 
   // COMPONENTE INTERNO: BARRA DE PROGRESSO
   const ProgressBar = ({ label, actualPercent, targetPercent, color, value }: any) => {
-    const isGood = label === 'Poupar (20%)' ? actualPercent >= targetPercent : actualPercent <= targetPercent;
+    // Para investimentos/poupança o ideal é poupar MAIS que a meta. Para despesas/necessidades, o ideal é gastar MENOS.
+    const isGood = label.includes('Investir') || label.includes('Poupar') ? actualPercent >= targetPercent : actualPercent <= targetPercent;
+    
+    // Alerta visual de estouro
+    const barColor = isGood ? color : 'bg-rose-500';
+    const safePercent = Math.max(0, Math.min(Number(actualPercent) || 0, 100));
+    
+    // Cálculo do desvio da meta
+    const diff = actualPercent - targetPercent;
+    let feedbackText = `Atual: ${actualPercent.toFixed(1)}%`;
+    
+    if (label.includes('Investir') || label.includes('Poupar')) {
+        if (diff > 0) feedbackText += ` (+${diff.toFixed(1)}% Acima da Meta)`;
+        else if (diff < 0) feedbackText += ` (${Math.abs(diff).toFixed(1)}% Abaixo da Meta)`;
+    } else {
+        if (diff > 0) feedbackText += ` (+${diff.toFixed(1)}% Excedido)`;
+    }
+
     return (
       <div className="space-y-2">
         <div className="flex justify-between items-end">
@@ -125,29 +160,50 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
                 {label} {isGood ? <CheckCircle2 size={12} className="text-emerald-500"/> : <XCircle size={12} className="text-rose-500"/>}
             </span>
             <div className="text-right">
-                <span className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>R$ {value.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                <span className={`text-xs font-black block ${isLight ? 'text-slate-900' : 'text-white'}`}>R$ {value.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                <span className={`text-[9px] font-black tracking-widest uppercase ${isGood ? 'text-emerald-500' : 'text-rose-500 shadow-rose-500/50'}`}>
+                  {actualPercent > 0 ? feedbackText : '0%'}
+                </span>
             </div>
         </div>
         <div className={`h-2 w-full rounded-full overflow-hidden ${isLight ? 'bg-slate-200' : 'bg-white/10'}`}>
-            <div className={`h-full rounded-full transition-all duration-1000 ${color}`} style={{ width: `${Math.min(actualPercent, 100)}%` }} />
+            <div className={`h-full rounded-full transition-all duration-1000 ${barColor}`} style={{ width: `${safePercent}%` }} />
         </div>
       </div>
     );
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 h-full min-h-0 overflow-y-auto pr-2 scrollbar-hide">
+    <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 h-full min-h-0 overflow-hidden pr-2">
       
-      {/* 1. HEADER (Título) */}
-      <div className={`shrink-0 p-8 rounded-[3rem] border transition-all ${isLight ? 'bg-white border-slate-200 shadow-xl' : 'bg-white/5 border-white/10 backdrop-blur-xl'}`}>
-        <h2 className={`text-3xl font-black uppercase italic tracking-tighter flex items-center gap-3 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-          <FileText className="text-indigo-500" size={32} /> Raio-X Financeiro
-        </h2>
-        <p className="text-indigo-500 text-[10px] font-black uppercase tracking-[0.4em] mt-1">Inteligência & Simetria de Dados</p>
+      {/* 1. HEADER (Título e Filtro temporal) */}
+      <div className={`shrink-0 p-5 rounded-[2.5rem] border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all ${isLight ? 'bg-white border-slate-200 shadow-xl' : 'bg-white/5 border-white/10 backdrop-blur-xl'}`}>
+        <div>
+            <h2 className={`text-2xl font-black uppercase italic tracking-tighter flex items-center gap-3 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+            <FileText className="text-indigo-500" size={28} /> Raio-X Financeiro
+            </h2>
+            <p className="text-indigo-500 text-[9px] font-black uppercase tracking-[0.4em] mt-1">Inteligência & Simetria de Dados</p>
+        </div>
+
+        {/* MENSAL / ANUAL TOGGLE */}
+        <div className={`flex gap-2 p-2 rounded-2xl border ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-black/20 border-white/5'}`}>
+            <button 
+                onClick={() => setTimeFilter('month')}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${timeFilter === 'month' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'}`}
+            >
+                Mês Atual
+            </button>
+            <button 
+                onClick={() => setTimeFilter('year')}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${timeFilter === 'year' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-400 hover:bg-slate-200 dark:hover:bg-white/5'}`}
+            >
+                Longo Prazo (Anual)
+            </button>
+        </div>
       </div>
 
       {/* 2. LINHA DE VELOCÍMETROS (4 Itens) */}
-      <div className={`p-8 rounded-[3rem] border grid grid-cols-2 md:grid-cols-4 gap-6 items-center transition-all ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 border-white/10 shadow-2xl'}`}>
+      <div className={`p-5 rounded-[2.5rem] border grid grid-cols-2 md:grid-cols-4 gap-4 items-center shrink-0 transition-all ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 border-white/10 shadow-2xl'}`}>
           <MiniGauge value={analysis.savingsRate} label="Retenção (Lucro)" color="#6366f1" />
           <MiniGauge value={analysis.rule503020.needs.percent} label="Custo Fixo" color={analysis.rule503020.needs.percent > 55 ? "#f43f5e" : "#10b981"} />
           <MiniGauge value={analysis.debtRatio} label="Dívidas/Renda" color={analysis.debtRatio > 30 ? "#f43f5e" : "#10b981"} />
@@ -155,12 +211,12 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
       </div>
 
       {/* 3. GRID PRINCIPAL (12 Colunas para alinhamento perfeito) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-0 pb-2">
         
         {/* LADO ESQUERDO: PARECER E DISTRIBUIÇÃO (5 colunas) */}
-        <div className="lg:col-span-5 flex flex-col gap-6 min-h-0">
+        <div className="lg:col-span-5 flex flex-col gap-4 min-h-0">
             {/* PARECER */}
-            <div className={`p-6 rounded-[2.5rem] border flex items-center gap-4 transition-all ${isLight ? 'bg-white border-slate-200 shadow-md' : 'bg-white/5 border-white/10'}`}>
+            <div className={`p-5 rounded-[2rem] border flex items-center gap-4 shrink-0 transition-all ${isLight ? 'bg-white border-slate-200 shadow-md' : 'bg-white/5 border-white/10'}`}>
                 <div className={`p-3 rounded-full shrink-0 ${analysis.status === 'danger' ? 'bg-rose-500/20 text-rose-500' : 'bg-indigo-500/20 text-indigo-500'}`}>
                     <Brain size={24} />
                 </div>
@@ -171,46 +227,46 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
             </div>
 
             {/* DISTRIBUIÇÃO 50/30/20 */}
-            <div className={`flex-1 flex flex-col p-8 rounded-[3rem] border transition-all ${isLight ? 'bg-white border-slate-200 shadow-md' : 'bg-indigo-900/10 border-indigo-500/20'}`}>
-                <h3 className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-2 mb-8 ${isLight ? 'text-indigo-600' : 'text-indigo-400'}`}>
-                    <PieChart size={16}/> Distribuição de Fluxo
+            <div className={`flex-1 flex flex-col p-6 rounded-[2.5rem] border min-h-0 transition-all ${isLight ? 'bg-white border-slate-200 shadow-md' : 'bg-indigo-900/10 border-indigo-500/20'}`}>
+                <h3 className={`text-[9px] font-black uppercase tracking-widest flex items-center gap-2 mb-6 shrink-0 ${isLight ? 'text-indigo-600' : 'text-indigo-400'}`}>
+                    <PieChart size={14}/> Distribuição de Fluxo
                 </h3>
                 <div className="flex-1 flex flex-col justify-around">
-                    <ProgressBar label="Essenciais (50%)" actualPercent={analysis.rule503020.needs.percent} targetPercent={50} color="bg-indigo-500" value={analysis.rule503020.needs.actual} />
-                    <ProgressBar label="Lifestyle (30%)" actualPercent={analysis.rule503020.wants.percent} targetPercent={30} color="bg-amber-500" value={analysis.rule503020.wants.actual} />
-                    <ProgressBar label="Liberdade (20%)" actualPercent={analysis.rule503020.savings.percent} targetPercent={20} color="bg-emerald-500" value={analysis.rule503020.savings.actual} />
+                    <ProgressBar label="Custos Essenciais (50%)" actualPercent={analysis.rule503020.needs.percent} targetPercent={50} color="bg-indigo-500" value={analysis.rule503020.needs.actual} />
+                    <ProgressBar label="Estilo de Vida (30%)" actualPercent={analysis.rule503020.wants.percent} targetPercent={30} color="bg-amber-500" value={analysis.rule503020.wants.actual} />
+                    <ProgressBar label="Poupar & Investir (20%)" actualPercent={analysis.rule503020.savings.percent} targetPercent={20} color="bg-emerald-500" value={analysis.rule503020.savings.actual} />
                 </div>
             </div>
         </div>
 
         {/* LADO DIREITO: CARDS E VAZAMENTOS (7 colunas) */}
-        <div className="lg:col-span-7 flex flex-col gap-6 min-h-0">
+        <div className="lg:col-span-7 flex flex-col gap-4 min-h-0">
             {/* GRID DE CARDS 2x2 */}
-            <div className="grid grid-cols-2 gap-4 shrink-0">
-                <div className={`p-6 rounded-[2.5rem] border flex flex-col justify-center min-h-[110px] transition-all ${isLight ? 'bg-emerald-50 border-emerald-100' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600 mb-2 flex items-center gap-1.5"><TrendingUp size={12}/> Receita</p>
-                    <h3 className="text-2xl font-black tracking-tighter">R$ {analysis.income.toLocaleString('pt-BR')}</h3>
+            <div className="grid grid-cols-2 gap-3 shrink-0">
+                <div className={`p-5 rounded-[2rem] border flex flex-col justify-center min-h-[90px] transition-all ${isLight ? 'bg-emerald-50 border-emerald-100' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
+                    <p className="text-[8px] font-black uppercase tracking-widest text-emerald-600 mb-1.5 flex items-center gap-1.5"><TrendingUp size={12}/> Receita</p>
+                    <h3 className="text-xl font-black tracking-tighter">R$ {analysis.income.toLocaleString('pt-BR')}</h3>
                 </div>
 
-                <div className={`p-6 rounded-[2.5rem] border flex flex-col justify-center min-h-[110px] transition-all ${isLight ? 'bg-rose-50 border-rose-100' : 'bg-rose-500/10 border-rose-500/20'}`}>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-rose-600 mb-2 flex items-center gap-1.5"><TrendingDown size={12}/> Saídas</p>
-                    <h3 className="text-2xl font-black tracking-tighter">R$ {analysis.expense.toLocaleString('pt-BR')}</h3>
+                <div className={`p-5 rounded-[2rem] border flex flex-col justify-center min-h-[90px] transition-all ${isLight ? 'bg-rose-50 border-rose-100' : 'bg-rose-500/10 border-rose-500/20'}`}>
+                    <p className="text-[8px] font-black uppercase tracking-widest text-rose-600 mb-1.5 flex items-center gap-1.5"><TrendingDown size={12}/> Saídas</p>
+                    <h3 className="text-xl font-black tracking-tighter">R$ {analysis.expense.toLocaleString('pt-BR')}</h3>
                 </div>
 
-                <div className={`p-6 rounded-[2.5rem] border flex flex-col justify-center min-h-[110px] transition-all ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/5 border-white/10'}`}>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 flex items-center gap-1.5"><Wallet size={12}/> Saldo Real</p>
-                    <h3 className="text-2xl font-black tracking-tighter">R$ {analysis.realBalance.toLocaleString('pt-BR')}</h3>
+                <div className={`p-5 rounded-[2rem] border flex flex-col justify-center min-h-[90px] transition-all ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/5 border-white/10'}`}>
+                    <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-1.5 flex items-center gap-1.5"><Wallet size={12}/> Saldo Real</p>
+                    <h3 className="text-xl font-black tracking-tighter">R$ {analysis.realBalance.toLocaleString('pt-BR')}</h3>
                 </div>
 
-                <div className={`p-6 rounded-[2.5rem] border flex flex-col justify-center min-h-[110px] transition-all ${isLight ? 'bg-indigo-50 border-indigo-100' : 'bg-indigo-500/10 border-indigo-500/20'}`}>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-indigo-500 mb-2 flex items-center gap-1.5"><Clock size={12}/> Oxigênio</p>
-                    <h3 className="text-2xl font-black tracking-tighter uppercase">{analysis.survivalMonths.toFixed(1)} <span className="text-[10px] opacity-50">Meses</span></h3>
+                <div className={`p-5 rounded-[2rem] border flex flex-col justify-center min-h-[90px] transition-all ${isLight ? 'bg-indigo-50 border-indigo-100' : 'bg-indigo-500/10 border-indigo-500/20'}`}>
+                    <p className="text-[8px] font-black uppercase tracking-widest text-indigo-500 mb-1.5 flex items-center gap-1.5"><Clock size={12}/> Oxigênio</p>
+                    <h3 className="text-xl font-black tracking-tighter uppercase">{analysis.survivalMonths.toFixed(1)} <span className="text-[9px] opacity-50">Meses</span></h3>
                 </div>
             </div>
 
             {/* TOP VAZAMENTOS COM SCROLL INVISÍVEL */}
-            <div className={`flex-1 flex flex-col min-h-0 rounded-[3rem] p-8 border transition-all ${isLight ? 'bg-white border-slate-200 shadow-md' : 'bg-white/5 border-white/10 backdrop-blur-md'}`}>
-                <h3 className={`text-[10px] font-black uppercase tracking-widest mb-6 shrink-0 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Top Vazamentos de Riqueza</h3>
+            <div className={`flex-1 flex flex-col min-h-0 rounded-[2.5rem] p-5 border transition-all ${isLight ? 'bg-white border-slate-200 shadow-md' : 'bg-white/5 border-white/10 backdrop-blur-md'}`}>
+                <h3 className={`text-[9px] font-black uppercase tracking-widest mb-4 shrink-0 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Top Vazamentos de Riqueza</h3>
                 
                 {/* CONTAINER DE SCROLL INVISÍVEL */}
                 <div className="flex-1 overflow-y-auto space-y-5 pr-2 scrollbar-hide [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

@@ -15,10 +15,10 @@ import {
 } from 'lucide-react';
 
 // 1. IMPORTAÇÃO E EXPANSÃO DO TYPE (Resolve o erro do status)
-import { Transaction as BaseTransaction } from '../types'; 
+import { Transaction as BaseTransaction, TransactionStatus } from '../types'; 
 
-interface Transaction extends BaseTransaction {
-  status?: 'COMPLETED' | 'PENDING';
+interface Transaction extends Omit<BaseTransaction, 'status'> {
+  status?: TransactionStatus | 'COMPLETED' | 'PENDING';
   installment?: { current: number; total: number };
 }
 
@@ -70,7 +70,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
   const currentMonthTxs = useMemo(() => {
     return transactions.filter(t => {
       if (!t || !t.date) return false; 
-      if (t.status === 'PENDING') return false; // Ignora pendentes
+      if (t.status === 'PENDING' || t.status === TransactionStatus.PENDING) return false; // Ignora pendentes
 
       const txDate = new Date(t.date);
       if (isNaN(txDate.getTime())) return false;
@@ -82,7 +82,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
   const currentMonthBills = useMemo(() => {
     return transactions.filter(t => {
       if (!t || !t.date) return false;
-      if (t.status !== 'PENDING') return false; // Exige que seja pendente
+      if (t.status !== 'PENDING' && t.status !== TransactionStatus.PENDING) return false; // Exige que seja pendente
 
       const txDate = new Date(t.date);
       if (isNaN(txDate.getTime())) return false;
@@ -144,7 +144,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
       }
 
       const histTxs = transactions.filter(t => {
-        if (!t || !t.date || t.status === 'PENDING') return false; 
+        if (!t || !t.date || t.status === 'PENDING' || t.status === TransactionStatus.PENDING) return false; 
         const d = new Date(t.date);
         return d.getMonth() === m && d.getFullYear() === y;
       });

@@ -218,6 +218,196 @@ const opportunities: IncomeOpportunity[] = [
     potential: 'R$ 60 - R$ 120 / hora',
     description: 'Ensine violão, teclado, pintura ou desenho para crianças e adultos online ou presencial.',
     steps: ['Defina sua metodologia.', 'Ofereça a 1ª aula grátis.', 'Venda pacotes de 4 aulas.', 'Grave o progresso do aluno.']
+  },
+  {
+    id: 'equipment_rental',
+    icon: <Camera size={28} />,
+    title: 'Locação de Equipamento',
+    category: 'Ativos',
+    effort: 'Baixo',
+    potential: 'R$ 50 - R$ 300 / diária',
+    description: 'Transforme ferramentas, câmeras, barracas de camping ou bicicletas encostadas em dinheiro alugando-as.',
+    steps: ['Liste seus equipamentos úteis.', 'Tire fotos e defina o valor da diária.', 'Divulgue no Aluga Logo/Grupos.', 'Assine um mini-contrato/caução.']
+  },
+  {
+    id: 'shorts_editor',
+    icon: <Smartphone size={28} />,
+    title: 'Editor de Vídeos Curtos',
+    category: 'Habilidades Digitais',
+    effort: 'Médio',
+    potential: 'R$ 1.000 - R$ 3.000 / mês',
+    description: 'Edite vídeos estilo TikTok/Reels para profissionais liberais (médicos, corretores) usando apenas o celular ou CapCut.',
+    steps: ['Aprenda dinâmica de legendas e cortes rápidos.', 'Pegue um vídeo e edite de graça como amostra.', 'Ofereça pacotes mensais de 15 vídeos.', 'Cobre por pacote e não por hora.']
+  },
+  {
+    id: 'furniture_assembler',
+    icon: <Hammer size={28} />,
+    title: 'Montador Rápido',
+    category: 'Serviços Reais',
+    effort: 'Alto',
+    potential: 'R$ 100 - R$ 300 / móvel',
+    description: 'Pessoas compram online e não conseguem montar. Seja a salvação montando raques, mesas e armários.',
+    steps: ['Compre uma parafusadeira básica.', 'Cadastre-se no GetNinjas/Triider.', 'Seja ágil e não arranhe as peças.', 'Peça para indicarem seu número no condomínio.']
+  },
+  {
+    id: 'local_drop',
+    icon: <ShoppingBag size={28} />,
+    title: 'Arbitragem Local',
+    category: 'Vendas',
+    effort: 'Médio',
+    potential: 'R$ 500 - R$ 2.000 / mês',
+    description: 'Compre produtos demandados em atacadões ou feiras de atacado (Brás/25 de Março) e revenda em atacarejos locais ou condomínios.',
+    steps: ['Identifique o "produto da moda".', 'Negocie lote direto no distribuidor.', 'Tire fotos apelativas.', 'Venda com pronta entrega nos grupos do bairro.']
+  },
+  {
+    id: 'computer_repair',
+    icon: <Laptop size={28} />,
+    title: 'SOS Computadores',
+    category: 'Manutenção Digital',
+    effort: 'Alto',
+    potential: 'R$ 80 - R$ 250 / serviço',
+    description: 'Formatação, limpeza preventiva, troca de HD por SSD e instalação de pacotes Office/Antivírus.',
+    steps: ['Tenha um Pendrive "Canivete Suíço".', 'Faça pacotes "Deixa seu PC como novo".', 'Sempre faça backup primeiro.', 'Ofereça visita domiciliar para ganhar na comodidade.']
+  },
+  {
+    id: 'copywriter',
+    icon: <Book size={28} />,
+    title: 'Copywriter Local',
+    category: 'Habilidades Digitais',
+    effort: 'Alto',
+    potential: 'R$ 300 - R$ 1.500 / projeto',
+    description: 'Escreva textos persuasivos para anúncios, panfletos, e sites das empresas da sua cidade que publicam "textos chatos".',
+    steps: ['Estude os 4 Ps e Gatilhos Mentais.', 'Encontre 3 comércios e reescreva um anúncio deles grátis.', 'Mostre como a versão nova atrai.', 'Feche pacotes de copywriting.']
+  },
+  {
+    id: 'delivery_app',
+    icon: <Car size={28} />,
+    title: 'Entregador Estratégico',
+    category: 'Gig Economy',
+    effort: 'Alto',
+    potential: 'R$ 150 / dia',
+    description: 'Faça entregas (carro, moto ou bike) nos picos de demanda (Sexta noite / Sábado) diretamente por apps ou restaurantes parceiros.',
+    steps: ['Ative contas em iFood, Rappi, Loggi.', 'Mapeie as rotas de restaurantes gourmet da sua cidade.', 'Foque EXCLUSIVAMENTE nas horas de tarifa dinâmica (pico).', 'Monitore seu custo de gasolina.']
+  },
+  {
+    id: 'remote_closer',
+    icon: <MessageSquare size={28} />,
+    title: 'Fechador de Vendas no WhatsApp',
+    category: 'Marketing',
+    effort: 'Médio',
+    potential: '10% de Comissão por Venda',
+    description: 'Trabalhe no WhatsApp de produtores ou lojistas "quebrando objeções" e fechando vendas para clientes que abandonaram o carrinho.',
+    steps: ['Gere networking em grupos digitais.', 'Mostre habilidade de negociação e escuta ativa.', 'Assuma os LEADS mornos do lojista.', 'Ganhe sobre o lucro que ninguém estava aproveitando.']
+  },
+  {
+    id: 'moving_helper',
+    icon: <HeartHandshake size={28} />,
+    title: 'Empacotador de Mudanças',
+    category: 'Serviços Reais',
+    effort: 'Alto',
+    potential: 'R$ 150 - R$ 400 / dia',
+    description: 'Organizar uma mudança é o inferno de todos. Ofereça-se para empacotar itens com segurança, identificar caixas e limpar o local antes da saída.',
+    steps: ['Tenha plástico bolha, etiquetas, fitas e papelão.', 'Seja meticuloso e rápido.', 'Faça parceria com empresas de frete.', 'Divulgue o "Stress-free moving".']
+  },
+  {
+    id: 'tour_guide',
+    icon: <Plane size={28} />,
+    title: 'Guia de Experiências Locais',
+    category: 'Entretenimento',
+    effort: 'Médio',
+    potential: 'R$ 80 - R$ 200 / tour',
+    description: 'Sabe da história da sua cidade ou conhece os melhores cafés "secretos"? Crie uma experiência e venda para turistas corporativos ou AirBnb.',
+    steps: ['Crie um roteiro memorável e autêntico.', 'Cadastre no Airbnb Experiences/TripAdvisor.', 'Tenha carisma e histórias prontas.', 'Faça fotos das turmas sorrindo para a página.']
+  },
+  {
+    id: 'car_flipping',
+    icon: <Car size={28} />,
+    title: 'Flipping Automotivo',
+    category: 'Vendas Avançado',
+    effort: 'Alto',
+    potential: 'R$ 2.000 - R$ 5.000 / carro',
+    description: 'Compre o carro "feinho" mas de boa mecânica abaixo da FIPE, mande higienizar, faça micropintura, tire fotos "de lojista" e lucre na revenda.',
+    steps: ['Aprenda mecânica básica de checagem ou feche parceria c/ mecânico.', 'Aperte donos enforcados no Facebook/OLX.', 'Invista R$ 500 no embelezamento.', 'Venda pelo preço de mercado exato.']
+  },
+  {
+    id: 'bpo_financeiro',
+    icon: <Wallet size={28} />,
+    title: 'BPO Financeiro',
+    category: 'Habilidades Digitais',
+    effort: 'Médio',
+    potential: 'R$ 500 - R$ 1.500 / empresa',
+    description: 'Terceirize a emissão de notas e conciliação bancária (fazer o fechamento do caixa) para donos de consultório ou lojas que odeiam planilhas.',
+    steps: ['Domine o Omie ou ContaAzul.', 'Aborde contadores locais pedindo indicação mútua.', 'Ofereça 1 semana de ordem no caos financeiro do cliente grátis.', 'Trabalhe poucas horas mensais por contrato.']
+  },
+  {
+    id: 'elderly_companion',
+    icon: <HeartHandshake size={28} />,
+    title: 'Acompanhante Tecnológico Sênior',
+    category: 'Serviços',
+    effort: 'Baixo',
+    potential: 'R$ 50 - R$ 100 / hora',
+    description: 'Ajude idosos a instalarem bancos, pedirem Uber, fazer videochamadas com a família ou arrumar a configuração estranha que a TV ficou.',
+    steps: ['Anuncie na igreja ou prédio local.', 'Tenha a paciência de um santo.', 'Mostre dicas de segurança contra fraudes a eles.', 'Crie uma relação de lealdade extrema.']
+  },
+  {
+    id: 'pet_sitting_premium',
+    icon: <Dog size={28} />,
+    title: 'Hotel Pet Domiciliar',
+    category: 'Serviços Reais',
+    effort: 'Alto',
+    potential: 'R$ 60 - R$ 150 / noite',
+    description: 'Cansado e triste de deixar os cães em canis durante a viagem, os donos preferem pagar mais caro pro cachorro dormir confortavelmente "em uma casa". Hospede-os na sua sala.',
+    steps: ['Peça vacinas em dia e focinho dócil.', 'Prepare a sala c/ telas nas janelas e sem riscos.', 'Grave Stories do cachorro feliz brincando na sua casa para o dono ver durante a viagem.', 'Gere reviews no DogHero ou Rover.']
+  },
+  {
+    id: 'resume_writer',
+    icon: <Book size={28} />,
+    title: 'Reestruturação de Currículos',
+    category: 'Conhecimento',
+    effort: 'Baixo',
+    potential: 'R$ 80 - R$ 250 / CV',
+    description: 'A maioria dos excelentes profissionais tem currículos pavorosos que não passam nos robôs dos RHs. Reformate e aplique metodologias focadas em resultados (método STAR).',
+    steps: ['Estude as práticas do LinkedIn e ATS atual.', 'Pegue o Word feio do cliente e transforme num PDF limpo/moderno.', 'Use ChatGPT inteligentemente apenas para polir.', 'Ofereça simulação de entrevista como UPSELL.']
+  },
+  {
+    id: 'tv_mounting',
+    icon: <HardHat size={28} />,
+    title: 'Instalador de TVs e Suportes',
+    category: 'Serviços Reais',
+    effort: 'Baixo',
+    potential: 'R$ 80 - R$ 150 / instalação',
+    description: 'Furadeira na mão e fita métrica. Serviço que demanda 40 minutos mas as pessoas tem pavor de fazer errado e derrubar uma TV de R$4 mil no chão.',
+    steps: ['Compre nível, brocas de qualidade e buchas de tijolo baiano.', 'Aviso o porteiro do condomínio que você domina a instalação com zero sujeira (leve aspirador).', 'Tire foto dela alinhadinha na parede.', 'Faça pacotes conjugados (TV + Cortina).']
+  },
+  {
+    id: 'personal_shopper',
+    icon: <ShoppingBag size={28} />,
+    title: 'Personal Shopper/Importador',
+    category: 'Vendas',
+    effort: 'Baixo',
+    potential: '15% - 30% a mais na taxa',
+    description: 'Compre roupas infantis da Carter`s, iPhones ou maquiagens de sites gringos (usando redirecionadores) ou viagens rápidas ao Outlet. Traga encomendado de forma segura.',
+    steps: ['Ache fornecedores "Grab and Go" de redirecionamento Miami.', 'Pegue a verba do cliente adiantada via sinal.', 'Emita os despachos.', 'A galera adora a aura de exclusividade do importado e detesta a burocracia de comprar sozinho.']
+  },
+  {
+    id: 'subtitles',
+    icon: <Languages size={28} />,
+    title: 'Legendador Meticuloso',
+    category: 'Habilidades Digitais',
+    effort: 'Alto',
+    potential: 'R$ 200 - R$ 600 / vídeo',
+    description: 'Traduzir e legendar com "timing perfeito" (.SRT) o material de influenciadores brasileiros que querem viralizar seus vídeos no mundo inteiro (Inglês ou Espanhol).',
+    steps: ['Busque Youtubers grandes em ascensão.', 'Traga o conhecimento da fluência + slang correta (gírias do nativo).', 'Entregue o arquivo e ajude no título e capa gringos.', 'Construa um case internacional rápido.']
+  },
+  {
+    id: 'video_thumbnail_designer',
+    icon: <Paintbrush size={28} />,
+    title: 'Designer de Capas (Thumbnails)',
+    category: 'Habilidades Digitais',
+    effort: 'Baixo',
+    potential: 'R$ 30 - R$ 100 / capa',
+    description: 'Uma capa bem feita aumenta o faturamento do YouTuber em milhares de reais. Seja o designer que traz a psicologia visual (leitura da esquerda, contrastes, caras de suspense) em thumbnails matadoras.',
+    steps: ['Estude a teoria de cores do Mr Beast e Peter (Ei Nerd).', 'Construa um banco de efeitos (Raios, Outlines vermelhos).', 'Faça 3 capas famosas melhoradas e mande no direct como provocação para os canais que tem views ruins.', 'Venda combos e suba no barco de influenciadores bons.']
   }
 ];
 
@@ -233,8 +423,21 @@ export function ExtraIncomeModule() {
           <Zap className="text-yellow-400 fill-yellow-400/20" /> Acelerador de Renda
         </h2>
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-          20 estratégias reais para transformar seu tempo livre em liberdade financeira
+          40 estratégias reais para transformar seu tempo livre em liberdade financeira
         </p>
+      </div>
+
+      {/* 🚀 MENSAGEM INSPIRADORA (TOPO) */}
+      <div className="shrink-0 p-5 bg-gradient-to-r from-yellow-900/30 to-indigo-900/30 rounded-[2rem] flex items-center gap-5">
+          <div className="p-4 bg-yellow-500/20 rounded-full text-yellow-300 shrink-0">
+              <Star size={22} />
+          </div>
+          <div>
+              <h4 className="text-sm font-black uppercase tracking-widest text-white mb-1">O Próximo Passo Só Depende de Você</h4>
+              <p className="text-[10px] font-medium text-yellow-200/70 leading-relaxed">
+                Escolha UMA dessas 40 oportunidades hoje e execute o primeiro passo. A diferença entre quem enriquece e quem sonha é a velocidade da execução.
+              </p>
+          </div>
       </div>
 
       {/* GRID COM SCROLL INVISÍVEL */}
@@ -248,46 +451,62 @@ export function ExtraIncomeModule() {
               <div 
                 key={op.id}
                 onClick={() => !isSelected && setSelectedId(op.id)}
-                className={`group relative bg-white/5 backdrop-blur-md border rounded-[2.5rem] p-6 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-between
-                  ${isSelected ? 'border-yellow-500/50 shadow-yellow-500/10 md:col-span-2 xl:col-span-2 row-span-2' : 'border-white/10 hover:border-white/20 hover:bg-white/10 min-h-[250px]'}`}
+                className={`group relative bg-white/5 backdrop-blur-md rounded-[1.5rem] p-4 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-center shadow-lg
+                  ${isSelected ? 'md:col-span-2 xl:col-span-2 row-span-2 bg-white/10 p-6 rounded-[2.5rem]' : 'hover:bg-white/10'}`}
               >
                 {/* Cabeçalho do Card */}
-                <div className="flex justify-between items-start mb-4 relative z-10 w-full">
-                  <div className={`p-3 rounded-2xl bg-black/30 border border-white/10 ${isSelected ? 'text-yellow-400' : 'text-slate-400 group-hover:text-white'}`}>
-                    {op.icon}
+                <div className={`flex ${isSelected ? 'flex-col items-start' : 'items-center gap-3'} justify-between relative z-10 w-full`}>
+                  <div className={`flex ${isSelected ? 'flex-col items-start' : 'items-center gap-3'} w-full`}>
+                    <div className={`p-2.5 rounded-2xl bg-black/30 shrink-0 ${isSelected ? 'text-yellow-400 mb-4' : 'text-slate-400 group-hover:text-white'}`}>
+                      {op.icon}
+                    </div>
+                    <div className="flex-1 min-w-0 pr-2">
+                       {isSelected ? (
+                         <>
+                           <span className="text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 bg-white/5 rounded-full text-indigo-300 mb-2 inline-block">
+                             {op.category}
+                           </span>
+                           <h3 className="text-base font-black uppercase tracking-tight text-white mb-2 leading-tight">{op.title}</h3>
+                         </>
+                       ) : (
+                         <h3 className="text-[10px] font-black uppercase tracking-widest text-white leading-tight truncate">{op.title}</h3>
+                       )}
+                    </div>
                   </div>
-                  {isSelected && (
+
+                  {isSelected ? (
                     <button 
                       onClick={(e) => { e.stopPropagation(); setSelectedId(null); }}
-                      className="p-1.5 rounded-full bg-white/10 hover:bg-rose-500/20 hover:text-rose-400 transition-all"
+                      className="absolute right-0 top-0 p-1.5 rounded-full bg-white/10 hover:bg-rose-500/20 hover:text-rose-400 transition-all shrink-0"
                     >
                       <X size={18} />
                     </button>
+                  ) : (
+                    <div className="p-1.5 rounded-full text-slate-500 group-hover:text-white transition-colors shrink-0">
+                      <ChevronRight size={16} />
+                    </div>
                   )}
                 </div>
 
                 {/* Info Principal */}
-                <div className="relative z-10">
-                  <span className="text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 bg-white/5 rounded-full border border-white/10 text-indigo-300 mb-2 inline-block">
-                    {op.category}
-                  </span>
-                  <h3 className="text-base font-black uppercase tracking-tight text-white mb-2 leading-tight">{op.title}</h3>
-                  
-                  <div className="flex flex-wrap gap-3 mb-4">
-                    <div className="flex items-center gap-1">
-                      <Timer size={12} className="text-slate-500" />
-                      <span className="text-[9px] font-bold text-slate-400 uppercase">Esforço: {op.effort}</span>
+                {isSelected && (
+                  <div className="relative z-10">
+                    <div className="flex flex-wrap gap-3 mb-4">
+                      <div className="flex items-center gap-1">
+                        <Timer size={12} className="text-slate-500" />
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">Esforço: {op.effort}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Wallet size={12} className="text-emerald-500" />
+                        <span className="text-[9px] font-bold text-emerald-400 uppercase">{op.potential}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Wallet size={12} className="text-emerald-500" />
-                      <span className="text-[9px] font-bold text-emerald-400 uppercase">{op.potential}</span>
-                    </div>
+                    
+                    <p className="text-sm text-slate-300 leading-relaxed font-medium transition-all duration-500 mb-6">
+                      {op.description}
+                    </p>
                   </div>
-                  
-                  <p className={`text-xs text-slate-300 leading-relaxed font-medium transition-all duration-500 ${isSelected ? 'mb-6 text-sm' : 'line-clamp-2'}`}>
-                    {op.description}
-                  </p>
-                </div>
+                )}
 
                 {/* CONTEÚDO EXPANDIDO */}
                 {isSelected && (
@@ -322,14 +541,6 @@ export function ExtraIncomeModule() {
 
         </div>
 
-        {/* MENSAGEM FINAL */}
-        <div className="mt-8 p-10 bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-black/40 border border-indigo-500/20 rounded-[3rem] text-center relative overflow-hidden">
-            <Star className="absolute top-5 left-5 text-indigo-500/20" size={120} />
-            <h4 className="text-xl font-black uppercase tracking-tighter text-white mb-3 relative z-10">O próximo passo só depende de você</h4>
-            <p className="text-sm font-medium text-slate-300 max-w-2xl mx-auto leading-relaxed relative z-10">
-              Escolha **UMA** dessas 20 oportunidades hoje e execute o primeiro passo. A diferença entre quem enriquece e quem apenas sonha é a velocidade da execução. Use o VittaCash para monitorar esse novo lucro e veja sua liberdade chegar meses ou anos mais cedo.
-            </p>
-        </div>
       </div>
     </div>
   );

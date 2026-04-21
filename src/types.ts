@@ -27,7 +27,9 @@ export interface Category {
   id: string;
   user_id?: string;
   name: string;
-  type: TransactionType;
+  type: TransactionType | 'income' | 'expense';
+  color?: string;
+  limit_amount?: number;
 }
 
 export interface Investment {
@@ -48,4 +50,5 @@ export interface Goal {
   current_amount: number;
   deadline?: string;
   created_at?: string;
+  category?: string;
 }

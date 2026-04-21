@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Target, Plus, Trash2, X, CheckCircle2, AlertTriangle, TrendingUp, Wallet, Zap, Trophy, Brain } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-interface Goal {
-  id: string;
-  title: string;
-  targetValue: number;
-  currentValue: number;
-  category: 'travel' | 'car' | 'home' | 'retirement' | 'other';
+import { appApi } from '../services/api';
+import { Goal } from '../types';
+
+interface Props {
+  goals: Goal[];
+  onUpdate: () => void;
+  currentUserId?: string;
 }
 
-const HorizonsManager: React.FC = () => {
-  const [goals, setGoals] = useState<Goal[]>([]);
+const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [contributeTo, setContributeTo] = useState<Goal | null>(null);
   
@@ -28,15 +28,7 @@ const HorizonsManager: React.FC = () => {
   // Aqui você conectará com o saldo real vindo do seu context ou Firebase/Supabase futuramente
   const monthlyDisposableIncome = 2500; 
 
-  useEffect(() => {
-    const saved = localStorage.getItem('vitta_horizons');
-    if (saved) setGoals(JSON.parse(saved));
-  }, []);
-
-  const saveGoals = (updated: Goal[]) => {
-    setGoals(updated);
-    localStorage.setItem('vitta_horizons', JSON.stringify(updated));
-  };
+  // Removido useEffect e saveGoals, porque os gols vêm via prop e o api.ts salva
 
   const fireConfetti = () => {
     const duration = 3 * 1000;
@@ -62,34 +54,42 @@ const HorizonsManager: React.FC = () => {
     setDisplay(new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num));
   };
 
-  const addGoal = () => {
-    if (!newTitle || numericValue <= 0) return;
+  const addGoal = async () => {
+    if (!newTitle || numericValue <= 0 || !currentUserId) return;
     const goal: Goal = {
       id: Date.now().toString(),
+      user_id: currentUserId,
       title: newTitle.toUpperCase(),
-      targetValue: numericValue,
-      currentValue: 0,
+      target_amount: numericValue,
+      current_amount: 0,
       category: newCategory
     };
-    saveGoals([...goals, goal]);
+    try {
+      await appApi.addGoal(goal);
+      onUpdate();
+    } catch (err) {
+      console.error("Erro ao salvar objetivo", err);
+    }
     setIsAdding(false);
     setNewTitle(''); setDisplayValue(''); setNumericValue(0);
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
   };
 
-  const handleContribute = () => {
-    if (contributionNumeric <= 0 || !contributeTo) return;
+  const handleContribute = async () => {
+    if (contributionNumeric <= 0 || !contributeTo || !currentUserId) return;
     
-    const wasCompleted = contributeTo.currentValue >= contributeTo.targetValue;
-    const newTotal = contributeTo.currentValue + contributionNumeric;
-    const isNowCompleted = newTotal >= contributeTo.targetValue;
+    const wasCompleted = contributeTo.current_amount >= contributeTo.target_amount;
+    const newTotal = contributeTo.current_amount + contributionNumeric;
+    const isNowCompleted = newTotal >= contributeTo.target_amount;
 
-    const updated = goals.map(g => 
-      g.id === contributeTo.id ? { ...g, currentValue: newTotal } : g
-    );
+    try {
+       await appApi.updateGoal({ ...contributeTo, current_amount: newTotal });
+       onUpdate();
+    } catch (err) {
+       console.error("Erro ao contribuir", err);
+    }
 
-    saveGoals(updated);
     setContributeTo(null);
     setContributionNumeric(0);
     setContributionDisplay('');
@@ -100,6 +100,16 @@ const HorizonsManager: React.FC = () => {
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+       await appApi.deleteGoal(id);
+       onUpdate();
+    } catch (err) {
+       console.error("Erro ao apagar", err);
+    }
+    setConfirmDelete(null);
   };
 
   return (
@@ -125,8 +135,8 @@ const HorizonsManager: React.FC = () => {
       {/* GRID DE CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-1">
         {goals.map(goal => {
-          const percent = goal.targetValue > 0 ? Math.min(Math.round((goal.currentValue / goal.targetValue) * 100), 100) : 0;
-          const remaining = Math.max(goal.targetValue - goal.currentValue, 0);
+          const percent = goal.target_amount > 0 ? Math.min(Math.round((goal.current_amount / goal.target_amount) * 100), 100) : 0;
+          const remaining = Math.max(goal.target_amount - goal.current_amount, 0);
           const isCompleted = percent === 100;
           
           const monthlyEffort = remaining / 12;
@@ -275,7 +285,7 @@ const HorizonsManager: React.FC = () => {
             <h2 className="text-white font-black uppercase italic text-xl mb-2">Abortar Missão?</h2>
             <div className="flex gap-4 mt-8">
               <button onClick={() => setConfirmDelete(null)} className="flex-1 py-4 rounded-2xl bg-white/5 text-zinc-400 font-black uppercase text-[10px] tracking-widest">Não</button>
-              <button onClick={() => { saveGoals(goals.filter(g => g.id !== confirmDelete)); setConfirmDelete(null); }} className="flex-1 py-4 rounded-2xl bg-rose-600 text-white font-black uppercase text-[10px] tracking-widest">Sim</button>
+              <button onClick={() => handleDelete(confirmDelete)} className="flex-1 py-4 rounded-2xl bg-rose-600 text-white font-black uppercase text-[10px] tracking-widest">Sim</button>
             </div>
           </div>
         </div>

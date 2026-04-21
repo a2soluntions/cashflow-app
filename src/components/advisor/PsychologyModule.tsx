@@ -217,6 +217,196 @@ const traps: Trap[] = [
     bgGlow: 'bg-emerald-400/10',
     mindTrick: 'Ao abrir a corretora e ver 300 opções de CDBs ou ações, você fica com tanto medo de fazer a escolha sub-ótima que acaba não investindo em nada.',
     solution: 'Bom o suficiente bate o perfeito que nunca acontece. Escolha um índice passivo amplo ou aplique uma regra simples de corte. A inércia cobra o imposto mais caro.'
+  },
+  {
+    id: 'dunning_kruger',
+    icon: <Brain size={28} />,
+    title: 'Efeito Dunning-Kruger',
+    subtitle: 'A superconfiança cega',
+    color: 'text-orange-300',
+    bgGlow: 'bg-orange-400/10',
+    mindTrick: 'Depois de acertar dois investimentos fáceis ou ler um livro, seu cérebro afirma que você é um gênio financeiro, levando a apostas absurdamente arriscadas.',
+    solution: 'Assuma a posição de eterno aprendiz. Questione todas as suas "certezas absolutas". Bons investidores lucram porque conhecem exatamente os limites de sua própria ignorância.'
+  },
+  {
+    id: 'framing_effect',
+    icon: <Crosshair size={28} />,
+    title: 'Efeito de Enquadramento',
+    subtitle: 'R$ 1 real por dia',
+    color: 'text-blue-300',
+    bgGlow: 'bg-blue-400/10',
+    mindTrick: 'Vendedores anunciam "Por menos de um cafézinho ao dia" para um seguro ou carro. Seu subconsciente pensa no preço do café (R$ 5) e esquece que o total dá R$ 1.800 no ano.',
+    solution: 'Sempre converta custos diários para custos anuais antes de assinar qualquer contrato. A mente processa a dor imediata e subestima o vazamento de longo prazo.'
+  },
+  {
+    id: 'loss_aversion',
+    icon: <TrendingUp size={28} />,
+    title: 'Viés da Aversão à Perda',
+    subtitle: 'O terror de perder R$1',
+    color: 'text-rose-500',
+    bgGlow: 'bg-rose-500/10',
+    mindTrick: 'A dor emocional de perder R$ 100 é 2x mais forte do que a alegria de ganhar R$ 100. Pelo medo, você deixa dinheiro mofando na Poupança (e perdendo pra inflação).',
+    solution: 'Entenda que não investir hoje já é uma perda garantida chamada Inflação. Risco controlado é o "pedágio" inevitável na estrada do enriquecimento.'
+  },
+  {
+    id: 'recency_bias',
+    icon: <Repeat size={28} />,
+    title: 'Viés de Recência',
+    subtitle: 'O passado recente dita o futuro',
+    color: 'text-cyan-300',
+    bgGlow: 'bg-cyan-400/10',
+    mindTrick: 'Se a bolsa caiu ontem, você acha que vai continuar caindo para sempre. Se está subindo, você acha que nunca mais vai cair. Você projeta o hoje no amanhã eterno.',
+    solution: 'Ciclos econômicos duram anos, não dias. Ignore o pânico das manchetes diárias. Para ter retornos acima da média, compre quando estão chorando e venda quando estão rindo.'
+  },
+  {
+    id: 'gamblers_fallacy',
+    icon: <Coins size={28} />,
+    title: 'Falácia do Apostador',
+    subtitle: 'A sorte deve mudar',
+    color: 'text-yellow-500',
+    bgGlow: 'bg-yellow-500/10',
+    mindTrick: 'Oibr3 e Americanas caíram 8 vezes seguidas. Seu cérebro diz: "Pronto, agora não pode cair mais, o preço TÁ MUITO BARATO!". O mercado não tem memória.',
+    solution: 'Empresas ou ativos ruins podem e vão a Zero. Não invista só porque algo "já caiu muito". Siga os fundamentos do negócio e não a matemática fantasiosa dos cassinos.'
+  },
+  {
+    id: 'ikea_effect_finance',
+    icon: <HandHeart size={28} />,
+    title: 'Efeito IKEA',
+    subtitle: 'Cegueira pelo próprio labor',
+    color: 'text-indigo-300',
+    bgGlow: 'bg-indigo-400/10',
+    mindTrick: 'Você dedicou três dias analisando uma ação e criando planilhas pra ela. Agora, mesmo quando o resultado é ruim, você se recusa a vendê-la porque "deu muito trabalho".',
+    solution: 'Apaixone-se pelo lucro, não pelos ativos ou pela sua própria habilidade de análise. Se os números mudaram, rasgue a planilha sorrindo e vá para onde o dinheiro está.'
+  },
+  {
+    id: 'status_quo',
+    icon: <Anchor size={28} />,
+    title: 'Status Quo Destrutivo',
+    subtitle: 'A escravidão da Inércia',
+    color: 'text-purple-300',
+    bgGlow: 'bg-purple-400/10',
+    mindTrick: 'Você paga anuidade de cartão de crédito e tarifas num banco clássico há anos apenas porque "dá preguiça de mudar tudo". Essa preguiça enriquece os grandes.',
+    solution: 'Faça o "Dia da Mudança". São necessários apenas 15 minutos pelo celular para abrir contas de correntes e corretagens gratuitas hoje em dia. Sua preguiça custa muito caro.'
+  },
+  {
+    id: 'illusion_control',
+    icon: <Sparkles size={28} />,
+    title: 'Ilusão de Controle',
+    subtitle: 'O "Timing" Perfeito',
+    color: 'text-teal-300',
+    bgGlow: 'bg-teal-400/10',
+    mindTrick: 'Você retarda seus aportes mensais jurando que vai comprar exatamente na "baixa" suprema do mês. Seu ego acha que vai cravar o ponto final do gráfico.',
+    solution: 'Ninguém, nem Warren Buffett, acerta o poço ou o topo repetidas vezes. Pratique o DCA (feche os olhos e invista todo mês no mesmo dia, independente do noticiário).'
+  },
+  {
+    id: 'hyperbolic_discounting',
+    icon: <Rocket size={28} />,
+    title: 'Desconto Hiperbólico',
+    subtitle: 'Miojo hoje, Filé amanhã',
+    color: 'text-amber-500',
+    bgGlow: 'bg-amber-500/10',
+    mindTrick: 'O cérebro prefere ganhar R$ 1.000 agora do que aguardar para receber R$ 1.500 no ano que vem. O animal dentro de nós odeia esperar.',
+    solution: 'Concretize o seu "Eu do Futuro". Troque nomes das suas contas como "Poupança" para "Sua Aposentadoria na Praia aos 50 Anos". Deixe seu cérebro lutar pelo prêmio real.'
+  },
+  {
+    id: 'artificial_scarcity',
+    icon: <Flame size={28} />,
+    title: 'Escassez Artificial',
+    subtitle: 'Últimas 2 unidades',
+    color: 'text-red-400',
+    bgGlow: 'bg-red-500/10',
+    mindTrick: 'A mente dispara o alerta primitivo de sobrevivência quando vê o contador dizendo: "Promoção Expirando em 00:03". O medo paralisa a parte racional do cérebro.',
+    solution: 'Feche o site ou saia da loja. Pense por 1 hora e lembre-se: 99% desses cronômetros zeram e a "promoção" continua no dia seguinte, eles são só scripts de computador.'
+  },
+  {
+    id: 'planning_fallacy',
+    icon: <Sun size={28} />,
+    title: 'Falácia do Planejamento',
+    subtitle: 'Tudo dará certo e no prazo',
+    color: 'text-pink-300',
+    bgGlow: 'bg-pink-400/10',
+    mindTrick: 'Orçar uma reforma ou assumir uma grande dívida apostando que "com certeza vou ser promovido" ou "a obra vai custar exatamente os R$ 20.000 calculados".',
+    solution: 'Multiplique orçamentos de projetos longos (como obras) ou metas de poupança difíceis por 1.5 logo de início. Assim você já joga no hard e nunca é pego descalço.'
+  },
+  {
+    id: 'symbolic_contribution',
+    icon: <Award size={28} />,
+    title: 'Contribuição Simbólica',
+    subtitle: 'Enganando a consciência',
+    color: 'text-slate-300',
+    bgGlow: 'bg-slate-400/10',
+    mindTrick: 'Você poupa os R$ 50 redondos que "sobraram", sem corrigir os valores a vida toda, e o seu cérebro deita no travesseiro com a sensação de missão perfeitamente cumprida.',
+    solution: 'A inflação devora seus R$ 50 de dez anos atrás. Todo mês de Janeiro ou após aumentos você DEVE subir o % absoluto a ser investido, acompanhando seu avanço de vida.'
+  },
+  {
+    id: 'nomimal_value_illusion',
+    icon: <Tag size={28} />,
+    title: 'Ilusão do Valor Nominal',
+    subtitle: 'A miragem estatística',
+    color: 'text-violet-300',
+    bgGlow: 'bg-violet-400/10',
+    mindTrick: 'Você comemora porque seu apartamento subiu "O Triplo" (100k para 300k) em 20 anos. Esquece que uma cesta básica subiu 5 vezes no mesmo período.',
+    solution: 'Tome as decisões focadas no Juro Real e Poder de Compra. "Com esse dinheiro eu compro quantos litros de gasolina hoje vs ontem?" Desconte sempre a inflação do cálculo.'
+  },
+  {
+    id: 'blind_spot_bias',
+    icon: <EyeOff size={28} />,
+    title: 'Viés do Ponto Cego',
+    subtitle: '"Consigo ver os outros, mas eu não"',
+    color: 'text-fuchsia-300',
+    bgGlow: 'bg-fuchsia-400/10',
+    mindTrick: 'Saber ler sobre essas armadilhas lhe dá a impressão reconfortante de que você "agora está imune", mas acha que as massas e as outras pessoas nas lojas ainda cairão.',
+    solution: 'A arrogância da imunidade é o último degrau antes da queda. Aceite que a química do seu cérebro é igual a dos outros; continue implementando blindagens rigorosas e processos.'
+  },
+  {
+    id: 'clustering_illusion',
+    icon: <Search size={28} />,
+    title: 'Ilusão de Agrupamento',
+    subtitle: 'O misticismo do gráfico',
+    color: 'text-lime-300',
+    bgGlow: 'bg-lime-400/10',
+    mindTrick: 'O cérebro humano evoluiu para achar sentido no caos. Você olha gráficos de ações que se movem aleatoriamente e enxerga padrões perfeitos onde "agora a crise vem certinha".',
+    solution: 'Assuma volatilidade como ruído branco. Invista pela qualidade dos ativos/empresas que distribuem recursos consistentes, não pelas figuras lúdicas nos gráficos das ações.'
+  },
+  {
+    id: 'halo_influencer',
+    icon: <Users size={28} />,
+    title: 'Halo do Influenciador',
+    subtitle: 'Dando moral a quem não se deve',
+    color: 'text-indigo-400',
+    bgGlow: 'bg-indigo-500/10',
+    mindTrick: 'Se um guru fala bonito e mora numa casa rica em Dubai vendendo curso, seu cérebro presume imediatamente que os investimentos e dicas super arriscadas dele são lei irrefutável.',
+    solution: 'Investidores profissionais fazem carreira quieta e chata. Pessoas exibindo excesso de opulência na internet em troca das suas visualizações costumam enriquecer do seu engajamento, não daquele portfólio.'
+  },
+  {
+    id: 'focus_illusion',
+    icon: <Crosshair size={28} />,
+    title: 'Efeito de Foco Direcional',
+    subtitle: 'A miopia analítica',
+    color: 'text-blue-500',
+    bgGlow: 'bg-blue-500/10',
+    mindTrick: 'Ficar obcecado em não pedir um Ifood de R$ 30 (sofre por horas calculando centavos) e à tarde fecha a compra de um carro com taxa abusiva escondida "só para resolver logo".',
+    solution: 'Faça a gestão macro do tempo. Esforce-se em lutar contra onde perde milhares: taxas do consignado, juros do financiamento imobiliário e os maus seguros na hora grande.'
+  },
+  {
+    id: 'reaction_bias',
+    icon: <Flame size={28} />,
+    title: 'Reatância Psicológica',
+    subtitle: 'Comprar por rebeldia adolescente',
+    color: 'text-rose-600',
+    bgGlow: 'bg-rose-600/10',
+    mindTrick: 'Seu assessor ou amigos bons lhe disseram: "Essa moeda/mercado é lixo tóxico, ninguém deve tocar nisso". Pelo simples desafio da proibição, o cérebro quer participar pra provar o contrário.',
+    solution: 'Ego não paga boleto. Mercado financeiro pune cruelmente os rebeldes que não têm bases lógicas sólidas para a inversão do consenso. Siga o fluxo ou vá contra de forma blindada.'
+  },
+  {
+    id: 'residual_money_bias',
+    icon: <CreditCard size={28} />,
+    title: 'Viés do Resto do Caixa',
+    subtitle: '"Pago minhas contas, depois invisto"',
+    color: 'text-emerald-500',
+    bgGlow: 'bg-emerald-500/10',
+    mindTrick: 'Recebe o salário, paga aluguel, paga cartão e deixa R$ 300 pra viver o mês. Você confia ingenuamente que, se sobrar no dia 31, você investe. A conta corrente, surpreendentemente, nunca sobra nada.',
+    solution: 'O sistema "Pague-se Primeiro". No instante que o salário cai no dia 5. Você arranca pra corretora os 10 ou 20%. O seu custo de vida no restante dos 30 dias vai DEVERÁ se achatar forçosamente pro restante do saldo natural.'
   }
 ];
 
@@ -232,11 +422,24 @@ export function PsychologyModule() {
           <Brain className="text-indigo-400" /> Hackeando a Mente
         </h2>
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-          Descubra os 20 vieses cognitivos que roubam o seu dinheiro silenciosamente
+          Descubra os 40 vieses cognitivos que roubam o seu dinheiro silenciosamente
         </p>
       </div>
 
-      {/* GRID DE ARMADILHAS (Agora com 20 itens) */}
+      {/* 💡 MENSAGEM INSPIRADORA (TOPO) */}
+      <div className="shrink-0 p-5 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-[2rem] flex items-center gap-5">
+          <div className="p-4 bg-indigo-500/20 rounded-full text-indigo-300 shrink-0">
+              <Sparkles size={24} />
+          </div>
+          <div>
+              <h4 className="text-sm font-black uppercase tracking-widest text-white mb-1">A Consciência é o Primeiro Passo para a Riqueza</h4>
+              <p className="text-[10px] font-medium text-indigo-200/70 leading-relaxed">
+                Grandes corporações gastam bilhões estudando como ativar esses gatilhos na sua mente. Agora que você conhece as regras do jogo, você reassume o controle do seu dinheiro.
+              </p>
+          </div>
+      </div>
+
+      {/* GRID DE ARMADILHAS */}
       <div className="flex-1 overflow-y-auto pb-6 px-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           
@@ -246,32 +449,34 @@ export function PsychologyModule() {
             return (
               <div 
                 key={trap.id} 
-                className={`relative bg-white/5 backdrop-blur-sm border p-6 rounded-[2.5rem] transition-all duration-500 overflow-hidden cursor-pointer shadow-xl flex flex-col justify-between
-                  ${isActive ? 'border-indigo-500/50 shadow-indigo-500/10 md:col-span-2 xl:col-span-2 row-span-2' : 'border-white/10 hover:border-white/30 hover:bg-white/10 min-h-[220px]'}`}
+                className={`relative bg-white/5 backdrop-blur-sm rounded-[2rem] transition-all duration-500 overflow-hidden cursor-pointer shadow-lg flex flex-col justify-center
+                  ${isActive ? 'md:col-span-2 xl:col-span-2 row-span-2 p-6 rounded-[2.5rem] bg-white/10' : 'hover:bg-white/10 p-4'}`}
                 onClick={() => !isActive && setActiveTrap(trap.id)}
               >
                 {/* Brilho de fundo do card */}
                 <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[50px] pointer-events-none transition-all duration-500 ${isActive ? trap.bgGlow : 'opacity-0'}`} />
 
                 {/* CONTEÚDO FRONTAL */}
-                <div className="flex items-start justify-between relative z-10 w-full">
-                  <div>
-                    <div className={`p-3 rounded-2xl bg-black/20 border border-white/5 inline-block mb-4 ${trap.color}`}>
+                <div className={`flex ${isActive ? 'flex-col items-start justify-between' : 'flex-row items-center justify-between'} relative z-10 w-full`}>
+                  <div className={`flex ${isActive ? 'flex-col items-start' : 'items-center gap-3'} w-full`}>
+                    <div className={`p-2.5 rounded-2xl bg-black/20 ${isActive ? 'mb-4' : ''} ${trap.color} shrink-0`}>
                       {trap.icon}
                     </div>
-                    <h3 className="text-sm font-black uppercase tracking-widest text-white mb-1 leading-tight">{trap.title}</h3>
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{trap.subtitle}</p>
+                    <div className="flex-1 min-w-0 pr-2">
+                      <h3 className={`font-black uppercase tracking-widest text-white leading-tight ${isActive ? 'text-sm mb-1 whitespace-normal' : 'text-[10px] truncate'}`}>{trap.title}</h3>
+                      {isActive && <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{trap.subtitle}</p>}
+                    </div>
                   </div>
                   
                   {isActive ? (
                     <button 
                       onClick={(e) => { e.stopPropagation(); setActiveTrap(null); }}
-                      className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors shrink-0"
+                      className="absolute right-0 top-0 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors shrink-0"
                     >
                       <X size={16} />
                     </button>
                   ) : (
-                    <div className="p-2 rounded-full border border-white/10 text-slate-500 group-hover:text-white transition-colors mt-2 shrink-0">
+                    <div className="p-1.5 rounded-full text-slate-500 group-hover:text-white transition-colors shrink-0">
                       <ChevronRight size={16} />
                     </div>
                   )}
@@ -306,19 +511,6 @@ export function PsychologyModule() {
             );
           })}
 
-        </div>
-
-        {/* MENSAGEM FINAL INSPIRADORA */}
-        <div className="mt-8 p-6 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border border-indigo-500/20 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-6 animate-in fade-in">
-            <div className="p-5 bg-indigo-500/20 rounded-full text-indigo-300 shrink-0">
-                <Sparkles size={32} />
-            </div>
-            <div>
-                <h4 className="text-base font-black uppercase tracking-widest text-white mb-2">A consciência é o primeiro passo para a Riqueza</h4>
-                <p className="text-xs font-medium text-indigo-200/80 leading-relaxed">
-                  Grandes corporações e marqueteiros gastam bilhões de dólares todos os anos estudando como ativar esses exatos gatilhos na sua mente. Agora que você mapeou e conhece as regras do jogo, você reassume o controle do seu dinheiro e do seu futuro.
-                </p>
-            </div>
         </div>
 
       </div>

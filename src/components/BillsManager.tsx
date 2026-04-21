@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   CalendarDays, ArrowUpCircle, ArrowDownCircle, CheckCircle2, 
-  AlertCircle, Search, Calendar, Filter 
+  AlertCircle, Search, Calendar, Filter, BellRing
 } from 'lucide-react';
 
 interface Transaction {
@@ -15,10 +15,19 @@ interface Transaction {
   installment?: { current: number; total: number };
 }
 
-export default function BillsManager() {
+interface BillsManagerProps {
+  mode?: 'normal' | 'overdue';
+}
+
+export default function BillsManager({ mode = 'normal' }: BillsManagerProps) {
   const [activeTab, setActiveTab] = useState<'expense' | 'income'>('expense');
   const [bills, setBills] = useState<Transaction[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Sincroniza aba padrao quando em modo overdue
+  useEffect(() => {
+    if (mode === 'overdue') setActiveTab('expense');
+  }, [mode]);
 
   // Carrega e Filtra (Apenas PENDING) do novo Cofre PRO
   useEffect(() => {
@@ -53,10 +62,18 @@ export default function BillsManager() {
       }
   };
 
-  const filteredBills = bills.filter(b => 
-      b.type === activeTab && 
-      b.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredBills = bills.filter(b => {
+      let isMatch = b.type === activeTab && b.description.toLowerCase().includes(searchTerm.toLowerCase());
+      if (!isMatch) return false;
+      
+      if (mode === 'overdue') {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          return new Date(b.date) < today;
+      }
+      
+      return true;
+  });
 
   const totalValue = filteredBills.reduce((acc, b) => acc + b.amount, 0);
 
@@ -68,6 +85,31 @@ export default function BillsManager() {
       return `${day}/${month}`; 
   };
 
+  const handleNotify = (bill: Transaction) => {
+      const channel = localStorage.getItem('vittacash_notification_channel') || 'both';
+      const phone = localStorage.getItem('vittacash_user_phone')?.replace(/\D/g, '') || '';
+      const email = localStorage.getItem('vittacash_user_email') || '';
+
+      const text = `Aviso VittaCash:\nA conta *${bill.description.toUpperCase()}* no valor de *${formatCurrency(bill.amount)}* venceu no dia ${formatDate(bill.date)}.`;
+      
+      const sendWhatsApp = () => {
+          if (!phone) return alert('Cadastre o WhatsApp na aba Ajustes antes de notificar!');
+          window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(text)}`, '_blank');
+      };
+
+      const sendEmail = () => {
+          if (!email) return alert('Cadastre o E-mail na aba Ajustes antes de notificar!');
+          window.open(`mailto:${email}?subject=Alerta de Vencimento VittaCash&body=${encodeURIComponent(text)}`);
+      };
+
+      if (channel === 'whatsapp') { sendWhatsApp(); }
+      else if (channel === 'email') { sendEmail(); }
+      else {
+          if (phone) sendWhatsApp();
+          else sendEmail();
+      }
+  };
+
   return (
     <div className="h-full w-full flex flex-col gap-4 overflow-hidden font-sans">
       
@@ -77,11 +119,16 @@ export default function BillsManager() {
            <div className="flex items-center gap-2 mb-1">
               <div className={`w-2 h-2 rounded-full animate-pulse ${activeTab === 'expense' ? 'bg-rose-500 shadow-rose-500/50' : 'bg-emerald-500 shadow-emerald-500/50'} shadow-lg`}/>
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-white/60">
-                Gestão de Vencimentos
+                {mode === 'overdue' ? (
+                  <span className="text-rose-500 font-black animate-pulse">Alertas de Atraso Ativo</span>
+                ) : (
+                  'Gestão de Vencimentos'
+                )}
               </span>
            </div>
            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter flex items-center gap-3">
              {activeTab === 'expense' ? 'Contas a Pagar' : 'Valores a Receber'}
+             {mode === 'overdue' && <span className="text-sm bg-rose-500/20 text-rose-500 px-3 py-1 rounded-lg ml-2">Atrasadas</span>}
            </h2>
         </div>
 
@@ -219,10 +266,20 @@ export default function BillsManager() {
                             </div>
 
                             {/* Valor e Ação */}
-                            <div className="flex items-center gap-4">
-                                <span className={`text-sm font-black ${activeTab === 'expense' ? 'text-rose-500' : 'text-emerald-500'}`}>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-sm font-black mr-2 ${activeTab === 'expense' ? 'text-rose-500' : 'text-emerald-500'}`}>
                                     {formatCurrency(bill.amount)}
                                 </span>
+                                
+                                {isOverdue && (
+                                    <button 
+                                        onClick={() => handleNotify(bill)}
+                                        title="Enviar Notificação"
+                                        className="p-3 rounded-xl transition-all shadow-sm active:scale-95 bg-white border border-indigo-100 text-indigo-400 hover:bg-indigo-500 hover:text-white hover:border-indigo-500 dark:bg-white/5 dark:border-white/5 dark:hover:bg-indigo-500"
+                                    >
+                                        <BellRing size={18} />
+                                    </button>
+                                )}
                                 
                                 <button 
                                     onClick={() => handleMarkAsPaid(bill.id)}

@@ -49,7 +49,7 @@ const Gauge = ({ value, label, subtitle, type = 'normal' }: { value: number, lab
   }
 
   return (
-      <div className="flex flex-col items-center justify-center p-3 h-full bg-white dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-[2rem] w-full relative overflow-hidden group shadow-sm hover:shadow-lg transition-all">
+      <div className="flex flex-col items-center justify-center p-3 h-full bg-white dark:bg-black/20 rounded-[2rem] w-full relative overflow-hidden group shadow-sm hover:shadow-lg transition-all">
           <div className="absolute bottom-0 w-24 h-12 blur-2xl opacity-50 transition-colors duration-1000" style={{ backgroundColor: glow }} />
           
           <div className="relative w-28 h-16 mt-2">
@@ -226,7 +226,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
   const peakOutY = peakOutData ? 40 - ((peakOutData.out / maxVal) * 40) : 40;
 
   return (
-    <div className="h-full w-full flex flex-col gap-4 overflow-hidden font-sans pb-2">
+    <div className="w-full h-auto md:h-full flex flex-col gap-4 md:overflow-hidden font-sans pb-12 md:pb-2">
       
       <style>{`
         .no-scrollbar::-webkit-scrollbar {
@@ -243,7 +243,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
           <h1 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter flex items-center gap-2">
               <Activity className="text-indigo-500" /> Cockpit VittaCash
           </h1>
-          <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl border border-slate-200 dark:border-white/10">
+          <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl">
               <button onClick={() => setViewMode('monthly')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${viewMode === 'monthly' ? 'bg-white dark:bg-white/10 shadow-sm text-indigo-600 dark:text-white' : 'text-slate-400'}`}>Mensal</button>
               <button onClick={() => setViewMode('yearly')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${viewMode === 'yearly' ? 'bg-white dark:bg-white/10 shadow-sm text-indigo-600 dark:text-white' : 'text-slate-400'}`}>Anual</button>
           </div>
@@ -267,11 +267,11 @@ export default function DashboardHome({ transactions }: DashboardProps) {
       </div>
 
       {/* 3. CONTEÚDO PRINCIPAL (BLINDADO COM MIN-H-0 PARA EVITAR VAZAMENTOS) */}
-      <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
+      <div className="flex flex-col md:grid md:grid-cols-12 gap-4 flex-1 md:min-h-0">
           
           {/* COLUNA ESQUERDA */}
-          <div className="col-span-12 md:col-span-3 flex flex-col gap-4 min-h-0">
-              <div className="shrink-0 h-[150px] rounded-[2rem] border p-5 bg-white dark:bg-black/20 dark:border-white/10 flex flex-col justify-between shadow-lg">
+          <div className="col-span-12 md:col-span-3 flex flex-col gap-4 md:min-h-0">
+              <div className="shrink-0 h-[150px] rounded-[2rem] p-5 bg-white dark:bg-black/20 flex flex-col justify-between shadow-lg">
                   <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black uppercase text-slate-500 flex items-center gap-2"><BrainCircuit size={16} className="text-indigo-500"/> Saúde</span>
                       <span className={`text-xl font-black ${financialData.healthStatus === 'neutral' ? 'text-slate-500' : (financialData.healthStatus === 'good' ? 'text-emerald-500' : 'text-rose-500')}`}>{financialData.healthScore}%</span>
@@ -279,14 +279,14 @@ export default function DashboardHome({ transactions }: DashboardProps) {
                   <p className="text-[10px] font-black leading-tight text-slate-800 dark:text-white">{financialData.diagnostico}</p>
                   <div className="flex gap-2">
                       {financialData.proximosPassos.map((step, i) => (
-                          <div key={i} className="flex-1 p-2 rounded-lg bg-indigo-50 dark:bg-white/5 border border-indigo-100 dark:border-white/5 flex items-center justify-center text-center gap-2">
+                          <div key={i} className="flex-1 p-2 rounded-lg bg-indigo-50 dark:bg-white/5 flex items-center justify-center text-center gap-2">
                               <span className="text-[8px] font-bold uppercase text-slate-500 dark:text-white/60">{step}</span>
                           </div>
                       ))}
                   </div>
               </div>
 
-              <div className="flex-1 rounded-[2rem] border p-5 bg-white dark:bg-black/20 dark:border-white/10 overflow-hidden flex flex-col shadow-lg min-h-0">
+              <div className="flex-1 rounded-[2rem] p-5 bg-white dark:bg-black/20 overflow-hidden flex flex-col shadow-lg min-h-[200px] md:min-h-0">
                   <div className="flex items-center gap-2 mb-4 text-rose-500 shrink-0">
                       <Skull size={18} /><span className="text-[10px] font-black uppercase">Maiores Gastos</span>
                   </div>
@@ -311,7 +311,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
           </div>
 
           {/* COLUNA CENTRAL (A GRANDE CULPADA RESOLVIDA) */}
-          <div className="col-span-12 md:col-span-6 rounded-[2rem] border p-5 bg-white dark:bg-black/20 dark:border-white/10 flex flex-col relative overflow-hidden shadow-lg min-h-0">
+          <div className="col-span-12 md:col-span-6 rounded-[2rem] p-5 bg-white dark:bg-black/20 flex flex-col relative overflow-hidden shadow-lg min-h-[300px] md:min-h-0">
               <div className="flex justify-between items-center mb-4 text-[10px] font-black uppercase tracking-widest relative z-10 shrink-0">
                   <span className="flex items-center gap-2">
                       <Activity size={16} className="text-indigo-500" /> 
@@ -375,7 +375,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
                         <p className="text-[8px] font-black uppercase opacity-60">Pendente no Período</p>
                         <h4 className="text-sm font-black">{formatCurrency(financialData.totalPendingAmount)}</h4>
                    </div>
-                   <div className="p-4 rounded-2xl border bg-white dark:bg-white/5 dark:border-white/10 flex flex-col justify-between shadow-md h-20">
+                   <div className="p-4 rounded-2xl bg-white dark:bg-white/5 flex flex-col justify-between shadow-md h-20">
                         <p className="text-[8px] font-black uppercase text-slate-400">Status Quitação</p>
                         <h4 className={`text-sm font-black ${financialData.totalPendingAmount > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
                             {financialData.totalPendingAmount > 0 ? 'Existem Pendências' : 'Tudo em dia'}
@@ -385,8 +385,8 @@ export default function DashboardHome({ transactions }: DashboardProps) {
           </div>
 
           {/* COLUNA DIREITA */}
-          <div className="col-span-12 md:col-span-3 flex flex-col gap-4 min-h-0">
-              <div className="shrink-0 h-[150px] rounded-[2rem] border p-5 bg-white dark:bg-black/20 dark:border-white/10 flex flex-col shadow-lg">
+          <div className="col-span-12 md:col-span-3 flex flex-col gap-4 md:min-h-0">
+              <div className="shrink-0 h-[150px] rounded-[2rem] p-5 bg-white dark:bg-black/20 flex flex-col shadow-lg">
                   <div className="flex items-center gap-2 mb-4 text-amber-500 shrink-0">
                       <Percent size={18} /><span className="text-[10px] font-black uppercase tracking-widest">% Distribuição</span>
                   </div>
@@ -409,7 +409,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
                   </div>
               </div>
 
-              <div className="flex-1 rounded-[2rem] border p-5 bg-white dark:bg-black/20 dark:border-white/10 flex flex-col shadow-lg min-h-0">
+              <div className="flex-1 rounded-[2rem] p-5 bg-white dark:bg-black/20 flex flex-col shadow-lg min-h-[200px] md:min-h-0">
                   <div className="flex items-center gap-2 mb-4 text-indigo-500 shrink-0">
                       <Target size={18} /><span className="text-[10px] font-black uppercase tracking-widest">Monitor de Metas</span>
                   </div>
@@ -420,7 +420,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
                             <p className="text-[8px] uppercase font-black text-center text-slate-400">Nenhum Teto</p>
                         </div>
                       ) : financialData.budgetStatus.map((budget, i) => (
-                          <div key={i} className={`p-3 rounded-2xl border transition-all ${budget.isOver ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20 shadow-sm' : budget.isWarning ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 shadow-sm' : 'bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5'}`}>
+                          <div key={i} className={`p-3 rounded-2xl transition-all ${budget.isOver ? 'bg-rose-50 dark:bg-rose-500/10 shadow-sm' : budget.isWarning ? 'bg-amber-50 dark:bg-amber-500/10 shadow-sm' : 'bg-slate-50 dark:bg-white/5'}`}>
                               <div className="flex justify-between items-center mb-1.5">
                                   <div className="flex items-center gap-1.5">
                                       {(budget.isOver || budget.isWarning) && (
@@ -445,7 +445,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
       </div>
 
       {/* 4. ÁREA: 4 VELOCÍMETROS */}
-      <div className="shrink-0 h-[120px] grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="shrink-0 h-auto md:h-[120px] grid grid-cols-2 md:grid-cols-4 gap-4">
           <Gauge 
              value={financialData.healthScore} 
              label="Saúde Financeira" 

@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useAuth } from './components/AuthProvider';
+import { appApi } from './services/api';
+import { supabase } from './supabase';
 import { HomeHub } from './components/HomeHub';
 import { FinancialAdvisor } from "./components/FinancialAdvisor";
 import DashboardHome from './components/DashboardHome';
@@ -9,14 +12,19 @@ import TransactionTable from './components/TransactionTable';
 import ProfileSettings from './components/ProfileSettings'; 
 import HorizonsManager from './components/HorizonsManager'; 
 import Reports from './components/Reports'; 
-import { Transaction } from './types'; 
-import { User, Bell } from 'lucide-react'; 
+import { Transaction, Category, Goal } from './types'; 
+import { User, Bell, Eye, EyeOff } from 'lucide-react'; 
 
 export default function Vitta() {
-  // --- SISTEMA DE LICENÇA (AGORA DENTRO DA NAVE!) ---
-  const [isLicensed, setIsLicensed] = useState(false);
-  const [accessCode, setAccessCode] = useState('');
-  const [licenseError, setLicenseError] = useState(false);
+  // --- SISTEMA DE LOGIN SUPABASE ---
+  const { session } = useAuth();
+  const isAuthenticated = !!session;
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   // --------------------------------------------------
 
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
@@ -24,33 +32,67 @@ export default function Vitta() {
   const [showWelcome, setShowWelcome] = useState(true);
   
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userName, setUserName] = useState('');
 
-  const loadAllData = useCallback(() => {
-    // Cofre PRO limpo
-    const savedTxs = localStorage.getItem('vittacash_pro_transactions');
-    setTransactions(savedTxs ? JSON.parse(savedTxs) : []);
+  const loadAllData = useCallback(async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      const dbTransactions = await appApi.getTransactions(session.user.id);
+      setTransactions(dbTransactions);
+      const dbCategories = await appApi.getCategories(session.user.id);
+      setCategories(dbCategories);
+      const dbGoals = await appApi.getGoals(session.user.id);
+      setGoals(dbGoals);
+    } catch (err) {
+      console.error("Erro ao carregar dados", err);
+    }
+
     const savedAvatar = localStorage.getItem('vittacash_user_avatar');
     const savedName = localStorage.getItem('vittacash_user_name');
     setUserAvatar(savedAvatar);
     setUserName(savedName || 'Comandante');
+  }, [session]);
 
-    // Verifica se o PC já está ativado para não pedir a chave toda vez
-    if (localStorage.getItem('vittacash_license_key') === 'VITTA-PRO-2026-X79') {
-      setIsLicensed(true);
-    }
-  }, []);
+  const handleAuth = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setAuthLoading(true);
+    setAuthError('');
+    
+    try {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        alert('Cadastro realizado com sucesso! Você já pode fazer login.');
+        setIsSignUp(false);
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      }
+    } catch (error: any) {
+      let errorMessage = error.message || 'Erro na autenticação';
+      
+      // Tradução de erros comuns do Supabase
+      if (errorMessage.includes('Email not confirmed')) {
+        errorMessage = 'Por favor, confirme seu e-mail clicando no link que enviamos antes de fazer login. (Ou desative a "Confirmação de E-mail" no painel do Supabase)';
+      } else if (errorMessage.includes('Invalid login credentials')) {
+        errorMessage = 'E-mail ou senha incorretos.';
+      } else if (errorMessage.includes('User already registered')) {
+        errorMessage = 'Este e-mail já está cadastrado.';
+      } else if (errorMessage.includes('Password should be at least')) {
+        errorMessage = 'A senha deve ter pelo menos 6 caracteres.';
+      } else if (errorMessage.includes('Email address "') && errorMessage.includes('is invalid')) {
+        errorMessage = 'O endereço de e-mail fornecido é inválido.';
+      }
 
-  const handleActivateLicense = () => {
-    if (accessCode === 'VITTA-PRO-2026-X79') {
-      localStorage.setItem('vittacash_license_key', accessCode);
-      setIsLicensed(true);
-      setLicenseError(false);
-    } else {
-      setLicenseError(true);
-      setTimeout(() => setLicenseError(false), 3000);
+      setAuthError(errorMessage);
+      setTimeout(() => setAuthError(''), 6000);
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -58,13 +100,16 @@ export default function Vitta() {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    loadAllData();
+    
+    if (session) {
+      loadAllData();
+    }
 
     const timer = setTimeout(() => {
       setShowWelcome(false);
     }, 5500);
     return () => clearTimeout(timer);
-  }, [theme, loadAllData]);
+  }, [theme, loadAllData, session]);
 
   const overdueCount = useMemo(() => {
     const today = new Date();
@@ -79,10 +124,18 @@ export default function Vitta() {
   const handleNavigate = (tabId: string) => setCurrentTab(tabId);
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
-  const handleSaveTransaction = (newTransactions: any[]) => {
+  const handleSaveTransaction = async (newTransactions: any[]) => {
+      if (!session?.user?.id) return;
+
       const updatedList = [...newTransactions, ...transactions];
+      // Optmistic UI Update
       setTransactions(updatedList);
-      localStorage.setItem('vittacash_pro_transactions', JSON.stringify(updatedList));
+      
+      // Persist in Backend / Offline Queue
+      for (const tx of newTransactions) {
+        await appApi.addTransaction({ ...tx, user_id: session.user.id });
+      }
+      
       loadAllData();
   };
 
@@ -142,36 +195,67 @@ export default function Vitta() {
   // ==================================================================================
   // TELA 2: PORTÃO DE SEGURANÇA (ANTI-PIRATARIA)
   // ==================================================================================
-  if (!isLicensed) {
+  if (!isAuthenticated) {
     return (
       <div className="w-screen h-screen bg-[#050505] flex items-center justify-center relative overflow-hidden font-sans">
-        <div className="absolute w-[600px] h-[600px] bg-indigo-600/10 blur-[150px] rounded-full" />
+        <div className="absolute w-[600px] h-[600px] bg-[#00d06c]/10 blur-[150px] rounded-full" />
         
-        <div className="relative z-10 w-full max-w-md p-8 bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl flex flex-col items-center text-center">
-          <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-6">
-            <span className="text-3xl">🔒</span>
+        <form onSubmit={handleAuth} className="relative z-10 w-full max-w-md p-8 bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl flex flex-col items-center text-center mx-4">
+          <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+            <User className="text-[#00d06c]" size={30} />
           </div>
           
-          <h2 className="text-2xl font-black text-white uppercase tracking-widest mb-2">Sistema Bloqueado</h2>
-          <p className="text-sm text-zinc-400 mb-8">Insira a sua chave de acesso oficial para liberar as funções do sistema.</p>
+          <h2 className="text-2xl font-black text-white uppercase tracking-widest mb-2">{isSignUp ? 'Criar Conta' : 'Acesso Restrito'}</h2>
+          <p className="text-sm text-zinc-400 mb-8">{isSignUp ? 'Crie sua nova conta' : 'Insira seu e-mail e senha para acessar'}</p>
           
-          <input 
-            type="text"
-            value={accessCode}
-            onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-            placeholder="XXXX-XXXX-XXXX-XXXX"
-            className={`w-full bg-black/50 border ${licenseError ? 'border-rose-500 text-rose-500' : 'border-white/10 text-white'} rounded-xl px-4 py-3 text-center text-xl font-mono tracking-widest focus:outline-none focus:border-indigo-500 transition-colors mb-6`}
-          />
+          <div className="w-full space-y-4 mb-8">
+            <input 
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              className={`w-full bg-black/50 border ${authError ? 'border-rose-500 text-rose-500' : 'border-white/10 text-white'} rounded-xl px-4 py-3 text-center text-sm tracking-widest focus:outline-none focus:border-[#00d06c] transition-colors`}
+              required
+            />
+            
+            <div className="relative w-full">
+              <input 
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Senha"
+                className={`w-full bg-black/50 border ${authError ? 'border-rose-500 text-rose-500' : 'border-white/10 text-white'} rounded-xl px-4 py-3 text-center text-sm tracking-widest focus:outline-none focus:border-[#00d06c] transition-colors pr-10`}
+                required
+              />
+              <button 
+                type="button" 
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
           
-          {licenseError && <p className="text-rose-500 text-xs font-bold uppercase mb-4 animate-pulse">Chave Inválida ou Expirada</p>}
+          {authError && <p className="text-rose-500 text-xs font-bold uppercase mb-4 animate-pulse">{authError}</p>}
           
           <button 
-            onClick={handleActivateLicense}
-            className="w-full py-4 bg-gradient-to-r from-indigo-600 to-[#00d06c] hover:opacity-90 transition-opacity rounded-xl text-white font-black uppercase tracking-widest shadow-[0_0_20px_rgba(99,102,241,0.4)]"
+            type="submit"
+            disabled={authLoading}
+            className="w-full py-4 bg-gradient-to-r from-[#00d06c] to-emerald-700 hover:opacity-90 transition-opacity rounded-xl text-white font-black uppercase tracking-widest shadow-[0_0_20px_rgba(0,208,108,0.4)] disabled:opacity-50"
           >
-            Autenticar Licença
+            {authLoading ? 'Aguarde...' : (isSignUp ? 'Cadastrar' : 'Entrar no Sistema')}
           </button>
-        </div>
+
+          <button 
+            type="button"
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="mt-6 text-xs text-zinc-400 hover:text-white uppercase tracking-widest transition-colors"
+          >
+            {isSignUp ? 'Já tem conta? Faça Login' : 'Ainda não tem conta? Cadastre-se'}
+          </button>
+        </form>
       </div>
     );
   }
@@ -180,16 +264,16 @@ export default function Vitta() {
   // TELA 3: SISTEMA PRINCIPAL VITTACASH
   // ==================================================================================
   const NavigationHeader = () => (
-    <div className="absolute top-12 left-10 z-[50] pointer-events-none flex items-center gap-8">
+    <div className="absolute top-5 left-4 md:top-12 md:left-10 z-[50] pointer-events-none flex items-center gap-4 md:gap-8">
       <button 
         onClick={() => setCurrentTab('hub')}
-        className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex items-center gap-2 group backdrop-blur-md pointer-events-auto shadow-lg
+        className={`px-4 md:px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex items-center gap-2 group backdrop-blur-md pointer-events-auto shadow-lg
           ${theme === 'light' 
             ? 'bg-white border-slate-300 text-slate-900 hover:bg-slate-50' 
             : 'bg-black/40 border-white/10 text-white/70 hover:text-white hover:bg-black/60'}
         `}
       >
-        <span className="group-hover:-translate-x-1 transition-transform">←</span> Menu Hub
+        <span className="group-hover:-translate-x-1 transition-transform">←</span> <span className="hidden md:inline">Menu Hub</span>
       </button>
 
       {overdueCount > 0 && (
@@ -230,17 +314,17 @@ export default function Vitta() {
       )}
 
       {/* AVATAR DE USUÁRIO COM BOTÃO ACESSÍVEL */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center group">
+      <div className="absolute top-5 right-4 md:top-8 md:left-1/2 md:-translate-x-1/2 z-[100] flex flex-col items-center group">
         <button
           onClick={() => setCurrentTab('settings')}
           className={`relative p-1 rounded-full border-2 transition-all duration-700 shadow-2xl active:scale-95
             ${theme === 'light' ? 'border-slate-300 bg-white shadow-slate-200' : 'border-[#00d06c]/20 bg-black group-hover:border-[#00d06c]'}
           `}
         >
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-zinc-900 flex items-center justify-center border border-white/5">
-            {userAvatar ? <img src={userAvatar} className="w-full h-full object-cover" alt="Avatar" /> : <User size={32} className="text-[#00d06c]" />}
+          <div className="w-12 h-12 md:w-20 md:h-20 rounded-full overflow-hidden bg-zinc-900 flex items-center justify-center border border-white/5">
+            {userAvatar ? <img src={userAvatar} className="w-full h-full object-cover" alt="Avatar" /> : <User className="w-6 h-6 md:w-8 md:h-8 text-[#00d06c]" />}
           </div>
-          <div className={`absolute bottom-1 right-1 w-4 h-4 bg-[#00d06c] rounded-full border-2 ${theme === 'light' ? 'border-white' : 'border-[#050505]'}`} />
+          <div className={`absolute bottom-0 right-0 md:bottom-1 md:right-1 w-3 h-3 md:w-4 md:h-4 bg-[#00d06c] rounded-full border-2 ${theme === 'light' ? 'border-white' : 'border-[#050505]'}`} />
         </button>
       </div>
 
@@ -254,13 +338,13 @@ export default function Vitta() {
       ) : (
         <div className="h-full w-full flex flex-col relative z-10 animate-in fade-in duration-500">
           <NavigationHeader />
-          <div className="flex-1 overflow-hidden p-6 pt-36">
+          <div className="flex-1 w-full overflow-y-auto overflow-x-hidden md:overflow-hidden p-4 md:p-6 pt-24 md:pt-36">
             {currentTab === 'dashboard' && <DashboardHome transactions={transactions as any} />}
-            {currentTab === 'categories' && <CategoryManager />}
-            {currentTab === 'target' && <HorizonsManager />} 
+            {currentTab === 'categories' && <CategoryManager categories={categories} onUpdate={loadAllData} currentUserId={session?.user?.id} />}
+            {currentTab === 'target' && <HorizonsManager goals={goals} onUpdate={loadAllData} currentUserId={session?.user?.id} />} 
             {currentTab === 'report' && <Reports transactions={transactions as any} />} 
             {currentTab === 'settings' && <ProfileSettings onUpdate={loadAllData} onClose={() => setCurrentTab('hub')} />}
-            {(currentTab === 'contas' || currentTab === 'bills') && <BillsManager />}
+            {(currentTab === 'contas' || currentTab === 'bills') && <BillsManager mode={currentTab === 'bills' ? 'overdue' : 'normal'} />}
             {currentTab === 'history' && <TransactionTable />}
             {(currentTab === 'overview' || currentTab === 'edu') && <FinancialAdvisor currentBalance={0} transactions={transactions} categories={[]} />}
           </div>

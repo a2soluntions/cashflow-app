@@ -1,22 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Tag, Plus, Trash2, ArrowUpCircle, ArrowDownCircle, Search, LayoutGrid, Target, Edit3 } from 'lucide-react';
 
-interface Category {
-  id: string;
-  name: string;
-  type: 'income' | 'expense';
-  color: string;
-  limit?: number;
+import { appApi } from '../services/api';
+import { Category } from '../types';
+
+interface Props {
+  categories: Category[];
+  onUpdate: () => void;
+  currentUserId?: string;
 }
 
-export default function CategoryManager() {
-  // === AQUI ESTÁ A MÁGICA DA LIMPEZA ===
-  const [categories, setCategories] = useState<Category[]>(() => {
-    const saved = localStorage.getItem('vittacash_pro_categories');
-    // Se não tiver nada salvo, retorna VAZIO [] (Sem categorias fantasma)
-    return saved ? JSON.parse(saved) : []; 
-  });
-
+export default function CategoryManager({ categories, onUpdate, currentUserId }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [newLimit, setNewLimit] = useState('');
@@ -24,18 +18,7 @@ export default function CategoryManager() {
   const [selectedColor, setSelectedColor] = useState('bg-rose-500');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    // Salvando no novo cofre PRO
-    localStorage.setItem('vittacash_pro_categories', JSON.stringify(categories));
-    
-    const budgets = categories
-      .filter(c => c.type === 'expense' && (c.limit || 0) > 0)
-      .map(c => ({ id: c.id, category: c.name, limitAmount: Number(c.limit) }));
-    
-    // Salvando orçamentos no novo cofre PRO também
-    localStorage.setItem('vittacash_pro_budgets', JSON.stringify(budgets));
-    window.dispatchEvent(new Event('storage'));
-  }, [categories]);
+  // Removemos o local storage daqui, já que o pai gerencia!
 
   const colors = [
     'bg-rose-500', 'bg-pink-500', 'bg-fuchsia-500', 'bg-purple-500', 'bg-violet-500',
@@ -44,24 +27,42 @@ export default function CategoryManager() {
     'bg-orange-500', 'bg-red-500', 'bg-stone-500', 'bg-slate-500', 'bg-zinc-800'
   ];
 
-  const handleSave = () => {
-    if (!newName) return;
-    if (editingId) {
-      setCategories(categories.map(c => c.id === editingId ? {
-        ...c, name: newName.toUpperCase(), type: newType, color: selectedColor, limit: newType === 'expense' ? Number(newLimit) || 0 : undefined
-      } : c));
-      setEditingId(null);
-    } else {
-      const newCat: Category = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: newName.toUpperCase(),
-        type: newType,
-        color: selectedColor,
-        limit: newType === 'expense' ? Number(newLimit) || 0 : undefined
-      };
-      setCategories([...categories, newCat]);
+  const handleSave = async () => {
+    if (!newName || !currentUserId) return;
+    try {
+      if (editingId) {
+        await appApi.updateCategory({
+          id: editingId,
+          name: newName.toUpperCase(),
+          type: newType,
+          color: selectedColor,
+          limit_amount: newType === 'expense' ? Number(newLimit) || 0 : undefined,
+          user_id: currentUserId,
+        });
+      } else {
+        await appApi.addCategory({
+          id: Math.random().toString(36).substr(2, 9),
+          name: newName.toUpperCase(),
+          type: newType,
+          color: selectedColor,
+          limit_amount: newType === 'expense' ? Number(newLimit) || 0 : undefined,
+          user_id: currentUserId,
+        });
+      }
+      onUpdate();
+    } catch (err) {
+      console.error("Erro ao salvar categoria", err);
     }
     resetForm();
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await appApi.deleteCategory(id);
+      onUpdate();
+    } catch (err) {
+      console.error("Erro ao remover", err);
+    }
   };
 
   const resetForm = () => {
@@ -75,13 +76,13 @@ export default function CategoryManager() {
   const startEdit = (cat: Category) => {
     setEditingId(cat.id);
     setNewName(cat.name);
-    setNewType(cat.type);
-    setSelectedColor(cat.color);
-    setNewLimit(cat.limit?.toString() || '');
+    setNewType(cat.type as any);
+    setSelectedColor(cat.color || colors[0]);
+    setNewLimit(cat.limit_amount?.toString() || '');
   };
 
   return (
-    <div className="h-full w-full flex flex-col gap-3 overflow-hidden font-sans">
+    <div className="w-full h-auto md:h-full flex flex-col gap-3 md:overflow-hidden font-sans pb-12 md:pb-0">
       <style>{`
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -94,10 +95,10 @@ export default function CategoryManager() {
         </h2>
       </div>
 
-      <div className="flex-1 min-h-0 grid grid-cols-12 gap-4 pb-2">
+      <div className="flex flex-col md:grid md:grid-cols-12 gap-4 flex-1 md:min-h-0 pb-2">
         {/* FORMULÁRIO */}
-        <div className="col-span-12 md:col-span-4 flex flex-col min-h-0">
-            <div className={`flex-1 p-5 rounded-[2rem] border-2 bg-white dark:bg-black/20 flex flex-col transition-all ${newType === 'income' ? 'border-emerald-500/20' : 'border-rose-500/20'}`}>
+        <div className="col-span-12 md:col-span-4 flex flex-col md:min-h-0">
+            <div className={`flex-1 p-5 rounded-[2rem] bg-white dark:bg-black/20 flex flex-col transition-all shadow-lg`}>
                 <div className="flex-1 overflow-y-auto no-scrollbar">
                     <h3 className="text-[10px] font-black uppercase tracking-widest mb-5 text-slate-400 flex items-center gap-2">
                         {editingId ? <Edit3 size={14} className="text-amber-500"/> : <Plus size={14} className="text-indigo-500"/>}
@@ -162,8 +163,8 @@ export default function CategoryManager() {
             </div>
         </div>
 
-        {/* LISTA (CATÁLOGO) */}
-        <div className="col-span-12 md:col-span-8 p-6 rounded-[2rem] border bg-white dark:bg-black/20 flex flex-col min-h-0">
+                {/* LISTA (CATÁLOGO) */}
+        <div className="col-span-12 md:col-span-8 p-4 md:p-6 rounded-[2rem] bg-white dark:bg-black/20 flex flex-col min-h-[300px] md:min-h-0 shadow-lg">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                     <LayoutGrid size={14} className="text-indigo-500"/> Registros Ativos
@@ -178,7 +179,7 @@ export default function CategoryManager() {
                 {categories.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase())).map((cat) => (
                     <div key={cat.id} className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-white/5 group hover:bg-white dark:hover:bg-white/10 transition-all border border-transparent hover:border-slate-100 dark:hover:border-white/5">
                         <div className="flex items-center gap-4 flex-1">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md ${cat.color}`}>
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md ${cat.color || 'bg-slate-500'}`}>
                                 {cat.type === 'income' ? <ArrowUpCircle size={16}/> : <ArrowDownCircle size={16}/>}
                             </div>
                             <div>
@@ -194,7 +195,7 @@ export default function CategoryManager() {
                             <div className="mr-6 text-right">
                                 <p className="text-[7px] font-black text-slate-400 uppercase tracking-tighter">Teto Mensal</p>
                                 <p className="text-[11px] font-black text-rose-600">
-                                    R$ {cat.limit ? Number(cat.limit).toLocaleString('pt-BR') : '0'}
+                                    R$ {cat.limit_amount ? Number(cat.limit_amount).toLocaleString('pt-BR') : '0'}
                                 </p>
                             </div>
                         )}
@@ -203,7 +204,7 @@ export default function CategoryManager() {
                             <button onClick={() => startEdit(cat)} className="p-2.5 rounded-lg bg-white dark:bg-black/40 text-amber-500 hover:bg-amber-500 hover:text-white transition-all shadow-sm">
                                 <Edit3 size={14} />
                             </button>
-                            <button onClick={() => setCategories(categories.filter(c => c.id !== cat.id))} className="p-2.5 rounded-lg bg-white dark:bg-black/40 text-slate-300 hover:bg-rose-500 hover:text-white transition-all shadow-sm">
+                            <button onClick={() => handleDelete(cat.id)} className="p-2.5 rounded-lg bg-white dark:bg-black/40 text-slate-300 hover:bg-rose-500 hover:text-white transition-all shadow-sm">
                                 <Trash2 size={14} />
                             </button>
                         </div>

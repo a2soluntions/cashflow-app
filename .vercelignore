@@ -1,0 +1,6 @@
+node_modules
+release
+electron
+*.cjs
+.vscode
+chave vittacash.txt

@@ -21,8 +21,12 @@ const updateSW = registerSW({
   },
 });
 
+import { AuthProvider } from './components/AuthProvider'
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Vitta />
+    <AuthProvider>
+      <Vitta />
+    </AuthProvider>
   </React.StrictMode>,
 )

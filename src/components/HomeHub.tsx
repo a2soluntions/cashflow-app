@@ -43,14 +43,13 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
   return (
     <div className="relative h-full w-full flex items-center justify-center overflow-hidden bg-transparent">
       
-      {/* 🌌 SISTEMA ORBITAL */}
-      <div className={`relative flex items-center justify-center w-[650px] h-[650px] transition-all duration-700 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in zoom-in'}`}>
-        
+      {/* 🌌 SISTEMA ORBITAL (DESKTOP) */}
+      <div className={`hidden md:flex relative items-center justify-center w-[650px] h-[650px] transition-all duration-700 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in zoom-in'}`}>
         {/* NÚCLEO CENTRAL */}
         <div className="relative z-50 group transition-all duration-700">
           <div className={`absolute inset-0 blur-[100px] rounded-full animate-pulse ${isLight ? 'bg-indigo-400/20' : 'bg-indigo-500/30'}`} />
-          <div className={`w-60 h-60 md:w-72 md:h-72 rounded-full border-[1px] flex items-center justify-center shadow-2xl transition-all relative overflow-hidden ${isLight ? 'bg-white border-slate-200' : 'bg-[#0a0a0c] border-white/10'}`}>
-             <img src="./icon.png" alt="VittaCash" className="w-40 md:w-48 h-auto object-contain z-10 transition-transform duration-700 group-hover:scale-110" />
+          <div className={`w-72 h-72 rounded-full flex items-center justify-center shadow-2xl transition-all relative overflow-hidden ${isLight ? 'bg-white' : 'bg-[#0a0a0c]'}`}>
+             <img src="./icon.png" alt="VittaCash" className="w-48 h-auto object-contain z-10 transition-transform duration-700 group-hover:scale-110" />
           </div>
         </div>
 
@@ -71,16 +70,44 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
           );
         })}
 
-        {/* ANÉIS DECORATIVOS */}
-        <div className={`absolute w-[480px] h-[480px] border-[1px] rounded-full opacity-20 ${isLight ? 'border-slate-300' : 'border-white/10'}`} />
-        <div className={`absolute w-[480px] h-[480px] border-[1px] rounded-full border-dashed animate-[spin_120s_linear_infinite] opacity-10 ${isLight ? 'border-indigo-600' : 'border-indigo-400'}`} />
+        {/* ANÉIS DECORATIVOS (Bordas Removidas) */}
+        <div className={`absolute w-[480px] h-[480px] rounded-full opacity-5 bg-gradient-to-r ${isLight ? 'from-slate-200 to-transparent' : 'from-white/10 to-transparent'}`} />
+        <div className={`absolute w-[480px] h-[480px] rounded-full opacity-5 ${isLight ? 'bg-indigo-600/5' : 'bg-indigo-400/5'}`} />
+      </div>
+
+      {/* 📱 SISTEMA EM GRID (MOBILE) */}
+      <div className={`md:hidden flex flex-col items-center w-full max-w-sm px-4 pb-16 transition-all duration-700 z-10 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in slide-in-from-bottom-8'}`}>
+          <div className="relative mb-8 group">
+              <div className={`absolute inset-0 blur-3xl rounded-full scale-[2] animate-pulse ${isLight ? 'bg-indigo-400/20' : 'bg-indigo-500/20'}`} />
+              <img src="./icon.png" alt="VittaCash" className="w-24 h-auto object-contain relative z-10 drop-shadow-2xl" />
+          </div>
+
+          <div className="grid grid-cols-3 gap-6 w-full">
+            {menuItems.map((item) => (
+              <button 
+                key={item.id} 
+                onClick={item.action} 
+                className="flex flex-col items-center gap-3 group active:scale-90 transition-all"
+              >
+                <div 
+                  className={`w-16 h-16 rounded-2xl ${item.color} text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`} 
+                  style={{ boxShadow: `0 8px 25px ${item.color}40` }}
+                >
+                  {item.icon}
+                </div>
+                <span className={`text-[9px] font-black uppercase tracking-widest text-center leading-tight ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
+                  {item.label}
+                </span>
+              </button>
+            ))}
+          </div>
       </div>
 
       {/* 🚪 MODAL DE FECHAMENTO CUSTOMIZADO */}
       {showExitConfirm && (
         <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className={`w-[400px] p-8 rounded-[2.5rem] border animate-in zoom-in slide-in-from-bottom-8 duration-500 ${
-            isLight ? 'bg-white border-slate-200' : 'bg-[#0f0f12] border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)]'
+          <div className={`w-[400px] p-8 rounded-[2.5rem] animate-in zoom-in slide-in-from-bottom-8 duration-500 shadow-2xl ${
+            isLight ? 'bg-white' : 'bg-[#0f0f12] shadow-[0_0_50px_rgba(0,0,0,0.5)]'
           }`}>
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 mb-6">
@@ -97,8 +124,8 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
               <div className="flex gap-4 w-full">
                 <button 
                   onClick={() => setShowExitConfirm(false)}
-                  className={`flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${
-                    isLight ? 'border-slate-200 text-slate-400 hover:bg-slate-50' : 'border-white/5 text-zinc-500 hover:bg-white/5'
+                  className={`flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-md ${
+                    isLight ? 'bg-slate-100 text-slate-400 hover:bg-slate-200' : 'bg-white/5 text-zinc-400 hover:bg-white/10'
                   }`}
                 >
                   Cancelar
