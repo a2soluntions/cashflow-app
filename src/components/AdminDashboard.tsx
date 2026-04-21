@@ -111,6 +111,7 @@ const AdminDashboard: React.FC = () => {
           title: newsTitle, 
           description: newsDesc, 
           image_url: newsImg,
+          is_active: true,
           meta_value: { external_url: newsUrl }
         }]);
         setNewsTitle(''); setNewsDesc(''); setNewsImg(''); setNewsUrl(''); fetchData();
