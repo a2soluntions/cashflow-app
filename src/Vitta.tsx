@@ -27,8 +27,6 @@ export default function Vitta() {
   const location = useLocation();
   const isAuthenticated = !!session;
   
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
@@ -88,16 +86,15 @@ export default function Vitta() {
     if (session) loadAllData();
   }, [loadAllData, session]);
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAuth = async (emailInput: string, passwordInput: string) => {
     setAuthLoading(true);
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ email: emailInput, password: passwordInput });
         if (error) throw error;
         alert('Cadastro realizado!'); setIsSignUp(false);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: emailInput, password: passwordInput });
         if (error) throw error;
         navigate('/app');
       }
@@ -154,13 +151,9 @@ export default function Vitta() {
         {/* ROTA DE LOGIN */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : (
             <LoginPage 
-                email={email} 
-                setEmail={setEmail} 
-                password={password} 
-                setPassword={setPassword} 
                 isSignUp={isSignUp} 
                 setIsSignUp={setIsSignUp} 
-                handleAuth={handleAuth} 
+                onAuth={handleAuth} 
                 authLoading={authLoading} 
                 authError={authError} 
             />
@@ -206,31 +199,59 @@ export default function Vitta() {
   );
 }
 
-// --- NOVO COMPONENTE DE LOGIN (EXTERNO PARA EVITAR PERDA DE FOCO) ---
-const LoginPage = ({ email, setEmail, password, setPassword, isSignUp, setIsSignUp, handleAuth, authLoading, authError }: any) => {
+// --- NOVO COMPONENTE DE LOGIN (ESTADOS ISOLADOS PARA PERFORMANCE 100%) ---
+const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: any) => {
+    const [localEmail, setLocalEmail] = useState('');
+    const [localPassword, setLocalPassword] = useState('');
     const [showPass, setShowPass] = useState(false);
+
+    const passwordStrength = useMemo(() => {
+        if (!localPassword) return { score: 0, label: '', color: 'bg-zinc-800' };
+        if (localPassword.length < 6) return { score: 33, label: 'Fraca', color: 'bg-rose-500' };
+        
+        const hasNumbers = /\d/.test(localPassword);
+        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(localPassword);
+        
+        if (localPassword.length >= 8 && hasNumbers && hasSpecial) {
+            return { score: 100, label: 'Forte', color: 'bg-emerald-500' };
+        }
+        if (localPassword.length >= 6 && (hasNumbers || hasSpecial)) {
+            return { score: 66, label: 'Média', color: 'bg-amber-500' };
+        }
+        return { score: 33, label: 'Fraca', color: 'bg-rose-500' };
+    }, [localPassword]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onAuth(localEmail, localPassword);
+    };
     
     return (
         <div className="w-screen h-screen bg-black flex items-center justify-center p-6 animate-in fade-in duration-700">
-            <form onSubmit={handleAuth} className="w-full max-w-sm bg-zinc-900 border border-white/10 p-10 rounded-[3rem] text-center shadow-2xl">
+            <form onSubmit={handleSubmit} className="w-full max-w-sm bg-zinc-900 border border-white/10 p-10 rounded-[3rem] text-center shadow-2xl relative overflow-hidden">
+                {/* Visual Glow */}
+                <div className={`absolute top-0 left-0 w-full h-1 transition-all duration-500 ${passwordStrength.color}`} style={{ width: `${passwordStrength.score}%` }} />
+                
                 <h2 className="text-2xl font-black text-white uppercase italic mb-8">{isSignUp ? 'Nova Conta' : 'Acesso VittaCash'}</h2>
                 
                 <div className="space-y-4 mb-8">
                     <input 
                         type="email" 
                         placeholder="E-mail" 
-                        value={email} 
-                        onChange={e => setEmail(e.target.value)} 
-                        className="w-full bg-black border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-all" 
+                        value={localEmail} 
+                        onChange={e => setLocalEmail(e.target.value)} 
+                        className="w-full bg-black border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-all font-bold" 
+                        required
                     />
                     
                     <div className="relative">
                         <input 
                             type={showPass ? "text" : "password"} 
                             placeholder="Senha" 
-                            value={password} 
-                            onChange={e => setPassword(e.target.value)} 
-                            className="w-full bg-black border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-all pr-12" 
+                            value={localPassword} 
+                            onChange={e => setLocalPassword(e.target.value)} 
+                            className="w-full bg-black border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-all pr-12 font-bold" 
+                            required
                         />
                         <button 
                             type="button"
@@ -240,6 +261,19 @@ const LoginPage = ({ email, setEmail, password, setPassword, isSignUp, setIsSign
                             {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
                         </button>
                     </div>
+
+                    {localPassword && (
+                        <div className="px-1 animate-in slide-in-from-top-2 duration-300">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className={`text-[9px] font-black uppercase tracking-widest ${passwordStrength.color.replace('bg-', 'text-')}`}>
+                                    Senha {passwordStrength.label}
+                                </span>
+                            </div>
+                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div className={`h-full transition-all duration-500 ${passwordStrength.color}`} style={{ width: `${passwordStrength.score}%` }} />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <button className="w-full py-4 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
