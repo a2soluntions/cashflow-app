@@ -173,7 +173,7 @@ export default function Vitta() {
                         if (tab === 'investments') return <InvestmentsManager investments={investments} onAdd={async(v) => { await appApi.addInvestment({...v, id: crypto.randomUUID(), user_id: session?.user?.id}); loadAllData(); }} onDelete={async(id) => { await appApi.deleteInvestment(id); loadAllData(); }} />;
                         if (tab === 'freedom') return <DebtFreedom />;
                         if (tab === 'settings') return <ProfileSettings onUpdate={loadAllData} onClose={() => navigate('/app')} subscriptionPlan={subscriptionPlan} onNavigate={(t) => navigate(`/app?tab=${t}`)} />;
-                        if (tab === 'admin') return session?.user?.email === ADMIN_EMAIL ? <AdminDashboard /> : <Navigate to="/app" />;
+                        if (tab === 'admin') return session?.user?.email === ADMIN_EMAIL ? <AdminDashboard theme={theme} /> : <Navigate to="/app" />;
                         if (tab === 'categories') return <CategoryManager categories={categories} onUpdate={loadAllData} currentUserId={session?.user?.id} />;
                         if (tab === 'target') return <HorizonsManager goals={goals} onUpdate={loadAllData} currentUserId={session?.user?.id} />;
                         if (tab === 'report') return <Reports transactions={transactions as any} />;

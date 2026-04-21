@@ -12,7 +12,7 @@ import {
 
 const CORES_FUNIL = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-const AdminDashboard: React.FC = () => {
+const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
   const [activeTab, setActiveTab] = useState<'vendas' | 'conteudo'>('vendas');
   const [licenses, setLicenses] = useState<any[]>([]);
   const [siteContent, setSiteContent] = useState<any[]>([]);
@@ -32,7 +32,9 @@ const AdminDashboard: React.FC = () => {
   const [indicators, setIndicators] = useState<any>({
     SELIC: { value: '', symbol: '%' },
     IPCA: { value: '', symbol: '%' },
-    DÓLAR: { value: '', symbol: 'R$' }
+    INPC: { value: '', symbol: '%' },
+    DÓLAR: { value: '', symbol: 'R$' },
+    BITCOIN: { value: '', symbol: 'R$' }
   });
 
   const fetchData = async () => {
@@ -138,7 +140,8 @@ const AdminDashboard: React.FC = () => {
   const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
   return (
-    <div className="h-full bg-slate-50 dark:bg-black font-inter text-slate-900 dark:text-white overflow-y-auto custom-scrollbar p-4 lg:p-8 rounded-[2.5rem]">
+  return (
+    <div className={`h-full font-inter overflow-y-auto custom-scrollbar p-4 lg:p-8 rounded-[2.5rem] transition-colors duration-500 ${theme === 'dark' ? 'bg-[#0a0a0c] text-white' : 'bg-slate-50 text-slate-900'}`}>
       <div className="max-w-7xl mx-auto pb-20">
         
         {/* HEADER & TABS */}
@@ -149,10 +152,10 @@ const AdminDashboard: React.FC = () => {
             </div>
             
             <div className="flex bg-white dark:bg-zinc-900 p-1 rounded-2xl border border-slate-200 dark:border-zinc-800">
-                <button onClick={() => setActiveTab('vendas')} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'vendas' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-white'}`}>
+                <button onClick={() => setActiveTab('vendas')} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'vendas' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500'}`}>
                     Vendas & KPIS
                 </button>
-                <button onClick={() => setActiveTab('conteudo')} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'conteudo' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-white'}`}>
+                <button onClick={() => setActiveTab('conteudo')} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'conteudo' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500'}`}>
                     Site & Notícias
                 </button>
             </div>
@@ -215,21 +218,21 @@ const AdminDashboard: React.FC = () => {
           <div className="animate-in slide-in-from-right-4 duration-500 space-y-6">
             
             {/* INDEXADORES FINANCEIROS */}
-            <div className="bg-white dark:bg-zinc-900 p-8 rounded-[3rem] border border-slate-200 dark:border-zinc-800 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900/50 p-8 rounded-[3rem] border border-slate-200 dark:border-zinc-800 shadow-sm">
                 <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-[#3b82f6] mb-8 text-xs"><TrendingUp size={16}/> Indexadores Econômicos (Manual / Cache)</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {['SELIC', 'IPCA', 'DÓLAR'].map(key => (
-                        <div key={key} className="bg-black/40 border border-white/5 p-6 rounded-2xl">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    {['SELIC', 'IPCA', 'INPC', 'DÓLAR', 'BITCOIN'].map(key => (
+                        <div key={key} className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/5 p-4 rounded-2xl">
                             <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">{key}</label>
                             <div className="flex items-center gap-2">
                                 <input 
-                                    className="bg-transparent text-xl font-black text-white w-full outline-none focus:text-blue-400" 
-                                    value={indicators[key].value} 
+                                    className="bg-transparent text-lg font-black text-slate-900 dark:text-white w-full outline-none focus:text-blue-400" 
+                                    value={indicators[key]?.value || ''} 
                                     onChange={e => setIndicators({ ...indicators, [key]: { ...indicators[key], value: e.target.value } })}
                                     placeholder="0.00"
                                 />
-                                <span className="text-slate-500 font-black">{indicators[key].symbol}</span>
-                                <button onClick={() => handleUpdateIndicator(key)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400"><Save size={16}/></button>
+                                <span className="text-slate-500 font-black text-[10px]">{indicators[key]?.symbol || ''}</span>
+                                <button onClick={() => handleUpdateIndicator(key)} className="p-1.5 hover:bg-emerald-500 hover:text-black rounded-lg text-blue-400 transition-all"><Save size={14}/></button>
                             </div>
                         </div>
                     ))}
@@ -238,14 +241,14 @@ const AdminDashboard: React.FC = () => {
 
             {/* NOTÍCIAS */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-zinc-900 p-8 rounded-[3rem] border border-slate-200 dark:border-zinc-800 shadow-sm">
+                <div className="bg-white dark:bg-zinc-900/50 p-8 rounded-[3rem] border border-slate-200 dark:border-zinc-800 shadow-sm text-slate-900 dark:text-white">
                     <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 mb-6 text-xs"><Newspaper size={16}/> Compor Notícia</h3>
                     <form onSubmit={handleAddNews} className="space-y-4">
-                        <input className="w-full bg-black border border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none" placeholder="Título" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} required />
-                        <textarea className="w-full bg-black border border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none h-24" placeholder="Descrição curta" value={newsDesc} onChange={e => setNewsDesc(e.target.value)} required />
-                        <input className="w-full bg-black border border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none" placeholder="Link da Imagem" value={newsImg} onChange={e => setNewsImg(e.target.value)} />
-                        <input className="w-full bg-black border border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none" placeholder="Link Externo (Fonte)" value={newsUrl} onChange={e => setNewsUrl(e.target.value)} />
-                        <button className="w-full bg-emerald-500 text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95">Publicar no Radar</button>
+                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500" placeholder="Título" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} required />
+                        <textarea className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none h-24 text-slate-900 dark:text-white focus:border-emerald-500" placeholder="Descrição curta" value={newsDesc} onChange={e => setNewsDesc(e.target.value)} required />
+                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500" placeholder="Link da Imagem" value={newsImg} onChange={e => setNewsImg(e.target.value)} />
+                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500" placeholder="Link Externo (Fonte)" value={newsUrl} onChange={e => setNewsUrl(e.target.value)} />
+                        <button className="w-full bg-emerald-500 text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">Publicar no Radar</button>
                     </form>
                 </div>
 

@@ -54,7 +54,9 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         setIndicators([
             { title: 'SELIC', value: '10.75', symbol: '%' },
             { title: 'IPCA', value: '4.50', symbol: '%' },
+            { title: 'INPC', value: '3.90', symbol: '%' },
             { title: 'DÓLAR', value: '5.45', symbol: 'R$' },
+            { title: 'BITCOIN', value: '345.200', symbol: 'R$' },
         ]);
       }
 
