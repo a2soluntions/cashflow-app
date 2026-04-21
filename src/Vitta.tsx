@@ -148,7 +148,7 @@ export default function Vitta() {
   );
 
   return (
-    <div className={`min-h-screen w-screen font-sans relative ${theme === 'light' ? 'bg-slate-50' : 'bg-[#050505] text-white'} ${location.pathname === '/' ? '' : 'h-screen overflow-hidden'}`}>
+    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-slate-50' : 'bg-[#050505] text-white'} ${location.pathname === '/' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
       
       {isAuthenticated && (
           <div className="absolute top-5 right-4 z-[100]">

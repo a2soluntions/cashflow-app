@@ -77,23 +77,24 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
     <div className="min-h-screen bg-black text-slate-200 font-sans selection:bg-emerald-500/30 scroll-smooth pb-20">
       
       {/* 📈 TICKER: ESTILO BOLSA DE VALORES */}
-      <div className="w-full bg-[#050505] border-b border-emerald-500/10 py-3 overflow-hidden whitespace-nowrap relative z-[100] shadow-2xl">
-        <div className="flex animate-marquee hover:pause gap-12 items-center">
-            {/* Repetir para efeito infinito - Fallback se vazio */}
-            {(indicators.length > 0 ? [...indicators, ...indicators, ...indicators] : [
-                { title: 'SELIC', value: '10.75', symbol: '%' },
-                { title: 'IPCA', value: '4.50', symbol: '%' },
-                { title: 'DÓLAR', value: '5.45', symbol: 'R$' },
-                { title: 'SELIC', value: '10.75', symbol: '%' },
-                { title: 'IPCA', value: '4.50', symbol: '%' },
-                { title: 'DÓLAR', value: '5.45', symbol: 'R$' }
-            ]).map((ind, i) => (
-                <div key={i} className="flex items-center gap-2 group">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 group-hover:text-emerald-500 transition-colors">{ind.title}</span>
-                    <span className="text-xs font-black text-white italic">{ind.symbol} {ind.value}</span>
-                    <TrendingUp size={10} className="text-emerald-500" />
-                </div>
-            ))}
+      <div className="w-full bg-[#050505] border-b border-emerald-500/10 py-3 overflow-hidden whitespace-nowrap relative z-[100] shadow-2xl flex justify-start">
+        <div className="flex animate-marquee hover:pause gap-12 items-center justify-start min-w-full">
+            {/* Repetir para efeito infinito - Fallback se vazio (Repetição QUÁDRUPLA para garantir preenchimento) */}
+            {(() => {
+                const list = indicators.length > 0 ? indicators : [
+                    { title: 'SELIC', value: '10.75', symbol: '%' },
+                    { title: 'IPCA', value: '4.50', symbol: '%' },
+                    { title: 'DÓLAR', value: '5.45', symbol: 'R$' }
+                ];
+                const repeatedList = [...list, ...list, ...list, ...list];
+                return repeatedList.map((ind, i) => (
+                    <div key={i} className="flex items-center gap-2 group shrink-0">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 group-hover:text-emerald-400 transition-colors uppercase font-bold">{ind.title}</span>
+                        <span className="text-xs font-black text-white italic">{ind.symbol} {ind.value}</span>
+                        <TrendingUp size={10} className="text-emerald-500" />
+                    </div>
+                ));
+            })()}
         </div>
       </div>
 
