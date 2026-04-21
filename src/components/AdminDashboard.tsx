@@ -141,21 +141,21 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
   return (
   return (
-    <div className={`h-full font-inter overflow-y-auto custom-scrollbar p-4 lg:p-8 rounded-[2.5rem] transition-colors duration-500 ${theme === 'dark' ? 'bg-[#0a0a0c] text-white' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`h-full font-inter overflow-y-auto custom-scrollbar p-4 lg:p-6 rounded-xl transition-colors duration-500 ${theme === 'dark' ? 'bg-[#0a0a0c] text-white' : 'bg-white text-slate-900 border border-slate-200'}`}>
       <div className="max-w-7xl mx-auto pb-20">
         
         {/* HEADER & TABS */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-4">
-                <div className="p-3 bg-emerald-500/10 rounded-2xl"><ShieldCheck className="w-8 h-8 text-emerald-500" /></div>
+                <div className="p-3 bg-emerald-500/10 rounded-xl"><ShieldCheck className="w-8 h-8 text-emerald-500" /></div>
                 <div><h1 className="text-2xl font-black uppercase tracking-tighter italic">Vitta Admin</h1><p className="text-slate-500 text-xs font-bold uppercase tracking-widest">SaaS Management Center</p></div>
             </div>
             
-            <div className="flex bg-white dark:bg-zinc-900 p-1 rounded-2xl border border-slate-200 dark:border-zinc-800">
-                <button onClick={() => setActiveTab('vendas')} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'vendas' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500'}`}>
+            <div className="flex bg-slate-100 dark:bg-zinc-900 p-1 rounded-xl border border-slate-200 dark:border-zinc-800">
+                <button onClick={() => setActiveTab('vendas')} className={`px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'vendas' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500'}`}>
                     Vendas & KPIS
                 </button>
-                <button onClick={() => setActiveTab('conteudo')} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'conteudo' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500'}`}>
+                <button onClick={() => setActiveTab('conteudo')} className={`px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'conteudo' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500'}`}>
                     Site & Notícias
                 </button>
             </div>
@@ -165,49 +165,44 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
           <div className="animate-in fade-in duration-500">
             {/* KPI CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] border border-slate-100 dark:border-zinc-800 shadow-sm">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Receita Vitalícia</p>
-                    <h3 className="text-2xl font-black text-emerald-400">{formatCurrency(stats.totalRevenue)}</h3>
-                </div>
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] border border-slate-100 dark:border-zinc-800 shadow-sm">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Vendas (Mês)</p>
-                    <h3 className="text-2xl font-black text-white">{formatCurrency(stats.revenueThisMonth)}</h3>
-                </div>
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] border border-slate-100 dark:border-zinc-800 shadow-sm">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Clientes Base</p>
-                    <h3 className="text-2xl font-black text-white">{stats.totalClients}</h3>
-                </div>
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] border border-slate-100 dark:border-zinc-800 shadow-sm">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Ticket Médio</p>
-                    <h3 className="text-2xl font-black text-blue-400">{formatCurrency(stats.averageTicket)}</h3>
-                </div>
+                {[
+                    { label: 'Receita Vitalícia', val: formatCurrency(stats.totalRevenue), color: 'text-emerald-500' },
+                    { label: 'Vendas (Mês)', val: formatCurrency(stats.revenueThisMonth), color: 'text-slate-900 dark:text-white' },
+                    { label: 'Clientes Base', val: stats.totalClients, color: 'text-slate-900 dark:text-white' },
+                    { label: 'Ticket Médio', val: formatCurrency(stats.averageTicket), color: 'text-blue-500' }
+                ].map((kpi, idx) => (
+                    <div key={idx} className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm transition-all hover:border-emerald-500/30">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{kpi.label}</p>
+                        <h3 className={`text-2xl font-black ${kpi.color}`}>{kpi.val}</h3>
+                    </div>
+                ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <div className="bg-white dark:bg-zinc-900 p-6 rounded-[3rem] border border-slate-200 dark:border-zinc-800 shadow-sm">
+                <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm">
                     <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 mb-6 text-xs"><Plus size={16}/> Registrar Venda</h3>
                     <form onSubmit={handleCreateLicense} className="space-y-4">
-                        <input className="w-full bg-black border border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none focus:border-emerald-500" placeholder="Cliente" value={clientName} onChange={e => setClientName(e.target.value)} />
-                        <input className="w-full bg-black border border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none focus:border-emerald-500" placeholder="Valor R$ 0,00" value={saleValue} onChange={e => setSaleValue(e.target.value)} />
+                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500" placeholder="Cliente" value={clientName} onChange={e => setClientName(e.target.value)} />
+                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500" placeholder="Valor R$ 0,00" value={saleValue} onChange={e => setSaleValue(e.target.value)} />
                         <div className="grid grid-cols-2 gap-2">
-                            <select className="bg-black border border-white/10 p-3 rounded-xl font-bold text-xs" value={productType} onChange={e => setProductType(e.target.value)}>
+                            <select className="bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 p-3 rounded-xl font-bold text-xs text-slate-900 dark:text-white outline-none focus:border-emerald-500" value={productType} onChange={e => setProductType(e.target.value)}>
                                 <option value="SaaS">SaaS</option>
                                 <option value="Desktop">Desktop</option>
                             </select>
-                            <select className="bg-black border border-white/10 p-3 rounded-xl font-bold text-xs" value={origin} onChange={e => setOrigin(e.target.value)}>
+                            <select className="bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 p-3 rounded-xl font-bold text-xs text-slate-900 dark:text-white outline-none focus:border-emerald-500" value={origin} onChange={e => setOrigin(e.target.value)}>
                                 <option>Instagram</option>
                                 <option>A2 App</option>
                                 <option>Indicação</option>
                             </select>
                         </div>
-                        <button className="w-full bg-emerald-500 py-4 rounded-xl font-black uppercase text-xs text-black active:scale-95 transition-all">Salvar Licença</button>
+                        <button className="w-full bg-emerald-500 py-4 rounded-xl font-black uppercase text-xs text-black active:scale-95 transition-all shadow-lg shadow-emerald-500/20">Salvar Licença</button>
                     </form>
                 </div>
-                <div className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-[3rem] border border-slate-200 dark:border-zinc-800 p-6 h-[400px]">
+                <div className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={stats.timelineData}>
                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b'}} />
-                            <Tooltip contentStyle={{backgroundColor: '#000', borderRadius: '12px', border: 'none'}} />
+                            <Tooltip contentStyle={{backgroundColor: '#000', borderRadius: '12px', border: 'none', color: '#fff'}} />
                             <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={3} fillOpacity={0.1} fill="#10b981" />
                         </AreaChart>
                     </ResponsiveContainer>
@@ -218,11 +213,11 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
           <div className="animate-in slide-in-from-right-4 duration-500 space-y-6">
             
             {/* INDEXADORES FINANCEIROS */}
-            <div className="bg-white dark:bg-zinc-900/50 p-8 rounded-[3rem] border border-slate-200 dark:border-zinc-800 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900/50 p-8 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm">
                 <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-[#3b82f6] mb-8 text-xs"><TrendingUp size={16}/> Indexadores Econômicos (Manual / Cache)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                     {['SELIC', 'IPCA', 'INPC', 'DÓLAR', 'BITCOIN'].map(key => (
-                        <div key={key} className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/5 p-4 rounded-2xl">
+                        <div key={key} className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/5 p-4 rounded-xl">
                             <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">{key}</label>
                             <div className="flex items-center gap-2">
                                 <input 
@@ -241,27 +236,27 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
             {/* NOTÍCIAS */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-zinc-900/50 p-8 rounded-[3rem] border border-slate-200 dark:border-zinc-800 shadow-sm text-slate-900 dark:text-white">
+                <div className="bg-white dark:bg-zinc-900/50 p-8 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm text-slate-900 dark:text-white">
                     <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 mb-6 text-xs"><Newspaper size={16}/> Compor Notícia</h3>
                     <form onSubmit={handleAddNews} className="space-y-4">
-                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500" placeholder="Título" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} required />
-                        <textarea className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none h-24 text-slate-900 dark:text-white focus:border-emerald-500" placeholder="Descrição curta" value={newsDesc} onChange={e => setNewsDesc(e.target.value)} required />
-                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500" placeholder="Link da Imagem" value={newsImg} onChange={e => setNewsImg(e.target.value)} />
-                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500" placeholder="Link Externo (Fonte)" value={newsUrl} onChange={e => setNewsUrl(e.target.value)} />
+                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500 placeholder:text-slate-400" placeholder="Título" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} required />
+                        <textarea className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none h-24 text-slate-900 dark:text-white focus:border-emerald-500 placeholder:text-slate-400" placeholder="Descrição curta" value={newsDesc} onChange={e => setNewsDesc(e.target.value)} required />
+                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500 placeholder:text-slate-400" placeholder="Link da Imagem" value={newsImg} onChange={e => setNewsImg(e.target.value)} />
+                        <input className="w-full bg-slate-100 dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-3 rounded-xl font-bold text-sm outline-none text-slate-900 dark:text-white focus:border-emerald-500 placeholder:text-slate-400" placeholder="Link Externo (Fonte)" value={newsUrl} onChange={e => setNewsUrl(e.target.value)} />
                         <button className="w-full bg-emerald-500 text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">Publicar no Radar</button>
                     </form>
                 </div>
 
-                <div className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-[3rem] border border-slate-200 dark:border-zinc-800 overflow-hidden flex flex-col h-[480px]">
-                    <div className="p-6 border-b border-white/5 flex justify-between items-center bg-black/20">
+                <div className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden flex flex-col h-[480px]">
+                    <div className="p-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-black/20">
                         <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Feed Ativo (Radar)</h3>
                     </div>
                     <div className="overflow-y-auto flex-1 p-6 space-y-4 custom-scrollbar">
                         {siteContent.filter(c => c.content_type === 'news').map(item => (
-                            <div key={item.id} className="flex gap-4 p-4 bg-black/40 rounded-2xl border border-white/5 group relative">
+                            <div key={item.id} className="flex gap-4 p-4 bg-slate-50 dark:bg-black/40 rounded-2xl border border-slate-100 dark:border-white/5 group relative transition-all hover:border-emerald-500/30">
                                 {item.image_url && <img src={item.image_url} className="w-20 h-20 rounded-xl object-cover grayscale group-hover:grayscale-0 transition-all"/>}
                                 <div className="flex-1">
-                                    <h4 className="font-black text-white uppercase text-xs mb-1">{item.title}</h4>
+                                    <h4 className="font-black text-slate-900 dark:text-white uppercase text-xs mb-1">{item.title}</h4>
                                     <p className="text-[10px] text-slate-500 leading-relaxed line-clamp-2">{item.description}</p>
                                 </div>
                                 <button onClick={() => handleDeleteContent(item.id)} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl self-start transition-all opacity-0 group-hover:opacity-100"><Trash2 size={16}/></button>
