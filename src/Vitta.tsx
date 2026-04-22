@@ -125,10 +125,13 @@ export default function Vitta() {
     </div>
   );
 
-
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
 
   return (
-    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-slate-50' : 'bg-[#050505] text-white'} ${location.pathname === '/' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
+    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-white text-slate-900' : 'dark bg-[#09090b] text-white'} ${location.pathname === '/' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
       
       {isAuthenticated && (
           <div className="absolute top-5 right-4 z-[100]">
@@ -162,11 +165,11 @@ export default function Vitta() {
         {/* ROTA DO APP (PROTEGIDA) */}
         <Route path="/app" element={
             !isAuthenticated ? <Navigate to="/login" /> : (
-                <div className="h-full w-full">
+                <div className="h-full w-full pt-20 md:pt-24 px-4 md:px-8 pb-12 overflow-y-auto custom-scrollbar">
                     {/* Renderiza o conteúdo baseado no Query Param ?tab=... */}
                     {(() => {
                         const tab = new URLSearchParams(location.search).get('tab') || 'hub';
-                        if (tab === 'hub') return <HomeHub onNavigate={(t) => navigate(`/app?tab=${t}`)} onNewTransaction={() => setIsModalOpen(true)} currentTheme={theme} onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} isAdmin={session?.user?.email === ADMIN_EMAIL} />;
+                        if (tab === 'hub') return <HomeHub onNavigate={(t) => navigate(`/app?tab=${t}`)} onNewTransaction={() => setIsModalOpen(true)} currentTheme={theme} onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} isAdmin={session?.user?.email === ADMIN_EMAIL} onLogout={handleLogout} />;
                         if (tab === 'sales') return <SalesPage onSelectPlan={() => navigate('/app?tab=settings')} />;
                         if (tab === 'dashboard') return <DashboardHome transactions={transactions as any} />;
                         if (tab === 'history') return <TransactionTable />;
@@ -228,7 +231,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
     
     return (
         <div className="w-screen h-screen bg-black flex items-center justify-center p-6 animate-in fade-in duration-700">
-            <form onSubmit={handleSubmit} className="w-full max-w-sm bg-zinc-900 border border-white/10 p-10 rounded-[3rem] text-center shadow-2xl relative overflow-hidden">
+            <form onSubmit={handleSubmit} className="w-full max-w-sm bg-zinc-900 p-10 rounded-[3rem] text-center shadow-2xl relative overflow-hidden">
                 {/* Visual Glow */}
                 <div className={`absolute top-0 left-0 w-full h-1 transition-all duration-500 ${passwordStrength.color}`} style={{ width: `${passwordStrength.score}%` }} />
                 
@@ -240,7 +243,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                         placeholder="E-mail" 
                         value={localEmail} 
                         onChange={e => setLocalEmail(e.target.value)} 
-                        className="w-full bg-black border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-all font-bold" 
+                        className="w-full bg-black p-4 rounded-xl text-white outline-none focus:bg-zinc-800 transition-all font-bold" 
                         required
                     />
                     
@@ -250,7 +253,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                             placeholder="Senha" 
                             value={localPassword} 
                             onChange={e => setLocalPassword(e.target.value)} 
-                            className="w-full bg-black border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-all pr-12 font-bold" 
+                            className="w-full bg-black p-4 rounded-xl text-white outline-none focus:bg-zinc-800 transition-all pr-12 font-bold" 
                             required
                         />
                         <button 
