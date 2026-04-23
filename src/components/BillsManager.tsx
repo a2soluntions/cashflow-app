@@ -163,8 +163,8 @@ export default function BillsManager({ mode = 'normal' }: BillsManagerProps) {
  {/* COLUNA ESQUERDA: Resumo e Filtros */}
  <div className="col-span-12 md:col-span-4 flex flex-col gap-4 min-h-0">
  {/* Card de Total */}
- <div className={`p-6 rounded-[2rem] relative overflow-hidden group transition-all shrink-0
- bg-white  dark:bg-[#09090b] 
+ <div className={`p-6 relative overflow-hidden group transition-all shrink-0
+ bg-white/5
  `}>
  <div className={`absolute top-0 right-0 p-32 rounded-full blur-[80px] opacity-20 pointer-events-none transition-colors duration-500
  ${activeTab === 'expense' ? 'bg-rose-500' : 'bg-emerald-500'}
@@ -180,8 +180,8 @@ export default function BillsManager({ mode = 'normal' }: BillsManagerProps) {
  </div>
 
  {/* Filtros / Busca */}
- <div className="flex-1 p-6 rounded-[2rem] flex flex-col gap-4 min-h-0
- bg-white  dark:bg-[#09090b] 
+ <div className="flex-1 p-6 flex flex-col gap-4 min-h-0
+ bg-white/5
  ">
  <div className="relative group shrink-0">
  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -211,8 +211,8 @@ export default function BillsManager({ mode = 'normal' }: BillsManagerProps) {
  </div>
 
  {/* COLUNA DIREITA: Lista de Contas */}
- <div className="col-span-12 md:col-span-8 p-6 rounded-[2rem] flex flex-col min-h-0
- bg-white  dark:bg-[#09090b] 
+ <div className="col-span-12 md:col-span-8 p-6 flex flex-col min-h-0
+ bg-white/5
  ">
  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
  {filteredBills.length === 0 ? (

@@ -23,9 +23,10 @@ interface NewTransactionModalProps {
  onClose: () => void;
  onSave: (transactions: any[]) => void;
  isLimitReached?: boolean;
+ theme?: 'light' | 'dark';
 }
 
-export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitReached = false }: NewTransactionModalProps) {
+export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitReached = false, theme = 'dark' }: NewTransactionModalProps) {
  const [type, setType] = useState<'income' | 'expense'>('expense');
  const [displayValue, setDisplayValue] = useState(''); 
  const [rawValue, setRawValue] = useState(0); 
@@ -42,8 +43,8 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  const [budgets, setBudgets] = useState<Budget[]>([]);
  const [allTransactions, setAllTransactions] = useState<any[]>([]);
 
- // === A MÁGICA FOI CORRIGIDA AQUI ===
- // Agora o formulário lê exatamente o mesmo cofre que a página de categorias usa
+ const isLight = theme === 'light';
+
  useEffect(() => {
  if (isOpen) {
  setCategories(JSON.parse(localStorage.getItem('vittacash_pro_categories') || '[]'));
@@ -148,192 +149,195 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
 
  if (!isOpen) return null;
 
- const activeColorClass = type === 'income' 
- ? 'bg-emerald-50  text-emerald-600 dark:bg-emerald-500/20 dark: dark:text-white'
- : 'bg-rose-50  text-rose-600 dark:bg-rose-500/20 dark: dark:text-white';
-
  return (
- // O evento onClick no fundo escuro permite fechar clicando fora
  <div 
- className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
+ className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md animate-in fade-in duration-300"
  onClick={onClose}
  >
  
- {/* O stopPropagation impede que o clique dentro do modal feche ele */}
  <div 
- className={`relative w-full max-w-md rounded-[2.5rem] bg-white dark:bg-[#09090b]   `}
+ className={`relative w-full max-w-md border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 ${isLight ? 'bg-[#F3E5F5] border-slate-200' : 'bg-[#283593] border-white/10'}`}
  onClick={(e) => e.stopPropagation()}
  >
  
- {/* ÍCONE FLUTUANTE DE ALERTA GIGANTE */}
+ {/* ALERTA DE ORÇAMENTO */}
  {budgetStatus && (budgetStatus.isOver || budgetStatus.isWarning) && (
- <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full flex flex-col items-center justify-center -[0_0_30px_rgba(0,0,0,0.5)] border-4 border-[#09090b] z-[110] transition-all duration-300
- ${budgetStatus.isOver 
- ? 'bg-rose-600 animate-[pulse_1s_infinite] scale-105' 
- : 'bg-amber-500 animate-bounce'}`}>
- 
- {budgetStatus.isOver ? (
- <>
- <AlertTriangle size={24} className="text-white mb-0.5" />
- <span className="text-[9px] font-black text-white leading-none uppercase tracking-widest mt-1">Estourado</span>
- </>
- ) : (
- <>
- <Zap size={24} className="text-white mb-0.5" />
- <span className="text-[9px] font-black text-white leading-none uppercase tracking-widest mt-1">Atenção</span>
- </>
- )}
- 
- <span className="text-xl font-black text-white leading-none mt-1 drop- ">
- {budgetStatus.percent.toFixed(0)}%
+ <div className={`absolute right-0 top-0 px-4 py-1 z-[110] flex items-center gap-2
+ ${budgetStatus.isOver ? 'bg-rose-600' : 'bg-amber-500'}`}>
+ {budgetStatus.isOver ? <AlertTriangle size={12} className="text-white" /> : <Zap size={12} className="text-white" />}
+ <span className="text-[9px] font-black text-white uppercase tracking-widest">
+ {budgetStatus.percent.toFixed(0)}% DO TETO
  </span>
  </div>
  )}
 
  {/* HEADER */}
- <div className={`px-6 py-5 flex justify-between items-center rounded-t-[2.5rem] relative overflow-hidden transition-colors duration-500 `}>
- <div className={`relative z-10 ${type === 'income' ? 'text-emerald-500' : 'text-rose-500'}`}>
- <h2 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-80">Novo Lançamento</h2>
- <p className="text-xl font-black uppercase tracking-tight">{type === 'income' ? 'Entrada' : 'Saída'}</p>
+ <div className={`px-8 py-5 border-b bg-black/5 ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+ <div className="flex justify-between items-start">
+ <div>
+ <h2 className={`text-[10px] font-black uppercase tracking-[0.4em] mb-1 ${isLight ? 'text-slate-500' : 'text-white/40'}`}>Cofre de Lançamento</h2>
+ <p className={`text-2xl font-black uppercase italic tracking-tighter ${type === 'income' ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-rose-600' : 'text-rose-400')}`}>
+ {type === 'income' ? 'Receita' : 'Despesa'}
+ </p>
  </div>
- <button onClick={onClose} className="relative z-10 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 flex items-center justify-center text-slate-500 dark:text-white transition-colors">
+ <button onClick={onClose} className={`w-8 h-8 flex items-center justify-center transition-all border ${isLight ? 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50' : 'bg-white/5 border-white/5 text-white hover:bg-white/10'}`}>
  <X size={18} strokeWidth={3} />
  </button>
  </div>
+ </div>
 
- <div className="p-6 flex flex-col gap-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
+ <div className="p-6 flex flex-col gap-4 max-h-[85vh] overflow-y-auto custom-scrollbar">
  
- {/* TIPO */}
- <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-white/5 p-1.5 rounded-2xl ">
- <button onClick={() => setType('income')} className={`py-2 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${type === 'income' ? 'bg-white text-emerald-600  dark:bg-emerald-500/10 dark:text-emerald-400 dark:/20' : 'text-slate-400 dark:text-white/40 hover:bg-slate-200 dark:hover:bg-white/10'}`}>
- <ArrowUpCircle size={16} /> Receita
+ {/* TIPO DE OPERAÇÃO */}
+ <div className="grid grid-cols-2 gap-3">
+ <button 
+ onClick={() => setType('income')} 
+ className={`py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all border
+ ${type === 'income' ? 'bg-emerald-500 border-emerald-400 text-white' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40 hover:bg-black/40')}`}
+ >
+ <ArrowUpCircle size={16} /> Entrada
  </button>
- <button onClick={() => setType('expense')} className={`py-2 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all ${type === 'expense' ? 'bg-white text-rose-600  dark:bg-rose-500/10 dark:text-rose-400 dark:/20' : 'text-slate-400 dark:text-white/40 hover:bg-slate-200 dark:hover:bg-white/10'}`}>
- <ArrowDownCircle size={16} /> Despesa
+ <button 
+ onClick={() => setType('expense')} 
+ className={`py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all border
+ ${type === 'expense' ? 'bg-rose-500 border-rose-400 text-white' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40 hover:bg-black/40')}`}
+ >
+ <ArrowDownCircle size={16} /> Saída
  </button>
  </div>
 
- {/* SELETOR DE MODO DE CÁLCULO */}
- {paymentMethod === 'installment' && (
- <div className="flex gap-2 justify-center pb-2 ">
- <button onClick={() => setAmountType('installment')} className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full transition-all flex items-center gap-1 ${amountType === 'installment' ? (type === 'income' ? 'bg-emerald-500  text-white' : 'bg-rose-500  text-white') : 'text-slate-400   dark:text-white/40 hover:bg-slate-100'}`}>
- <Divide size={10} /> Por Parcela
- </button>
- <button onClick={() => setAmountType('total')} className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full transition-all flex items-center gap-1 ${amountType === 'total' ? (type === 'income' ? 'bg-emerald-500  text-white' : 'bg-rose-500  text-white') : 'text-slate-400   dark:text-white/40 hover:bg-slate-100'}`}>
- <Multiply size={10} /> Valor Total
- </button>
- </div>
- )}
-
- {/* VALOR */}
- <div>
- <label className="text-[9px] font-black uppercase tracking-widest ml-2 text-slate-400 dark:text-white/40 mb-1 block">
- {paymentMethod === 'cash' ? 'Valor Total' : (amountType === 'total' ? 'Valor Total Parcelado' : 'Valor da Parcela')}
+ {/* VALOR PRINCIPAL */}
+ <div className="space-y-1">
+ <label className={`text-[9px] font-black uppercase tracking-[0.2em] block ml-1 ${isLight ? 'text-slate-400' : 'text-white/40'}`}>
+ {paymentMethod === 'cash' ? 'Montante Total' : (amountType === 'total' ? 'Montante Parcelado' : 'Valor da Parcela')}
  </label>
-  <input type="text" value={displayValue} onChange={handleAmountChange} placeholder="R$ 0,00" className="w-full text-center py-4 rounded-2xl text-3xl font-black outline-none transition-all bg-slate-50 text-slate-800 placeholder:text-slate-300 dark:bg-white/5 dark:text-white dark:placeholder:text-white/10" />
- </div>
-
- {/* CÁLCULO DE JUROS */}
- {paymentMethod === 'installment' && rawValue > 0 && (
- <div className="bg-orange-50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/20 rounded-xl p-3 animate-in slide-in-from-top-2">
- <div className="flex items-center gap-2 mb-2">
- <Percent size={14} className="text-orange-500"/>
- <span className="text-[9px] font-black uppercase text-orange-600 dark:text-orange-400">Cálculo de Juros (Opcional)</span>
- </div>
- <div className="flex items-center gap-2">
- <span className="text-[9px] text-slate-400 whitespace-nowrap">Se fosse à vista:</span>
+ <div className="relative group">
  <input 
- type="number" 
- placeholder="Digite o valor à vista..."
- value={cashPrice}
- onChange={(e) => setCashPrice(Number(e.target.value))}
- className="w-full bg-white dark:bg-[#09090b]/20 rounded-lg px-2 py-1 text-xs font-bold outline-none text-slate-700 dark:text-white"
+ type="text" 
+ value={displayValue} 
+ onChange={handleAmountChange} 
+ placeholder="R$ 0,00" 
+ className={`w-full text-left px-5 py-4 border text-3xl font-black outline-none transition-all focus:border-indigo-400 ${isLight ? 'bg-white border-slate-200 text-slate-900 placeholder:text-slate-200' : 'bg-black/40 border-white/10 text-white placeholder:text-white/5'}`} 
  />
  </div>
- {calculateInterest() > 0 && (
- <p className="text-[9px] font-bold text-orange-500 mt-2 text-right">
- Você está pagando <span className="underline decoration-2">{calculateInterest().toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span> de juros.
- </p>
- )}
  </div>
- )}
 
  {/* DESCRIÇÃO E DATA */}
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
  <div className="space-y-1">
- <label className="text-[9px] font-black uppercase tracking-widest ml-2 text-slate-400 dark:text-white/40">Descrição</label>
- <input type="text" value={description} onChange={(e) => setDescription(e.target.value.toUpperCase())} placeholder="EX: TV SMART" className="w-full pl-4 pr-3 py-3 rounded-xl text-xs font-bold uppercase outline-none bg-slate-50  text-slate-700 dark:bg-white/5  dark:text-white" />
+ <label className={`text-[9px] font-black uppercase tracking-[0.2em] ml-1 ${isLight ? 'text-slate-400' : 'text-white/40'}`}>Identificação</label>
+ <input 
+ type="text" 
+ value={description} 
+ onChange={(e) => setDescription(e.target.value.toUpperCase())} 
+ placeholder="EX: INVESTIMENTO" 
+ className={`w-full px-4 py-3 border text-xs font-bold uppercase outline-none focus:border-indigo-500 transition-all ${isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-black/20 border-white/5 text-white'}`} 
+ />
  </div>
  <div className="space-y-1">
- <label className="text-[9px] font-black uppercase tracking-widest ml-2 text-slate-400 dark:text-white/40">Data Início</label>
- <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full pl-4 pr-3 py-3 rounded-xl text-xs font-bold outline-none bg-slate-50  text-slate-700 dark:bg-white/5  dark:text-white [color-scheme:light] dark:[color-scheme:dark]" />
+ <label className={`text-[9px] font-black uppercase tracking-[0.2em] ml-1 ${isLight ? 'text-slate-400' : 'text-white/40'}`}>Data de Início</label>
+ <input 
+ type="date" 
+ value={date} 
+ onChange={(e) => setDate(e.target.value)} 
+ className={`w-full px-4 py-3 border text-xs font-bold outline-none focus:border-indigo-500 transition-all ${isLight ? 'bg-white border-slate-200 text-slate-700 [color-scheme:light]' : 'bg-black/20 border-white/5 text-white [color-scheme:dark]'}`} 
+ />
  </div>
  </div>
 
  {/* FORMA DE PAGAMENTO */}
-  <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/5 ">
- <button onClick={() => { setPaymentMethod('cash'); setInstallments(1); setCashPrice(''); }} className={`p-3 rounded-xl flex flex-col items-center justify-center gap-1 transition-all ${paymentMethod === 'cash' ? activeColorClass : ' text-slate-400  dark:text-white/40'}`}>
+ <div className={`grid grid-cols-2 gap-3 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+ <button 
+ onClick={() => { setPaymentMethod('cash'); setInstallments(1); setCashPrice(''); }} 
+ className={`p-4 border transition-all flex flex-col items-center justify-center gap-1
+ ${paymentMethod === 'cash' ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/30 hover:bg-black/40')}`}
+ >
  <Wallet size={18} />
  <span className="text-[9px] font-black uppercase tracking-widest">À Vista</span>
  </button>
- <button onClick={() => { setPaymentMethod('installment'); setInstallments(2); }} className={`p-3 rounded-xl flex flex-col items-center justify-center gap-1 transition-all ${paymentMethod === 'installment' ? activeColorClass : ' text-slate-400  dark:text-white/40'}`}>
- {type === 'income' ? <Clock size={18} /> : <CreditCard size={18} />}
- <span className="text-[9px] font-black uppercase tracking-widest">{type === 'income' ? 'A Prazo' : 'Parcelado'}</span>
+ <button 
+ onClick={() => { setPaymentMethod('installment'); setInstallments(2); }} 
+ className={`p-4 border transition-all flex flex-col items-center justify-center gap-1
+ ${paymentMethod === 'installment' ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/30 hover:bg-black/40')}`}
+ >
+ <Clock size={18} />
+ <span className="text-[9px] font-black uppercase tracking-widest">A Prazo</span>
  </button>
  </div>
 
  {/* PARCELAS */}
  {paymentMethod === 'installment' && (
- <div className="relative animate-in slide-in-from-top-2 duration-300">
- <label className="text-[9px] font-black uppercase tracking-widest ml-2 text-slate-400 dark:text-white/40 mb-1 block">Qtd. Parcelas</label>
- <select value={installments} onChange={(e) => setInstallments(Number(e.target.value))} className="w-full pl-4 pr-4 py-3 rounded-xl text-xs font-bold outline-none appearance-none bg-slate-50  text-slate-700 dark:bg-white/5  dark:text-white">
- {Array.from({ length: 71 }, (_, i) => i + 2).map(num => (<option key={num} value={num} className="text-black">{num}x Meses</option>))}
- </select>
+ <div className="space-y-1 animate-in slide-in-from-top-4 duration-500">
+ <div className="flex justify-between items-center px-1">
+ <label className={`text-[9px] font-black uppercase tracking-[0.2em] ${isLight ? 'text-slate-400' : 'text-white/40'}`}>Ciclos / Parcelas</label>
+ <span className={`text-10px font-black ${isLight ? 'text-indigo-600' : 'text-indigo-400'}`}>{installments}x</span>
+ </div>
+ <input 
+ type="range" 
+ min="2" 
+ max="72" 
+ value={installments} 
+ onChange={(e) => setInstallments(Number(e.target.value))}
+ className={`w-full h-1 rounded-none appearance-none cursor-pointer accent-indigo-500 ${isLight ? 'bg-slate-200' : 'bg-black/40'}`}
+ />
+ <div className="flex gap-2 mt-2">
+ <button onClick={() => setAmountType('installment')} className={`flex-1 py-2 text-[9px] font-black uppercase border transition-all ${amountType === 'installment' ? 'bg-indigo-600 text-white border-indigo-500' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40')}`}>Valor Unitário</button>
+ <button onClick={() => setAmountType('total')} className={`flex-1 py-2 text-[9px] font-black uppercase border transition-all ${amountType === 'total' ? 'bg-indigo-600 text-white border-indigo-500' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40')}`}>Valor Total</button>
+ </div>
  </div>
  )}
 
  {/* CATEGORIA */}
- <div className="space-y-1">
- <label className="text-[9px] font-black uppercase tracking-widest ml-2 text-slate-400 dark:text-white/40">Categoria</label>
- <div className="grid grid-cols-3 gap-2 max-h-24 overflow-y-auto custom-scrollbar p-1">
- {filteredCategories.length === 0 ? <div className="col-span-3 text-center py-2 opacity-50"><p className="text-[9px]">Sem categorias</p></div> : filteredCategories.map(cat => (
- <button key={cat.id} onClick={() => setSelectedCategory(cat.name)} className={`px-2 py-2 rounded-xl text-[8px] font-black uppercase tracking-wider transition-all truncate ${selectedCategory === cat.name ? `bg-slate-800 text-white  dark:bg-white dark:text-black` : 'bg-slate-50 text-slate-500  hover:bg-slate-100 dark:bg-white/5 dark:text-white/50  dark:hover:bg-white/10'}`}>{cat.name}</button>
+ <div className="space-y-2">
+ <label className={`text-[9px] font-black uppercase tracking-[0.2em] ml-1 ${isLight ? 'text-slate-400' : 'text-white/40'}`}>Classificação</label>
+ <div className="grid grid-cols-3 gap-2 p-1">
+ {filteredCategories.length === 0 ? (
+ <div className={`col-span-3 text-center py-4 border border-dashed text-[9px] font-black uppercase tracking-widest ${isLight ? 'bg-white border-slate-200 text-slate-300' : 'bg-black/20 border-white/10 text-white/20'}`}>
+ Sem categorias
+ </div>
+ ) : filteredCategories.map(cat => (
+ <button 
+ key={cat.id} 
+ onClick={() => setSelectedCategory(cat.name)} 
+ className={`px-2 py-2 border text-[8px] font-black uppercase tracking-wider transition-all truncate
+ ${selectedCategory === cat.name ? (isLight ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-white text-black border-white') : (isLight ? 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50' : 'bg-black/20 border-white/5 text-white/40 hover:border-white/20')}`}
+ >
+ {cat.name}
+ </button>
  ))}
  </div>
  </div>
 
- {/* BOTÕES DE AÇÃO (CANCELAR / CONFIRMAR OU UPGRADE) */}
- <div className="flex flex-col gap-3 mt-2">
+ {/* AÇÕES */}
+ <div className={`flex flex-col gap-3 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
  {isLimitReached ? (
- <div className="bg-rose-500/10 /20 p-6 rounded-[2rem] text-center animate-in zoom-in-95 duration-500">
- <AlertTriangle className="text-rose-500 mx-auto mb-2" size={32} />
- <h4 className="text-sm font-black text-rose-500 uppercase tracking-tighter italic">Limite de Dados Atingido</h4>
- <p className="text-[9px] text-slate-500 mt-2 uppercase font-black tracking-widest leading-relaxed">
- Seu plano Básico permite até 50 transações. <br />
- Faça o upgrade para Premium e tenha banco de dados <span className="text-emerald-500">ilimitado</span>.
+ <div className={`border p-4 text-center animate-in zoom-in-95 duration-500 ${isLight ? 'bg-rose-50 border-rose-200' : 'bg-rose-500/10 border-rose-500/30'}`}>
+ <AlertTriangle className="text-rose-500 mx-auto mb-1" size={24} />
+ <h4 className="text-[10px] font-black text-rose-500 uppercase tracking-tighter italic">Capacidade Máxima</h4>
+ <p className={`text-[8px] mt-1 uppercase font-black tracking-widest leading-relaxed ${isLight ? 'text-slate-500' : 'text-white/40'}`}>
+ Upgrade Premium necessário para ilimitado.
  </p>
  <button 
  onClick={onClose}
- className="w-full mt-4 py-4 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest rounded-2xl active:scale-95 transition-all -emerald-500/20"
+ className="w-full mt-3 py-3 bg-rose-600 text-white font-black uppercase text-xs tracking-widest active:scale-95 transition-all shadow-xl"
  >
- Liberar Acesso Total
+ Ver Planos
  </button>
- <button onClick={onClose} className="mt-2 text-[9px] text-slate-500 uppercase font-bold hover:text-white transition-colors">Voltar</button>
  </div>
  ) : (
  <div className="flex gap-3">
  <button 
  onClick={onClose} 
- className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all active:scale-95 bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10"
+ className={`flex-1 py-4 border font-black uppercase tracking-widest text-[9px] transition-all ${isLight ? 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50' : 'bg-black/20 border-white/5 text-white/40 hover:bg-black/40'}`}
  >
  Cancelar
  </button>
- 
  <button 
  onClick={handleSave} 
- className={`flex-[2] py-4 rounded-2xl font-black uppercase tracking-widest text-xs text-white transition-all active:scale-95 flex items-center justify-center gap-2 ${type === 'income' ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-rose-500 hover:bg-rose-400'}`}
+ className={`flex-[2] py-4 font-black uppercase tracking-widest text-[9px] text-white transition-all active:scale-95 flex items-center justify-center gap-2 shadow-2xl
+ ${type === 'income' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-900/20' : 'bg-rose-600 hover:bg-rose-500 shadow-rose-900/20'}`}
  >
- <Check size={18} strokeWidth={3} /> {paymentMethod === 'installment' ? 'Confirmar Parcelamento' : 'Confirmar'}
+ <Check size={16} strokeWidth={4} /> {paymentMethod === 'installment' ? 'Lançar Parcelas' : 'Lançar'}
  </button>
  </div>
  )}
@@ -344,6 +348,3 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  </div>
  );
 }
-
-
-

@@ -7,15 +7,16 @@ import {
 } from 'lucide-react';
 
 interface HomeHubProps {
- onNavigate: (tabId: string) => void;
- onNewTransaction: () => void; 
- currentTheme: 'light' | 'dark';
- onToggleTheme: () => void;
- isAdmin?: boolean;
- onLogout?: () => void;
+  onNavigate: (tabId: string) => void;
+  onNewTransaction: () => void; 
+  currentTheme: 'light' | 'dark';
+  onToggleTheme: () => void;
+  isAdmin?: boolean;
+  onLogout?: () => void;
+  userAvatar?: string | null;
 }
 
-export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTheme, isAdmin, onLogout }: HomeHubProps) {
+export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTheme, isAdmin, onLogout, userAvatar }: HomeHubProps) {
  const isLight = currentTheme === 'light';
  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
@@ -47,20 +48,19 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
    }
  };
 
- const radius = isAdmin ? 290 : 265; 
+ const radius = isAdmin ? 270 : 240; 
  const totalItems = menuItems.length;
 
  return (
  <div className="relative h-full w-full flex items-center justify-center overflow-hidden bg-transparent">
  
  {/* 🌌 SISTEMA ORBITAL (DESKTOP) */}
- <div className={`hidden md:flex relative items-center justify-center w-[650px] h-[650px] transition-all duration-700 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in zoom-in'}`}>
+ <div className={`hidden md:flex relative items-center justify-center w-[650px] h-[650px] -translate-y-12 transition-all duration-700 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in zoom-in'}`}>
  {/* NÚCLEO CENTRAL */}
  <div className="relative z-50 group transition-all duration-700">
- <div className={`absolute inset-0 blur-[100px] rounded-full animate-pulse ${isLight ? 'bg-indigo-400/20' : 'bg-indigo-500/30'}`} />
- <div className={`w-72 h-72 rounded-full flex items-center justify-center -2xl transition-all relative overflow-hidden ${isLight ? 'bg-white' : 'bg-[#0a0a0c]'}`}>
- <img src="./icon.png" alt="VittaCash" className="w-48 h-auto object-contain z-10 transition-transform duration-700 group-hover:scale-110" />
- </div>
+  <div className="flex items-center justify-center transition-all relative">
+    <img src="./icon.png" alt="VittaCash" className="w-56 h-auto object-contain z-10 transition-transform duration-700 group-hover:scale-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]" />
+  </div>
  </div>
 
  {/* ÍCONES ORBITAIS */}
@@ -69,14 +69,14 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  const x = radius * Math.cos(angle * (Math.PI / 180));
  const y = radius * Math.sin(angle * (Math.PI / 180));
  return (
- <div key={item.id} className="absolute z-40 flex flex-col items-center group transition-all duration-700" style={{ transform: `translate(${x}px, ${y}px)` }}>
- <span className="absolute -top-12 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300 pointer-events-none whitespace-nowrap bg-black/80 backdrop-blur-md text-[10px] font-black uppercase tracking-[0.2em] text-white py-1.5 px-4 rounded-lg border-white/10 -2xl">
- {item.label}
- </span>
- <button onClick={item.action} className={`p-4 rounded-2xl ${item.color} text-white transition-all duration-300 hover:scale-125 hover:rotate-[360deg] active:scale-90`} style={{ boxShadow : `0 0 25px ${item.color}55` }}>
- {item.icon}
- </button>
- </div>
+  <div key={item.id} className="absolute z-40 flex flex-col items-center group transition-all duration-700" style={{ transform: `translate(${x}px, ${y}px)` }}>
+  <button onClick={item.action} className={`p-5 ${item.color} text-white transition-all duration-300 hover:scale-125 hover:rotate-[360deg] active:scale-95 shadow-lg group-hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]`} style={{ boxShadow : `0 10px 30px ${item.color}66` }}>
+  {item.icon}
+  </button>
+  <span className={`absolute ${item.id === 'add' ? 'top-20' : (x >= 0 ? 'left-24' : 'right-24')} ${item.id === 'add' ? '' : 'top-1/2 -translate-y-1/2'} opacity-0 group-hover:opacity-100 group-hover:translate-x-3 transition-all duration-300 pointer-events-none whitespace-nowrap text-[10px] font-black uppercase tracking-[0.3em] ${isLight ? 'text-slate-900' : 'text-white'} z-[100]`}>
+  {item.label}
+  </span>
+  </div>
  );
  })}
 
@@ -100,7 +100,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  className="flex flex-col items-center gap-3 group active:scale-90 transition-all"
  >
  <div 
- className={`w-16 h-16 rounded-2xl ${item.color} text-white flex items-center justify-center group-hover:scale-110 transition-transform`} 
+ className={`w-16 h-16 ${item.color} text-white flex items-center justify-center group-hover:scale-110 transition-transform`} 
  style={{ boxShadow : `0 8px 25px ${item.color}40` }}
  >
  {item.icon}
@@ -116,11 +116,11 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  {/* 🚪 MODAL DE FECHAMENTO CUSTOMIZADO */}
  {showExitConfirm && (
  <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
- <div className={`w-[400px] p-8 rounded-[2.5rem] animate-in zoom-in slide-in-from-bottom-8 duration-500 -2xl ${
+ <div className={`w-[400px] p-8 animate-in zoom-in slide-in-from-bottom-8 duration-500 -2xl ${
  isLight ? 'bg-white' : 'bg-[#0f0f12] -[0_0_50px_rgba(0,0,0,0.5)]'
  }`}>
  <div className="flex flex-col items-center text-center">
- <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500 mb-6">
+ <div className="w-16 h-16 bg-rose-500/10 flex items-center justify-center text-rose-500 mb-6">
  <ShieldAlert size={32} />
  </div>
  
@@ -134,7 +134,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  <div className="flex gap-4 w-full">
  <button 
  onClick={() => setShowExitConfirm(false)}
- className={`flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
+ className={`flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
  isLight ? 'bg-slate-100 text-slate-400 hover:bg-slate-200' : 'bg-white/5 text-zinc-400 hover:bg-white/10'
  }`}
  >
@@ -142,7 +142,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  </button>
  <button 
  onClick={confirmExit}
- className="flex-1 py-4 rounded-2xl bg-rose-600 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-rose-500 -rose-600/20 active:scale-95 transition-all"
+ className="flex-1 py-4 bg-rose-600 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-rose-500 -rose-600/20 active:scale-95 transition-all"
  >
  Confirmar Saída
  </button>
@@ -153,15 +153,15 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  )}
 
  {/* FOOTER */}
- <footer className="absolute bottom-10 w-full flex flex-col items-center gap-3 select-none pointer-events-none">
+ <footer className="absolute bottom-6 w-full flex flex-col items-center gap-2 select-none pointer-events-none">
  <div className="flex items-center gap-4">
  <div className={`h-[1px] w-12 ${isLight ? 'bg-slate-300' : 'bg-white/10'}`} />
- <Fingerprint size={16} className={isLight ? 'text-indigo-600 opacity-60' : 'text-indigo-400 opacity-40'} />
+ <Fingerprint size={14} className={isLight ? 'text-indigo-600 opacity-60' : 'text-indigo-400 opacity-40'} />
  <div className={`h-[1px] w-12 ${isLight ? 'bg-slate-300' : 'bg-white/10'}`} />
  </div>
- <div className="flex flex-col items-center gap-1">
- <p className={`text-[10px] font-black uppercase tracking-[0.5em] ${isLight ? 'text-slate-900' : 'text-white'}`}>VittaCash</p>
- <p className={`text-[8px] font-bold uppercase tracking-[0.3em] ${isLight ? 'text-slate-400' : 'text-indigo-200 opacity-40'}`}>
+ <div className="flex flex-col items-center gap-0.5">
+ <p className={`text-[9px] font-black uppercase tracking-[0.6em] ${isLight ? 'text-slate-900' : 'text-white'}`}>VittaCash</p>
+ <p className={`text-[7px] font-bold uppercase tracking-[0.4em] ${isLight ? 'text-slate-400' : 'text-indigo-200 opacity-30'}`}>
  Desenvolvido por <span className={isLight ? 'text-indigo-600 font-black' : 'text-indigo-400'}>A2Solutions</span>
  </p>
  </div>
@@ -169,4 +169,3 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  </div>
  );
 }
-

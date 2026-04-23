@@ -98,7 +98,7 @@ export default function CategoryManager({ categories, onUpdate, currentUserId }:
  <div className="flex flex-col md:grid md:grid-cols-12 gap-4 flex-1 md:min-h-0 pb-2">
  {/* FORMULÁRIO */}
  <div className="col-span-12 md:col-span-4 flex flex-col md:min-h-0">
- <div className={`flex-1 p-5 rounded-[2rem] bg-white dark:bg-[#09090b] flex flex-col transition-all `}>
+ <div className={`flex-1 p-5 bg-white/5 flex flex-col transition-all `}>
  <div className="flex-1 overflow-y-auto no-scrollbar">
  <h3 className="text-[10px] font-black uppercase tracking-widest mb-5 text-slate-400 flex items-center gap-2">
  {editingId ? <Edit3 size={14} className="text-amber-500"/> : <Plus size={14} className="text-indigo-500"/>}
@@ -164,7 +164,7 @@ export default function CategoryManager({ categories, onUpdate, currentUserId }:
  </div>
 
  {/* LISTA (CATÁLOGO) */}
- <div className="col-span-12 md:col-span-8 p-4 md:p-6 rounded-[2rem] bg-white dark:bg-[#09090b] flex flex-col min-h-[300px] md:min-h-0 ">
+ <div className="col-span-12 md:col-span-8 p-4 md:p-6 bg-white/5 flex flex-col min-h-[300px] md:min-h-0 ">
  <div className="flex justify-between items-center mb-6">
  <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
  <LayoutGrid size={14} className="text-indigo-500"/> Registros Ativos

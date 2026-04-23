@@ -131,7 +131,7 @@ export function TransactionManager() {
  return (
  <div className="h-full flex flex-col gap-6 text-white animate-in fade-in zoom-in-95 duration-500">
  
- <div className="flex justify-between items-center bg-white/5 backdrop-blur-md p-6 rounded-[2.5rem] border-white/10 ">
+ <div className="flex justify-between items-center bg-white/5 backdrop-blur-md p-6 border-white/10">
  <div>
  <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3">
  <Wallet className="text-indigo-400" /> Histórico de Lançamentos
@@ -141,14 +141,14 @@ export function TransactionManager() {
  
  <button 
  onClick={() => setIsModalOpen(true)}
- className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-black uppercase text-xs tracking-widest transition-all -indigo-500/30 flex items-center gap-2 hover:scale-105"
+ className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 font-black uppercase text-xs tracking-widest transition-all hover:scale-105 flex items-center gap-2"
  >
  <Plus size={16} /> Novo Lançamento
  </button>
  </div>
 
  <div className="flex gap-4 items-center">
- <div className="flex-1 bg-white/5 border-white/10 rounded-2xl px-4 py-3 flex items-center gap-3 focus-within:border-indigo-500/50 transition-colors">
+ <div className="flex-1 bg-white/5 border-white/10 px-4 py-3 flex items-center gap-3 focus-within:border-indigo-500/50 transition-colors">
  <Search size={18} className="text-slate-400" />
  <input 
  type="text" 
@@ -158,14 +158,14 @@ export function TransactionManager() {
  className="bg-transparent border-none outline-none text-sm font-bold w-full placeholder:text-slate-600"
  />
  </div>
- <div className="flex bg-white/5 border-white/10 rounded-2xl p-1">
- <button onClick={() => setFilterType('all')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${filterType === 'all' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-white'}`}>Todos</button>
- <button onClick={() => setFilterType('income')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${filterType === 'income' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-500 hover:text-emerald-400'}`}>Receitas</button>
- <button onClick={() => setFilterType('expense')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${filterType === 'expense' ? 'bg-rose-500/20 text-rose-400' : 'text-slate-500 hover:text-rose-400'}`}>Despesas</button>
+ <div className="flex bg-white/5 border-white/10 p-1">
+ <button onClick={() => setFilterType('all')} className={`px-4 py-2 text-[10px] font-black uppercase transition-all ${filterType === 'all' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-white'}`}>Todos</button>
+ <button onClick={() => setFilterType('income')} className={`px-4 py-2 text-[10px] font-black uppercase transition-all ${filterType === 'income' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-500 hover:text-emerald-400'}`}>Receitas</button>
+ <button onClick={() => setFilterType('expense')} className={`px-4 py-2 text-[10px] font-black uppercase transition-all ${filterType === 'expense' ? 'bg-rose-500/20 text-rose-400' : 'text-slate-500 hover:text-rose-400'}`}>Despesas</button>
  </div>
  </div>
 
- <div className="flex-1 overflow-y-auto no-scrollbar bg-white/5 border-white/10 rounded-[2.5rem] p-4 ">
+ <div className="flex-1 overflow-y-auto no-scrollbar bg-white/5 border-white/10 p-4">
  {filteredTransactions.length === 0 ? (
  <div className="h-full flex flex-col items-center justify-center opacity-40">
  <Wallet size={60} className="mb-4 text-slate-500" />
@@ -178,9 +178,9 @@ export function TransactionManager() {
  const isIncome = tx.type === 'income';
  
  return (
- <div key={tx.id} className="group bg-slate-900/50 hover:bg-slate-800/80 border-white/5 p-4 rounded-2xl flex items-center justify-between transition-all">
+ <div key={tx.id} className="group bg-slate-900/50 hover:bg-slate-800/80 border-white/5 p-4 flex items-center justify-between transition-all">
  <div className="flex items-center gap-4">
- <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 -inner ${isIncome ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
+ <div className={`w-12 h-12 flex items-center justify-center shrink-0 ${isIncome ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
  {isIncome ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
  </div>
  <div>
@@ -200,7 +200,7 @@ export function TransactionManager() {
  <span className={`text-lg font-black tracking-tighter ${isIncome ? 'text-emerald-400' : 'text-rose-400'}`}>
  {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
  </span>
- <button onClick={() => handleDelete(tx.id)} className="w-8 h-8 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-rose-500 hover:text-white transition-all">
+ <button onClick={() => handleDelete(tx.id)} className="w-8 h-8 bg-rose-500/10 text-rose-500 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-rose-500 hover:text-white transition-all">
  <Trash2 size={14} />
  </button>
  </div>
@@ -213,9 +213,9 @@ export function TransactionManager() {
 
  {isModalOpen && (
  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
- <div className="bg-[#0f172a] w-full max-w-md rounded-[2.5rem] border-white/10 -2xl overflow-hidden flex flex-col">
+ <div className="bg-[#0f172a] w-full max-w-md border-white/10 overflow-hidden flex flex-col">
  
- <div className="p-6  border-white/5 flex justify-between items-center bg-white/5">
+ <div className="p-6 border-white/5 flex justify-between items-center bg-white/5">
  <h3 className="font-black uppercase tracking-widest text-sm flex items-center gap-2">
  <Plus size={16} className="text-indigo-400"/> Lançamento Rápido
  </h3>

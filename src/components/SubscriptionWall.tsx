@@ -113,14 +113,14 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  {/* === TELA: SUCESSO === */}
  {stage === 'success' && (
  <div className="flex flex-col items-center gap-6 animate-in zoom-in-90 duration-500 text-center">
- <div className="w-24 h-24 rounded-full bg-emerald-500/20 flex items-center justify-center -[0_0_60px_rgba(16,185,129,0.4)]">
+ <div className="w-24 h-24 bg-emerald-500/20 flex items-center justify-center">
  <ShieldCheck size={48} className="text-emerald-400" />
  </div>
  <div>
  <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Acesso Liberado!</h2>
  <p className="text-emerald-400 font-bold text-sm mt-2 uppercase tracking-widest">Bem-vindo ao VittaCash</p>
  </div>
- <div className="w-48 h-1 bg-emerald-500/30 rounded-full overflow-hidden">
+ <div className="w-48 h-1 bg-emerald-500/30 overflow-hidden">
  <div className="h-full bg-emerald-500 animate-[progress_2.5s_ease-in-out_forwards]" style={{ width: '100%' }} />
  </div>
  </div>
@@ -132,7 +132,7 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  {/* Header */}
  <div className="text-center mb-8">
  <div className="flex justify-center mb-4">
- <div className="px-4 py-1.5 bg-emerald-500/10 border-emerald-500/30 rounded-full">
+ <div className="px-4 py-1.5 bg-emerald-500/10 border-emerald-500/30">
  {isTrialExpired ? (
  <span className="text-rose-400 text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
  <AlertTriangle size={12} /> Trial expirado — escolha um plano
@@ -161,14 +161,14 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  <button
  key={plan.id}
  onClick={() => setSelectedPlan(plan)}
- className={`relative p-6 rounded-[2rem] border-2 text-left transition-all duration-300 group
+ className={`relative p-6 border-2 text-left transition-all duration-300 group
  ${selectedPlan.id === plan.id
- ? 'border-emerald-500 bg-emerald-500/10 -[0_0_40px_rgba(16,185,129,0.2)]'
+ ? 'border-emerald-500 bg-emerald-500/10'
  : 'border-white/10 bg-white/5 hover:border-white/20'
  }`}
  >
  {plan.badge && (
- <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider rounded-full ">
+ <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider">
  {plan.badge}
  </div>
  )}
@@ -182,7 +182,7 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  <span className="text-slate-500 text-xs">{plan.period}</span>
  </div>
  </div>
- <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedPlan.id === plan.id ? 'border-emerald-500 bg-emerald-500' : 'border-white/20'}`}>
+ <div className={`w-6 h-6 border-2 flex items-center justify-center transition-all ${selectedPlan.id === plan.id ? 'border-emerald-500 bg-emerald-500' : 'border-white/20'}`}>
  {selectedPlan.id === plan.id && <Check size={12} className="text-white" />}
  </div>
  </div>
@@ -203,7 +203,7 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  </div>
 
  {errorMsg && (
- <div className="mb-4 p-3 bg-rose-500/10 border-rose-500/30 rounded-xl flex items-center gap-3">
+ <div className="mb-4 p-3 bg-rose-500/10 border-rose-500/30 flex items-center gap-3">
  <XCircle size={16} className="text-rose-400 shrink-0" />
  <p className="text-rose-300 text-xs font-bold">{errorMsg}</p>
  </div>
@@ -212,7 +212,7 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  <button
  onClick={handleGeneratePix}
  disabled={loading}
- className="w-full py-5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-black uppercase tracking-widest rounded-2xl -[0_0_30px_rgba(16,185,129,0.4)] transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-3 text-sm"
+ className="w-full py-5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-black uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-3 text-sm"
  >
  {loading ? <RefreshCw size={18} className="animate-spin" /> : <Zap size={18} />}
  {loading ? 'Gerando PIX...' : `Pagar R$ ${selectedPlan.price.toFixed(2).replace('.', ',')} via PIX`}
@@ -226,7 +226,7 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  {/* === TELA: QR CODE PIX === */}
  {stage === 'pix' && (
  <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
- <div className="bg-zinc-900 border-white/10 rounded-[3rem] p-8 -2xl">
+ <div className="bg-zinc-900 border-white/10 p-8">
  {/* Header */}
  <div className="text-center mb-6">
  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-2">Pagamento PIX</p>
@@ -241,7 +241,7 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  </div>
 
  {/* QR Code */}
- <div className="bg-white p-4 rounded-2xl mx-auto w-fit mb-6 ">
+ <div className="bg-white p-4 mx-auto w-fit mb-6">
  {qrBase64 ? (
  <img
  src={`data:image/png;base64,${qrBase64}`}
@@ -256,11 +256,11 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  </div>
 
  {/* Pix Copia e Cola */}
- <div className="bg-black/40 border-white/10 rounded-xl p-3 mb-4">
+ <div className="bg-black/40 border-white/10 p-3 mb-4">
  <p className="text-[9px] font-black uppercase text-slate-500 mb-1">Pix Copia e Cola</p>
  <div className="flex items-center gap-2">
  <p className="text-[10px] text-slate-400 font-mono flex-1 truncate">{qrCode.substring(0, 40)}...</p>
- <button onClick={copyPix} className={`shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${copied ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`}>
+ <button onClick={copyPix} className={`shrink-0 px-3 py-1.5 text-[10px] font-black uppercase transition-all ${copied ? 'bg-emerald-500 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`}>
  {copied ? <><Check size={10} className="inline mr-1" />Copiado!</> : <><Copy size={10} className="inline mr-1" />Copiar</>}
  </button>
  </div>
@@ -285,7 +285,7 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  {/* === TELA: ERRO === */}
  {stage === 'error' && (
  <div className="flex flex-col items-center gap-6 text-center max-w-sm animate-in zoom-in-90">
- <div className="w-20 h-20 rounded-full bg-rose-500/20 flex items-center justify-center">
+ <div className="w-20 h-20 bg-rose-500/20 flex items-center justify-center">
  <XCircle size={40} className="text-rose-400" />
  </div>
  <div>
@@ -294,7 +294,7 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  </div>
  <button
  onClick={() => { setStage('plans'); setErrorMsg(''); }}
- className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-black uppercase tracking-widest rounded-2xl transition-all"
+ className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-black uppercase tracking-widest transition-all"
  >
  Tentar Novamente
  </button>

@@ -14,7 +14,7 @@ import ProfileSettings from './components/ProfileSettings';
 import HorizonsManager from './components/HorizonsManager'; 
 import Reports from './components/Reports'; 
 import { Transaction, Category, Goal, Investment } from './types'; 
-import { User, Bell, Eye, EyeOff, ShieldCheck, Zap } from 'lucide-react'; 
+import { User, Bell, Eye, EyeOff, ShieldCheck, Zap, LayoutGrid } from 'lucide-react'; 
 import InvestmentsManager from './components/InvestmentsManager';
 import DebtFreedom from './components/DebtFreedom';
 import SubscriptionWall from './components/SubscriptionWall';
@@ -106,24 +106,48 @@ export default function Vitta() {
     return transactions.filter(t => (t as any).status === 'PENDING' && new Date(t.date) < today).length;
   }, [transactions]);
 
-  const NavigationHeader = () => (
-    <div className="absolute top-5 left-4 md:top-12 md:left-10 z-[50] pointer-events-none flex items-center gap-4 md:gap-8">
-      <button 
-        onClick={() => navigate('/app')}
-        className={`px-4 md:px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex items-center gap-2 group backdrop-blur-md pointer-events-auto shadow-lg
-          ${theme === 'light' ? 'bg-white border-slate-300 text-slate-900 shadow-slate-200' : 'bg-black/40 border-white/10 text-white/70 hover:text-white'}
-        `}
-      >
-        <span className="group-hover:-translate-x-1 transition-transform">←</span> Hub
-      </button>
-      {overdueCount > 0 && (
-         <button onClick={() => navigate('/app?tab=bills')} className="pointer-events-auto relative text-rose-500 animate-pulse">
-           <Bell size={24} />
-           <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white text-[9px] font-black rounded-full flex items-center justify-center">{overdueCount}</span>
+  const NavigationHeader = () => {
+    const tab = new URLSearchParams(location.search).get('tab') || 'hub';
+    if (location.pathname === '/' || tab === 'hub' || tab === 'sales') return null;
+
+    return (
+      <div className="fixed top-6 right-8 z-[1001] pointer-events-none flex items-center gap-6 animate-in slide-in-from-right duration-700">
+        {overdueCount > 0 && (
+          <button onClick={() => navigate('/app?tab=bills')} className="pointer-events-auto relative text-rose-500 animate-pulse ml-1 px-1">
+            <Bell size={24} />
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white text-[9px] font-black flex items-center justify-center rounded-full" style={{ borderRadius: '50%' }}>
+              {overdueCount}
+            </span>
+          </button>
+        )}
+
+        {isAuthenticated && (
+            <button 
+              onClick={() => navigate('/app?tab=settings')} 
+              className="group relative pointer-events-auto flex items-center overflow-hidden transition-all hover:scale-110"
+              style={{ borderRadius: '50%' }}
+            >
+              <div className="w-16 h-16 overflow-hidden bg-zinc-950 transition-all" style={{ borderRadius: '50%' }}>
+                  {userAvatar ? 
+                    <img src={userAvatar} className="w-full h-full object-cover" alt="User" /> : 
+                    <div className="w-full h-full flex items-center justify-center text-emerald-500 font-black text-lg">VC</div>
+                  }
+              </div>
+            </button>
+        )}
+
+        <button 
+          onClick={() => navigate('/app')}
+          className={`w-14 h-14 flex items-center justify-center transition-all group pointer-events-auto
+            ${theme === 'light' ? 'bg-white text-slate-900 shadow-xl' : 'bg-zinc-900/60 backdrop-blur-md text-white/80 hover:text-white shadow-2xl'}
+          `}
+          style={{ borderRadius: '50%' }}
+        >
+          <LayoutGrid size={24} className="group-hover:rotate-90 transition-transform duration-500" />
         </button>
-      )}
-    </div>
-  );
+      </div>
+    );
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -131,16 +155,8 @@ export default function Vitta() {
   };
 
   return (
-    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-white text-slate-900' : 'dark bg-[#09090b] text-white'} ${location.pathname === '/' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
+    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
       
-      {isAuthenticated && (
-          <div className="absolute top-5 right-4 z-[100]">
-            <button onClick={() => navigate('/app?tab=settings')} className="w-12 h-12 rounded-full border-2 border-emerald-500/20 overflow-hidden">
-                {userAvatar ? <img src={userAvatar} className="w-full h-full object-cover" alt="User" /> : <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-emerald-500 font-black">VC</div>}
-            </button>
-          </div>
-      )}
-
       {location.pathname !== '/' && location.pathname !== '/login' && <NavigationHeader />}
 
       {!subscriptionActive && isAuthenticated && (
@@ -165,11 +181,11 @@ export default function Vitta() {
         {/* ROTA DO APP (PROTEGIDA) */}
         <Route path="/app" element={
             !isAuthenticated ? <Navigate to="/login" /> : (
-                <div className="h-full w-full pt-20 md:pt-24 px-4 md:px-8 pb-12 overflow-y-auto custom-scrollbar">
+                <div className="h-full w-full pt-36 md:pt-40 px-4 md:px-8 pb-12 overflow-y-auto custom-scrollbar">
                     {/* Renderiza o conteúdo baseado no Query Param ?tab=... */}
                     {(() => {
                         const tab = new URLSearchParams(location.search).get('tab') || 'hub';
-                        if (tab === 'hub') return <HomeHub onNavigate={(t) => navigate(`/app?tab=${t}`)} onNewTransaction={() => setIsModalOpen(true)} currentTheme={theme} onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} isAdmin={session?.user?.email === ADMIN_EMAIL} onLogout={handleLogout} />;
+                        if (tab === 'hub') return <HomeHub onNavigate={(t) => navigate(`/app?tab=${t}`)} onNewTransaction={() => setIsModalOpen(true)} currentTheme={theme} onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} isAdmin={session?.user?.email === ADMIN_EMAIL} onLogout={handleLogout} userAvatar={userAvatar} />;
                         if (tab === 'sales') return <SalesPage onSelectPlan={() => navigate('/app?tab=settings')} />;
                         if (tab === 'dashboard') return <DashboardHome transactions={transactions as any} />;
                         if (tab === 'history') return <TransactionTable />;
@@ -181,7 +197,7 @@ export default function Vitta() {
                         if (tab === 'target') return <HorizonsManager goals={goals} onUpdate={loadAllData} currentUserId={session?.user?.id} />;
                         if (tab === 'report') return <Reports transactions={transactions as any} />;
                         if (tab === 'contas' || tab === 'bills') return <BillsManager mode={tab === 'bills' ? 'overdue' : 'normal'} />;
-                        if (tab === 'advisor') return (subscriptionPlan === 'premium' || session?.user?.email === ADMIN_EMAIL) ? <FinancialAdvisor currentBalance={0} transactions={transactions} categories={[]} theme={theme} /> : <div className="h-full flex flex-col items-center justify-center text-center p-6"><Lock size={64} className="text-blue-400 mb-4" /><h2 className="text-2xl font-black uppercase italic">Advisor Premium</h2><p className="text-zinc-500 mb-6 text-xs uppercase font-bold tracking-widest">Upgrade para liberar o cérebro da rede.</p><button onClick={() => navigate('/app?tab=sales')} className="px-8 py-4 bg-blue-600 rounded-2xl font-black text-white uppercase text-[10px]">Ver Planos</button></div>;
+                        if (tab === 'advisor') return (subscriptionPlan === 'premium' || session?.user?.email === ADMIN_EMAIL) ? <FinancialAdvisor currentBalance={0} transactions={transactions} categories={[]} theme={theme} /> : <div className="h-full flex flex-col items-center justify-center text-center p-6"><Lock size={64} className="text-blue-400 mb-4" /><h2 className="text-2xl font-black uppercase italic">Advisor Premium</h2><p className="text-zinc-500 mb-6 text-xs uppercase font-bold tracking-widest">Upgrade para liberar o cérebro da rede.</p><button onClick={() => navigate('/app?tab=sales')} className="px-8 py-4 bg-blue-600 font-black text-white uppercase text-[10px]">Ver Planos</button></div>;
                         return <div>Não encontrado</div>;
                     })()}
                 </div>
@@ -197,6 +213,7 @@ export default function Vitta() {
         onClose={() => setIsModalOpen(false)} 
         onSave={async (txs) => { if(!isLimitReached) { for(const tx of txs) await appApi.addTransaction({...tx, user_id: session?.user?.id}); loadAllData(); } }}
         isLimitReached={isLimitReached}
+        theme={theme}
       />
     </div>
   );
@@ -231,7 +248,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
     
     return (
         <div className="w-screen h-screen bg-black flex items-center justify-center p-6 animate-in fade-in duration-700">
-            <form onSubmit={handleSubmit} className="w-full max-w-sm bg-zinc-900 p-10 rounded-[3rem] text-center shadow-2xl relative overflow-hidden">
+            <form onSubmit={handleSubmit} className="w-full max-w-sm bg-zinc-900 p-10 text-center shadow-2xl relative overflow-hidden">
                 {/* Visual Glow */}
                 <div className={`absolute top-0 left-0 w-full h-1 transition-all duration-500 ${passwordStrength.color}`} style={{ width: `${passwordStrength.score}%` }} />
                 
@@ -243,7 +260,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                         placeholder="E-mail" 
                         value={localEmail} 
                         onChange={e => setLocalEmail(e.target.value)} 
-                        className="w-full bg-black p-4 rounded-xl text-white outline-none focus:bg-zinc-800 transition-all font-bold" 
+                        className="w-full bg-black p-4 text-white outline-none focus:bg-zinc-800 transition-all font-bold" 
                         required
                     />
                     
@@ -253,7 +270,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                             placeholder="Senha" 
                             value={localPassword} 
                             onChange={e => setLocalPassword(e.target.value)} 
-                            className="w-full bg-black p-4 rounded-xl text-white outline-none focus:bg-zinc-800 transition-all pr-12 font-bold" 
+                            className="w-full bg-black p-4 text-white outline-none focus:bg-zinc-800 transition-all pr-12 font-bold" 
                             required
                         />
                         <button 
@@ -272,14 +289,14 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                                     Senha {passwordStrength.label}
                                 </span>
                             </div>
-                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-1 w-full bg-white/5 overflow-hidden">
                                 <div className={`h-full transition-all duration-500 ${passwordStrength.color}`} style={{ width: `${passwordStrength.score}%` }} />
                             </div>
                         </div>
                     )}
                 </div>
 
-                <button className="w-full py-4 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                <button className="w-full py-4 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
                     {authLoading ? 'Verificando...' : (isSignUp ? 'Cadastrar' : 'Entrar')}
                 </button>
                 

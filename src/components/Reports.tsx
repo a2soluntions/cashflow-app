@@ -242,14 +242,14 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  
  {/* TABS E BOTÃO EXPORTAR */}
  <div className="flex items-center gap-4">
- <div className="flex gap-1 bg-slate-50 dark:bg-[#09090b]/40 p-1 rounded-[1rem] ">
- <button onClick={() => setActiveTab('summary')} className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'summary' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>
+ <div className="flex gap-1 bg-slate-50 dark:bg-[#09090b]/40 p-1 ">
+ <button onClick={() => setActiveTab('summary')} className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'summary' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>
  <BarChart3 size={12} /> Resumo
  </button>
- <button onClick={() => setActiveTab('statement')} className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'statement' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>
+ <button onClick={() => setActiveTab('statement')} className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'statement' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>
  <ListOrdered size={12} /> Extrato
  </button>
- <button onClick={() => setActiveTab('bills')} className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'bills' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>
+ <button onClick={() => setActiveTab('bills')} className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'bills' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>
  <Receipt size={12} /> Contas
  </button>
  </div>
@@ -257,18 +257,18 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  <div className="relative">
  <button 
  onClick={() => setPrintMenuOpen(!printMenuOpen)}
- className="px-5 py-2 flex items-center justify-center gap-2 rounded-xl bg-[#00d06c] text-black font-black uppercase text-[9px] tracking-[0.2em] -[#00d06c]/10 active:scale-95 transition-all"
+ className="px-5 py-2 flex items-center justify-center gap-2 bg-[#00d06c] text-black font-black uppercase text-[9px] tracking-[0.2em] -[#00d06c]/10 active:scale-95 transition-all"
  >
  <Printer size={14} /> Exportar
  </button>
 
  {printMenuOpen && (
- <div className="absolute top-full mt-2 right-0 w-[180px] bg-white dark:bg-[#0a0a0c] rounded-2xl p-2 flex flex-col gap-2 -2xl backdrop-blur-md animate-in slide-in-from-top-2 z-[100]">
- <button onClick={() => executePrint('color')} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-white transition-all text-left">
- <span className="w-2 h-2 rounded-full bg-gradient-to-tr from-rose-500 via-amber-500 to-[#00d06c] shrink-0" /> Colorido
+ <div className="absolute top-full mt-2 right-0 w-[180px] bg-white dark:bg-[#0a0a0c] p-2 flex flex-col gap-2 -2xl backdrop-blur-md animate-in slide-in-from-top-2 z-[100]">
+ <button onClick={() => executePrint('color')} className="flex items-center gap-3 p-3 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-white transition-all text-left">
+ <span className="w-2 h-2 bg-gradient-to-tr from-rose-500 via-amber-500 to-[#00d06c] shrink-0" /> Colorido
  </button>
- <button onClick={() => executePrint('bw')} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-400 transition-all text-left">
- <span className="w-2 h-2 rounded-full bg-zinc-400 shrink-0" /> Preto e Branco
+ <button onClick={() => executePrint('bw')} className="flex items-center gap-3 p-3 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-400 transition-all text-left">
+ <span className="w-2 h-2 bg-zinc-400 shrink-0" /> Preto e Branco
  </button>
  </div>
  )}
@@ -277,16 +277,16 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
 
  {/* SELETOR DE CALENDÁRIO */}
  <div className="flex items-center gap-2">
- <button onClick={handlePrevMonth} className="p-1.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-90">
+ <button onClick={handlePrevMonth} className="p-1.5 bg-slate-50 dark:bg-white/[0.03] text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-90">
  <ChevronLeft size={14} />
  </button>
- <div className="px-5 py-1.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] flex items-center justify-center min-w-[110px]">
+ <div className="px-5 py-1.5 bg-slate-50 dark:bg-white/[0.03] flex items-center justify-center min-w-[110px]">
  <Calendar size={12} className="text-emerald-500 dark:text-[#00d06c] mr-2" />
  <span className="text-slate-900 dark:text-white font-black uppercase text-[9px] tracking-widest italic">
  {monthNames[selectedDate.month]} {selectedDate.year}
  </span>
  </div>
- <button onClick={handleNextMonth} className="p-1.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-90">
+ <button onClick={handleNextMonth} className="p-1.5 bg-slate-50 dark:bg-white/[0.03] text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-90">
  <ChevronRight size={14} />
  </button>
  </div>
@@ -305,7 +305,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  {activeTab === 'summary' && (
  <>
  <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 shrink-0 print:grid-cols-3 print:gap-4 print:mb-6">
- <div className="lg:col-span-2 p-5 rounded-[2.5rem] bg-white dark:bg-[#09090b] relative overflow-hidden group flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 ">
+ <div className="lg:col-span-2 p-5 bg-white/5 relative overflow-hidden group flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 ">
  <div className="absolute top-0 right-0 p-4 opacity-5 dark:opacity-10 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity">
  <Zap size={80} className="text-emerald-500 dark:text-[#00d06c] fill-emerald-500 dark:fill-[#00d06c] print:text-gray-300 print:fill-gray-300" />
  </div>
@@ -317,23 +317,23 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </div>
  </div>
  <div className="space-y-2 relative z-10 mt-4">
- <div className="h-1.5 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden print:bg-gray-200">
+ <div className="h-1.5 w-full bg-slate-100 dark:bg-white/5 overflow-hidden print:bg-gray-200">
  <div className={`h-full transition-all duration-1000 print:bg-black ${!stats.hasData ? 'bg-slate-300 dark:bg-zinc-800' : stats.vittaScore >= 500 ? 'bg-emerald-500 dark:bg-[#00d06c]' : 'bg-rose-500'}`} style={{ width: `${Math.max(5, (stats.vittaScore / 1000) * 100)}%` }} />
  </div>
  </div>
  </div>
 
- <div className="p-5 rounded-[2.5rem] bg-white dark:bg-[#09090b] flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 ">
+ <div className="p-5 bg-white dark:bg-[#09090b] flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 ">
  <div>
- <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-3 border-emerald-100 dark:border-emerald-500/20 print:border-none print:bg-transparent print:p-0"><ArrowUpRight size={18} /></div>
+ <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-3 border-emerald-100 dark:border-emerald-500/20 print:border-none print:bg-transparent print:p-0"><ArrowUpRight size={18} /></div>
  <p className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-1 italic print:text-gray-600">Entradas Reais</p>
  <h4 className="text-xl font-black text-slate-900 dark:text-white italic leading-none tracking-tighter print:text-black">R$ {stats.monthlyIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h4>
  </div>
  </div>
 
- <div className="p-5 rounded-[2.5rem] bg-white dark:bg-[#09090b] flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 ">
+ <div className="p-5 bg-white dark:bg-[#09090b] flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 ">
  <div>
- <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-500 mb-3 border-rose-100 dark:border-rose-500/20 print:border-none print:bg-transparent print:p-0"><ArrowDownRight size={18} /></div>
+ <div className="w-9 h-9 bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-500 mb-3 border-rose-100 dark:border-rose-500/20 print:border-none print:bg-transparent print:p-0"><ArrowDownRight size={18} /></div>
  <p className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-1 italic print:text-gray-600">Saídas Reais</p>
  <h4 className="text-xl font-black text-slate-900 dark:text-white italic leading-none tracking-tighter print:text-black">R$ {stats.monthlyExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h4>
  </div>
@@ -341,7 +341,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </div>
 
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0 print:grid-cols-2 print:mb-6">
- <div className="lg:col-span-2 p-6 rounded-[3rem] bg-white dark:bg-[#09090b] flex flex-col print:lack/20 print:bg-gray-50 min-h-[220px] ">
+ <div className="lg:col-span-2 p-6 bg-white dark:bg-[#09090b] flex flex-col print:lack/20 print:bg-gray-50 min-h-[220px] ">
  <div className="flex justify-between items-center mb-4 shrink-0">
  <h3 className="text-base font-black text-slate-900 dark:text-white uppercase italic tracking-tighter leading-none print:text-black">Crescimento Patrimonial</h3>
  </div>
@@ -351,7 +351,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  return (
  <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
  <span className={`text-[9px] font-bold italic transition-all ${isPositive ? 'text-emerald-500 dark:text-[#00d06c]' : 'text-rose-500'} print:text-black`}>{item.netValue !== 0 ? formatK(item.netValue) : 'R$ 0'}</span>
- <div className={`w-full max-w-[40px] rounded-t-xl transition-all duration-700 relative overflow-hidden print:border print:lack/30 print:bg-gray-300 ${isPositive ? 'bg-gradient-to-t from-emerald-100 dark:from-[#00d06c]/5 to-emerald-300 dark:to-[#00d06c]/40' : 'bg-gradient-to-t from-rose-100 dark:from-rose-500/5 to-rose-300 dark:to-rose-500/40'}`} style={{ height: `${Math.max(item.heightPercent, 5)}%` }} />
+ <div className={`w-full max-w-[40px] transition-all duration-700 relative overflow-hidden print:border print:lack/30 print:bg-gray-300 ${isPositive ? 'bg-gradient-to-t from-emerald-100 dark:from-[#00d06c]/5 to-emerald-300 dark:to-[#00d06c]/40' : 'bg-gradient-to-t from-rose-100 dark:from-rose-500/5 to-rose-300 dark:to-rose-500/40'}`} style={{ height: `${Math.max(item.heightPercent, 5)}%` }} />
  <span className="text-[8px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest group-hover:text-slate-900 dark:group-hover:text-white transition-colors italic print:text-black">{item.monthName}</span>
  </div>
  );
@@ -359,13 +359,13 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </div>
  </div>
 
- <div className="p-6 rounded-[3rem] bg-emerald-50 dark:bg-[#00d06c]/5 border-emerald-100 dark:border-[#00d06c]/10 flex flex-col overflow-hidden print:lack/20 print:bg-gray-50 min-h-[220px]">
+ <div className="p-6 bg-emerald-50 dark:bg-[#00d06c]/5 border-emerald-100 dark:border-[#00d06c]/10 flex flex-col overflow-hidden print:lack/20 print:bg-gray-50 min-h-[220px]">
  <div className="flex items-center gap-2 mb-4 shrink-0">
  <AlertCircle size={20} className="text-emerald-500 dark:text-[#00d06c] print:text-black" />
  <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase italic tracking-widest print:text-black">Vitta Analysis</h3>
  </div>
  <div className="flex-1 flex flex-col gap-3 overflow-hidden">
- <div className="p-5 rounded-[1.5rem] bg-white dark:bg-[#09090b]/40 flex-1 flex flex-col justify-center print:bg-transparent print:lack/10">
+ <div className="p-5 bg-white dark:bg-[#09090b]/40 flex-1 flex flex-col justify-center print:bg-transparent print:lack/10">
  {stats.topExpenses.length > 0 ? (
  <p className="text-sm md:text-base font-medium text-slate-700 dark:text-zinc-200 leading-relaxed italic print:text-gray-900">"A categoria <span className="text-slate-900 dark:text-white font-black print:text-black">{stats.topExpenses[0].category}</span> foi a maior despesa. Avalie se compromete seu <span className="text-emerald-600 dark:text-[#00d06c] font-black print:text-emerald-700">Vitta Horizons</span>."</p>
  ) : (
@@ -376,7 +376,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </div>
  </div>
 
- <div className="p-6 rounded-[2.5rem] bg-white dark:bg-[#09090b] flex flex-col shrink-0 min-h-[100px] justify-center print:lack/20 print:bg-gray-50 ">
+ <div className="p-6 bg-white dark:bg-[#09090b] flex flex-col shrink-0 min-h-[100px] justify-center print:lack/20 print:bg-gray-50 ">
  <div className="flex items-center gap-2 mb-4">
  <AlertCircle size={14} className="text-rose-500 print:text-black" />
  <h3 className="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-[0.2em] print:text-black">Top 3 Maiores Despesas (Vilões do Mês)</h3>

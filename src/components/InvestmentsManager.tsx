@@ -45,7 +45,7 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
  
  {/* CABEÇALHO */}
  <div className="flex items-center gap-3 mb-6 px-2 shrink-0">
- <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500">
+ <div className="p-3 bg-blue-500/10 text-blue-500">
  <TrendingUp size={22} />
  </div>
  <div>
@@ -58,20 +58,20 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
  <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row items-center gap-4 mb-8 px-2 shrink-0">
  <input 
  type="text" placeholder="NOME DO ATIVO"
- className="flex-[2] w-full bg-slate-50 dark:bg-white/[0.03]  px-6 py-4 rounded-2xl outline-none text-xs font-black text-slate-900 dark:text-white placeholder:text-slate-400 uppercase transition-all "
+ className="flex-[2] w-full bg-slate-50 dark:bg-white/[0.03]  px-6 py-4 outline-none text-xs font-black text-slate-900 dark:text-white placeholder:text-slate-400 uppercase transition-all "
  value={name} onChange={(e) => setName(e.target.value)}
  />
  <input 
  type="text" placeholder="VALOR INVESTIDO"
- className="flex-1 w-full bg-slate-50 dark:bg-white/[0.03]  px-6 py-4 rounded-2xl outline-none text-xs font-black text-slate-900 dark:text-white placeholder:text-slate-400 transition-all "
+ className="flex-1 w-full bg-slate-50 dark:bg-white/[0.03]  px-6 py-4 outline-none text-xs font-black text-slate-900 dark:text-white placeholder:text-slate-400 transition-all "
  value={investedDisplay} onChange={(e) => handleCurrencyInput(e.target.value, setInvestedDisplay, setInvestedValue)}
  />
  <input 
  type="text" placeholder="VALOR ATUAL"
- className="flex-1 w-full bg-slate-50 dark:bg-white/[0.03]  px-6 py-4 rounded-2xl outline-none text-xs font-black text-slate-900 dark:text-white placeholder:text-slate-400 transition-all "
+ className="flex-1 w-full bg-slate-50 dark:bg-white/[0.03]  px-6 py-4 outline-none text-xs font-black text-slate-900 dark:text-white placeholder:text-slate-400 transition-all "
  value={currentDisplay} onChange={(e) => handleCurrencyInput(e.target.value, setCurrentDisplay, setCurrentValue)}
  />
- <button type="submit" className="w-full lg:w-14 h-14 flex items-center justify-center bg-blue-500 text-white rounded-2xl transition-all active:scale-95 shrink-0 hover:bg-blue-600">
+ <button type="submit" className="w-full lg:w-14 h-14 flex items-center justify-center bg-blue-500 text-white transition-all active:scale-95 shrink-0 hover:bg-blue-600">
  <Plus size={24} />
  </button>
  </form>
@@ -94,7 +94,7 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
  const displayName = (inv as any).name || (inv as any).description || (inv as any).title || "ATIVO";
 
  return (
- <div key={inv.id} className="grid grid-cols-1 md:grid-cols-12 items-center px-6 py-5 rounded-[1.5rem] mb-3 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
+ <div key={inv.id} className="grid grid-cols-1 md:grid-cols-12 items-center px-6 py-5 mb-3 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
  <div className="col-span-1 md:col-span-5 flex items-center gap-4">
  <div className={`w-3 h-3 rounded-full ${isPositive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
  <div>

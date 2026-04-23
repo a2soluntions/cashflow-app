@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
  Search, ArrowUpCircle, ArrowDownCircle, Trash2, 
- CheckCircle2, CalendarDays
+ CheckCircle2, CalendarDays, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { appApi } from '../services/api';
@@ -93,7 +93,7 @@ export default function TransactionTable() {
  <div className="flex justify-between items-end shrink-0 px-2 h-[8%] min-h-[60px]">
  <div>
  <div className="flex items-center gap-2 mb-1">
- <div className="w-2 h-2 rounded-full bg-cyan-500 -cyan-500/50 animate-pulse"/>
+ <div className="w-2 h-2 bg-cyan-500 animate-pulse"/>
  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-white/60">
  Banco de Dados
  </span>
@@ -105,22 +105,13 @@ export default function TransactionTable() {
 
  {/* Seletor de Mês (TRANSPARENTE E MINIMALISTA) */}
  <div className="relative group">
- {/* Ícone decorativo flutuante */}
  <CalendarDays size={16} className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-indigo-500 transition-colors pointer-events-none" />
  
  <input 
  type="month" 
  value={selectedMonth}
  onChange={(e) => setSelectedMonth(e.target.value)}
- className="
- bg-transparent 
- pl-6 pr-2 py-2 
- text-[10px] font-black uppercase tracking-widest 
- text-slate-500 hover:text-indigo-600 
- dark:text-white/60 dark:hover:text-white 
- outline-none border-none cursor-pointer transition-colors
- dark:[color-scheme:dark]
- "
+ className="bg-transparent pl-6 pr-2 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 dark:text-white/60 dark:hover:text-white outline-none border-none cursor-pointer transition-colors dark:[color-scheme:dark]"
  />
  </div>
  </div>
@@ -132,10 +123,8 @@ export default function TransactionTable() {
  <div className="col-span-12 md:col-span-4 flex flex-col gap-4 min-h-0">
  
  {/* Card Saldo */}
- <div className={`p-6 rounded-[2rem] relative overflow-hidden transition-all shrink-0
- bg-white  dark:bg-[#09090b] 
- `}>
- <div className="absolute top-0 right-0 p-24 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+ <div className="p-6 relative overflow-hidden transition-all shrink-0 bg-white/5">
+ <div className="absolute top-0 right-0 p-24 bg-indigo-500/10 blur-3xl pointer-events-none" />
  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/60 mb-2">Fluxo de Caixa (Mês)</p>
  <h1 className={`text-3xl font-black tracking-tighter ${balance >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
  {formatCurrency(balance)}
@@ -144,14 +133,14 @@ export default function TransactionTable() {
 
  {/* Cards Entrada/Saída */}
  <div className="grid grid-cols-2 gap-4">
- <div className="p-4 rounded-[1.5rem] bg-emerald-50 dark:bg-emerald-500/10 ">
+ <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10">
  <div className="flex items-center gap-2 mb-1">
  <ArrowUpCircle size={14} className="text-emerald-500"/>
  <span className="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Entrou</span>
  </div>
  <p className="text-sm font-black text-emerald-700 dark:text-emerald-300">{formatCurrency(income)}</p>
  </div>
- <div className="p-4 rounded-[1.5rem] bg-rose-50 dark:bg-rose-500/10 ">
+ <div className="p-4 bg-rose-50 dark:bg-rose-500/10">
  <div className="flex items-center gap-2 mb-1">
  <ArrowDownCircle size={14} className="text-rose-500"/>
  <span className="text-[8px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400">Saiu</span>
@@ -161,9 +150,7 @@ export default function TransactionTable() {
  </div>
 
  {/* Busca */}
- <div className="flex-1 p-6 rounded-[2rem] flex flex-col gap-4 min-h-0
- bg-white  dark:bg-[#09090b] 
- ">
+ <div className="flex-1 p-6 flex flex-col gap-4 min-h-0 bg-white/5">
  <div className="relative group">
  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
  <input 
@@ -171,19 +158,14 @@ export default function TransactionTable() {
  value={searchTerm}
  onChange={(e) => setSearchTerm(e.target.value)}
  placeholder="Buscar..." 
- className="w-full pl-10 pr-4 py-3 rounded-xl text-xs font-bold uppercase outline-none transition-all
- bg-slate-50 text-slate-600 focus:ring-2 focus:ring-indigo-500/20
- dark:bg-white/5 dark:text-white
- "
+ className="w-full pl-10 pr-4 py-3 text-xs font-bold uppercase outline-none transition-all bg-slate-50 text-slate-600 focus:ring-2 focus:ring-indigo-500/20 dark:bg-white/5 dark:text-white"
  />
  </div>
  </div>
  </div>
 
  {/* DIREITA: Lista */}
- <div className="col-span-12 md:col-span-8 p-6 rounded-[2rem] flex flex-col min-h-0
- bg-white  dark:bg-[#09090b] 
- ">
+ <div className="col-span-12 md:col-span-8 p-6 flex flex-col min-h-0 bg-white/5">
  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
  {filteredTransactions.length === 0 ? (
  <div className="h-full flex flex-col items-center justify-center opacity-40">
@@ -194,13 +176,12 @@ export default function TransactionTable() {
  </div>
  ) : (
  filteredTransactions.map((t) => (
- <div key={t.id} className="group flex items-center justify-between p-3 rounded-2xl transition-all hover:bg-slate-100 dark:hover:bg-white/5">
+ <div key={t.id} className="group flex items-center justify-between p-3 transition-all hover:bg-slate-100 dark:hover:bg-white/5">
  <div className="flex items-center gap-4">
- <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${t.type === 'income' 
- ? 'bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10' 
- : 'bg-rose-50 text-rose-500 dark:bg-rose-500/10'}
- `}>
- {t.type === 'income' ? <ArrowUpCircle size={18} /> : <ArrowDownCircle size={18} />}
+ <div className={`w-10 h-10 flex items-center justify-center ${t.type === 'income' 
+ ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
+ : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}>
+ {t.type === 'income' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
  </div>
 
  <div>
@@ -209,26 +190,31 @@ export default function TransactionTable() {
  </h4>
  <div className="flex items-center gap-2 text-[8px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-wider">
  <span>{formatDate(t.date)}</span>
- <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-white/20" />
+ <span className="w-1 h-1 bg-slate-300 dark:bg-white/20" />
  <span>{t.category || 'GERAL'}</span>
- {t.installment && (
- <>
- <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-white/20" />
- <span>{t.installment.current}/{t.installment.total}</span>
- </>
- )}
+ <span className="w-1 h-1 bg-slate-300 dark:bg-white/20" />
+ <span className={t.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}>
+ {t.type === 'income' ? 'REALIZADO' : 'PAGO'}
+ </span>
  </div>
  </div>
  </div>
 
  <div className="flex items-center gap-4">
- <span className={`text-sm font-black ${t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-800 dark:text-white'}`}>
- {t.type === 'expense' && '- '}{formatCurrency(Number(t.amount) || 0)}
- </span>
+ <div className="text-right">
+ <p className={`text-xs font-black ${t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+ {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
+ </p>
+ {t.installment && (
+ <p className="text-[7px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-tighter">
+ Parcela {t.installment.current}/{t.installment.total}
+ </p>
+ )}
+ </div>
  
  <button 
  onClick={() => handleDelete(t.id)}
- className="p-2 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:text-white/20 dark:hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"
+ className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:text-white/20 dark:hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"
  >
  <Trash2 size={16} />
  </button>
@@ -238,9 +224,7 @@ export default function TransactionTable() {
  )}
  </div>
  </div>
-
  </div>
  </div>
  );
 }
-

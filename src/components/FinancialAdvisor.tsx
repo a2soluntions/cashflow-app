@@ -22,34 +22,31 @@ export function FinancialAdvisor({ currentBalance, transactions, theme = 'dark' 
  const [activeTab, setActiveTab] = useState('welcome');
  const isLight = theme === 'light';
 
- return (
- <div className="h-auto md:h-full w-full flex flex-col md:flex-row p-2 md:p-4 overflow-visible md:overflow-hidden transition-colors duration-500 pb-16 md:pb-4">
- 
- {/* 🟢 BARRA LATERAL FLUTUANTE (TAB HORIZONTAL NO MOBILE) */}
- <aside className="w-full md:w-72 flex flex-row md:flex-col gap-2 md:gap-4 z-10 md:pr-4 shrink-0 py-2 overflow-x-auto md:overflow-x-visible md:overflow-y-auto no-scrollbar mb-4 md:mb-0">
- <div className={`rounded-[2rem] p-2 md:p-4 transition-all flex flex-row md:flex-col gap-2 shrink-0 ${
- isLight ? 'bg-white/70 md: ' : 'bg-white/5 backdrop-blur-2xl md: -2xl'
- }`}>
- <p className="hidden md:block px-4 py-2 text-[9px] font-black uppercase tracking-[0.4em] text-indigo-500/60 mb-1 italic">Consultoria</p>
- <SidebarItem label="Painel Consultor" icon={<Activity size={20}/>} active={activeTab === 'welcome'} onClick={() => setActiveTab('welcome')} />
- <SidebarItem label="Radar do Mercado" icon={<LineChart size={20}/>} active={activeTab === 'radar'} onClick={() => setActiveTab('radar')} />
- <SidebarItem label="Raio-X Financeiro" icon={<FileText size={20}/>} active={activeTab === 'report'} onClick={() => setActiveTab('report')} />
- <SidebarItem label="Máquina do Tempo" icon={<History size={20}/>} active={activeTab === 'debt'} onClick={() => setActiveTab('debt')} />
- </div>
+  return (
+  <div className="h-full w-full flex flex-col p-4 transition-colors duration-500 overflow-hidden">
+  
+  {/* 🟢 TOP NAVIGATION BAR (SUBSTITUINDO O SIDEBAR) */}
+  <header className="w-full shrink-0 mb-8 z-10">
+    <div className={`p-4 flex gap-4 overflow-x-auto no-scrollbar border border-white/5 ${
+      isLight ? 'bg-white/70' : 'bg-white/5 backdrop-blur-2xl shadow-2xl'
+    }`}>
+      <div className="flex gap-2 pr-4 border-r border-white/10">
+        <SidebarItem label="Painel" icon={<Activity size={18}/>} active={activeTab === 'welcome'} onClick={() => setActiveTab('welcome')} />
+        <SidebarItem label="Radar" icon={<LineChart size={18}/>} active={activeTab === 'radar'} onClick={() => setActiveTab('radar')} />
+        <SidebarItem label="Diagnóstico" icon={<FileText size={18}/>} active={activeTab === 'report'} onClick={() => setActiveTab('report')} />
+        <SidebarItem label="Dívidas" icon={<History size={18}/>} active={activeTab === 'debt'} onClick={() => setActiveTab('debt')} />
+      </div>
+      <div className="flex gap-2">
+        <SidebarItem label="Psicologia" icon={<Brain size={18}/>} active={activeTab === 'psychology'} onClick={() => setActiveTab('psychology')} />
+        <SidebarItem label="Renda Extra" icon={<Zap size={18}/>} active={activeTab === 'income'} onClick={() => setActiveTab('income')} />
+        <SidebarItem label="Quiz" icon={<GraduationCap size={18}/>} active={activeTab === 'quiz'} onClick={() => setActiveTab('quiz')} />
+      </div>
+    </div>
+  </header>
 
- <div className={`rounded-[2rem] p-2 md:p-4 transition-all flex flex-row md:flex-col gap-2 shrink-0 ${
- isLight ? 'bg-white/70 md: ' : 'bg-white/5 backdrop-blur-2xl md: -2xl'
- }`}>
- <p className="hidden md:block px-4 py-2 text-[9px] font-black uppercase tracking-[0.4em] text-indigo-500/60 mb-1 italic">Universidade</p>
- <SidebarItem label="Mente & Armadilhas" icon={<Brain size={20}/>} active={activeTab === 'psychology'} onClick={() => setActiveTab('psychology')} />
- <SidebarItem label="Renda Extra" icon={<Zap size={20}/>} active={activeTab === 'income'} onClick={() => setActiveTab('income')} />
- <SidebarItem label="Desafio Quiz" icon={<GraduationCap size={20}/>} active={activeTab === 'quiz'} onClick={() => setActiveTab('quiz')} />
- </div>
- </aside>
-
- {/* 🔵 ÁREA DE CONTEÚDO */}
- <main className="flex-1 overflow-visible md:overflow-hidden relative h-auto md:h-full">
- <div className="h-auto md:h-full w-full p-2 md:p-4 md:px-10 pb-10">
+  {/* 🔵 ÁREA DE CONTEÚDO */}
+  <main className="flex-1 overflow-y-auto no-scrollbar relative">
+  <div className="h-full w-full p-2 md:px-6 pb-20">
  <div className="max-w-6xl mx-auto h-full flex flex-col">
  {/* 1. Painel Consultor */}
  {activeTab === 'welcome' && <DashboardOverview {...({ theme, transactions } as any)} />}

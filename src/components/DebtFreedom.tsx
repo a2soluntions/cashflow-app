@@ -113,16 +113,16 @@ const DebtFreedom = () => {
  <p className="text-sm text-slate-500 dark:text-slate-400">Resolva o passado ou planeje o futuro.</p>
  </div>
 
- <div className="flex bg-slate-100 dark:bg-[#09090b] p-1 rounded-xl">
+ <div className="flex bg-slate-100 dark:bg-white/5 p-1">
  <button 
  onClick={() => setActiveTab('debt')}
- className={`px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'debt' ? 'bg-white dark:bg-zinc-800 text-rose-600 ' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+ className={`px-6 py-2 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'debt' ? 'bg-white dark:bg-zinc-800 text-rose-600 ' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
  >
  <ShieldAlert className="w-4 h-4"/> Sair das Dívidas
  </button>
  <button 
  onClick={() => setActiveTab('invest')}
- className={`px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'invest' ? 'bg-white dark:bg-zinc-800 text-emerald-600 ' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
+ className={`px-6 py-2 text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'invest' ? 'bg-white dark:bg-zinc-800 text-emerald-600 ' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}
  >
  <TrendingUp className="w-4 h-4"/> Começar a Investir
  </button>
@@ -137,22 +137,22 @@ const DebtFreedom = () => {
  
  {/* Coluna Esquerda: Cadastro */}
  <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
- <div className="bg-white dark:bg-[#09090b] p-6 rounded-[2rem] relative overflow-hidden">
+ <div className="bg-white dark:bg-[#09090b] p-6 relative overflow-hidden">
  <h3 className="font-bold text-slate-700 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
  <Plus className="w-4 h-4 text-rose-500"/> Cadastrar Pendência
  </h3>
  <form onSubmit={handleAddDebt} className="space-y-4">
- <input type="text" placeholder="Nome (Ex: Cartão Visa)" value={newName} onChange={e => setNewName(e.target.value)} className="w-full bg-slate-50 dark:bg-white/[0.03] rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-500/40 dark:text-white" />
+ <input type="text" placeholder="Nome (Ex: Cartão Visa)" value={newName} onChange={e => setNewName(e.target.value)} className="w-full bg-slate-50 dark:bg-white/[0.03] px-4 py-3 text-sm outline-none focus:border-rose-500/40 dark:text-white" />
  <div className="grid grid-cols-2 gap-3">
- <input type="number" placeholder="Valor (R$)" value={newAmount} onChange={e => setNewAmount(e.target.value)} className="w-full bg-slate-50 dark:bg-white/[0.03] rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-500/40 dark:text-white" />
- <input type="number" placeholder="Juros %" value={newInterest} onChange={e => setNewInterest(e.target.value)} className="w-full bg-slate-50 dark:bg-white/[0.03] rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-500/40 dark:text-white" />
+ <input type="number" placeholder="Valor (R$)" value={newAmount} onChange={e => setNewAmount(e.target.value)} className="w-full bg-slate-50 dark:bg-white/[0.03] px-4 py-3 text-sm outline-none focus:border-rose-500/40 dark:text-white" />
+ <input type="number" placeholder="Juros %" value={newInterest} onChange={e => setNewInterest(e.target.value)} className="w-full bg-slate-50 dark:bg-white/[0.03] px-4 py-3 text-sm outline-none focus:border-rose-500/40 dark:text-white" />
  </div>
- <button className="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl transition-all active:scale-95 text-[10px] uppercase tracking-widest">Adicionar</button>
+ <button className="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 transition-all active:scale-95 text-[10px] uppercase tracking-widest">Adicionar</button>
  </form>
  </div>
 
  {/* Card Totais */}
- <div className="bg-white dark:bg-[#09090b] p-6 rounded-[2rem] flex justify-between items-center">
+ <div className="bg-white/5 p-6 flex justify-between items-center">
  <div>
  <p className="text-[9px] font-black tracking-widest text-slate-500 dark:text-zinc-500 uppercase italic">Total Devido</p>
  <p className="text-2xl font-black italic tracking-tighter text-rose-500">R$ {totalDebt.toLocaleString()}</p>
@@ -166,12 +166,12 @@ const DebtFreedom = () => {
 
  {/* Coluna Direita: Estratégia */}
  <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
- <div className="bg-white dark:bg-[#09090b] p-6 rounded-[2.5rem] flex-1">
+ <div className="bg-white dark:bg-[#09090b] p-6 flex-1">
  <div className="flex justify-between items-center mb-6">
  <h3 className="font-bold text-slate-700 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wide"><Target className="w-5 h-5 text-rose-500"/> Plano de Ataque</h3>
- <div className="flex bg-slate-50 dark:bg-white/[0.03] p-1 rounded-xl">
- <button onClick={() => setStrategy('avalanche')} className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${strategy === 'avalanche' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>Avalanche (Matemático)</button>
- <button onClick={() => setStrategy('snowball')} className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${strategy === 'snowball' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>Bola de Neve (Psicológico)</button>
+ <div className="flex bg-slate-50 dark:bg-white/[0.03] p-1 ">
+ <button onClick={() => setStrategy('avalanche')} className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${strategy === 'avalanche' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>Avalanche (Matemático)</button>
+ <button onClick={() => setStrategy('snowball')} className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${strategy === 'snowball' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>Bola de Neve (Psicológico)</button>
  </div>
  </div>
 
@@ -179,8 +179,8 @@ const DebtFreedom = () => {
  {/* Lista */}
  <div className="flex-1 space-y-3 max-h-[300px] overflow-y-auto no-scrollbar pr-2">
  {debts.length === 0 ? <p className="text-center text-slate-400 py-10 text-sm italic">Adicione dívidas ao lado para gerar o plano.</p> : sortedDebts.map((d, i) => (
- <div key={d.id} className={`flex items-center p-4 rounded-[1.5rem] ${i===0 ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-100 dark:border-rose-500/20' : 'bg-white dark:bg-white/[0.02]  '}`}>
- <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-[10px] mr-4 ${i===0 ? 'bg-rose-500 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-zinc-500'}`}>{i+1}</div>
+ <div key={d.id} className={`flex items-center p-4 ${i===0 ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-100 dark:border-rose-500/20' : 'bg-white dark:bg-white/[0.02]  '}`}>
+ <div className={`w-8 h-8 flex items-center justify-center font-black text-[10px] mr-4 ${i===0 ? 'bg-rose-500 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-zinc-500'}`}>{i+1}</div>
  <div className="flex-1">
  <div className="flex justify-between">
  <span className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-tighter italic">{d.name}</span>
@@ -211,16 +211,16 @@ const DebtFreedom = () => {
  </div>
 
  {/* Scripts */}
- <div className="bg-white dark:bg-[#09090b] p-6 rounded-[2.5rem] ">
+ <div className="bg-white dark:bg-[#09090b] p-6 ">
  <h3 className="font-bold text-slate-700 dark:text-white mb-4 text-sm flex items-center gap-2 uppercase tracking-wide"><MessageSquare className="w-4 h-4 text-emerald-500 dark:text-[#00d06c]"/> Scripts de Negociação</h3>
  <div className="flex gap-2 mb-4 flex-wrap">
  {Object.keys(scriptsText).map(key => (
- <button key={key} onClick={() => setActiveScript(key)} className={`px-4 py-2 text-[9px] font-black rounded-xl uppercase tracking-widest transition-all ${activeScript === key ? 'bg-emerald-50 dark:bg-[#00d06c]/10 border-emerald-500 dark:border-[#00d06c] text-emerald-600 dark:text-[#00d06c]' : '  text-slate-500 dark:text-zinc-500 hover:border-emerald-500/50 dark:hover:border-[#00d06c]/50'}`}>{key}</button>
+ <button key={key} onClick={() => setActiveScript(key)} className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${activeScript === key ? 'bg-emerald-50 dark:bg-[#00d06c]/10 border-emerald-500 dark:border-[#00d06c] text-emerald-600 dark:text-[#00d06c]' : '  text-slate-500 dark:text-zinc-500 hover:border-emerald-500/50 dark:hover:border-[#00d06c]/50'}`}>{key}</button>
  ))}
  </div>
  <div className="relative">
- <textarea readOnly value={activeScript ? scriptsText[activeScript as keyof typeof scriptsText] : "Selecione um script..."} className="w-full h-24 p-4 text-sm bg-slate-50 dark:bg-white/[0.02] rounded-2xl resize-none outline-none text-slate-600 dark:text-zinc-300 italic"></textarea>
- {activeScript && <button onClick={() => {navigator.clipboard.writeText(scriptsText[activeScript as keyof typeof scriptsText]); alert('Copiado!')}} className="absolute top-3 right-3 p-2 bg-white dark:bg-[#09090b]/50 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors "><Copy className="w-4 h-4 text-slate-500 dark:text-zinc-400"/></button>}
+ <textarea readOnly value={activeScript ? scriptsText[activeScript as keyof typeof scriptsText] : "Selecione um script..."} className="w-full h-24 p-4 text-sm bg-slate-50 dark:bg-white/[0.02] resize-none outline-none text-slate-600 dark:text-zinc-300 italic"></textarea>
+ {activeScript && <button onClick={() => {navigator.clipboard.writeText(scriptsText[activeScript as keyof typeof scriptsText]); alert('Copiado!')}} className="absolute top-3 right-3 p-2 bg-white dark:bg-[#09090b]/50 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors "><Copy className="w-4 h-4 text-slate-500 dark:text-zinc-400"/></button>}
  </div>
  </div>
  </div>
@@ -235,54 +235,54 @@ const DebtFreedom = () => {
  
  {/* Coluna Esquerda: Calculadora */}
  <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
- <div className="bg-white dark:bg-[#09090b] p-6 rounded-[2rem] relative overflow-hidden">
- <h3 className="font-bold text-slate-700 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
- <Calculator className="w-4 h-4 text-emerald-500"/> Simulador de Futuro
- </h3>
- 
- <div className="space-y-4">
- <div>
- <label className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest ml-1 block mb-1">Aporte Mensal (R$)</label>
- <input type="number" value={invMonthly} onChange={e => setInvMonthly(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-white/[0.03] rounded-xl px-4 py-3 text-sm font-black text-emerald-500 dark:text-[#00d06c] outline-none focus:border-emerald-500/40 dark:focus:border-[#00d06c]/40" />
- </div>
- <div className="grid grid-cols-2 gap-3">
- <div>
- <label className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest ml-1 block mb-1">Anos</label>
- <input type="number" value={invYears} onChange={e => setInvYears(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-white/[0.03] rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500/40 dark:focus:border-[#00d06c]/40 dark:text-white" />
- </div>
- <div>
- <label className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest ml-1 block mb-1">Taxa Anual %</label>
- <input type="number" value={invRate} onChange={e => setInvRate(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-white/[0.03] rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500/40 dark:focus:border-[#00d06c]/40 dark:text-white" />
- </div>
- </div>
- </div>
- </div>
+  <div className="bg-white dark:bg-[#09090b] p-6 relative overflow-hidden">
+  <h3 className="font-bold text-slate-700 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+  <Calculator className="w-4 h-4 text-emerald-500"/> Simulador de Futuro
+  </h3>
+  
+  <div className="space-y-4">
+  <div>
+  <label className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest ml-1 block mb-1">Aporte Mensal (R$)</label>
+  <input type="number" value={invMonthly} onChange={e => setInvMonthly(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-white/[0.03] px-4 py-3 text-sm font-black text-emerald-500 dark:text-[#00d06c] outline-none focus:border-emerald-500/40 dark:focus:border-[#00d06c]/40" />
+  </div>
+  <div className="grid grid-cols-2 gap-3">
+  <div>
+  <label className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest ml-1 block mb-1">Anos</label>
+  <input type="number" value={invYears} onChange={e => setInvYears(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-white/[0.03] px-4 py-3 text-sm outline-none focus:border-emerald-500/40 dark:focus:border-[#00d06c]/40 dark:text-white" />
+  </div>
+  <div>
+  <label className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest ml-1 block mb-1">Taxa Anual %</label>
+  <input type="number" value={invRate} onChange={e => setInvRate(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-white/[0.03] px-4 py-3 text-sm outline-none focus:border-emerald-500/40 dark:focus:border-[#00d06c]/40 dark:text-white" />
+  </div>
+  </div>
+  </div>
+  </div>
 
  {/* Resultado Calc */}
- <div className="bg-slate-900 dark:bg-[#0a0a0c] text-white p-8 rounded-[2.5rem] relative overflow-hidden ">
- <div className="absolute top-0 right-0 p-4 opacity-5"><TrendingUp className="w-32 h-32 text-emerald-500 dark:text-[#00d06c]"/></div>
- <p className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-[0.3em] mb-2 italic">Você terá acumulado</p>
- <p className="text-4xl font-black text-emerald-400 dark:text-[#00d06c] mb-6 italic tracking-tighter">R$ {investmentResult.total.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
- 
- <div className="pt-6 border-t border-slate-800  flex justify-between text-[10px] font-black uppercase tracking-widest italic">
- <span className="text-slate-500 dark:text-zinc-500">Investido: <b className="text-white">R$ {investmentResult.invested.toLocaleString()}</b></span>
- <span className="text-emerald-500 dark:text-[#00d06c]">Juros: <b>R$ {investmentResult.interest.toLocaleString(undefined, {maximumFractionDigits: 0})}</b></span>
- </div>
- </div>
+  <div className="bg-slate-900 dark:bg-[#0a0a0c] text-white p-8 relative overflow-hidden ">
+  <div className="absolute top-0 right-0 p-4 opacity-5"><TrendingUp className="w-32 h-32 text-emerald-500 dark:text-[#00d06c]"/></div>
+  <p className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-[0.3em] mb-2 italic">Você terá acumulado</p>
+  <p className="text-4xl font-black text-emerald-400 dark:text-[#00d06c] mb-6 italic tracking-tighter">R$ {investmentResult.total.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+  
+  <div className="pt-6 border-t border-slate-800  flex justify-between text-[10px] font-black uppercase tracking-widest italic">
+  <span className="text-slate-500 dark:text-zinc-500">Investido: <b className="text-white">R$ {investmentResult.invested.toLocaleString()}</b></span>
+  <span className="text-emerald-500 dark:text-[#00d06c]">Juros: <b>R$ {investmentResult.interest.toLocaleString(undefined, {maximumFractionDigits: 0})}</b></span>
+  </div>
+  </div>
  </div>
 
  {/* Coluna Direita: Perfil e Alocação */}
  <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
- <div className="bg-white dark:bg-[#09090b] p-6 lg:p-8 rounded-[2.5rem] flex-1">
- <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
- <h3 className="font-bold text-slate-700 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wide"><PieIcon className="w-5 h-5 text-indigo-500"/> Sugestão de Carteira</h3>
- 
- <div className="flex bg-slate-50 dark:bg-white/[0.03] p-1 rounded-xl w-full sm:w-auto">
- <button onClick={() => setProfile('conservative')} className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${profile === 'conservative' ? 'bg-emerald-500 dark:bg-[#00d06c] text-white dark:text-black ' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500'}`}>Conservador</button>
- <button onClick={() => setProfile('moderate')} className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${profile === 'moderate' ? 'bg-indigo-500 dark:bg-indigo-500 text-white ' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500'}`}>Moderado</button>
- <button onClick={() => setProfile('bold')} className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${profile === 'bold' ? 'bg-purple-500 dark:bg-purple-500 text-white ' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500'}`}>Arrojado</button>
- </div>
- </div>
+  <div className="bg-white dark:bg-[#09090b] p-6 lg:p-8 flex-1">
+  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+  <h3 className="font-bold text-slate-700 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wide"><PieIcon className="w-5 h-5 text-indigo-500"/> Sugestão de Carteira</h3>
+  
+  <div className="flex bg-slate-50 dark:bg-white/[0.03] p-1 w-full sm:w-auto">
+  <button onClick={() => setProfile('conservative')} className={`flex-1 sm:flex-none px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${profile === 'conservative' ? 'bg-emerald-500 dark:bg-[#00d06c] text-white dark:text-black ' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500'}`}>Conservador</button>
+  <button onClick={() => setProfile('moderate')} className={`flex-1 sm:flex-none px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${profile === 'moderate' ? 'bg-indigo-500 dark:bg-indigo-500 text-white ' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500'}`}>Moderado</button>
+  <button onClick={() => setProfile('bold')} className={`flex-1 sm:flex-none px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all ${profile === 'bold' ? 'bg-purple-500 dark:bg-purple-500 text-white ' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500'}`}>Arrojado</button>
+  </div>
+  </div>
 
  <div className="flex flex-col lg:flex-row gap-8 items-center">
  <div className="w-full lg:w-1/2 space-y-4">

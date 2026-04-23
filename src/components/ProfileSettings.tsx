@@ -138,10 +138,10 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  <div className="flex items-center justify-between pb-8  border-white/5 mb-8">
  <div className="flex items-center gap-6">
  <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
- <div className="w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 dark:bg-[#09090b] flex items-center justify-center transition-all group-hover:/50 dark:group-hover:border-[#00d06c]/50">
+ <div className="w-24 h-24 overflow-hidden bg-slate-100 dark:bg-white/5 flex items-center justify-center transition-all">
  {avatarUrl ? <img src={avatarUrl} className="w-full h-full object-cover" alt="User" /> : <User className="w-12 h-12 text-slate-400 dark:text-zinc-800" />}
  </div>
- <div className="absolute -bottom-2 -right-2 bg-emerald-500 dark:bg-[#00d06c] p-2 rounded-lg text-white dark:text-black ">
+ <div className="absolute -bottom-2 -right-2 bg-emerald-500 dark:bg-[#00d06c] p-2 text-white dark:text-black ">
  <Camera className="w-4 h-4" />
  </div>
  <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
@@ -149,23 +149,20 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  <div>
  <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter italic uppercase">{fullName || 'Comandante'}</h1>
  <p className="text-xs text-emerald-600 dark:text-[#00d06c] font-black uppercase tracking-[0.4em] flex items-center gap-2">
- <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-[#00d06c] animate-pulse" />
+ <span className="w-2 h-2 bg-emerald-500 dark:bg-[#00d06c] animate-pulse" />
  {companyName || 'VittaCash System'}
  </p>
  </div>
  </div>
- <button onClick={onClose} className="flex items-center gap-2 px-6 py-3 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-white text-[10px] font-black uppercase tracking-widest transition-all ">
- <ArrowLeft className="w-4 h-4" /> Voltar ao Hub
- </button>
  </div>
 
  {/* GRID DE CONTEÚDO */}
  <div className="flex-1 overflow-y-auto no-scrollbar pb-10">
  
  {/* BANNER DE ASSINATURA */}
- <div className="mb-10 p-8 rounded-[2.5rem] bg-gradient-to-r from-emerald-50 dark:from-emerald-500/5 to-indigo-50 dark:to-indigo-500/5 flex flex-col md:flex-row items-center justify-between gap-6 ">
+ <div className="mb-10 p-8 bg-gradient-to-r from-emerald-50 dark:from-emerald-500/5 to-indigo-50 dark:to-indigo-500/5 flex flex-col md:flex-row items-center justify-between gap-6 ">
  <div className="flex items-center gap-6">
- <div className="w-16 h-16 rounded-2xl bg-white dark:bg-[#09090b] flex items-center justify-center text-emerald-500 ">
+ <div className="w-16 h-16 bg-white dark:bg-[#09090b] flex items-center justify-center text-emerald-500 ">
  <Database size={28} />
  </div>
  <div>

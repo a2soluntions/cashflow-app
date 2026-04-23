@@ -58,7 +58,18 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
  setLoading(false);
  };
 
- useEffect(() => { fetchData(); }, []);
+ useEffect(() => { fetchData(); 
+
+    const channel = supabase
+      .channel('admin-changes')
+      .on('postgres_changes', { event: '*', table: 'site_content', schema: 'public' }, () => fetchData())
+      .on('postgres_changes', { event: '*', table: 'licenses', schema: 'public' }, () => fetchData())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
  // --- CÁLCULOS VENDAS ---
  const stats = useMemo(() => {
@@ -147,11 +158,11 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
  {/* HEADER & TABS */}
  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
  <div className="flex items-center gap-4">
- <div className="p-3 bg-emerald-500/10 rounded-xl"><ShieldCheck className="w-8 h-8 text-emerald-500" /></div>
+  <div className="p-3 bg-emerald-500/10"><ShieldCheck className="w-8 h-8 text-emerald-500" /></div>
  <div><h1 className="text-2xl font-black uppercase tracking-tighter italic">Vitta Admin</h1><p className="text-slate-500 text-xs font-bold uppercase tracking-widest">SaaS Management Center</p></div>
  </div>
  
- <div className="flex bg-slate-100 dark:bg-[#09090b] p-1 rounded-xl ">
+ <div className="flex bg-slate-100 dark:bg-white/5 p-1 ">
  <button onClick={() => setActiveTab('vendas')} className={`px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'vendas' ? 'bg-emerald-500 text-black -emerald-500/20' : 'text-slate-500 hover:text-emerald-500'}`}>
  Vendas & KPIS
  </button>
@@ -189,7 +200,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
  <input className="w-full bg-slate-100 dark:bg-white/5 p-4 rounded-xl font-bold text-sm outline-none  transition-colors placeholder:text-slate-400" placeholder="Valor R$ 0,00" value={saleValue} onChange={e => setSaleValue(e.target.value)} required />
  </div>
  <div className="grid grid-cols-2 gap-4 mt-2">
- <select className="bg-slate-100 dark:bg-white/5 p-4 rounded-xl font-bold text-sm outline-none  transition-colors text-slate-500 focus:text-slate-900 dark:focus:text-white" value={productType} onChange={e => setProductType(e.target.value)}>
+  <select className="bg-slate-100 dark:bg-white/5 p-4 font-bold text-sm outline-none  transition-colors text-slate-500 focus:text-slate-900 dark:focus:text-white" value={productType} onChange={e => setProductType(e.target.value)}>
  <option value="SaaS" className="bg-white dark:bg-[#09090b]">SaaS</option>
  <option value="Desktop" className="bg-white dark:bg-[#09090b]">Desktop</option>
  </select>

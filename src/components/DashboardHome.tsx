@@ -49,7 +49,7 @@ const Gauge = ({ value, label, subtitle, type = 'normal' }: { value: number, lab
  }
 
  return (
- <div className="flex flex-col items-center justify-center p-3 h-full bg-white dark:bg-[#09090b]/20 rounded-[2rem] w-full relative overflow-hidden group transition-all ">
+  <div className="flex flex-col items-center justify-center p-3 h-full bg-white/5 border border-white/5 w-full relative overflow-hidden group transition-all ">
  <div className="absolute bottom-0 w-24 h-12 blur-2xl opacity-50 transition-colors duration-1000" style={{ backgroundColor: glow }} />
  
  <div className="relative w-28 h-16 mt-2">
@@ -225,8 +225,8 @@ export default function DashboardHome({ transactions }: DashboardProps) {
  const peakOutX = financialData.chartData.length > 1 ? (peakOutIndex / (financialData.chartData.length - 1)) * 100 : 0;
  const peakOutY = peakOutData ? 40 - ((peakOutData.out / maxVal) * 40) : 40;
 
- return (
- <div className="w-full h-auto flex flex-col gap-6 font-sans transition-colors duration-500 bg-transparent">
+  return (
+  <div className="w-full h-auto flex flex-col gap-6 font-sans transition-colors duration-500 bg-transparent px-4">
  
  <style>{`
  .no-scrollbar::-webkit-scrollbar {
@@ -243,9 +243,9 @@ export default function DashboardHome({ transactions }: DashboardProps) {
  <h1 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3 italic text-slate-900 dark:text-white">
  <Activity className="text-emerald-500" /> Cockpit
  </h1>
- <div className="flex bg-slate-100 dark:bg-[#09090b] p-1 rounded-xl ">
- <button onClick={() => setViewMode('monthly')} className={`px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'monthly' ? 'bg-emerald-500 text-black -emerald-500/20' : 'text-slate-500 hover:text-emerald-500'}`}>Mensal</button>
- <button onClick={() => setViewMode('yearly')} className={`px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'yearly' ? 'bg-emerald-500 text-black -emerald-500/20' : 'text-slate-500 hover:text-emerald-500'}`}>Anual</button>
+ <div className="flex bg-slate-100 dark:bg-[#09090b] p-1 ">
+ <button onClick={() => setViewMode('monthly')} className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'monthly' ? 'bg-emerald-500 text-black' : 'text-slate-500 hover:text-emerald-500'}`}>Mensal</button>
+ <button onClick={() => setViewMode('yearly')} className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'yearly' ? 'bg-emerald-500 text-black' : 'text-slate-500 hover:text-emerald-500'}`}>Anual</button>
  </div>
  </div>
 
@@ -259,7 +259,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
  { label: 'Retenção', val: `${financialData.savingsRate.toFixed(1)}%`, icon: Percent, textColor: 'text-amber-500', iconColor: 'text-amber-500' },
  { label: 'Juros Pagos', val: financialData.totalInterest, icon: AlertTriangle, textColor: 'text-orange-500', iconColor: 'text-orange-500' }
  ].map((card, i) => (
- <div key={i} className="bg-transparent    pb-4 transition-all ">
+ <div key={i} className="bg-transparent pb-4 transition-all ">
  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-2">
  <card.icon size={12} className={card.iconColor}/> {card.label}
  </p>
@@ -275,7 +275,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
  
  {/* COLUNA ESQUERDA */}
  <div className="col-span-12 md:col-span-3 flex flex-col gap-4 md:min-h-0">
- <div className="shrink-0 h-[150px] rounded-[2rem] p-5 bg-white dark:bg-[#09090b]/20 flex flex-col justify-between transition-all ">
+ <div className="shrink-0 h-[150px] p-5 bg-white dark:bg-[#09090b]/20 flex flex-col justify-between transition-all ">
  <div className="flex items-center justify-between">
  <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2"><BrainCircuit size={16} className="text-emerald-500"/> Saúde</span>
  <span className={`text-xl font-black ${financialData.healthStatus === 'neutral' ? 'text-slate-500' : (financialData.healthStatus === 'good' ? 'text-emerald-500' : 'text-rose-500')}`}>{financialData.healthScore}%</span>
@@ -283,14 +283,14 @@ export default function DashboardHome({ transactions }: DashboardProps) {
  <p className="text-[10px] font-black leading-tight text-slate-800 dark:text-white">{financialData.diagnostico}</p>
  <div className="flex gap-2">
  {financialData.proximosPassos.map((step, i) => (
- <div key={i} className="flex-1 p-2 rounded-lg bg-slate-50 dark:bg-white/5 flex items-center justify-center text-center gap-2 ">
+ <div key={i} className="flex-1 p-2 bg-slate-50 dark:bg-white/5 flex items-center justify-center text-center gap-2 ">
  <span className="text-[8px] font-bold uppercase text-slate-500 dark:text-slate-400">{step}</span>
  </div>
  ))}
  </div>
  </div>
 
- <div className="flex-1 rounded-[2rem] p-5 bg-white dark:bg-[#09090b]/20 overflow-hidden flex flex-col min-h-[200px] md:min-h-0 transition-all ">
+ <div className="flex-1 p-5 bg-white dark:bg-[#09090b]/20 overflow-hidden flex flex-col min-h-[200px] md:min-h-0 transition-all ">
  <div className="flex items-center gap-2 mb-4 text-rose-500 shrink-0">
  <Skull size={18} /><span className="text-[10px] font-black uppercase">Maiores Gastos</span>
  </div>
@@ -305,8 +305,8 @@ export default function DashboardHome({ transactions }: DashboardProps) {
  <span className="text-slate-500 truncate w-24">{v.category}</span>
  <span className="text-rose-600">{formatCurrency(v.amount)}</span>
  </div>
- <div className="w-full h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
- <div style={{width: `${v.percent}%`}} className="h-full bg-rose-500 rounded-full" />
+ <div className="w-full h-1 bg-slate-100 dark:bg-white/5 overflow-hidden">
+ <div style={{width: `${v.percent}%`}} className="h-full bg-rose-500" />
  </div>
  </div>
  ))}
@@ -315,7 +315,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
  </div>
 
  {/* COLUNA CENTRAL (A GRANDE CULPADA RESOLVIDA) */}
- <div className="col-span-12 md:col-span-6 rounded-[2rem] p-5 bg-white dark:bg-[#09090b]/20 flex flex-col relative overflow-hidden min-h-[300px] md:min-h-0 transition-all ">
+ <div className="col-span-12 md:col-span-6 p-5 bg-white dark:bg-[#09090b]/20 flex flex-col relative overflow-hidden min-h-[300px] md:min-h-0 transition-all ">
  <div className="flex justify-between items-center mb-4 text-[10px] font-black uppercase tracking-widest relative z-10 shrink-0 text-slate-400">
  <span className="flex items-center gap-2">
  <Activity size={16} className="text-emerald-500" /> 
@@ -359,7 +359,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
  className="absolute flex flex-col items-center pointer-events-none transition-all duration-700 -translate-x-1/2 -translate-y-[120%]"
  style={{ left: `${peakOutX}%`, top: `${(peakOutY / 40) * 100}%` }}
  >
- <div className="bg-rose-500 text-white px-2 py-0.5 rounded-md text-[6px] font-black uppercase whitespace-nowrap -rose-500/30">
+ <div className="bg-rose-500 text-white px-2 py-0.5 text-[6px] font-black uppercase whitespace-nowrap">
  {viewMode === 'monthly' ? `Dia ${peakOutData.label}` : peakOutData.label} • {formatCurrency(peakOutData.out)}
  </div>
  <div className="w-[1px] h-4 bg-rose-500/50 mt-1" />
@@ -375,11 +375,11 @@ export default function DashboardHome({ transactions }: DashboardProps) {
  
  {/* STATUS PENDENTE */}
  <div className="shrink-0 grid grid-cols-2 gap-3 relative z-10 mt-auto">
- <div className="p-4 rounded-2xl bg-blue-500/10 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex flex-col justify-between lue-200 dark:lue-900/50 h-20">
+ <div className="p-4 bg-blue-500/10 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex flex-col justify-between h-20">
  <p className="text-[8px] font-black uppercase opacity-80">Pendente no Período</p>
  <h4 className="text-sm font-black">{formatCurrency(financialData.totalPendingAmount)}</h4>
  </div>
- <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 flex flex-col justify-between h-20">
+ <div className="p-4 bg-slate-50 dark:bg-white/5 flex flex-col justify-between h-20">
  <p className="text-[8px] font-black uppercase text-slate-400">Status Quitação</p>
  <h4 className={`text-sm font-black ${financialData.totalPendingAmount > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
  {financialData.totalPendingAmount > 0 ? 'Existem Pendências' : 'Tudo em dia'}
@@ -390,7 +390,7 @@ export default function DashboardHome({ transactions }: DashboardProps) {
 
  {/* COLUNA DIREITA */}
  <div className="col-span-12 md:col-span-3 flex flex-col gap-4 md:min-h-0">
- <div className="shrink-0 h-[150px] rounded-[2rem] p-5 bg-white dark:bg-[#09090b]/20 flex flex-col transition-all ">
+ <div className="shrink-0 h-[150px] p-5 bg-white dark:bg-[#09090b]/20 flex flex-col transition-all ">
  <div className="flex items-center gap-2 mb-4 text-amber-500 shrink-0">
  <Percent size={18} /><span className="text-[10px] font-black uppercase tracking-widest">% Distribuição</span>
  </div>
@@ -405,15 +405,15 @@ export default function DashboardHome({ transactions }: DashboardProps) {
  <span className="text-slate-500 truncate w-20">{item.category}</span>
  <span className="text-amber-500">{item.percent.toFixed(1)}%</span>
  </div>
- <div className="w-full h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
- <div style={{width: `${item.percent}%`}} className="h-full bg-amber-500 rounded-full" />
+ <div className="w-full h-1 bg-slate-100 dark:bg-white/5 overflow-hidden">
+ <div style={{width: `${item.percent}%`}} className="h-full bg-amber-500" />
  </div>
  </div>
  ))}
  </div>
  </div>
 
- <div className="flex-1 rounded-[2rem] p-5 bg-white dark:bg-[#09090b]/20 flex flex-col min-h-[200px] md:min-h-0 transition-all ">
+ <div className="flex-1 p-5 bg-white dark:bg-[#09090b]/20 flex flex-col min-h-[200px] md:min-h-0 transition-all ">
  <div className="flex items-center gap-2 mb-4 text-slate-400 shrink-0">
  <Target size={18} className="text-emerald-500"/><span className="text-[10px] font-black uppercase tracking-widest">Monitor de Metas</span>
  </div>

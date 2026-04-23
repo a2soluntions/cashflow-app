@@ -9,20 +9,28 @@
   
   /* Garante que o fundo mude mesmo fora da div principal */
   html.dark body {
-    background-color: #09090b;
+    background-color: #283593; /* Novo tom Indigo Dark */
   }
   
   html.light body {
-    background-color: #f8fafc;
+    background-color: #F3E5F5; /* Novo tom Lavender Light */
   }
 
-  /* Ocultar barras de rolagem globalmente para uma experiência premium */
+  /* 📏 ESTILO SHARP: REMOÇÃO TOTAL DE BORDAS ARREDONDADAS */
   * {
+    border-radius: 0px !important;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE e Edge */
   }
 
   *::-webkit-scrollbar {
     display: none; /* Chrome, Safari e Opera */
+  }
+
+  /* EFEITO DE GRADIENTE DO PAINEL (Inspirado na imagem) */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 }

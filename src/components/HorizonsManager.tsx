@@ -126,7 +126,7 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
 
  <button 
  onClick={() => setIsAdding(true)}
- className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-[#00d06c] text-black font-black uppercase text-[10px] tracking-widest hover:scale-105 active:scale-95 transition-all -[#00d06c]/20"
+ className="flex items-center gap-3 px-8 py-4 bg-[#00d06c] text-black font-black uppercase text-[10px] tracking-widest hover:scale-105 active:scale-95 transition-all -[#00d06c]/20"
  >
  <Plus size={16} strokeWidth={3} /> Novo Sonho
  </button>
@@ -143,14 +143,14 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  const impactLevel = (monthlyEffort / monthlyDisposableIncome) * 100;
 
  return (
- <div key={goal.id} className={`group p-8 rounded-[3.5rem] transition-all duration-500 flex flex-col ${isCompleted ? 'border-amber-500/40 bg-amber-50 dark:bg-amber-500/[0.03]' : '  bg-white dark:bg-[#09090b] '}`}>
+  <div key={goal.id} className={`group p-8 transition-all duration-500 flex flex-col ${isCompleted ? 'border-amber-500/40 bg-amber-50 dark:bg-amber-500/[0.03]' : '  bg-white/5 '}`}>
  
  <div className="flex justify-between items-start mb-8">
- <div className={`p-4 rounded-2xl ${isCompleted ? 'text-amber-500 border-amber-500/20' : 'text-emerald-500 dark:text-[#00d06c] border-emerald-100 dark:border-[#00d06c]/20 bg-emerald-50 dark:bg-transparent'}`}>
+ <div className={`p-4 ${isCompleted ? 'text-amber-500 border-amber-500/20' : 'text-emerald-500 dark:text-[#00d06c] border-emerald-100 dark:border-[#00d06c]/20 bg-emerald-50 dark:bg-transparent'}`}>
  {isCompleted ? <Trophy size={24} className="animate-pulse" /> : <Target size={24} />}
  </div>
  {!isCompleted && impactLevel > 40 && (
- <span className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border-rose-500/20 text-rose-500 bg-rose-500/5 animate-pulse">
+ <span className="px-3 py-1 text-[8px] font-black uppercase tracking-widest border-rose-500/20 text-rose-500 bg-rose-500/5 animate-pulse">
  ⚠️ Alerta de Impulso
  </span>
  )}
@@ -164,7 +164,7 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  <span className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest italic">Conquista</span>
  <span className={`text-2xl font-black italic ${isCompleted ? 'text-amber-500' : 'text-emerald-500 dark:text-[#00d06c]'}`}>{percent}%</span>
  </div>
- <div className="h-2.5 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden ">
+ <div className="h-2.5 w-full bg-slate-100 dark:bg-white/5 overflow-hidden ">
  <div 
  className={`h-full transition-all duration-1000 ease-out ${isCompleted ? 'bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600' : 'bg-emerald-500 dark:bg-[#00d06c]'}`} 
  style={{ width: `${percent}%` }} 
@@ -173,7 +173,7 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  </div>
 
  {!isCompleted ? (
- <div className={`p-5 rounded-3xl ${impactLevel > 40 ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-100 dark:border-rose-500/10' : 'bg-indigo-50 dark:bg-indigo-500/5 border-indigo-100 dark:border-indigo-500/10'}`}>
+ <div className={`p-5 ${impactLevel > 40 ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-100 dark:border-rose-500/10' : 'bg-indigo-50 dark:bg-indigo-500/5 border-indigo-100 dark:border-indigo-500/10'}`}>
  <p className={`text-[8px] font-black uppercase tracking-[0.2em] mb-2 ${impactLevel > 40 ? 'text-rose-500' : 'text-indigo-500 dark:text-indigo-400'}`}>Vitta Analysis</p>
  <p className="text-[10px] text-slate-600 dark:text-zinc-400 leading-relaxed italic">
  {impactLevel > 40 
@@ -183,18 +183,18 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  </p>
  </div>
  ) : (
- <div className="p-5 rounded-3xl bg-amber-500/10 border-amber-500/20 text-center">
+ <div className="p-5 bg-amber-500/10 border-amber-500/20 text-center">
  <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Horizonte Alcançado!</p>
  </div>
  )}
 
  <div className="flex gap-2">
  {!isCompleted && (
- <button onClick={() => setContributeTo(goal)} className="flex-1 py-4 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-emerald-500 hover:text-white dark:hover:bg-[#00d06c] dark:hover:text-black transition-all group-hover:bg-emerald-100 dark:group-hover:bg-[#00d06c]/20">
+ <button onClick={() => setContributeTo(goal)} className="flex-1 py-4 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white font-black uppercase text-[10px] tracking-widest hover:bg-emerald-500 hover:text-white dark:hover:bg-[#00d06c] dark:hover:text-black transition-all group-hover:bg-emerald-100 dark:group-hover:bg-[#00d06c]/20">
  Aportar
  </button>
  )}
- <button onClick={() => setConfirmDelete(goal.id)} className="p-4 bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-zinc-600 hover:text-rose-500 rounded-2xl transition-all">
+ <button onClick={() => setConfirmDelete(goal.id)} className="p-4 bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-zinc-600 hover:text-rose-500 transition-all">
  <Trash2 size={18} />
  </button>
  </div>
@@ -207,20 +207,20 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  {/* MODAL DE APORTE */}
  {contributeTo && (
  <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/60 dark:bg-[#09090b]/90 backdrop-blur-md p-6">
- <div className="bg-white dark:bg-[#09090b] p-10 rounded-[3rem] w-full max-w-sm animate-in zoom-in duration-300 -2xl">
+  <div className="bg-white dark:bg-[#09090b] p-10 w-full max-w-sm animate-in zoom-in duration-300">
  <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter mb-2 leading-none">Avançar<br/>Missão</h2>
  <p className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-8 italic">Para: {contributeTo.title}</p>
  <div className="space-y-6">
  <input 
  type="text"
  placeholder="R$ 0,00" 
- className="w-full bg-slate-50 dark:bg-white/[0.03] p-5 rounded-2xl text-emerald-500 dark:text-[#00d06c] text-3xl font-black outline-none"
+ className="w-full bg-slate-50 dark:bg-white/[0.03] p-5 text-emerald-500 dark:text-[#00d06c] text-3xl font-black outline-none"
  value={contributionDisplay}
  onChange={(e) => handleCurrencyChange(e, setContributionDisplay, setContributionNumeric)}
  autoFocus
  />
  <div className="flex flex-col gap-3">
- <button onClick={handleContribute} className="w-full py-5 bg-emerald-500 dark:bg-[#00d06c] text-white dark:text-black font-black uppercase text-xs tracking-widest rounded-2xl active:scale-95 transition-all">Confirmar Aporte</button>
+ <button onClick={handleContribute} className="w-full py-5 bg-emerald-500 dark:bg-[#00d06c] text-white dark:text-black font-black uppercase text-xs tracking-widest active:scale-95 transition-all">Confirmar Aporte</button>
  <button onClick={() => setContributeTo(null)} className="w-full py-3 text-slate-500 dark:text-zinc-600 font-black uppercase text-[10px] tracking-widest hover:text-slate-900 dark:hover:text-white">Voltar</button>
  </div>
  </div>
@@ -231,7 +231,7 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  {/* MODAL DE ADIÇÃO */}
  {isAdding && (
  <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/60 dark:bg-[#09090b]/90 backdrop-blur-md p-6">
- <div className="bg-white dark:bg-[#09090b] p-10 rounded-[3rem] w-full max-w-md animate-in zoom-in duration-300 ">
+  <div className="bg-white dark:bg-[#09090b] p-10 w-full max-w-md animate-in zoom-in duration-300 ">
  <div className="flex justify-between mb-8 items-center">
  <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter leading-none">Novo<br/>Horizonte</h2>
  <button onClick={() => setIsAdding(false)}><X className="text-slate-500 dark:text-zinc-500" /></button>
@@ -239,19 +239,19 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  <div className="space-y-6">
  <input 
  placeholder="NOME DO SONHO" 
- className="w-full bg-slate-50 dark:bg-white/[0.03] p-4 rounded-2xl text-slate-900 dark:text-white outline-none   uppercase font-black"
+ className="w-full bg-slate-50 dark:bg-white/[0.03] p-4 text-slate-900 dark:text-white outline-none   uppercase font-black"
  value={newTitle}
  onChange={e => setNewTitle(e.target.value.toUpperCase())}
  />
  <input 
  type="text"
  placeholder="R$ 0,00" 
- className="w-full bg-slate-50 dark:bg-white/[0.03] p-4 rounded-2xl text-emerald-500 dark:text-[#00d06c] text-xl font-black outline-none"
+ className="w-full bg-slate-50 dark:bg-white/[0.03] p-4 text-emerald-500 dark:text-[#00d06c] text-xl font-black outline-none"
  value={displayValue}
  onChange={(e) => handleCurrencyChange(e, setDisplayValue, setNumericValue)}
  />
  <select 
- className="w-full bg-slate-50 dark:bg-[#111] p-4 rounded-2xl text-slate-900 dark:text-white outline-none appearance-none cursor-pointer font-bold uppercase text-[11px]"
+ className="w-full bg-slate-50 dark:bg-[#111] p-4 text-slate-900 dark:text-white outline-none appearance-none cursor-pointer font-bold uppercase text-[11px]"
  value={newCategory}
  onChange={e => setNewCategory(e.target.value as any)}
  >
@@ -261,7 +261,7 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  <option value="home">IMÓVEL</option>
  <option value="retirement">APOSENTADORIA</option>
  </select>
- <button onClick={addGoal} className="w-full py-5 mt-4 bg-emerald-500 dark:bg-[#00d06c] text-white dark:text-black font-black uppercase text-xs tracking-widest rounded-2xl">Confirmar Missão</button>
+ <button onClick={addGoal} className="w-full py-5 mt-4 bg-emerald-500 dark:bg-[#00d06c] text-white dark:text-black font-black uppercase text-xs tracking-widest ">Confirmar Missão</button>
  </div>
  </div>
  </div>
@@ -270,7 +270,7 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  {/* MODAL DE SUCESSO */}
  {showSuccess && (
  <div className="fixed inset-0 z-[600] flex items-center justify-center pointer-events-none animate-in fade-in zoom-in duration-500">
- <div className="bg-emerald-500 dark:bg-[#00d06c] text-white dark:text-black px-12 py-10 rounded-[4rem] flex flex-col items-center gap-4 -2xl">
+ <div className="bg-emerald-500 dark:bg-[#00d06c] text-white dark:text-black px-12 py-10 flex flex-col items-center gap-4 -2xl">
  <CheckCircle2 size={60} strokeWidth={3} className="animate-bounce" />
  <h3 className="font-black uppercase italic text-2xl tracking-tighter">Registrado!</h3>
  </div>
@@ -280,12 +280,12 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  {/* CONFIRMAÇÃO DE EXCLUSÃO */}
  {confirmDelete && (
  <div className="fixed inset-0 z-[600] flex items-center justify-center bg-black/60 dark:bg-[#09090b]/90 backdrop-blur-md p-6">
- <div className="bg-white dark:bg-[#09090b]  dark:border-rose-500/20 p-10 rounded-[3rem] w-full max-w-sm text-center animate-in zoom-in ">
+ <div className="bg-white dark:bg-[#09090b]  dark:border-rose-500/20 p-10 w-full max-w-sm text-center animate-in zoom-in ">
  <AlertTriangle size={40} className="text-rose-500 mx-auto mb-6" />
  <h2 className="text-slate-900 dark:text-white font-black uppercase italic text-xl mb-2">Abortar Missão?</h2>
  <div className="flex gap-4 mt-8">
- <button onClick={() => setConfirmDelete(null)} className="flex-1 py-4 rounded-2xl bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-zinc-400 font-black uppercase text-[10px] tracking-widest">Não</button>
- <button onClick={() => handleDelete(confirmDelete)} className="flex-1 py-4 rounded-2xl bg-rose-500 dark:bg-rose-600 text-white font-black uppercase text-[10px] tracking-widest">Sim</button>
+ <button onClick={() => setConfirmDelete(null)} className="flex-1 py-4 bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-zinc-400 font-black uppercase text-[10px] tracking-widest">Não</button>
+ <button onClick={() => handleDelete(confirmDelete)} className="flex-1 py-4 bg-rose-500 dark:bg-rose-600 text-white font-black uppercase text-[10px] tracking-widest">Sim</button>
  </div>
  </div>
  </div>
