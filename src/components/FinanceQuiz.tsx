@@ -52,8 +52,9 @@ const phrases = [
  "Você deixou de ser um escravo do consumo para ser o mestre do seu destino."
 ];
 
-export function FinanceQuiz() {
- const [mode, setMode] = useState<'easy' | 'hard' | null>(null);
+export function FinanceQuiz({ theme = 'dark' }: { theme?: string }) {
+  const isLight = theme === 'light';
+  const [mode, setMode] = useState<'easy' | 'hard' | null>(null);
  const [phase, setPhase] = useState(1);
  const [currentInPhase, setCurrentInPhase] = useState(0); // 0 a 4
  const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -97,94 +98,94 @@ export function FinanceQuiz() {
 
  if (!mode) {
  return (
- <div className="h-full flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
- <Swords size={64} className="text-indigo-500 mb-6" />
- <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">Escolha seu Destino</h2>
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
- <button onClick={() => setMode('easy')} className="group p-8 bg-white/5 border-white/10 rounded-[2.5rem] hover:border-emerald-500/50 transition-all">
- <Zap className="text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform" size={40} />
- <h3 className="text-white font-black uppercase">Modo Aprendiz</h3>
- <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">Respostas imediatas e explicações</p>
- </button>
- <button onClick={() => setMode('hard')} className="group p-8 bg-white/5 border-white/10 rounded-[2.5rem] hover:border-rose-500/50 transition-all">
- <Flame className="text-rose-500 mx-auto mb-4 group-hover:scale-110 transition-transform" size={40} />
- <h3 className="text-white font-black uppercase">Modo Gladiador</h3>
- <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">Sem dicas. Apenas os fortes sobrevivem.</p>
- </button>
- </div>
- </div>
+  <div className="h-full flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+    <Swords size={64} className="text-indigo-500 mb-6" />
+    <h2 className={`text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'} uppercase tracking-tighter mb-4`}>Escolha seu Destino</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+      <button onClick={() => setMode('easy')} className={`group p-8 ${isLight ? 'bg-white border-slate-200' : 'bg-black/30 backdrop-blur-xl border-white/5'} rounded-[2.5rem] hover:border-emerald-500/50 transition-all border shadow-sm`}>
+        <Zap className="text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform" size={40} />
+        <h3 className={`${isLight ? 'text-slate-900' : 'text-white'} font-black uppercase`}>Modo Aprendiz</h3>
+        <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'} mt-2 font-bold uppercase tracking-widest`}>Respostas imediatas e explicações</p>
+      </button>
+      <button onClick={() => setMode('hard')} className={`group p-8 ${isLight ? 'bg-white border-slate-200' : 'bg-black/30 backdrop-blur-xl border-white/5'} rounded-[2.5rem] hover:border-rose-500/50 transition-all border shadow-sm`}>
+        <Flame className="text-rose-500 mx-auto mb-4 group-hover:scale-110 transition-transform" size={40} />
+        <h3 className={`${isLight ? 'text-slate-900' : 'text-white'} font-black uppercase`}>Modo Gladiador</h3>
+        <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'} mt-2 font-bold uppercase tracking-widest`}>Sem dicas. Apenas os fortes sobrevivem.</p>
+      </button>
+    </div>
+  </div>
  );
  }
 
  if (showPhrase) {
  return (
- <div className="h-full flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500">
- <div className="bg-indigo-600/20 border-indigo-500/30 p-12 rounded-[3rem] max-w-lg -2xl">
- <Sparkles className="text-yellow-400 mx-auto mb-6" size={60} />
- <h3 className="text-2xl font-black text-white uppercase mb-4">{phrases[phase - 1]}</h3>
- <p className="text-indigo-200 text-sm mb-8 font-medium">Você concluiu a Fase {phase}. Sua mente está mais afiada.</p>
- <button onClick={nextPhase} className="w-full bg-white text-indigo-950 font-black py-4 rounded-2xl uppercase tracking-widest hover:bg-indigo-50 transition-all">
- Iniciar Fase {phase + 1}
- </button>
- </div>
- </div>
+  <div className="h-full flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500">
+    <div className={`${isLight ? 'bg-indigo-50 border-indigo-200 shadow-xl' : 'bg-black/30 backdrop-blur-xl border-white/5'} p-12 rounded-[3rem] max-w-lg border`}>
+      <Sparkles className="text-yellow-500 mx-auto mb-6" size={60} />
+      <h3 className={`text-2xl font-black ${isLight ? 'text-indigo-900' : 'text-white'} uppercase mb-4`}>{phrases[phase - 1]}</h3>
+      <p className={`${isLight ? 'text-indigo-700' : 'text-indigo-200'} text-sm mb-8 font-medium`}>Você concluiu a Fase {phase}. Sua mente está mais afiada.</p>
+      <button onClick={nextPhase} className={`w-full ${isLight ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white text-indigo-950 hover:bg-indigo-50'} font-black py-4 rounded-2xl uppercase tracking-widest transition-all shadow-lg`}>
+        Iniciar Fase {phase + 1}
+      </button>
+    </div>
+  </div>
  );
  }
 
  if (isFinished) {
  return (
- <div className="h-full flex flex-col items-center justify-center animate-in zoom-in duration-500">
- <Trophy className="text-yellow-400 mb-4" size={80} />
- <h2 className="text-4xl font-black text-white uppercase italic">Mestre Supremo</h2>
- <p className="text-slate-400 font-bold mt-2">Você acertou {score} de 20 questões.</p>
- <button onClick={() => { setMode(null); setPhase(1); setIsFinished(false); setScore(0); }} className="mt-8 px-10 py-4 border-white/20 rounded-full text-white font-black uppercase hover:bg-white/10 transition-all">
- Reiniciar Jornada
- </button>
- </div>
+  <div className="h-full flex flex-col items-center justify-center animate-in zoom-in duration-500">
+    <Trophy className="text-yellow-500 mb-4" size={80} />
+    <h2 className={`text-4xl font-black ${isLight ? 'text-slate-900' : 'text-white'} uppercase italic`}>Mestre Supremo</h2>
+    <p className={`${isLight ? 'text-slate-600' : 'text-slate-400'} font-bold mt-2`}>Você acertou {score} de 20 questões.</p>
+    <button onClick={() => { setMode(null); setPhase(1); setIsFinished(false); setScore(0); }} className={`mt-8 px-10 py-4 ${isLight ? 'bg-indigo-600 text-white' : 'border border-white/20 text-white hover:bg-white/10'} rounded-full font-black uppercase transition-all shadow-lg`}>
+      Reiniciar Jornada
+    </button>
+  </div>
  );
  }
 
  return (
  <div className="h-full flex flex-col gap-6 animate-in fade-in duration-500">
  {/* HUD DE FASE */}
- <div className="flex justify-between items-center px-4 bg-white/5 p-4 rounded-[2rem] border-white/10">
- <div className="flex items-center gap-3">
- <ShieldCheck className="text-indigo-400" size={24} />
- <div>
- <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Nível Atual</p>
- <h4 className="text-sm font-black text-white uppercase">Fase {phase}: {phase === 1 ? 'O Despertar' : phase === 2 ? 'Blindagem' : phase === 3 ? 'Estrategista' : 'Mestre'}</h4>
- </div>
- </div>
- <div className="flex gap-1">
- {[1,2,3,4,5].map(i => (
- <div key={i} className={`h-1.5 w-8 rounded-full ${i <= currentInPhase + 1 ? 'bg-indigo-500 -[0_0_10px_rgba(99,102,241,0.5)]' : 'bg-white/10'}`} />
- ))}
- </div>
- </div>
+    <div className={`flex justify-between items-center px-4 ${isLight ? 'bg-white border-slate-200' : 'bg-black/30 backdrop-blur-xl border-white/5'} p-4 rounded-[2rem] border shadow-sm`}>
+      <div className="flex items-center gap-3">
+        <ShieldCheck className="text-indigo-500" size={24} />
+        <div>
+          <p className={`text-[8px] font-black ${isLight ? 'text-slate-400' : 'text-slate-500'} uppercase tracking-widest`}>Nível Atual</p>
+          <h4 className={`text-sm font-black ${isLight ? 'text-slate-900' : 'text-white'} uppercase`}>Fase {phase}: {phase === 1 ? 'O Despertar' : phase === 2 ? 'Blindagem' : phase === 3 ? 'Estrategista' : 'Mestre'}</h4>
+        </div>
+      </div>
+      <div className="flex gap-1">
+        {[1,2,3,4,5].map(i => (
+          <div key={i} className={`h-1.5 w-8 rounded-full ${i <= currentInPhase + 1 ? 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]' : (isLight ? 'bg-slate-200' : 'bg-white/10')}`} />
+        ))}
+      </div>
+    </div>
 
  {/* CARD DA PERGUNTA */}
  <div className="flex-1 flex flex-col items-center justify-center max-w-3xl mx-auto w-full">
- <div className="w-full bg-white/5 backdrop-blur-2xl border-white/10 p-10 rounded-[3rem] relative overflow-hidden -2xl">
+ <div className={`w-full ${isLight ? 'bg-white border-slate-200' : 'bg-black/30 backdrop-blur-xl border-white/5'} border p-10 rounded-[3rem] relative overflow-hidden shadow-sm`}>
  <span className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-4 block">Pergunta {currentInPhase + 1}/5</span>
- <h3 className="text-xl md:text-2xl font-black text-white mb-8 leading-tight">{q.question}</h3>
+ <h3 className={`text-xl md:text-2xl font-black ${isLight ? 'text-slate-900' : 'text-white'} mb-8 leading-tight`}>{q.question}</h3>
 
  <div className="grid gap-3">
  {q.options.map((opt, idx) => {
- let btnStyle = "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10";
+ let btnStyle = `${isLight ? 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'}`;
  
  if (showResult) {
  if (mode === 'easy') {
- if (idx === q.correct) btnStyle = "bg-emerald-500/20 border-emerald-500/50 text-emerald-400 -[0_0_15px_rgba(16,185,129,0.2)]";
- else if (selectedOption === idx) btnStyle = "bg-rose-500/20 border-rose-500/50 text-rose-400";
- else btnStyle = "opacity-30 border-white/5";
+ if (idx === q.correct) btnStyle = "bg-emerald-500/20 border-emerald-500/50 text-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+ else if (selectedOption === idx) btnStyle = "bg-rose-500/20 border-rose-500/50 text-rose-600";
+ else btnStyle = "opacity-30 border-transparent";
  } else {
  // MODO HARD: Não mostra a correta se errou
  if (selectedOption === idx) {
  btnStyle = idx === q.correct 
- ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400" 
- : "bg-rose-500/20 border-rose-500/50 text-rose-400";
+ ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-600" 
+ : "bg-rose-500/20 border-rose-500/50 text-rose-600";
  } else {
- btnStyle = "opacity-30 border-white/5";
+ btnStyle = "opacity-30 border-transparent";
  }
  }
  }
@@ -194,7 +195,7 @@ export function FinanceQuiz() {
  key={idx}
  disabled={showResult}
  onClick={() => handleSelect(idx)}
- className={`p-5 rounded-2xl text-left font-bold text-sm transition-all duration-300 ${btnStyle}`}
+ className={`p-5 rounded-2xl text-left font-bold text-sm transition-all duration-300 border ${btnStyle}`}
  >
  {opt}
  </button>
@@ -203,23 +204,22 @@ export function FinanceQuiz() {
  </div>
 
  {showResult && mode === 'easy' && (
- <div className="mt-6 p-4 bg-indigo-500/10 border-indigo-500/20 rounded-2xl animate-in slide-in-from-top-2">
- <p className="text-[11px] text-indigo-200 leading-relaxed font-medium italic">{q.explanation}</p>
+ <div className={`mt-6 p-4 ${isLight ? 'bg-indigo-50 border-indigo-200 text-indigo-950' : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-200'} border rounded-2xl animate-in slide-in-from-top-2`}>
+ <p className="text-[11px] leading-relaxed font-black italic">{q.explanation}</p>
  </div>
  )}
  </div>
 
- {showResult && (
- <button 
- onClick={handleNext} 
- className="mt-8 group bg-white text-indigo-950 font-black uppercase px-12 py-5 rounded-full flex items-center gap-3 transition-all active:scale-95 "
- >
- {currentInPhase === 4 ? "Finalizar Fase" : "Próxima Batalha"}
- <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
- </button>
- )}
+    {showResult && (
+      <button 
+        onClick={handleNext} 
+        className={`mt-8 group ${isLight ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white text-indigo-950 hover:bg-indigo-50'} font-black uppercase px-12 py-5 rounded-full flex items-center gap-3 transition-all active:scale-95 shadow-xl`}
+      >
+        {currentInPhase === 4 ? "Finalizar Fase" : "Próxima Batalha"}
+        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+      </button>
+    )}
  </div>
  </div>
  );
 }
-

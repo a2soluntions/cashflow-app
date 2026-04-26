@@ -411,34 +411,35 @@ const opportunities: IncomeOpportunity[] = [
  }
 ];
 
-export function ExtraIncomeModule() {
- const [selectedId, setSelectedId] = useState<string | null>(null);
+export function ExtraIncomeModule({ theme = 'dark' }: { theme?: string }) {
+  const isLight = theme === 'light';
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
  return (
  <div className="h-full w-full flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
  
  {/* HEADER */}
- <div className="px-2 shrink-0">
- <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3 text-white">
- <Zap className="text-yellow-400 fill-yellow-400/20" /> Acelerador de Renda
- </h2>
- <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
- 40 estratégias reais para transformar seu tempo livre em liberdade financeira
- </p>
- </div>
+    <div className="px-2 shrink-0">
+      <h2 className={`text-2xl font-black uppercase tracking-tighter flex items-center gap-3 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+        <Zap className="text-yellow-400 fill-yellow-400/20" /> Acelerador de Renda
+      </h2>
+      <p className={`text-[10px] font-bold ${isLight ? 'text-slate-700' : 'text-slate-400'} uppercase tracking-widest mt-1`}>
+        40 estratégias reais para transformar seu tempo livre em liberdade financeira
+      </p>
+    </div>
 
  {/* 🚀 MENSAGEM INSPIRADORA (TOPO) */}
- <div className="shrink-0 p-5 bg-gradient-to-r from-yellow-900/30 to-indigo-900/30 rounded-[2rem] flex items-center gap-5">
- <div className="p-4 bg-yellow-500/20 rounded-full text-yellow-300 shrink-0">
- <Star size={22} />
- </div>
- <div>
- <h4 className="text-sm font-black uppercase tracking-widest text-white mb-1">O Próximo Passo Só Depende de Você</h4>
- <p className="text-[10px] font-medium text-yellow-200/70 leading-relaxed">
- Escolha UMA dessas 40 oportunidades hoje e execute o primeiro passo. A diferença entre quem enriquece e quem sonha é a velocidade da execução.
- </p>
- </div>
- </div>
+    <div className={`shrink-0 p-5 ${isLight ? 'bg-amber-50 border border-amber-100' : 'bg-gradient-to-r from-yellow-900/30 to-indigo-900/30'} rounded-[2rem] flex items-center gap-5`}>
+      <div className={`p-4 ${isLight ? 'bg-yellow-500/10 text-yellow-600' : 'bg-yellow-500/20 text-yellow-300'} rounded-full shrink-0`}>
+        <Star size={22} />
+      </div>
+      <div>
+        <h4 className={`text-sm font-black uppercase tracking-widest ${isLight ? 'text-amber-900' : 'text-white'} mb-1`}>O Próximo Passo Só Depende de Você</h4>
+        <p className={`text-[10px] font-medium ${isLight ? 'text-amber-700/80' : 'text-yellow-200/70'} leading-relaxed`}>
+          Escolha UMA dessas 40 oportunidades hoje e execute o primeiro passo. A diferença entre quem enriquece e quem sonha é a velocidade da execução.
+        </p>
+      </div>
+    </div>
 
  {/* GRID COM SCROLL INVISÍVEL */}
  <div className="flex-1 overflow-y-auto pb-6 px-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
@@ -448,11 +449,13 @@ export function ExtraIncomeModule() {
  const isSelected = selectedId === op.id;
 
  return (
- <div 
- key={op.id}
- onClick={() => !isSelected && setSelectedId(op.id)}
- className={`group relative bg-white/5 backdrop-blur-md rounded-[1.5rem] p-4 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-center ${isSelected ? 'md:col-span-2 xl:col-span-2 row-span-2 bg-white/10 p-6 rounded-[2.5rem]' : 'hover:bg-white/10'}`}
- >
+          <div 
+            key={op.id}
+            onClick={() => !isSelected && setSelectedId(op.id)}
+            className={`group relative rounded-[1.5rem] p-4 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-center
+            ${isLight ? 'bg-white border border-slate-200 shadow-sm' : 'bg-black/30 backdrop-blur-xl border border-white/5'}
+            ${isSelected ? 'md:col-span-2 xl:col-span-2 row-span-2 ' + (isLight ? 'bg-slate-50 border-indigo-200' : 'bg-black/40 border-white/10') + ' p-6 rounded-[2.5rem]' : 'hover:bg-white/10'}`}
+          >
  {/* Cabeçalho do Card */}
  <div className={`flex ${isSelected ? 'flex-col items-start' : 'items-center gap-3'} justify-between relative z-10 w-full`}>
  <div className={`flex ${isSelected ? 'flex-col items-start' : 'items-center gap-3'} w-full`}>
@@ -460,16 +463,16 @@ export function ExtraIncomeModule() {
  {op.icon}
  </div>
  <div className="flex-1 min-w-0 pr-2">
- {isSelected ? (
- <>
- <span className="text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 bg-white/5 rounded-full text-indigo-300 mb-2 inline-block">
- {op.category}
- </span>
- <h3 className="text-base font-black uppercase tracking-tight text-white mb-2 leading-tight">{op.title}</h3>
- </>
- ) : (
- <h3 className="text-[10px] font-black uppercase tracking-widest text-white leading-tight truncate">{op.title}</h3>
- )}
+                {isSelected ? (
+                  <>
+                    <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 ${isLight ? 'bg-indigo-100 text-indigo-700' : 'bg-white/5 text-indigo-300'} rounded-full mb-2 inline-block`}>
+                      {op.category}
+                    </span>
+                    <h3 className={`text-base font-black uppercase tracking-tight ${isLight ? 'text-slate-900' : 'text-white'} mb-2 leading-tight`}>{op.title}</h3>
+                  </>
+                ) : (
+                  <h3 className={`text-[10px] font-black uppercase tracking-widest ${isLight ? 'text-slate-900' : 'text-white'} leading-tight truncate`}>{op.title}</h3>
+                )}
  </div>
  </div>
 
@@ -501,9 +504,9 @@ export function ExtraIncomeModule() {
  </div>
  </div>
  
- <p className="text-sm text-slate-300 leading-relaxed font-medium transition-all duration-500 mb-6">
- {op.description}
- </p>
+                <p className={`text-sm ${isLight ? 'text-slate-900' : 'text-slate-300'} leading-relaxed font-medium transition-all duration-500 mb-6`}>
+                  {op.description}
+                </p>
  </div>
  )}
 
@@ -515,20 +518,20 @@ export function ExtraIncomeModule() {
  <ArrowUpRight size={14} /> Passo a Passo Inicial
  </h4>
  {op.steps.map((step, idx) => (
- <div key={idx} className="flex items-start gap-3 bg-black/40 p-3 rounded-2xl border-white/5">
- <div className="w-5 h-5 rounded-full bg-yellow-500/20 border-yellow-500/30 flex items-center justify-center shrink-0">
- <span className="text-[10px] font-black text-yellow-500">{idx + 1}</span>
- </div>
- <p className="text-xs text-slate-200 font-medium">{step}</p>
- </div>
+                  <div key={idx} className={`flex items-start gap-3 ${isLight ? 'bg-white border border-slate-200' : 'bg-black/40 border-white/5'} p-3 rounded-2xl`}>
+                    <div className="w-5 h-5 rounded-full bg-yellow-500/20 border-yellow-500/30 flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-black text-yellow-500">{idx + 1}</span>
+                    </div>
+                    <p className={`text-xs ${isLight ? 'text-slate-950' : 'text-slate-200'} font-black`}>{step}</p>
+                  </div>
  ))}
  </div>
 
- <div className="bg-emerald-500/5 rounded-[2rem] border-emerald-500/10 p-6 flex flex-col justify-center items-center text-center">
- <CheckCircle2 size={32} className="text-emerald-400 mb-3" />
- <h5 className="text-[10px] font-black uppercase text-emerald-400 mb-2 tracking-widest">Mindset VittaCash</h5>
- <p className="text-[11px] text-slate-300 italic leading-relaxed">"Renda extra não é apenas dinheiro a mais; é o capital que vai comprar sua liberdade. Reinvista 100% disso no seu futuro."</p>
- </div>
+                <div className={`${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-emerald-500/5 border-emerald-500/10'} rounded-[2rem] p-6 flex flex-col justify-center items-center text-center`}>
+                  <CheckCircle2 size={32} className="text-emerald-400 mb-3" />
+                  <h5 className="text-[10px] font-black uppercase text-emerald-500 mb-2 tracking-widest">Mindset VittaCash</h5>
+                  <p className={`text-[11px] ${isLight ? 'text-slate-900' : 'text-slate-300'} italic font-bold leading-relaxed`}>"Renda extra não é apenas dinheiro a mais; é o capital que vai comprar sua liberdade. Reinvista 100% disso no seu futuro."</p>
+                </div>
  </div>
  )}
 

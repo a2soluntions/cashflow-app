@@ -305,7 +305,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  {activeTab === 'summary' && (
  <>
  <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 shrink-0 print:grid-cols-3 print:gap-4 print:mb-6">
- <div className="lg:col-span-2 p-5 bg-white/5 relative overflow-hidden group flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 ">
+ <div className="lg:col-span-2 p-5 bg-white/5 dark:bg-black/30 backdrop-blur-xl relative overflow-hidden group flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 border border-white/5">
  <div className="absolute top-0 right-0 p-4 opacity-5 dark:opacity-10 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity">
  <Zap size={80} className="text-emerald-500 dark:text-[#00d06c] fill-emerald-500 dark:fill-[#00d06c] print:text-gray-300 print:fill-gray-300" />
  </div>
@@ -323,7 +323,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </div>
  </div>
 
- <div className="p-5 bg-white dark:bg-[#09090b] flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 ">
+ <div className="p-5 bg-white dark:bg-[#09090b]/30 backdrop-blur-xl flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 border border-white/5 ">
  <div>
  <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-3 border-emerald-100 dark:border-emerald-500/20 print:border-none print:bg-transparent print:p-0"><ArrowUpRight size={18} /></div>
  <p className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-1 italic print:text-gray-600">Entradas Reais</p>
@@ -331,7 +331,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </div>
  </div>
 
- <div className="p-5 bg-white dark:bg-[#09090b] flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 ">
+ <div className="p-5 bg-white dark:bg-[#09090b]/30 backdrop-blur-xl flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 border border-white/5 ">
  <div>
  <div className="w-9 h-9 bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-500 mb-3 border-rose-100 dark:border-rose-500/20 print:border-none print:bg-transparent print:p-0"><ArrowDownRight size={18} /></div>
  <p className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-1 italic print:text-gray-600">Saídas Reais</p>
@@ -341,7 +341,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </div>
 
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0 print:grid-cols-2 print:mb-6">
- <div className="lg:col-span-2 p-6 bg-white dark:bg-[#09090b] flex flex-col print:lack/20 print:bg-gray-50 min-h-[220px] ">
+ <div className="lg:col-span-2 p-6 bg-white dark:bg-[#09090b]/30 backdrop-blur-xl flex flex-col print:lack/20 print:bg-gray-50 min-h-[220px] border border-white/5 ">
  <div className="flex justify-between items-center mb-4 shrink-0">
  <h3 className="text-base font-black text-slate-900 dark:text-white uppercase italic tracking-tighter leading-none print:text-black">Crescimento Patrimonial</h3>
  </div>
@@ -359,7 +359,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </div>
  </div>
 
- <div className="p-6 bg-emerald-50 dark:bg-[#00d06c]/5 border-emerald-100 dark:border-[#00d06c]/10 flex flex-col overflow-hidden print:lack/20 print:bg-gray-50 min-h-[220px]">
+ <div className="p-6 bg-emerald-50 dark:bg-[#00d06c]/30 backdrop-blur-xl border border-emerald-100 dark:border-emerald-500/20 flex flex-col overflow-hidden print:lack/20 print:bg-gray-50 min-h-[220px]">
  <div className="flex items-center gap-2 mb-4 shrink-0">
  <AlertCircle size={20} className="text-emerald-500 dark:text-[#00d06c] print:text-black" />
  <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase italic tracking-widest print:text-black">Vitta Analysis</h3>
@@ -376,7 +376,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </div>
  </div>
 
- <div className="p-6 bg-white dark:bg-[#09090b] flex flex-col shrink-0 min-h-[100px] justify-center print:lack/20 print:bg-gray-50 ">
+ <div className="p-6 bg-white dark:bg-[#09090b]/30 backdrop-blur-xl flex flex-col shrink-0 min-h-[100px] justify-center print:lack/20 print:bg-gray-50 border border-white/5 ">
  <div className="flex items-center gap-2 mb-4">
  <AlertCircle size={14} className="text-rose-500 print:text-black" />
  <h3 className="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-[0.2em] print:text-black">Top 3 Maiores Despesas (Vilões do Mês)</h3>
@@ -410,7 +410,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
 
  {/* ABA 2: EXTRATO COMPLETO */}
  {activeTab === 'statement' && (
- <div className="bg-white dark:bg-[#09090b] rounded-[2.5rem] p-6 print:border-none print:p-0 ">
+ <div className="bg-white dark:bg-[#09090b]/30 backdrop-blur-xl rounded-[2.5rem] p-6 print:border-none print:p-0 border border-white/5 ">
  <h3 className="text-slate-900 dark:text-white font-black italic uppercase mb-6 tracking-tighter text-xl print:text-black print:mb-2">Extrato de Transações (Realizadas)</h3>
  {currentMonthTxs.length > 0 ? (
  <div className="w-full">
@@ -449,7 +449,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
 
  {/* ABA 3: CONTAS A PAGAR */}
  {activeTab === 'bills' && (
- <div className="bg-white dark:bg-[#09090b] rounded-[2.5rem] p-6 print:border-none print:p-0 ">
+ <div className="bg-white dark:bg-[#09090b]/30 backdrop-blur-xl rounded-[2.5rem] p-6 print:border-none print:p-0 border border-white/5 ">
  <h3 className="text-slate-900 dark:text-white font-black italic uppercase mb-6 tracking-tighter text-xl print:text-black print:mb-2">Obrigações e Contas (Pendentes)</h3>
  {currentMonthBills.length > 0 ? (
  <div className="w-full">

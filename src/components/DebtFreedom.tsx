@@ -137,7 +137,7 @@ const DebtFreedom = () => {
  
  {/* Coluna Esquerda: Cadastro */}
  <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
- <div className="bg-white dark:bg-[#09090b] p-6 relative overflow-hidden">
+ <div className="bg-white dark:bg-black/30 backdrop-blur-xl p-6 relative overflow-hidden border border-white/5">
  <h3 className="font-bold text-slate-700 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
  <Plus className="w-4 h-4 text-rose-500"/> Cadastrar Pendência
  </h3>
@@ -152,7 +152,7 @@ const DebtFreedom = () => {
  </div>
 
  {/* Card Totais */}
- <div className="bg-white/5 p-6 flex justify-between items-center">
+ <div className="bg-white dark:bg-black/30 backdrop-blur-xl p-6 flex justify-between items-center border border-white/5">
  <div>
  <p className="text-[9px] font-black tracking-widest text-slate-500 dark:text-zinc-500 uppercase italic">Total Devido</p>
  <p className="text-2xl font-black italic tracking-tighter text-rose-500">R$ {totalDebt.toLocaleString()}</p>
@@ -166,7 +166,7 @@ const DebtFreedom = () => {
 
  {/* Coluna Direita: Estratégia */}
  <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
- <div className="bg-white dark:bg-[#09090b] p-6 flex-1">
+ <div className="bg-white dark:bg-black/30 backdrop-blur-xl p-6 flex-1 border border-white/5">
  <div className="flex justify-between items-center mb-6">
  <h3 className="font-bold text-slate-700 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wide"><Target className="w-5 h-5 text-rose-500"/> Plano de Ataque</h3>
  <div className="flex bg-slate-50 dark:bg-white/[0.03] p-1 ">
@@ -211,7 +211,7 @@ const DebtFreedom = () => {
  </div>
 
  {/* Scripts */}
- <div className="bg-white dark:bg-[#09090b] p-6 ">
+ <div className="bg-white dark:bg-black/30 backdrop-blur-xl p-6 border border-white/5">
  <h3 className="font-bold text-slate-700 dark:text-white mb-4 text-sm flex items-center gap-2 uppercase tracking-wide"><MessageSquare className="w-4 h-4 text-emerald-500 dark:text-[#00d06c]"/> Scripts de Negociação</h3>
  <div className="flex gap-2 mb-4 flex-wrap">
  {Object.keys(scriptsText).map(key => (
@@ -235,7 +235,7 @@ const DebtFreedom = () => {
  
  {/* Coluna Esquerda: Calculadora */}
  <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-  <div className="bg-white dark:bg-[#09090b] p-6 relative overflow-hidden">
+      <div className="bg-white dark:bg-black/30 backdrop-blur-xl p-6 relative overflow-hidden border border-white/5">
   <h3 className="font-bold text-slate-700 dark:text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
   <Calculator className="w-4 h-4 text-emerald-500"/> Simulador de Futuro
   </h3>
@@ -259,7 +259,7 @@ const DebtFreedom = () => {
   </div>
 
  {/* Resultado Calc */}
-  <div className="bg-slate-900 dark:bg-[#0a0a0c] text-white p-8 relative overflow-hidden ">
+  <div className="bg-slate-900 dark:bg-black/30 backdrop-blur-xl text-white p-8 relative overflow-hidden border border-white/5">
   <div className="absolute top-0 right-0 p-4 opacity-5"><TrendingUp className="w-32 h-32 text-emerald-500 dark:text-[#00d06c]"/></div>
   <p className="text-[10px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-[0.3em] mb-2 italic">Você terá acumulado</p>
   <p className="text-4xl font-black text-emerald-400 dark:text-[#00d06c] mb-6 italic tracking-tighter">R$ {investmentResult.total.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
@@ -273,7 +273,7 @@ const DebtFreedom = () => {
 
  {/* Coluna Direita: Perfil e Alocação */}
  <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
-  <div className="bg-white dark:bg-[#09090b] p-6 lg:p-8 flex-1">
+  <div className="bg-white dark:bg-black/30 backdrop-blur-xl p-6 lg:p-8 flex-1 border border-white/5">
   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
   <h3 className="font-bold text-slate-700 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wide"><PieIcon className="w-5 h-5 text-indigo-500"/> Sugestão de Carteira</h3>
   
@@ -335,11 +335,11 @@ const DebtFreedom = () => {
 
  {/* Cards Educativos Rápidos */}
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <div className="bg-emerald-50 dark:bg-emerald-500/5 p-6 rounded-3xl border-emerald-100 dark:border-emerald-500/10">
+  <div className="bg-emerald-50 dark:bg-black/30 backdrop-blur-xl p-6 rounded-3xl border-emerald-100 dark:border-white/5">
  <h4 className="font-black text-slate-800 dark:text-emerald-400 text-[10px] uppercase tracking-widest mb-2 italic">Tesouro Selic / CDB</h4>
  <p className="text-[11px] text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">O porto seguro. Você empresta dinheiro para o governo ou banco. Risco baixíssimo.</p>
  </div>
- <div className="bg-purple-50 dark:bg-purple-500/5 p-6 rounded-3xl border-purple-100 dark:border-purple-500/10">
+  <div className="bg-purple-50 dark:bg-black/30 backdrop-blur-xl p-6 rounded-3xl border-purple-100 dark:border-white/5">
  <h4 className="font-black text-slate-800 dark:text-purple-400 text-[10px] uppercase tracking-widest mb-2 italic">FIIs (Fundos Imobiliários)</h4>
  <p className="text-[11px] text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">Compre pedaços de shoppings e galpões. Receba aluguéis isentos de IR todo mês.</p>
  </div>

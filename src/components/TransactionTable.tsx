@@ -123,7 +123,7 @@ export default function TransactionTable() {
  <div className="col-span-12 md:col-span-4 flex flex-col gap-4 min-h-0">
  
  {/* Card Saldo */}
- <div className="p-6 relative overflow-hidden transition-all shrink-0 bg-white/5">
+ <div className="p-6 relative overflow-hidden transition-all shrink-0 bg-black/30 border border-white/5 backdrop-blur-xl">
  <div className="absolute top-0 right-0 p-24 bg-indigo-500/10 blur-3xl pointer-events-none" />
  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/60 mb-2">Fluxo de Caixa (Mês)</p>
  <h1 className={`text-3xl font-black tracking-tighter ${balance >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
@@ -150,7 +150,7 @@ export default function TransactionTable() {
  </div>
 
  {/* Busca */}
- <div className="flex-1 p-6 flex flex-col gap-4 min-h-0 bg-white/5">
+ <div className="flex-1 p-6 flex flex-col gap-4 min-h-0 bg-black/30 border border-white/5 backdrop-blur-xl">
  <div className="relative group">
  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
  <input 
@@ -165,7 +165,7 @@ export default function TransactionTable() {
  </div>
 
  {/* DIREITA: Lista */}
- <div className="col-span-12 md:col-span-8 p-6 flex flex-col min-h-0 bg-white/5">
+ <div className="col-span-12 md:col-span-8 p-6 flex flex-col min-h-0 bg-black/30 border border-white/5 backdrop-blur-xl">
  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
  {filteredTransactions.length === 0 ? (
  <div className="h-full flex flex-col items-center justify-center opacity-40">

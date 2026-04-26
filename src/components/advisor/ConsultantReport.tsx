@@ -174,15 +174,15 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
  };
 
  return (
- <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 h-full min-h-0 overflow-hidden pr-2">
+ <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-700 h-full min-h-0 overflow-hidden pr-2">
  
  {/* 1. HEADER (Título e Filtro temporal) */}
- <div className={`shrink-0 p-5 rounded-[2.5rem] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all ${isLight ? 'bg-white  ' : 'bg-white/5 border-white/10 backdrop-blur-xl'}`}>
+ <div className={`shrink-0 p-4 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 transition-all ${isLight ? 'bg-white  ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
  <div>
- <h2 className={`text-2xl font-black uppercase italic tracking-tighter flex items-center gap-3 ${isLight ? 'text-slate-900' : 'text-white'}`}>
- <FileText className="text-indigo-500" size={28} /> Raio-X Financeiro
+ <h2 className={`text-xl font-black uppercase italic tracking-tighter flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+ <FileText className="text-indigo-500" size={24} /> Raio-X Financeiro
  </h2>
- <p className="text-indigo-500 text-[9px] font-black uppercase tracking-[0.4em] mt-1">Inteligência & Simetria de Dados</p>
+ <p className="text-indigo-500 text-[8px] font-black uppercase tracking-[0.4em] mt-0.5">Inteligência & Simetria de Dados</p>
  </div>
 
  {/* MENSAL / ANUAL TOGGLE */}
@@ -203,7 +203,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
  </div>
 
  {/* 2. LINHA DE VELOCÍMETROS (4 Itens) */}
- <div className={`p-5 rounded-[2.5rem] grid grid-cols-2 md:grid-cols-4 gap-4 items-center shrink-0 transition-all ${isLight ? 'bg-white ' : 'bg-white/5 border-white/10 -2xl'}`}>
+ <div className={`p-4 rounded-3xl grid grid-cols-2 md:grid-cols-4 gap-3 items-center shrink-0 transition-all ${isLight ? 'bg-white ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
  <MiniGauge value={analysis.savingsRate} label="Retenção (Lucro)" color="#6366f1" />
  <MiniGauge value={analysis.rule503020.needs.percent} label="Custo Fixo" color={analysis.rule503020.needs.percent > 55 ? "#f43f5e" : "#10b981"} />
  <MiniGauge value={analysis.debtRatio} label="Dívidas/Renda" color={analysis.debtRatio > 30 ? "#f43f5e" : "#10b981"} />
@@ -216,7 +216,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
  {/* LADO ESQUERDO: PARECER E DISTRIBUIÇÃO (5 colunas) */}
  <div className="lg:col-span-5 flex flex-col gap-4 min-h-0">
  {/* PARECER */}
- <div className={`p-5 rounded-[2rem] flex items-center gap-4 shrink-0 transition-all ${isLight ? 'bg-white  ' : 'bg-white/5 border-white/10'}`}>
+ <div className={`p-4 rounded-2xl flex items-center gap-3 shrink-0 transition-all ${isLight ? 'bg-white  ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
  <div className={`p-3 rounded-full shrink-0 ${analysis.status === 'danger' ? 'bg-rose-500/20 text-rose-500' : 'bg-indigo-500/20 text-indigo-500'}`}>
  <Brain size={24} />
  </div>
@@ -227,7 +227,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
  </div>
 
  {/* DISTRIBUIÇÃO 50/30/20 */}
- <div className={`flex-1 flex flex-col p-6 rounded-[2.5rem] min-h-0 transition-all ${isLight ? 'bg-white  ' : 'bg-indigo-900/10 border-indigo-500/20'}`}>
+ <div className={`flex-1 flex flex-col p-4 rounded-3xl min-h-0 transition-all ${isLight ? 'bg-white  ' : 'bg-indigo-900/10 border-indigo-500/20 backdrop-blur-xl border'}`}>
  <h3 className={`text-[9px] font-black uppercase tracking-widest flex items-center gap-2 mb-6 shrink-0 ${isLight ? 'text-indigo-600' : 'text-indigo-400'}`}>
  <PieChart size={14}/> Distribuição de Fluxo
  </h3>
@@ -243,29 +243,29 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
  <div className="lg:col-span-7 flex flex-col gap-4 min-h-0">
  {/* GRID DE CARDS 2x2 */}
  <div className="grid grid-cols-2 gap-3 shrink-0">
- <div className={`p-5 rounded-[2rem] flex flex-col justify-center min-h-[90px] transition-all ${isLight ? 'bg-emerald-50 border-emerald-100' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
+ <div className={`p-4 rounded-2xl flex flex-col justify-center min-h-[70px] transition-all ${isLight ? 'bg-emerald-50 border-emerald-100' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
  <p className="text-[8px] font-black uppercase tracking-widest text-emerald-600 mb-1.5 flex items-center gap-1.5"><TrendingUp size={12}/> Receita</p>
  <h3 className="text-xl font-black tracking-tighter">R$ {analysis.income.toLocaleString('pt-BR')}</h3>
  </div>
 
- <div className={`p-5 rounded-[2rem] flex flex-col justify-center min-h-[90px] transition-all ${isLight ? 'bg-rose-50 border-rose-100' : 'bg-rose-500/10 border-rose-500/20'}`}>
+ <div className={`p-4 rounded-2xl flex flex-col justify-center min-h-[70px] transition-all ${isLight ? 'bg-rose-50 border-rose-100' : 'bg-rose-500/10 border-rose-500/20'}`}>
  <p className="text-[8px] font-black uppercase tracking-widest text-rose-600 mb-1.5 flex items-center gap-1.5"><TrendingDown size={12}/> Saídas</p>
  <h3 className="text-xl font-black tracking-tighter">R$ {analysis.expense.toLocaleString('pt-BR')}</h3>
  </div>
 
- <div className={`p-5 rounded-[2rem] flex flex-col justify-center min-h-[90px] transition-all ${isLight ? 'bg-slate-50 ' : 'bg-white/5 border-white/10'}`}>
+ <div className={`p-4 rounded-2xl flex flex-col justify-center min-h-[70px] transition-all ${isLight ? 'bg-slate-50 ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
  <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-1.5 flex items-center gap-1.5"><Wallet size={12}/> Saldo Real</p>
  <h3 className="text-xl font-black tracking-tighter">R$ {analysis.realBalance.toLocaleString('pt-BR')}</h3>
  </div>
 
- <div className={`p-5 rounded-[2rem] flex flex-col justify-center min-h-[90px] transition-all ${isLight ? 'bg-indigo-50 border-indigo-100' : 'bg-indigo-500/10 border-indigo-500/20'}`}>
+ <div className={`p-4 rounded-2xl flex flex-col justify-center min-h-[70px] transition-all ${isLight ? 'bg-indigo-50 border-indigo-100' : 'bg-indigo-500/10 border-indigo-500/20'}`}>
  <p className="text-[8px] font-black uppercase tracking-widest text-indigo-500 mb-1.5 flex items-center gap-1.5"><Clock size={12}/> Oxigênio</p>
  <h3 className="text-xl font-black tracking-tighter uppercase">{analysis.survivalMonths.toFixed(1)} <span className="text-[9px] opacity-50">Meses</span></h3>
  </div>
  </div>
 
  {/* TOP VAZAMENTOS COM SCROLL INVISÍVEL */}
- <div className={`flex-1 flex flex-col min-h-0 rounded-[2.5rem] p-5 transition-all ${isLight ? 'bg-white  ' : 'bg-white/5 border-white/10 backdrop-blur-md'}`}>
+ <div className={`flex-1 flex flex-col min-h-0 rounded-3xl p-4 transition-all ${isLight ? 'bg-white  ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
  <h3 className={`text-[9px] font-black uppercase tracking-widest mb-4 shrink-0 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Top Vazamentos de Riqueza</h3>
  
  {/* CONTAINER DE SCROLL INVISÍVEL */}

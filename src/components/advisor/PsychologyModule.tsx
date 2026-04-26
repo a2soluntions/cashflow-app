@@ -410,30 +410,31 @@ const traps: Trap[] = [
  }
 ];
 
-export function PsychologyModule() {
- const [activeTrap, setActiveTrap] = useState<string | null>(null);
+export function PsychologyModule({ theme = 'dark' }: { theme?: string }) {
+  const isLight = theme === 'light';
+  const [activeTrap, setActiveTrap] = useState<string | null>(null);
 
  return (
  <div className="h-full w-full flex flex-col gap-6 animate-in fade-in zoom-in-95 duration-500">
  
  {/* HEADER FLUTUANTE */}
  <div className="px-2 shrink-0">
- <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center gap-3 text-white">
+ <h2 className={`text-2xl font-black uppercase tracking-tighter flex items-center gap-3 ${isLight ? 'text-slate-900' : 'text-white'}`}>
  <Brain className="text-indigo-400" /> Hackeando a Mente
  </h2>
- <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+ <p className={`text-[10px] font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'} uppercase tracking-widest mt-1`}>
  Descubra os 40 vieses cognitivos que roubam o seu dinheiro silenciosamente
  </p>
  </div>
 
  {/* 💡 MENSAGEM INSPIRADORA (TOPO) */}
- <div className="shrink-0 p-5 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-[2rem] flex items-center gap-5">
- <div className="p-4 bg-indigo-500/20 rounded-full text-indigo-300 shrink-0">
+ <div className={`shrink-0 p-5 ${isLight ? 'bg-indigo-50 border border-indigo-100' : 'bg-gradient-to-r from-indigo-900/40 to-purple-900/40'} rounded-[2rem] flex items-center gap-5`}>
+ <div className={`p-4 ${isLight ? 'bg-indigo-500/10 text-indigo-600' : 'bg-indigo-500/20 text-indigo-300'} rounded-full shrink-0`}>
  <Sparkles size={24} />
  </div>
  <div>
- <h4 className="text-sm font-black uppercase tracking-widest text-white mb-1">A Consciência é o Primeiro Passo para a Riqueza</h4>
- <p className="text-[10px] font-medium text-indigo-200/70 leading-relaxed">
+ <h4 className={`text-sm font-black uppercase tracking-widest ${isLight ? 'text-indigo-900' : 'text-white'} mb-1`}>A Consciência é o Primeiro Passo para a Riqueza</h4>
+ <p className={`text-[10px] font-medium ${isLight ? 'text-indigo-700/80' : 'text-indigo-200/70'} leading-relaxed`}>
  Grandes corporações gastam bilhões estudando como ativar esses gatilhos na sua mente. Agora que você conhece as regras do jogo, você reassume o controle do seu dinheiro.
  </p>
  </div>
@@ -449,8 +450,9 @@ export function PsychologyModule() {
  return (
  <div 
  key={trap.id} 
- className={`relative bg-white/5 backdrop-blur-sm rounded-[2rem] transition-all duration-500 overflow-hidden cursor-pointer flex flex-col justify-center
- ${isActive ? 'md:col-span-2 xl:col-span-2 row-span-2 p-6 rounded-[2.5rem] bg-white/10' : 'hover:bg-white/10 p-4'}`}
+ className={`relative rounded-[2rem] transition-all duration-500 overflow-hidden cursor-pointer flex flex-col justify-center
+ ${isLight ? 'bg-white border border-slate-200 shadow-sm' : 'bg-black/30 backdrop-blur-xl'}
+ ${isActive ? 'md:col-span-2 xl:col-span-2 row-span-2 p-6 rounded-[2.5rem] ' + (isLight ? 'bg-slate-50 border-indigo-200' : 'bg-white/10') : 'hover:bg-white/10 p-4'}`}
  onClick={() => !isActive && setActiveTrap(trap.id)}
  >
  {/* Brilho de fundo do card */}
@@ -463,15 +465,15 @@ export function PsychologyModule() {
  {trap.icon}
  </div>
  <div className="flex-1 min-w-0 pr-2">
- <h3 className={`font-black uppercase tracking-widest text-white leading-tight ${isActive ? 'text-sm mb-1 whitespace-normal' : 'text-[10px] truncate'}`}>{trap.title}</h3>
- {isActive && <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{trap.subtitle}</p>}
+ <h3 className={`font-black uppercase tracking-widest leading-tight ${isLight ? 'text-slate-900' : 'text-white'} ${isActive ? 'text-sm mb-1 whitespace-normal' : 'text-[10px] truncate'}`}>{trap.title}</h3>
+ {isActive && <p className={`text-[9px] font-bold uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{trap.subtitle}</p>}
  </div>
  </div>
  
  {isActive ? (
  <button 
  onClick={(e) => { e.stopPropagation(); setActiveTrap(null); }}
- className="absolute right-0 top-0 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors shrink-0"
+ className={`absolute right-0 top-0 p-2 rounded-full ${isLight ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : 'bg-white/10 hover:bg-white/20 text-white'} transition-colors shrink-0`}
  >
  <X size={16} />
  </button>
@@ -486,21 +488,21 @@ export function PsychologyModule() {
  <div className={`transition-all duration-500 overflow-hidden relative z-10 ${isActive ? 'max-h-[500px] mt-6 opacity-100' : 'max-h-0 mt-0 opacity-0'}`}>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  {/* O Truque da Mente */}
- <div className="bg-rose-500/10 border-rose-500/20 rounded-2xl p-5">
- <h4 className="text-[9px] font-black uppercase tracking-widest text-rose-400 flex items-center gap-2 mb-3">
+ <div className={`${isLight ? 'bg-rose-50 border-rose-200' : 'bg-rose-500/10 border-rose-500/20'} rounded-2xl p-5`}>
+ <h4 className="text-[9px] font-black uppercase tracking-widest text-rose-500 flex items-center gap-2 mb-3">
  <ShieldAlert size={14}/> Como o cérebro te engana
  </h4>
- <p className="text-xs text-rose-100/90 leading-relaxed font-medium">
+ <p className={`text-xs ${isLight ? 'text-rose-900' : 'text-rose-100/90'} leading-relaxed font-medium`}>
  {trap.mindTrick}
  </p>
  </div>
 
  {/* A Solução / Vacina */}
- <div className="bg-emerald-500/10 border-emerald-500/20 rounded-2xl p-5">
- <h4 className="text-[9px] font-black uppercase tracking-widest text-emerald-400 flex items-center gap-2 mb-3">
+ <div className={`${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-500/20'} rounded-2xl p-5`}>
+ <h4 className="text-[9px] font-black uppercase tracking-widest text-emerald-600 flex items-center gap-2 mb-3">
  <Unlock size={14}/> A Cura do Hábito
  </h4>
- <p className="text-xs text-emerald-100/90 leading-relaxed font-medium">
+ <p className={`text-xs ${isLight ? 'text-emerald-900' : 'text-emerald-100/90'} leading-relaxed font-medium`}>
  {trap.solution}
  </p>
  </div>

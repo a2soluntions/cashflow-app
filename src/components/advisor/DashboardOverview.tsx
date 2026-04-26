@@ -22,7 +22,7 @@ export function DashboardOverview({ theme = 'dark' }: DashboardOverviewProps) {
  <Cpu size={350} className="absolute -bottom-20 left-1/4 opacity-50" />
  </div>
 
- <div className="relative flex flex-col gap-16 animate-in fade-in slide-in-from-bottom-6 duration-1000 max-w-2xl mx-auto px-6 py-16 lg:py-24">
+ <div className="relative flex flex-col gap-16 animate-in fade-in slide-in-from-bottom-6 duration-1000 max-w-2xl mx-auto px-6 pt-0 pb-16 lg:pt-0 lg:pb-24">
  
  {/* --- CABEÇALHO REFINADO --- */}
  <header className="space-y-6">

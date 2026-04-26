@@ -152,8 +152,8 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
  const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
  return (
- <div className="h-full font-inter overflow-y-auto custom-scrollbar p-4 lg:p-6 transition-colors duration-500 text-slate-900 dark:text-white">
- <div className="max-w-7xl mx-auto pb-20">
+ <div className="h-full font-inter overflow-hidden p-4 lg:p-6 transition-colors duration-500 text-slate-900 dark:text-white flex flex-col">
+ <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col min-h-0">
  
  {/* HEADER & TABS */}
  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
@@ -230,7 +230,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
  </div>
  </div>
  ) : (
- <div className="animate-in slide-in-from-right-4 duration-500 space-y-12 mt-6">
+ <div className="animate-in slide-in-from-right-4 duration-500 space-y-6 mt-6 flex-1 flex flex-col min-h-0">
  
  {/* INDEXADORES FINANCEIROS */}
  <div>
@@ -257,12 +257,12 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
  <div className="w-full h-px bg-slate-200 dark:bg-zinc-800/50" />
 
  {/* NOTÍCIAS */}
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+ <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1 min-h-0">
  <div className="text-slate-900 dark:text-white">
  <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 mb-8 text-xs"><Newspaper size={16}/> Compor Conteúdo</h3>
- <form onSubmit={handleAddNews} className="space-y-6">
+ <form onSubmit={handleAddNews} className="space-y-4">
  <div>
- <select className="w-full bg-slate-100 dark:bg-white/5 p-4 rounded-xl font-bold text-sm outline-none  transition-colors text-slate-500 focus:text-slate-900 dark:focus:text-white" value={contentType} onChange={e => setContentType(e.target.value)}>
+ <select className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none  transition-colors text-slate-500 focus:text-slate-900 dark:focus:text-white" value={contentType} onChange={e => setContentType(e.target.value)}>
  <option value="news" className="bg-white dark:bg-[#09090b]">Notícia (Radar)</option>
  <option value="marketing" className="bg-white dark:bg-[#09090b]">Marketing (Radar)</option>
   <option value="home_banner_left" className="bg-white dark:bg-[#09090b]">Banner Esquerdo (Home)</option>
@@ -270,22 +270,22 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
  </select>
  </div>
  <div>
- <input className="w-full bg-slate-100 dark:bg-white/5 p-4 rounded-xl font-bold text-sm outline-none  transition-colors placeholder:text-slate-400" placeholder="Título da Notícia" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} required />
+ <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none  transition-colors placeholder:text-slate-400" placeholder="Título da Notícia" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} required />
  </div>
  <div>
- <textarea className="w-full bg-transparent p-4 rounded-xl font-bold text-sm outline-none h-32  transition-colors placeholder:text-slate-400 custom-scrollbar" placeholder="Descrição curta (Call to action ou resumo da notícia)" value={newsDesc} onChange={e => setNewsDesc(e.target.value)} required />
+ <textarea className="w-full bg-transparent p-3 rounded-lg font-bold text-sm outline-none h-24  transition-colors placeholder:text-slate-400 custom-scrollbar" placeholder="Descrição curta (Call to action ou resumo da notícia)" value={newsDesc} onChange={e => setNewsDesc(e.target.value)} required />
  </div>
  <div>
- <input className="w-full bg-slate-100 dark:bg-white/5 p-4 rounded-xl font-bold text-sm outline-none  transition-colors placeholder:text-slate-400" placeholder="Link da Imagem (URL completa)" value={newsImg} onChange={e => setNewsImg(e.target.value)} />
+ <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none  transition-colors placeholder:text-slate-400" placeholder="Link da Imagem (URL completa)" value={newsImg} onChange={e => setNewsImg(e.target.value)} />
  </div>
  <div>
- <input className="w-full bg-slate-100 dark:bg-white/5 p-4 rounded-xl font-bold text-sm outline-none  transition-colors placeholder:text-slate-400" placeholder="Link Externo / Fonte (Opcional)" value={newsUrl} onChange={e => setNewsUrl(e.target.value)} />
+ <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none  transition-colors placeholder:text-slate-400" placeholder="Link Externo / Fonte (Opcional)" value={newsUrl} onChange={e => setNewsUrl(e.target.value)} />
  </div>
- <button className="w-full bg-emerald-500 text-black py-4 rounded-xl font-black uppercase text-xs tracking-widest -emerald-500/20 active:scale-95 transition-all mt-4 hover:bg-emerald-400">Publicar no Radar</button>
+ <button className="w-full bg-emerald-500 text-black py-3 rounded-lg font-black uppercase text-xs tracking-widest -emerald-500/20 active:scale-95 transition-all mt-2 hover:bg-emerald-400">Publicar no Radar</button>
  </form>
  </div>
 
- <div className="lg:col-span-2 flex flex-col h-[560px]">
+ <div className="lg:col-span-2 flex flex-col min-h-0">
  <div className="pb-4    flex justify-between items-center mb-6">
  <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Feed Ativo (Conteúdos)</h3>
  <span className="text-[10px] font-bold text-slate-400 px-3 py-1 rounded-full ">{siteContent.filter(c => c.content_type === 'news' || c.content_type === 'marketing').length} Item(ns) Ativo(s)</span>

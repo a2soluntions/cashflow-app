@@ -23,6 +23,11 @@
     -ms-overflow-style: none; /* IE e Edge */
   }
 
+  /* Exceção para elementos que PRECISAM ser redondos (Avatar, etc) */
+  .rounded-full, .rounded-full * {
+    border-radius: 9999px !important;
+  }
+
   *::-webkit-scrollbar {
     display: none; /* Chrome, Safari e Opera */
   }

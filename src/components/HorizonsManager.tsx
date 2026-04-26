@@ -143,7 +143,7 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  const impactLevel = (monthlyEffort / monthlyDisposableIncome) * 100;
 
  return (
-  <div key={goal.id} className={`group p-8 transition-all duration-500 flex flex-col ${isCompleted ? 'border-amber-500/40 bg-amber-50 dark:bg-amber-500/[0.03]' : '  bg-white/5 '}`}>
+  <div key={goal.id} className={`group p-8 transition-all duration-500 flex flex-col border border-white/20 ${isCompleted ? 'bg-amber-500/10 dark:bg-amber-500/[0.05] backdrop-blur-2xl' : 'bg-white dark:bg-white/10 backdrop-blur-2xl'}`}>
  
  <div className="flex justify-between items-start mb-8">
  <div className={`p-4 ${isCompleted ? 'text-amber-500 border-amber-500/20' : 'text-emerald-500 dark:text-[#00d06c] border-emerald-100 dark:border-[#00d06c]/20 bg-emerald-50 dark:bg-transparent'}`}>
@@ -206,8 +206,8 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
 
  {/* MODAL DE APORTE */}
  {contributeTo && (
- <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/60 dark:bg-[#09090b]/90 backdrop-blur-md p-6">
-  <div className="bg-white dark:bg-[#09090b] p-10 w-full max-w-sm animate-in zoom-in duration-300">
+ <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 backdrop-blur-sm p-6">
+  <div className="bg-white dark:bg-white/10 backdrop-blur-2xl border border-white/20 p-10 w-full max-w-sm animate-in zoom-in duration-300">
  <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter mb-2 leading-none">Avançar<br/>Missão</h2>
  <p className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-8 italic">Para: {contributeTo.title}</p>
  <div className="space-y-6">
@@ -230,8 +230,8 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
 
  {/* MODAL DE ADIÇÃO */}
  {isAdding && (
- <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/60 dark:bg-[#09090b]/90 backdrop-blur-md p-6">
-  <div className="bg-white dark:bg-[#09090b] p-10 w-full max-w-md animate-in zoom-in duration-300 ">
+ <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 backdrop-blur-sm p-6">
+  <div className="bg-white dark:bg-white/10 backdrop-blur-2xl border border-white/20 p-10 w-full max-w-md animate-in zoom-in duration-300 ">
  <div className="flex justify-between mb-8 items-center">
  <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter leading-none">Novo<br/>Horizonte</h2>
  <button onClick={() => setIsAdding(false)}><X className="text-slate-500 dark:text-zinc-500" /></button>
@@ -279,8 +279,8 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
 
  {/* CONFIRMAÇÃO DE EXCLUSÃO */}
  {confirmDelete && (
- <div className="fixed inset-0 z-[600] flex items-center justify-center bg-black/60 dark:bg-[#09090b]/90 backdrop-blur-md p-6">
- <div className="bg-white dark:bg-[#09090b]  dark:border-rose-500/20 p-10 w-full max-w-sm text-center animate-in zoom-in ">
+ <div className="fixed inset-0 z-[600] flex items-center justify-center bg-black/40 backdrop-blur-sm p-6">
+ <div className="bg-white dark:bg-white/10 backdrop-blur-2xl border border-white/20  dark:border-rose-500/20 p-10 w-full max-w-sm text-center animate-in zoom-in ">
  <AlertTriangle size={40} className="text-rose-500 mx-auto mb-6" />
  <h2 className="text-slate-900 dark:text-white font-black uppercase italic text-xl mb-2">Abortar Missão?</h2>
  <div className="flex gap-4 mt-8">
