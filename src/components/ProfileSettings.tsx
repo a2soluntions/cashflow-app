@@ -160,7 +160,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  <div className="flex-1 overflow-y-auto no-scrollbar pb-10">
  
  {/* BANNER DE ASSINATURA */}
- <div className="mb-10 p-8 bg-gradient-to-r from-emerald-50 dark:from-emerald-500/5 to-indigo-50 dark:to-indigo-500/5 flex flex-col md:flex-row items-center justify-between gap-6 ">
+ <div className="mb-6 p-8 bg-gradient-to-r from-emerald-50 dark:from-emerald-500/5 to-indigo-50 dark:to-indigo-500/5 flex flex-col md:flex-row items-center justify-between gap-6 ">
  <div className="flex items-center gap-6">
  <div className="w-16 h-16 bg-white dark:bg-[#09090b] flex items-center justify-center text-emerald-500 ">
  <Database size={28} />
@@ -182,6 +182,34 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  Ver Vantagens & Planos
  </button>
  </div>
+
+ {/* BANNER EXCLUSIVO LICENÇA VITALÍCIA (DESKTOP) */}
+ {subscriptionPlan === 'desktop' && (
+ <div className="mb-10 p-8 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-amber-900/10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+ {/* Efeito de brilho de fundo */}
+ <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/20 blur-3xl -z-10 rounded-full mix-blend-screen pointer-events-none translate-x-1/2 -translate-y-1/2"></div>
+ 
+ <div className="flex items-center gap-6 z-10">
+ <div className="w-16 h-16 bg-black flex items-center justify-center text-amber-400 border border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+ <Download size={28} />
+ </div>
+ <div>
+ <h3 className="text-xl font-black text-amber-500 uppercase italic tracking-tighter flex items-center gap-2">
+ Licença Vitalícia
+ <ShieldCheck size={16} className="text-amber-400" />
+ </h3>
+ <p className="text-xs text-amber-400/80 font-bold uppercase tracking-widest mt-1">Baixe seu aplicativo Windows Offline</p>
+ </div>
+ </div>
+ {/* TODO: Substituir este link pelo link final do instalador .exe */}
+ <a 
+ href="#" 
+ className="z-10 px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black font-black uppercase text-[11px] tracking-[0.2em] transition-all active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center gap-2"
+ >
+ <Download size={16} /> Baixar Instalador (.exe)
+ </a>
+ </div>
+ )}
 
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
  
