@@ -28,7 +28,7 @@ export default function CategoryManager({ categories, onUpdate, currentUserId }:
  ];
 
  const handleSave = async () => {
- if (!newName || !currentUserId) return;
+ if (!newName) return;
  try {
  if (editingId) {
  await appApi.updateCategory({
@@ -37,16 +37,16 @@ export default function CategoryManager({ categories, onUpdate, currentUserId }:
  type: newType,
  color: selectedColor,
  limit_amount: newType === 'expense' ? Number(newLimit) || 0 : undefined,
- user_id: currentUserId,
+ user_id: currentUserId || 'offline',
  });
  } else {
  await appApi.addCategory({
- id: Math.random().toString(36).substr(2, 9),
+ id: crypto.randomUUID(),
  name: newName.toUpperCase(),
  type: newType,
  color: selectedColor,
  limit_amount: newType === 'expense' ? Number(newLimit) || 0 : undefined,
- user_id: currentUserId,
+ user_id: currentUserId || 'offline',
  });
  }
  onUpdate();

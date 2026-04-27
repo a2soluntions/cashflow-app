@@ -29,7 +29,7 @@ export default function GoalsManager() {
  const addBudget = () => {
  if (!newBudget.category || !newBudget.limit) return;
  const budget: BudgetGoal = {
- id: Math.random().toString(36).substr(2, 9),
+ id: crypto.randomUUID(),
  category: newBudget.category,
  limitAmount: Number(newBudget.limit),
  };

@@ -99,7 +99,7 @@ export function TransactionManager() {
  }
 
  const newTx: Transaction = {
- id: Date.now().toString(),
+ id: crypto.randomUUID(),
  type: formData.type as 'income' | 'expense',
  amount: Number(formData.amount),
  description: formData.description,

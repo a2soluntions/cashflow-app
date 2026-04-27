@@ -13,7 +13,7 @@ interface Transaction {
  description: string;
  category: string;
  date: string;
- status?: 'COMPLETED' | 'PENDING';
+ status?: 'COMPLETED' | 'PENDING' | 'completed' | 'pending';
  installment?: { current: number; total: number };
 }
 
@@ -54,7 +54,7 @@ export default function TransactionTable() {
 
  // Filtra apenas PAGOS
  const filteredTransactions = transactions.filter(t => {
- const isCompleted = t.status === 'COMPLETED' || !t.status; 
+ const isCompleted = t.status === 'COMPLETED' || t.status === 'completed' || !t.status;
  const desc = t.description ? t.description.toLowerCase() : '';
  const cat = t.category ? t.category.toLowerCase() : '';
  const search = searchTerm.toLowerCase();

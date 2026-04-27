@@ -11,7 +11,7 @@ interface Transaction {
  description: string;
  category: string;
  date: string;
- status: 'COMPLETED' | 'PENDING';
+ status: 'COMPLETED' | 'PENDING' | 'completed' | 'pending';
  installment?: { current: number; total: number };
 }
 
@@ -36,7 +36,7 @@ export default function BillsManager({ mode = 'normal' }: BillsManagerProps) {
  if (saved) {
  const allTxs: Transaction[] = JSON.parse(saved);
  // Filtra apenas o que está Pendente
- const pending = allTxs.filter(t => t.status === 'PENDING');
+ const pending = allTxs.filter(t => t.status === 'PENDING' || t.status === 'pending');
  // Ordena por data (mais antigas/próximas primeiro)
  pending.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
  setBills(pending);
@@ -53,7 +53,7 @@ export default function BillsManager({ mode = 'normal' }: BillsManagerProps) {
  if (saved) {
  const allTxs: Transaction[] = JSON.parse(saved);
  const updatedTxs = allTxs.map(t => 
- t.id === id ? { ...t, status: 'COMPLETED' } : t
+ t.id === id ? { ...t, status: 'completed' } : t
  );
  
  localStorage.setItem('vittacash_pro_transactions', JSON.stringify(updatedTxs));

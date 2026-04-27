@@ -35,7 +35,7 @@ export default function DebtManager({ theme }: { theme: string }) {
  if (!newDebt.name || newDebt.balanceRaw <= 0 || newDebt.minPaymentRaw <= 0) return;
  const interestConverted = parseFloat(newDebt.interestDisplay.replace(',', '.')) || 0;
  const debt: Debt = {
- id: Date.now().toString(),
+ id: crypto.randomUUID(),
  name: newDebt.name,
  balance: newDebt.balanceRaw,
  interestRate: interestConverted,

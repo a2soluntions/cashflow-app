@@ -19,7 +19,7 @@ export interface Transaction {
   date: string;
   category: string;
   account?: string;
-  status?: TransactionStatus | 'PENDING' | 'COMPLETED' | 'OVERDUE';
+  status?: TransactionStatus | 'PENDING' | 'COMPLETED' | 'OVERDUE' | 'pending' | 'completed' | 'overdue';
 }
 
 export interface Category {

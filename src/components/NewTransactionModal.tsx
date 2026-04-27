@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
  X, Check, ArrowUpCircle, ArrowDownCircle, 
  CreditCard, Wallet, Divide, X as Multiply, 
- Clock, Percent, AlertTriangle, Zap
+ Clock, Percent, AlertTriangle, Zap, MessageSquare
 } from 'lucide-react';
+import { CustomAlert } from './CustomAlert';
 
 interface Category {
  id: string;
@@ -42,14 +43,30 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  const [categories, setCategories] = useState<Category[]>([]);
  const [budgets, setBudgets] = useState<Budget[]>([]);
  const [allTransactions, setAllTransactions] = useState<any[]>([]);
+ const [showSuccess, setShowSuccess] = useState(false);
+ const [sendToWhatsApp, setSendToWhatsApp] = useState(false);
+ const [errorAlert, setErrorAlert] = useState<{ isOpen: boolean; title: string; message: string }>({ isOpen: false, title: '', message: '' });
 
  const isLight = theme === 'light';
 
  useEffect(() => {
  if (isOpen) {
- setCategories(JSON.parse(localStorage.getItem('vittacash_pro_categories') || '[]'));
+  const savedCats = JSON.parse(localStorage.getItem('vittacash_pro_categories') || '[]');
+  if (savedCats.length > 0) {
+  setCategories(savedCats);
+  } else {
+  setCategories([
+  { id: '1', name: 'Alimentação', color: '#f59e0b' },
+  { id: '2', name: 'Moradia', color: '#3b82f6' },
+  { id: '3', name: 'Lazer', color: '#ec4899' },
+  { id: '4', name: 'Salário', color: '#10b981' },
+  { id: '5', name: 'Investimentos', color: '#8b5cf6' }
+  ] as any[]);
+  }
  setBudgets(JSON.parse(localStorage.getItem('vittacash_pro_budgets') || '[]'));
  setAllTransactions(JSON.parse(localStorage.getItem('vittacash_pro_transactions') || '[]'));
+ // Reset whatsapp toggle on open
+ setSendToWhatsApp(false);
  }
  }, [isOpen]);
 
@@ -88,31 +105,27 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  };
  }, [type, selectedCategory, rawValue, budgets, allTransactions, date, amountType, installments]);
 
- const calculateInterest = () => {
- if (paymentMethod === 'cash' || cashPrice === '' || rawValue === 0) return 0;
- let totalFinanced = amountType === 'total' ? rawValue : rawValue * installments;
- const interest = totalFinanced - Number(cashPrice);
- return interest > 0 ? interest : 0;
- };
-
  const handleSave = () => {
- if (!rawValue || !description || !selectedCategory) return;
+ if (!rawValue || !description || !selectedCategory) {
+  setErrorAlert({
+    isOpen: true,
+    title: 'Campos Incompletos',
+    message: 'Por favor, preencha o valor, a descrição e selecione uma categoria para prosseguir.'
+  });
+  return;
+ }
 
  const generatedTransactions = [];
- const totalInterest = calculateInterest();
- const interestPerInstallment = totalInterest / installments;
 
  if (paymentMethod === 'cash') {
  generatedTransactions.push({
- id: Math.random().toString(),
+ id: crypto.randomUUID(),
  type,
  amount: rawValue,
  description: description.toUpperCase(),
  category: selectedCategory,
  date,
- status: 'COMPLETED',
- interest: 0,
- installment: null
+ status: 'completed'
  });
  } else {
  let finalInstallmentValue = amountType === 'total' ? rawValue / installments : rawValue; 
@@ -122,29 +135,54 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  futureDate.setMonth(futureDate.getMonth() + i);
  
  generatedTransactions.push({
- id: Math.random().toString(),
+ id: crypto.randomUUID(),
  type,
  amount: finalInstallmentValue,
  description: `${description.toUpperCase()} (${i + 1}/${installments})`,
  category: selectedCategory,
  date: futureDate.toISOString().split('T')[0],
- status: 'PENDING',
- interest: interestPerInstallment,
- installment: { current: i + 1, total: installments }
+ status: 'pending'
  });
  }
  }
 
  onSave(generatedTransactions);
  
- setDisplayValue('');
- setRawValue(0);
- setCashPrice('');
- setDescription('');
- setSelectedCategory('');
- setPaymentMethod('cash');
- setInstallments(2);
- onClose();
+ // Feedback visual do sistema
+ setShowSuccess(true);
+
+ // --- AUTOMAÇÃO WHATSAPP (OPCIONAL) ---
+ if (sendToWhatsApp) {
+   const savedPhone = localStorage.getItem('vittacash_user_phone');
+   if (savedPhone) {
+     const cleanPhone = savedPhone.replace(/\D/g, '');
+     const formattedAmount = rawValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+     const typeLabel = type === 'income' ? '🟢 ENTRADA' : '🔴 SAÍDA';
+     const checkEmoji = '✅';
+     
+     const messageText = 
+       `*VittaCash - Alerta de Lançamento*\n\n` +
+       `*Tipo:* ${typeLabel}\n` +
+       `*Identificação:* ${description.toUpperCase()}\n` +
+       `*Valor:* ${formattedAmount}\n` +
+       `*Data:* ${new Date(date).toLocaleDateString('pt-BR')}\n\n` +
+       `${checkEmoji} Registro realizado com sucesso no seu Cockpit.`;
+     
+     window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(messageText)}`, '_blank');
+   }
+ }
+
+ setTimeout(() => {
+   setDisplayValue('');
+   setRawValue(0);
+   setCashPrice('');
+   setDescription('');
+   setSelectedCategory('');
+   setPaymentMethod('cash');
+   setInstallments(2);
+   setShowSuccess(false);
+   onClose();
+ }, 1500);
  };
 
  if (!isOpen) return null;
@@ -155,11 +193,29 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  onClick={onClose}
  >
  
+ <CustomAlert 
+   isOpen={errorAlert.isOpen}
+   onClose={() => setErrorAlert(prev => ({ ...prev, isOpen: false }))}
+   title={errorAlert.title}
+   message={errorAlert.message}
+   type="warning"
+ />
+
  <div 
  className={`relative w-full max-w-md border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 ${isLight ? 'bg-[#F3E5F5] border-slate-200' : 'bg-[#283593] border-white/10'}`}
  onClick={(e) => e.stopPropagation()}
  >
  
+ {showSuccess && (
+   <div className="absolute inset-0 z-[200] bg-emerald-500 flex flex-col items-center justify-center text-black animate-in fade-in duration-300">
+     <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4 animate-bounce">
+       <Check size={48} strokeWidth={4} />
+     </div>
+     <h3 className="text-xl font-black uppercase italic tracking-tighter">Lançado com Sucesso!</h3>
+     <p className="text-[10px] font-black uppercase tracking-widest mt-2 opacity-70">Sincronizando com o Cockpit...</p>
+   </div>
+ )}
+
  {/* ALERTA DE ORÇAMENTO */}
  {budgetStatus && (budgetStatus.isOver || budgetStatus.isWarning) && (
  <div className={`absolute right-0 top-0 px-4 py-1 z-[110] flex items-center gap-2
@@ -310,6 +366,22 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
 
  {/* AÇÕES */}
  <div className={`flex flex-col gap-3 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+  {/* TOGGLE WHATSAPP */}
+  <div className="flex items-center justify-between px-2 mb-1">
+    <div className="flex items-center gap-2">
+      <div className={`p-1.5 rounded-lg ${sendToWhatsApp ? 'bg-emerald-500/20 text-emerald-500' : 'bg-white/5 text-slate-500'}`}>
+        <MessageSquare size={14} />
+      </div>
+      <span className={`text-[9px] font-black uppercase tracking-widest ${sendToWhatsApp ? 'text-emerald-500' : 'text-slate-500'}`}>Notificar WhatsApp</span>
+    </div>
+    <button 
+      onClick={() => setSendToWhatsApp(!sendToWhatsApp)}
+      className={`w-10 h-5 rounded-full relative transition-all duration-300 border ${sendToWhatsApp ? 'bg-emerald-500 border-emerald-400' : 'bg-white/5 border-white/10'}`}
+    >
+      <div className={`absolute top-1 w-3 h-3 bg-white transition-all duration-300 ${sendToWhatsApp ? 'left-6' : 'left-1'}`} />
+    </button>
+  </div>
+
  {isLimitReached ? (
  <div className={`border p-4 text-center animate-in zoom-in-95 duration-500 ${isLight ? 'bg-rose-50 border-rose-200' : 'bg-rose-500/10 border-rose-500/30'}`}>
  <AlertTriangle className="text-rose-500 mx-auto mb-1" size={24} />

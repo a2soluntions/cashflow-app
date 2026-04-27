@@ -46,7 +46,8 @@ export default function Vitta() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [userAvatar, setUserAvatar] = useState<string | null>(localStorage.getItem('vittacash_user_avatar'));
+  const [userName, setUserName] = useState<string>(localStorage.getItem('vittacash_user_name') || 'Comandante');
 
   // --- ASSINATURA ---
   const [trialDaysLeft, setTrialDaysLeft] = useState<number>(999);
@@ -80,7 +81,7 @@ export default function Vitta() {
       const dbInvestments = await appApi.getInvestments(session.user.id);
       setInvestments(dbInvestments);
 
-      const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', session.user.id).single();
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
       if (profile) {
         const now = new Date();
         setSubscriptionPlan((profile.subscription_tier || 'free') as any);
@@ -92,6 +93,12 @@ export default function Vitta() {
         setSubscriptionActive(isSubActive || session.user.email === ADMIN_EMAIL);
         setTrialDaysLeft(daysLeft);
       }
+
+      // Sincroniza dados locais (Avatar e Nome)
+      const savedAvatar = localStorage.getItem('vittacash_user_avatar');
+      const savedName = localStorage.getItem('vittacash_user_name');
+      if (savedAvatar) setUserAvatar(savedAvatar);
+      if (savedName) setUserName(savedName);
     } catch (err) { console.error("Erro ao carregar dados", err); }
   }, [session, ADMIN_EMAIL]);
 
@@ -116,7 +123,11 @@ export default function Vitta() {
 
   const overdueCount = useMemo(() => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
-    return transactions.filter(t => (t as any).status === 'PENDING' && new Date(t.date) < today).length;
+    return transactions.filter(t => {
+      const status = String((t as any).status || '').toUpperCase();
+      const tDate = t.date ? new Date(t.date) : null;
+      return (status === 'PENDING') && tDate && tDate < today;
+    }).length;
   }, [transactions]);
 
   const NavigationHeader = () => {
@@ -150,23 +161,31 @@ export default function Vitta() {
               >
                   {userAvatar ? 
                     <img src={userAvatar} className="w-full h-full object-cover rounded-full" alt="User" /> : 
-                    <div className="w-full h-full flex items-center justify-center text-emerald-500 font-black text-lg bg-black rounded-full">VC</div>
+                    <div className="w-full h-full flex items-center justify-center text-emerald-500 font-black text-lg bg-black rounded-full">
+                      {userName.substring(0, 2).toUpperCase()}
+                    </div>
                   }
               </div>
             </button>
           )}
         </div>
 
-        {/* LADO DIREITO: Notificações (Ocultas após Trial se não for Premium) */}
+        {/* LADO DIREITO: Notificações (Sino sempre visível no sistema) */}
         <div className="fixed top-6 right-8 z-[1001] pointer-events-none flex items-center gap-6 animate-in slide-in-from-right duration-700">
-          {overdueCount > 0 && (subscriptionActive || trialDaysLeft > 0) && (
-            <button onClick={() => navigate('/app?tab=bills')} className="pointer-events-auto relative text-rose-500 animate-pulse px-1">
-              <Bell size={24} />
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white text-[9px] font-black flex items-center justify-center rounded-full">
+          <button 
+            onClick={() => navigate('/app?tab=bills')} 
+            className={`pointer-events-auto relative transition-all duration-500 hover:scale-110 px-1
+              ${overdueCount > 0 ? 'text-rose-500 animate-pulse' : 'text-slate-400 hover:text-emerald-500'}
+            `}
+            title={overdueCount > 0 ? `${overdueCount} contas atrasadas` : "Alertas e Notificações"}
+          >
+            <Bell size={24} />
+            {overdueCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white text-[9px] font-black flex items-center justify-center rounded-full shadow-[0_0_10px_rgba(225,29,72,0.4)]">
                 {overdueCount}
               </span>
-            </button>
-          )}
+            )}
+          </button>
         </div>
       </>
     );
@@ -275,7 +294,7 @@ export default function Vitta() {
                                     window.location.href = checkouts[plan] || '#';
                                 }
                             }} />;
-                            if (tab === 'dashboard') return <DashboardHome transactions={transactions as any} />;
+                            if (tab === 'dashboard') return <DashboardHome transactions={transactions as any} categories={categories} />;
                             if (tab === 'history') return <TransactionTable />;
                             if (tab === 'investments') return <InvestmentsManager investments={investments} onAdd={async(v) => { await appApi.addInvestment({...v, id: crypto.randomUUID(), user_id: session?.user?.id}); loadAllData(); }} onDelete={async(id) => { await appApi.deleteInvestment(id); loadAllData(); }} />;
                             if (tab === 'freedom') return <DebtFreedom />;
@@ -300,7 +319,19 @@ export default function Vitta() {
       <NewTransactionModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        onSave={async (txs) => { if(!isLimitReached) { for(const tx of txs) await appApi.addTransaction({...tx, user_id: session?.user?.id}); loadAllData(); } }}
+        onSave={async (txs) => { 
+          if(!isLimitReached) { 
+            try {
+              for(const tx of txs) {
+                await appApi.addTransaction({...tx, user_id: session?.user?.id}); 
+              }
+              loadAllData(); 
+            } catch (err: any) {
+              alert("Erro ao salvar transação: " + (err.message || JSON.stringify(err)));
+              console.error(err);
+            }
+          } 
+        }}
         isLimitReached={isLimitReached}
         theme={theme}
       />

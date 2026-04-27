@@ -30,10 +30,14 @@ export default defineConfig({
   plugins: [
     react(),
       VitePWA({
-      registerType: 'reloadPrompt',
+      registerType: 'prompt',
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw-v2.ts',
+      devOptions: {
+        enabled: true,
+        type: 'module'
+      },
       manifest: {
         name: 'VittaCash',
         short_name: 'VittaCash',

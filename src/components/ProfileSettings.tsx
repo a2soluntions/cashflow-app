@@ -59,16 +59,19 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  if (savedAvatar) setAvatarUrl(savedAvatar);
  };
 
- const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
- if (e.target.files?.[0]) {
- const reader = new FileReader();
- reader.readAsDataURL(e.target.files[0]);
- reader.onload = (event) => {
- setAvatarUrl(event.target?.result as string);
- showInternalToast('Avatar atualizado com sucesso!', 'success');
- };
- }
- };
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files?.[0]) {
+  const reader = new FileReader();
+  reader.readAsDataURL(e.target.files[0]);
+  reader.onload = (event) => {
+  const result = event.target?.result as string;
+  setAvatarUrl(result);
+  localStorage.setItem('vittacash_user_avatar', result);
+  onUpdate(); // Atualiza o avatar no resto do app imediatamente
+  showInternalToast('Avatar atualizado com sucesso!', 'success');
+  };
+  }
+  };
 
  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
  let v = e.target.value.replace(/\D/g, '');
@@ -99,6 +102,8 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  try {
  const backupData = {
  transactions: localStorage.getItem('vittacash_pro_transactions'),
+ categories: localStorage.getItem('vittacash_pro_categories'),
+ budgets: localStorage.getItem('vittacash_pro_budgets'),
  profile: { name: fullName, company: companyName, avatar: avatarUrl },
  date: new Date().toISOString()
  };
@@ -106,12 +111,42 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  const url = URL.createObjectURL(blob);
  const a = document.createElement('a');
  a.href = url;
- a.download = `VittaCash_Backup.json`;
+ a.download = `VittaCash_Backup_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
  a.click();
  showInternalToast('Backup exportado com sucesso!', 'success');
  } catch (err) {
  showInternalToast('Falha na exportação.', 'error');
  }
+ };
+
+ const handleRestoreData = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+  try {
+  const data = JSON.parse(event.target?.result as string);
+  
+  if (data.transactions) localStorage.setItem('vittacash_pro_transactions', data.transactions);
+  if (data.categories) localStorage.setItem('vittacash_pro_categories', data.categories);
+  if (data.budgets) localStorage.setItem('vittacash_pro_budgets', data.budgets);
+
+  if (data.profile) {
+  if (data.profile.name) localStorage.setItem('vittacash_user_name', data.profile.name);
+  if (data.profile.company) localStorage.setItem('vittacash_user_company', data.profile.company);
+  if (data.profile.avatar) localStorage.setItem('vittacash_user_avatar', data.profile.avatar);
+  }
+
+  loadProfile();
+  onUpdate();
+  showInternalToast('Dados restaurados com sucesso!', 'success');
+  if (backupInputRef.current) backupInputRef.current.value = '';
+  } catch (err) {
+  showInternalToast('Arquivo de backup inválido.', 'error');
+  }
+  };
+  reader.readAsText(file);
  };
 
  return (
@@ -257,7 +292,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  <Upload className="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
  <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest">Restaurar Dados</span>
  </button>
- <input type="file" ref={backupInputRef} className="hidden" />
+ <input type="file" ref={backupInputRef} onChange={handleRestoreData} accept=".json" className="hidden" />
  </div>
  </section>
  </div>
@@ -285,6 +320,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  value={userEmail} 
  onChange={e => setUserEmail(e.target.value)} 
  placeholder="seu@email.com"
+ antisocial-none="true"
  className="w-full bg-slate-50 dark:bg-white/[0.03] rounded-2xl px-6 py-4 text-slate-900 dark:text-white font-bold outline-none focus:/40 dark:focus:border-[#00d06c]/40 focus:bg-white dark:focus:bg-white/[0.07] transition-all "
  />
  </div>
@@ -329,7 +365,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
 
  <div className="pt-6 border-t   space-y-4">
  <div className="flex items-center justify-between">
- <div>
+ <div className="flex-1">
  <h4 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
  {permission === 'granted' ? <BellRing size={14} className="text-emerald-500 dark:text-[#00d06c]" /> : <BellOff size={14} className="text-slate-500 dark:text-zinc-500" />}
  Notificações Push (PWA)
@@ -384,6 +420,3 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
 };
 
 export default ProfileSettings;
-
-
-

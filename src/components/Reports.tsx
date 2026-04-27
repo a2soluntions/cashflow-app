@@ -15,10 +15,10 @@ import {
 } from 'lucide-react';
 
 // 1. IMPORTAÇÃO E EXPANSÃO DO TYPE (Resolve o erro do status)
-import { Transaction as BaseTransaction, TransactionStatus } from '../types'; 
+import { Transaction as BaseTransaction } from '../types'; 
 
 interface Transaction extends Omit<BaseTransaction, 'status'> {
- status?: TransactionStatus | 'COMPLETED' | 'PENDING';
+ status?: string;
  installment?: { current: number; total: number };
 }
 
@@ -69,8 +69,8 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  // Filtra apenas transações COMPLETED (ou sem status) do mês
  const currentMonthTxs = useMemo(() => {
  return transactions.filter(t => {
- if (!t || !t.date) return false; 
- if (t.status === 'PENDING' || t.status === TransactionStatus.PENDING) return false; // Ignora pendentes
+  if (!t || !t.date) return false; 
+  if (t.status?.toUpperCase() === 'PENDING') return false; // Ignora pendentes
 
  const txDate = new Date(t.date);
  if (isNaN(txDate.getTime())) return false;
@@ -81,8 +81,8 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  // Filtra apenas transações PENDING do mês (Contas a Pagar)
  const currentMonthBills = useMemo(() => {
  return transactions.filter(t => {
- if (!t || !t.date) return false;
- if (t.status !== 'PENDING' && t.status !== TransactionStatus.PENDING) return false; // Exige que seja pendente
+  if (!t || !t.date) return false;
+  if (t.status?.toUpperCase() !== 'PENDING') return false; // Exige que seja pendente
 
  const txDate = new Date(t.date);
  if (isNaN(txDate.getTime())) return false;
@@ -144,7 +144,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  }
 
  const histTxs = transactions.filter(t => {
- if (!t || !t.date || t.status === 'PENDING' || t.status === TransactionStatus.PENDING) return false; 
+  if (!t || !t.date || t.status?.toUpperCase() === 'PENDING') return false; 
  const d = new Date(t.date);
  return d.getMonth() === m && d.getFullYear() === y;
  });

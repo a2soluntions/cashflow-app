@@ -57,12 +57,11 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  const addGoal = async () => {
  if (!newTitle || numericValue <= 0 || !currentUserId) return;
  const goal: Goal = {
- id: Date.now().toString(),
+ id: crypto.randomUUID(),
  user_id: currentUserId,
  title: newTitle.toUpperCase(),
  target_amount: numericValue,
- current_amount: 0,
- category: newCategory
+ current_amount: 0
  };
  try {
  await appApi.addGoal(goal);
@@ -143,26 +142,26 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  const impactLevel = (monthlyEffort / monthlyDisposableIncome) * 100;
 
  return (
-  <div key={goal.id} className={`group p-8 transition-all duration-500 flex flex-col border border-white/20 ${isCompleted ? 'bg-amber-500/10 dark:bg-amber-500/[0.05] backdrop-blur-2xl' : 'bg-white dark:bg-white/10 backdrop-blur-2xl'}`}>
+  <div key={goal.id} className={`group p-6 transition-all duration-500 flex flex-col border border-white/20 ${isCompleted ? 'bg-amber-500/10 dark:bg-amber-500/[0.05] backdrop-blur-2xl' : 'bg-white dark:bg-white/10 backdrop-blur-2xl'}`}>
  
- <div className="flex justify-between items-start mb-8">
- <div className={`p-4 ${isCompleted ? 'text-amber-500 border-amber-500/20' : 'text-emerald-500 dark:text-[#00d06c] border-emerald-100 dark:border-[#00d06c]/20 bg-emerald-50 dark:bg-transparent'}`}>
- {isCompleted ? <Trophy size={24} className="animate-pulse" /> : <Target size={24} />}
+ <div className="flex justify-between items-start mb-5">
+ <div className={`p-3 ${isCompleted ? 'text-amber-500 border-amber-500/20' : 'text-emerald-500 dark:text-[#00d06c] border-emerald-100 dark:border-[#00d06c]/20 bg-emerald-50 dark:bg-transparent'}`}>
+ {isCompleted ? <Trophy size={20} className="animate-pulse" /> : <Target size={20} />}
  </div>
  {!isCompleted && impactLevel > 40 && (
- <span className="px-3 py-1 text-[8px] font-black uppercase tracking-widest border-rose-500/20 text-rose-500 bg-rose-500/5 animate-pulse">
+ <span className="px-3 py-1 text-xs px-1 font-black uppercase tracking-widest border-rose-500/20 text-rose-500 bg-rose-500/5 animate-pulse">
  ⚠️ Alerta de Impulso
  </span>
  )}
  </div>
 
- <h3 className={`text-2xl font-black uppercase italic tracking-tighter mb-6 ${isCompleted ? 'text-amber-500' : 'text-slate-900 dark:text-white'}`}>{goal.title}</h3>
+ <h3 className={`text-4xl font-black uppercase italic tracking-tighter mb-4 ${isCompleted ? 'text-amber-500' : 'text-slate-900 dark:text-white'}`}>{goal.title}</h3>
  
- <div className="space-y-6">
+ <div className="space-y-4">
  <div>
  <div className="flex justify-between items-end mb-2">
- <span className="text-[9px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest italic">Conquista</span>
- <span className={`text-2xl font-black italic ${isCompleted ? 'text-amber-500' : 'text-emerald-500 dark:text-[#00d06c]'}`}>{percent}%</span>
+ <span className="text-xs font-black text-slate-500 dark:text-zinc-500 uppercase tracking-widest italic">Conquista</span>
+ <span className={`text-4xl font-black italic ${isCompleted ? 'text-amber-500' : 'text-emerald-500 dark:text-[#00d06c]'}`}>{percent}%</span>
  </div>
  <div className="h-2.5 w-full bg-slate-100 dark:bg-white/5 overflow-hidden ">
  <div 
@@ -173,9 +172,9 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  </div>
 
  {!isCompleted ? (
- <div className={`p-5 ${impactLevel > 40 ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-100 dark:border-rose-500/10' : 'bg-indigo-50 dark:bg-indigo-500/5 border-indigo-100 dark:border-indigo-500/10'}`}>
- <p className={`text-[8px] font-black uppercase tracking-[0.2em] mb-2 ${impactLevel > 40 ? 'text-rose-500' : 'text-indigo-500 dark:text-indigo-400'}`}>Vitta Analysis</p>
- <p className="text-[10px] text-slate-600 dark:text-zinc-400 leading-relaxed italic">
+ <div className={`p-4 ${impactLevel > 40 ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-100 dark:border-rose-500/10' : 'bg-indigo-50 dark:bg-indigo-500/5 border-indigo-100 dark:border-indigo-500/10'}`}>
+ <p className={`text-xs font-black uppercase tracking-[0.2em] mb-2 ${impactLevel > 40 ? 'text-rose-500' : 'text-indigo-500 dark:text-indigo-400'}`}>Vitta Analysis</p>
+ <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed italic">
  {impactLevel > 40 
  ? `Este desejo compromete ${impactLevel.toFixed(0)}% da sua sobra mensal. Cuidado com o impulso.` 
  : `Viável! Aporte R$ ${monthlyEffort.toFixed(0)}/mês para realizar em 1 ano.`
@@ -183,18 +182,18 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  </p>
  </div>
  ) : (
- <div className="p-5 bg-amber-500/10 border-amber-500/20 text-center">
- <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Horizonte Alcançado!</p>
+ <div className="p-4 bg-amber-500/10 border-amber-500/20 text-center">
+ <p className="text-sm font-black text-amber-500 uppercase tracking-widest">Horizonte Alcançado!</p>
  </div>
  )}
 
  <div className="flex gap-2">
  {!isCompleted && (
- <button onClick={() => setContributeTo(goal)} className="flex-1 py-4 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white font-black uppercase text-[10px] tracking-widest hover:bg-emerald-500 hover:text-white dark:hover:bg-[#00d06c] dark:hover:text-black transition-all group-hover:bg-emerald-100 dark:group-hover:bg-[#00d06c]/20">
+ <button onClick={() => setContributeTo(goal)} className="flex-1 py-3 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-white font-black uppercase text-xs tracking-widest hover:bg-emerald-500 hover:text-white dark:hover:bg-[#00d06c] dark:hover:text-black transition-all group-hover:bg-emerald-100 dark:group-hover:bg-[#00d06c]/20">
  Aportar
  </button>
  )}
- <button onClick={() => setConfirmDelete(goal.id)} className="p-4 bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-zinc-600 hover:text-rose-500 transition-all">
+ <button onClick={() => setConfirmDelete(goal.id)} className="px-4 py-3 bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-zinc-600 hover:text-rose-500 transition-all">
  <Trash2 size={18} />
  </button>
  </div>
