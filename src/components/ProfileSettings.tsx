@@ -53,35 +53,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  }, [session]);
 
  const loadProfile = async () => {
- // 1. Tenta carregar do Supabase primeiro (persistência entre domínios)
- if (session?.user?.id) {
- try {
- const { data: profile } = await supabase
- .from('profiles')
- .select('name, avatar_url')
- .eq('id', session.user.id)
- .single();
-
- if (profile) {
- if (profile.name) { setFullName(profile.name); localStorage.setItem('vittacash_user_name', profile.name); }
- if (profile.avatar_url) { setAvatarUrl(profile.avatar_url); localStorage.setItem('vittacash_user_avatar', profile.avatar_url); }
- setUserEmail(session.user.email || '');
-
- // Campos extras: carrega do localStorage (isolado por sessão)
- const savedCompany = localStorage.getItem('vittacash_user_company');
- const savedPhone = localStorage.getItem('vittacash_user_phone');
- const savedChannel = localStorage.getItem('vittacash_notification_channel');
- if (savedCompany) setCompanyName(savedCompany);
- if (savedPhone) setUserPhone(savedPhone);
- if (savedChannel) setNotificationChannel(savedChannel as 'email'|'whatsapp'|'both');
- return;
- }
- } catch (err) {
- console.warn('[Profile] Falha ao carregar do Supabase, usando localStorage:', err);
- }
- }
-
- // 2. Fallback: carrega do localStorage
+ // 1. SEMPRE carrega do localStorage primeiro (rápido e confiável)
  const savedName = localStorage.getItem('vittacash_user_name');
  const savedCompany = localStorage.getItem('vittacash_user_company');
  const savedEmail = localStorage.getItem('vittacash_user_email');
@@ -94,6 +66,25 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  if (savedPhone) setUserPhone(savedPhone);
  if (savedChannel) setNotificationChannel(savedChannel as 'email'|'whatsapp'|'both');
  if (savedAvatar) setAvatarUrl(savedAvatar);
+
+ // 2. Complementa com Supabase (sobrescreve se tiver valor)
+ if (session?.user?.id) {
+ setUserEmail(session.user.email || savedEmail || '');
+ try {
+ const { data: profile } = await supabase
+ .from('profiles')
+ .select('name, avatar_url')
+ .eq('id', session.user.id)
+ .single();
+
+ if (profile) {
+ if (profile.name) { setFullName(profile.name); localStorage.setItem('vittacash_user_name', profile.name); }
+ if (profile.avatar_url) { setAvatarUrl(profile.avatar_url); localStorage.setItem('vittacash_user_avatar', profile.avatar_url); }
+ }
+ } catch (err) {
+ console.warn('[Profile] Supabase indisponível, usando dados locais:', err);
+ }
+ }
  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
