@@ -92,13 +92,23 @@ export default function Vitta() {
         
         setSubscriptionActive(isSubActive || session.user.email === ADMIN_EMAIL);
         setTrialDaysLeft(daysLeft);
-      }
 
-      // Sincroniza dados locais (Avatar e Nome)
-      const savedAvatar = localStorage.getItem('vittacash_user_avatar');
-      const savedName = localStorage.getItem('vittacash_user_name');
-      if (savedAvatar) setUserAvatar(savedAvatar);
-      if (savedName) setUserName(savedName);
+        // Carrega avatar e nome do Supabase (persist entre domínios)
+        if (profile.avatar_url) {
+          setUserAvatar(profile.avatar_url);
+          localStorage.setItem('vittacash_user_avatar', profile.avatar_url);
+        }
+        if (profile.name) {
+          setUserName(profile.name);
+          localStorage.setItem('vittacash_user_name', profile.name);
+        }
+      } else {
+        // Fallback: usa dados do localStorage se não tem no Supabase
+        const savedAvatar = localStorage.getItem('vittacash_user_avatar');
+        const savedName = localStorage.getItem('vittacash_user_name');
+        if (savedAvatar) setUserAvatar(savedAvatar);
+        if (savedName) setUserName(savedName);
+      }
     } catch (err) { console.error("Erro ao carregar dados", err); }
   }, [session, ADMIN_EMAIL]);
 

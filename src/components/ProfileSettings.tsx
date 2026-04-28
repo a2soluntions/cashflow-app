@@ -8,6 +8,7 @@ import {
 import logoA2 from '../assets/logo-a2.png'; 
 import { useAuth } from './AuthProvider';
 import { usePushNotifications } from '../hooks/usePushNotifications';
+import { supabase } from '../supabase';
 
 interface ProfileSettingsProps {
  onUpdate: () => void;
@@ -42,9 +43,33 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
 
  useEffect(() => {
  loadProfile();
- }, []);
+ }, [session]);
 
  const loadProfile = async () => {
+ // 1. Tenta carregar do Supabase primeiro (persistência entre domínios)
+ if (session?.user?.id) {
+ try {
+ const { data: profile } = await supabase
+ .from('profiles')
+ .select('name, company_name, phone, notification_channel, avatar_url')
+ .eq('id', session.user.id)
+ .single();
+
+ if (profile) {
+ if (profile.name) { setFullName(profile.name); localStorage.setItem('vittacash_user_name', profile.name); }
+ if (profile.company_name) { setCompanyName(profile.company_name); localStorage.setItem('vittacash_user_company', profile.company_name); }
+ if (profile.phone) { setUserPhone(profile.phone); localStorage.setItem('vittacash_user_phone', profile.phone); }
+ if (profile.notification_channel) { setNotificationChannel(profile.notification_channel as any); localStorage.setItem('vittacash_notification_channel', profile.notification_channel); }
+ if (profile.avatar_url) { setAvatarUrl(profile.avatar_url); localStorage.setItem('vittacash_user_avatar', profile.avatar_url); }
+ setUserEmail(session.user.email || '');
+ return; // Dados carregados da nuvem com sucesso
+ }
+ } catch (err) {
+ console.warn('[Profile] Falha ao carregar do Supabase, usando localStorage:', err);
+ }
+ }
+
+ // 2. Fallback: carrega do localStorage
  const savedName = localStorage.getItem('vittacash_user_name');
  const savedCompany = localStorage.getItem('vittacash_user_company');
  const savedEmail = localStorage.getItem('vittacash_user_email');
@@ -82,15 +107,33 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  }
  };
 
- const handleSave = (e: React.FormEvent) => {
+ const handleSave = async (e: React.FormEvent) => {
  e.preventDefault();
  try {
+ // Salva localmente (cache rápido)
  localStorage.setItem('vittacash_user_name', fullName);
  localStorage.setItem('vittacash_user_company', companyName);
  localStorage.setItem('vittacash_user_email', userEmail);
  localStorage.setItem('vittacash_user_phone', userPhone);
  localStorage.setItem('vittacash_notification_channel', notificationChannel);
  if (avatarUrl) localStorage.setItem('vittacash_user_avatar', avatarUrl);
+
+ // Salva na nuvem (Supabase) para persistir entre domínios
+ if (session?.user?.id) {
+ const { error } = await supabase.from('profiles').upsert({
+ id: session.user.id,
+ name: fullName,
+ company_name: companyName,
+ phone: userPhone,
+ notification_channel: notificationChannel,
+ avatar_url: avatarUrl || null,
+ }, { onConflict: 'id' });
+
+ if (error) {
+ console.warn('[Profile] Erro ao salvar no Supabase (dados salvos localmente):', error);
+ }
+ }
+
  onUpdate(); 
  showInternalToast('Perfil e Notificações atualizados com sucesso!', 'success');
  } catch (err) {

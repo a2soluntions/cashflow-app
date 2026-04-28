@@ -3,6 +3,39 @@ import { supabase } from '../supabase';
 
 const VAPID_PUBLIC_KEY = 'BKhEP0ahNoLA3eOKmSGAR93sLE6GVWyh6VcYyo2wpdIUN4P6Gkb2OqmSHayw1rz4Jm7ZEk6SNAHowxYlCfkqfKs';
 
+// Aguarda o Service Worker estar pronto com timeout e retry
+async function waitForServiceWorker(timeoutMs = 12000): Promise<ServiceWorkerRegistration> {
+  // Primeira tentativa
+  try {
+    const result = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('TIMEOUT_1')), timeoutMs / 2)
+      ),
+    ]);
+    return result;
+  } catch {
+    // Se falhou na primeira tentativa, espera 2s e tenta novamente
+    console.warn('[Push] SW não estava pronto, tentando novamente em 2s...');
+    await new Promise((r) => setTimeout(r, 2000));
+
+    return Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                'O Service Worker não conseguiu inicializar. Tente recarregar a página (Ctrl+Shift+R).'
+              )
+            ),
+          timeoutMs / 2
+        )
+      ),
+    ]);
+  }
+}
+
 export function usePushNotifications(userId: string | undefined) {
   const [permission, setPermission] = useState<NotificationPermission>(
     typeof Notification !== 'undefined' ? Notification.permission : 'default'
@@ -40,14 +73,8 @@ export function usePushNotifications(userId: string | undefined) {
 
     setLoading(true);
     try {
-      // Timeout para evitar loop infinito caso o Service Worker trave
-      const swPromise = navigator.serviceWorker.ready;
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout ao aguardar Service Worker')), 5000)
-      );
+      const registration = await waitForServiceWorker(12000);
 
-      const registration = await Promise.race([swPromise, timeoutPromise]) as ServiceWorkerRegistration;
-      
       const permissionResult = await Notification.requestPermission();
       setPermission(permissionResult);
 
@@ -61,7 +88,7 @@ export function usePushNotifications(userId: string | undefined) {
       });
 
       // Se falhar o fetch (ex: ambiente local sem API), pelo menos paramos o loading
-      const response = await fetch('/api/save-subscription', {
+      await fetch('/api/save-subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, subscription }),
