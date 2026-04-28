@@ -6,18 +6,14 @@ import './index.css'
 // Importa a função virtual gerada automagicamente pelo vite-plugin-pwa
 import { registerSW } from 'virtual:pwa-register';
 
-// Registro do Service Worker
+// Registro do Service Worker (atualização automática sem popup nativo)
 const updateSW = registerSW({
   onNeedRefresh() {
-    // Alerta nativo simples. Em um sistema robusto, isso poderia acionar o estado 
-    // de um Toast/Modal para atualizar ("Uma nova versão está disponível! Atualizar agora?")
-    const reload = confirm('Existe uma nova versão do VittaCash disponível. Deseja atualizar agora?');
-    if (reload) {
-      updateSW(true);
-    }
+    console.log('[VittaCash] Nova versão detectada — atualizando automaticamente...');
+    updateSW(true);
   },
   onOfflineReady() {
-    console.log('O app VittaCash já pode ser acessado offline!');
+    console.log('[VittaCash] App pronto para uso offline!');
   },
 });
 

@@ -27,7 +27,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  const [avatarUrl, setAvatarUrl] = useState('');
  
  const { session } = useAuth();
- const { permission, subscribeUser, unsubscribeUser, loading: pushLoading } = usePushNotifications(session?.user?.id);
+ const { permission, subscribeUser, unsubscribeUser, loading: pushLoading, lastMessage: pushMessage } = usePushNotifications(session?.user?.id);
  
  // --- ESTADO DO TOAST CUSTOMIZADO (PADRÃO VITTA) ---
  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -36,6 +36,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  setToast({ message, type });
  setTimeout(() => setToast(null), 3000);
  };
+
+ // Mostra mensagens do hook de push no toast do sistema (sem alert nativo)
+ useEffect(() => {
+ if (pushMessage) {
+ showInternalToast(pushMessage.text, pushMessage.type);
+ }
+ }, [pushMessage]);
 
  const PROFILE_ID = 'desktop_user_v2'; 
  const fileInputRef = useRef<HTMLInputElement>(null);
