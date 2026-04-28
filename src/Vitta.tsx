@@ -202,6 +202,15 @@ export default function Vitta() {
   };
 
   const handleLogout = async () => {
+    // Limpa dados de perfil do localStorage para não vazar para outro usuário
+    localStorage.removeItem('vittacash_user_avatar');
+    localStorage.removeItem('vittacash_user_name');
+    localStorage.removeItem('vittacash_user_company');
+    localStorage.removeItem('vittacash_user_email');
+    localStorage.removeItem('vittacash_user_phone');
+    localStorage.removeItem('vittacash_notification_channel');
+    setUserAvatar(null);
+    setUserName('Comandante');
     await supabase.auth.signOut();
     navigate('/login');
   };

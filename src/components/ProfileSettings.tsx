@@ -58,18 +58,23 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  try {
  const { data: profile } = await supabase
  .from('profiles')
- .select('name, company_name, phone, notification_channel, avatar_url')
+ .select('name, avatar_url')
  .eq('id', session.user.id)
  .single();
 
  if (profile) {
  if (profile.name) { setFullName(profile.name); localStorage.setItem('vittacash_user_name', profile.name); }
- if (profile.company_name) { setCompanyName(profile.company_name); localStorage.setItem('vittacash_user_company', profile.company_name); }
- if (profile.phone) { setUserPhone(profile.phone); localStorage.setItem('vittacash_user_phone', profile.phone); }
- if (profile.notification_channel) { setNotificationChannel(profile.notification_channel as any); localStorage.setItem('vittacash_notification_channel', profile.notification_channel); }
  if (profile.avatar_url) { setAvatarUrl(profile.avatar_url); localStorage.setItem('vittacash_user_avatar', profile.avatar_url); }
  setUserEmail(session.user.email || '');
- return; // Dados carregados da nuvem com sucesso
+
+ // Campos extras: carrega do localStorage (isolado por sessão)
+ const savedCompany = localStorage.getItem('vittacash_user_company');
+ const savedPhone = localStorage.getItem('vittacash_user_phone');
+ const savedChannel = localStorage.getItem('vittacash_notification_channel');
+ if (savedCompany) setCompanyName(savedCompany);
+ if (savedPhone) setUserPhone(savedPhone);
+ if (savedChannel) setNotificationChannel(savedChannel as 'email'|'whatsapp'|'both');
+ return;
  }
  } catch (err) {
  console.warn('[Profile] Falha ao carregar do Supabase, usando localStorage:', err);
@@ -125,16 +130,12 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  localStorage.setItem('vittacash_notification_channel', notificationChannel);
  if (avatarUrl) localStorage.setItem('vittacash_user_avatar', avatarUrl);
 
- // Salva na nuvem (Supabase) para persistir entre domínios
+ // Salva na nuvem (Supabase) — apenas colunas que existem na tabela profiles
  if (session?.user?.id) {
- const { error } = await supabase.from('profiles').upsert({
- id: session.user.id,
+ const { error } = await supabase.from('profiles').update({
  name: fullName,
- company_name: companyName,
- phone: userPhone,
- notification_channel: notificationChannel,
  avatar_url: avatarUrl || null,
- }, { onConflict: 'id' });
+ }).eq('id', session.user.id);
 
  if (error) {
  console.warn('[Profile] Erro ao salvar no Supabase (dados salvos localmente):', error);
