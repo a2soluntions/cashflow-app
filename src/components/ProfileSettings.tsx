@@ -107,7 +107,32 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
  v = v.replace(/(\d)(\d{4})$/, '$1-$2');
  setUserPhone(v);
+ localStorage.setItem('vittacash_user_phone', v);
+ } else if (v === '') {
+ setUserPhone('');
+ localStorage.setItem('vittacash_user_phone', '');
  }
+ };
+
+ // Auto-save: salva no localStorage a cada digitação para nunca perder dados
+ const handleNameChange = (value: string) => {
+ setFullName(value);
+ localStorage.setItem('vittacash_user_name', value);
+ };
+
+ const handleCompanyChange = (value: string) => {
+ setCompanyName(value);
+ localStorage.setItem('vittacash_user_company', value);
+ };
+
+ const handleEmailChange = (value: string) => {
+ setUserEmail(value);
+ localStorage.setItem('vittacash_user_email', value);
+ };
+
+ const handleChannelChange = (channel: 'email'|'whatsapp'|'both') => {
+ setNotificationChannel(channel);
+ localStorage.setItem('vittacash_notification_channel', channel);
  };
 
  const handleSave = async (e: React.FormEvent) => {
@@ -302,7 +327,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  <input 
  type="text" 
  value={fullName} 
- onChange={e => setFullName(e.target.value)} 
+ onChange={e => handleNameChange(e.target.value)} 
  className="w-full bg-slate-50 dark:bg-white/[0.03] rounded-2xl px-6 py-4 text-slate-900 dark:text-white font-bold outline-none focus:/40 dark:focus:border-[#00d06c]/40 focus:bg-white dark:focus:bg-white/[0.07] transition-all "
  />
  </div>
@@ -311,7 +336,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  <input 
  type="text" 
  value={companyName} 
- onChange={e => setCompanyName(e.target.value)} 
+ onChange={e => handleCompanyChange(e.target.value)} 
  className="w-full bg-slate-50 dark:bg-white/[0.03] rounded-2xl px-6 py-4 text-slate-900 dark:text-white font-bold outline-none focus:/40 dark:focus:border-[#00d06c]/40 focus:bg-white dark:focus:bg-white/[0.07] transition-all "
  />
  </div>
@@ -360,7 +385,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  <input 
  type="email" 
  value={userEmail} 
- onChange={e => setUserEmail(e.target.value)} 
+ onChange={e => handleEmailChange(e.target.value)} 
  placeholder="seu@email.com"
  antisocial-none="true"
  className="w-full bg-slate-50 dark:bg-white/[0.03] rounded-2xl px-6 py-4 text-slate-900 dark:text-white font-bold outline-none focus:/40 dark:focus:border-[#00d06c]/40 focus:bg-white dark:focus:bg-white/[0.07] transition-all "
@@ -383,21 +408,21 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  <div className="grid grid-cols-3 gap-2">
  <button 
  type="button"
- onClick={() => setNotificationChannel('email')}
+ onClick={() => handleChannelChange('email')}
  className={`py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 ${notificationChannel === 'email' ? 'bg-emerald-50 dark:bg-[#00d06c]/20   text-emerald-600 dark:text-[#00d06c]' : 'bg-slate-50 dark:bg-white/[0.02]   text-slate-500 dark:text-zinc-500 hover:bg-slate-100 dark:hover:bg-white/[0.05]'}`}
  >
  E-mail
  </button>
  <button 
  type="button"
- onClick={() => setNotificationChannel('whatsapp')}
+ onClick={() => handleChannelChange('whatsapp')}
  className={`py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 ${notificationChannel === 'whatsapp' ? 'bg-emerald-50 dark:bg-[#00d06c]/20   text-emerald-600 dark:text-[#00d06c]' : 'bg-slate-50 dark:bg-white/[0.02]   text-slate-500 dark:text-zinc-500 hover:bg-slate-100 dark:hover:bg-white/[0.05]'}`}
  >
  WhatsApp
  </button>
  <button 
  type="button"
- onClick={() => setNotificationChannel('both')}
+ onClick={() => handleChannelChange('both')}
  className={`py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 ${notificationChannel === 'both' ? 'bg-emerald-50 dark:bg-[#00d06c]/20   text-emerald-600 dark:text-[#00d06c]' : 'bg-slate-50 dark:bg-white/[0.02]   text-slate-500 dark:text-zinc-500 hover:bg-slate-100 dark:hover:bg-white/[0.05]'}`}
  >
  Em Ambos
