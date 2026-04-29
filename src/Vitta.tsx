@@ -216,7 +216,7 @@ export default function Vitta() {
   };
 
   return (
-    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' ? 'min-h-screen' : 'min-h-screen overflow-x-hidden'}`}>
+    <div className={`w-full h-screen overflow-hidden font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' ? 'min-h-screen overflow-auto' : ''}`}>
       
       {location.pathname !== '/' && location.pathname !== '/login' && <NavigationHeader />}
 

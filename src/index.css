@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply transition-colors duration-500;
+  html, body {
+    @apply transition-colors duration-500 overflow-hidden h-full;
   }
   
   /* Garante que o fundo mude mesmo fora da div principal */
