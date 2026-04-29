@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { 
  X, Check, ArrowUpCircle, ArrowDownCircle, 
  CreditCard, Wallet, Divide, X as Multiply, 
@@ -242,7 +242,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  </div>
  </div>
 
- <div className="p-6 flex flex-col gap-4 max-h-[85vh] overflow-y-auto custom-scrollbar">
+ <div className="p-6 flex flex-col gap-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
  
  {/* TIPO DE OPERAÇÃO */}
  <div className="grid grid-cols-2 gap-3">
@@ -346,7 +346,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  {/* CATEGORIA */}
  <div className="space-y-2">
  <label className={`text-[9px] font-black uppercase tracking-[0.2em] ml-1 ${isLight ? 'text-slate-400' : 'text-white/40'}`}>Classificação</label>
- <div className="grid grid-cols-3 gap-2 p-1">
+ <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-1">
  {filteredCategories.length === 0 ? (
  <div className={`col-span-3 text-center py-4 border border-dashed text-[9px] font-black uppercase tracking-widest ${isLight ? 'bg-white border-slate-200 text-slate-300' : 'bg-black/20 border-white/10 text-white/20'}`}>
  Sem categorias
@@ -420,3 +420,4 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  </div>
  );
 }
+

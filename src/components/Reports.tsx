@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { 
  BarChart3, 
  TrendingUp, 
@@ -228,7 +228,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  <div id="vitta-printable-report" className={`h-full w-full flex flex-col gap-4 animate-in fade-in duration-700 overflow-hidden pb-2 print:bg-white print:text-black print:overflow-visible print:h-auto ${printMode === 'bw' ? 'print:grayscale print:contrast-125' : ''}`}>
  
  {/* HEADER DA CENTRAL */}
- <div className="flex flex-col md:flex-row md:items-end justify-between  border-white/5 pb-4 shrink-0 gap-4 print:lack/10">
+ <div className="flex flex-col border-white/5 pb-4 shrink-0 gap-3 print:lack/10">
  <div>
  <h2 className="text-[9px] font-black text-[#00d06c] uppercase tracking-[0.5em] mb-1 flex items-center gap-2 print:text-emerald-700">
  <BarChart3 size={12} /> Central de Documentos
@@ -238,11 +238,11 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </h1>
  </div>
 
- <div className="flex flex-col items-end gap-3 print:hidden">
+ <div className="flex flex-col gap-3 print:hidden">
  
  {/* TABS E BOTÃO EXPORTAR */}
- <div className="flex items-center gap-4">
- <div className="flex gap-1 bg-slate-50 dark:bg-[#09090b]/40 p-1 ">
+ <div className="flex flex-wrap items-center gap-2 md:gap-4">
+ <div className="flex gap-1 bg-slate-50 dark:bg-[#09090b]/40 p-1 flex-wrap">
  <button onClick={() => setActiveTab('summary')} className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'summary' ? 'bg-white dark:bg-[#00d06c] text-emerald-600 dark:text-black' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white'}`}>
  <BarChart3 size={12} /> Resumo
  </button>
@@ -304,7 +304,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  {/* ABA 1: RESUMO EXECUTIVO */}
  {activeTab === 'summary' && (
  <>
- <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 shrink-0 print:grid-cols-3 print:gap-4 print:mb-6">
+ <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0 print:grid-cols-3 print:gap-4 print:mb-6">
  <div className="lg:col-span-2 p-5 bg-white/5 dark:bg-black/30 backdrop-blur-xl relative overflow-hidden group flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 border border-white/5">
  <div className="absolute top-0 right-0 p-4 opacity-5 dark:opacity-10 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity">
  <Zap size={80} className="text-emerald-500 dark:text-[#00d06c] fill-emerald-500 dark:fill-[#00d06c] print:text-gray-300 print:fill-gray-300" />
@@ -413,7 +413,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  <div className="bg-white dark:bg-[#09090b]/30 backdrop-blur-xl rounded-[2.5rem] p-6 print:border-none print:p-0 border border-white/5 ">
  <h3 className="text-slate-900 dark:text-white font-black italic uppercase mb-6 tracking-tighter text-xl print:text-black print:mb-2">Extrato de Transações (Realizadas)</h3>
  {currentMonthTxs.length > 0 ? (
- <div className="w-full">
+ <div className="w-full overflow-x-auto">
  <table className="w-full text-left text-sm text-slate-600 dark:text-zinc-400">
  <thead className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-zinc-500 ">
  <tr>
@@ -452,7 +452,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  <div className="bg-white dark:bg-[#09090b]/30 backdrop-blur-xl rounded-[2.5rem] p-6 print:border-none print:p-0 border border-white/5 ">
  <h3 className="text-slate-900 dark:text-white font-black italic uppercase mb-6 tracking-tighter text-xl print:text-black print:mb-2">Obrigações e Contas (Pendentes)</h3>
  {currentMonthBills.length > 0 ? (
- <div className="w-full">
+ <div className="w-full overflow-x-auto">
  <table className="w-full text-left text-sm text-slate-600 dark:text-zinc-400">
  <thead className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-zinc-500 ">
  <tr>
@@ -487,6 +487,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
 };
 
 export default Reports;
+
 
 
 

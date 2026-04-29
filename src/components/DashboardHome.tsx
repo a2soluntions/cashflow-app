@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
  TrendingUp, TrendingDown, Wallet, Activity, 
  AlertTriangle, BrainCircuit, Target, CheckCircle2,
@@ -268,7 +268,7 @@ export default function DashboardHome({ transactions, categories = [] }: Dashboa
  </div>
 
  {/* VELOCÍMETROS COMPACTOS */}
- <div className="shrink-0 h-[85px] grid grid-cols-4 gap-2 mb-1">
+ <div className="shrink-0 grid grid-cols-2 md:grid-cols-4 gap-2 mb-1">
  <Gauge value={financialData.healthScore} label="Saúde" subtitle="Score" />
  <Gauge value={financialData.expenseRatio} label="Uso Renda" subtitle="Gastos" type="inverse" />
  <Gauge value={financialData.debtRatio} label="Dívida" subtitle="Pendentes" type="inverse" />
@@ -276,7 +276,7 @@ export default function DashboardHome({ transactions, categories = [] }: Dashboa
  </div>
 
   {/* STATS COMPACTOS */}
-  <div className="grid grid-cols-6 gap-2 shrink-0 mb-1">
+  <div className="grid grid-cols-3 md:grid-cols-6 gap-2 shrink-0 mb-1">
   {[
   { label: 'Saldo', val: financialData.balance, icon: Wallet, color: 'text-white' },
   { label: 'Fluxo', val: financialData.cashFlow, icon: ArrowUpRight, color: 'text-emerald-500' },
@@ -297,10 +297,10 @@ export default function DashboardHome({ transactions, categories = [] }: Dashboa
   </div>
 
  {/* CONTEÚDO PRINCIPAL FLEXÍVEL */}
- <div className="flex grid grid-cols-12 gap-3 flex-1 min-h-0 overflow-hidden">
+ <div className="flex flex-col md:grid md:grid-cols-12 gap-3 md:flex-1 md:min-h-0 md:overflow-hidden">
  {/* ESQUERDA */}
- <div className="col-span-3 flex flex-col gap-2 min-h-0">
- <div className="h-[120px] p-3 bg-white/5 flex flex-col justify-between shrink-0">
+ <div className="md:col-span-3 flex flex-col gap-2">
+ <div className="p-3 bg-white/5 flex flex-col justify-between shrink-0 min-h-[100px]">
  <div className="flex items-center justify-between">
   <span className="text-[11px] font-black uppercase text-slate-400 flex items-center gap-1.5"><BrainCircuit size={14} className="text-emerald-500"/> Saúde</span>
  <span className={`text-base font-black ${financialData.healthStatus === 'good' ? 'text-emerald-500' : 'text-rose-500'}`}>{financialData.healthScore}%</span>
@@ -312,7 +312,7 @@ export default function DashboardHome({ transactions, categories = [] }: Dashboa
  ))}
  </div>
  </div>
- <div className="flex-1 p-3 bg-white/5 overflow-hidden flex flex-col min-h-0">
+ <div className="p-3 bg-white/5 flex flex-col min-h-[120px]">
   <div className="flex items-center gap-2 mb-2 text-rose-500 shrink-0"><Skull size={16} /><span className="text-[11px] font-black uppercase">Vilões</span></div>
  <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
  {financialData.villains.map((v, i) => (
@@ -326,7 +326,7 @@ export default function DashboardHome({ transactions, categories = [] }: Dashboa
  </div>
 
  {/* CENTRAL */}
- <div className="col-span-6 p-3 bg-white/5 flex flex-col relative overflow-hidden min-h-0">
+ <div className="md:col-span-6 p-3 bg-white/5 flex flex-col relative overflow-hidden min-h-[220px]">
  <div className="flex justify-between items-center mb-2 text-[9px] font-black uppercase tracking-widest text-slate-400 shrink-0">
  <span className="flex items-center gap-1.5"><Activity size={14} className="text-emerald-500" /> {viewMode === 'monthly' ? 'Fluxo Diário' : 'Fluxo Mensal'}</span>
  <div className="flex gap-3 text-[7px]"><div className="flex items-center gap-1"><div className="w-3 h-0.5 bg-emerald-500"/> In</div><div className="flex items-center gap-1"><div className="w-3 h-0.5 bg-rose-500"/> Out</div></div>
@@ -352,8 +352,8 @@ export default function DashboardHome({ transactions, categories = [] }: Dashboa
  </div>
 
  {/* DIREITA */}
- <div className="col-span-3 flex flex-col gap-2 min-h-0">
- <div className="h-[120px] p-3 bg-white/5 flex flex-col shrink-0">
+ <div className="md:col-span-3 flex flex-col gap-2">
+ <div className="p-3 bg-white/5 flex flex-col shrink-0 min-h-[100px]">
   <div className="flex items-center gap-1.5 mb-2 text-amber-500 shrink-0"><Percent size={16} /><span className="text-[11px] font-black uppercase">Distribuição</span></div>
  <div className="space-y-2 overflow-y-auto no-scrollbar flex-1">
  {financialData.categoryImpact.map((item, i) => (
@@ -364,7 +364,7 @@ export default function DashboardHome({ transactions, categories = [] }: Dashboa
  ))}
  </div>
  </div>
- <div className="flex-1 p-3 bg-white/5 overflow-hidden flex flex-col min-h-0">
+ <div className="p-3 bg-white/5 flex flex-col min-h-[120px]">
   <div className="flex items-center gap-1.5 mb-2 text-blue-400 shrink-0"><Clock size={16} /><span className="text-[11px] font-black uppercase">Vencimentos</span></div>
  <div className="flex-1 space-y-1.5 overflow-y-auto no-scrollbar">
  {financialData.upcomingBills.map((bill, i) => (
@@ -385,3 +385,4 @@ export default function DashboardHome({ transactions, categories = [] }: Dashboa
   </div>
  );
 }
+

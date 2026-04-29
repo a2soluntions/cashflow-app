@@ -48,14 +48,14 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
    }
  };
 
- const radius = isAdmin ? 270 : 240; 
+  const radius = 240; 
  const totalItems = menuItems.length;
 
  return (
  <div className="relative h-full w-full flex items-center justify-center overflow-hidden bg-transparent">
  
  {/* 🌌 SISTEMA ORBITAL (DESKTOP) */}
- <div className={`hidden md:flex relative items-center justify-center w-[650px] h-[650px] -translate-y-12 transition-all duration-700 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in zoom-in'}`}>
+  <div className={`hidden md:flex relative items-center justify-center w-[650px] h-[650px] transition-all duration-700 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in zoom-in'}`}>
  {/* NÚCLEO CENTRAL */}
  <div className="relative z-50 group transition-all duration-700">
   <div className="flex items-center justify-center transition-all relative">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
  Zap, ShieldCheck, TrendingUp, AlertTriangle, 
  CheckCircle2, ArrowRight, Newspaper, DollarSign, 
@@ -152,7 +152,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   
   <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-32 relative z-10">
    {/* Banner Esquerdo */}
-   <div className="hidden xl:block w-[440px] aspect-video overflow-hidden border border-white/10 bg-zinc-900 group relative shrink-0">
+   <div className="hidden xl:block w-[440px] aspect-video overflow-hidden border border-white/10 bg-zinc-950 group relative shrink-0 shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-lg">
    {leftBanners.length > 0 ? (
      <a 
        href={leftBanners[currentLeftIdx]?.meta_value?.external_url || "#"} 
@@ -161,7 +161,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
        className="block w-full h-full animate-in fade-in duration-1000"
        key={leftBanners[currentLeftIdx]?.id}
      >
-       <img src={leftBanners[currentLeftIdx]?.image_url} alt="Sponsor" className="w-full h-full object-cover transition-opacity duration-700" />
+       <img src={leftBanners[currentLeftIdx]?.image_url} alt="Sponsor" className="w-full h-full object-cover hover:scale-105 transition-all duration-700" />
      </a>
    ) : (
      <img src="vitta_sponsor_banner_1_1776825587725.png" alt="Sponsor" className="w-full h-full object-cover" />
@@ -206,7 +206,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   </div>
   
     {/* Banner Direito */}
-   <div className="hidden xl:block w-[440px] aspect-video overflow-hidden border border-white/10 bg-zinc-900 group relative shrink-0">
+   <div className="hidden xl:block w-[440px] aspect-video overflow-hidden border border-white/10 bg-zinc-950 group relative shrink-0 shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-lg">
    {rightBanners.length > 0 ? (
      <a 
        href={rightBanners[currentRightIdx]?.meta_value?.external_url || "#"} 
@@ -215,10 +215,10 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
        className="block w-full h-full animate-in fade-in duration-1000"
        key={rightBanners[currentRightIdx]?.id}
      >
-       <img src={rightBanners[currentRightIdx]?.image_url} alt="Sponsor" className="w-full h-full object-contain transition-opacity duration-700" />
+       <img src={rightBanners[currentRightIdx]?.image_url} alt="Sponsor" className="w-full h-full object-cover hover:scale-105 transition-all duration-700" />
      </a>
    ) : (
-     <img src="vitta_sponsor_banner_2_1776825608562.png" alt="Sponsor" className="w-full h-full object-contain" />
+     <img src="vitta_sponsor_banner_2_1776825608562.png" alt="Sponsor" className="w-full h-full object-cover" />
    )}
    </div>
   </div>
@@ -242,7 +242,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   {item.image_url && (
   <div className="aspect-[16/10] overflow-hidden relative">
   <div className="absolute inset-0 bg-gradient-to-t from-indigo-950 to-transparent z-10 opacity-60" />
-  <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+  <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
   </div>
   )}
   <div className="p-8 flex-1 flex flex-col relative z-20">
@@ -414,5 +414,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
  </div>
  );
 }
+
+
 
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from './components/AuthProvider';
 import { appApi } from './services/api';
@@ -147,11 +147,11 @@ export default function Vitta() {
     return (
       <>
         {/* LADO ESQUERDO: Voltar para o Hub (Home) */}
-        <div className="fixed top-6 left-8 z-[1001] pointer-events-none flex items-center animate-in slide-in-from-left duration-700">
+        <div className="fixed top-3 left-3 md:top-6 md:left-8 z-[1001] pointer-events-none flex items-center animate-in slide-in-from-left duration-700">
           <button 
             onClick={() => navigate('/app')}
             title="Voltar ao Hub"
-            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all group pointer-events-auto
+            className={`w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all group pointer-events-auto
               ${theme === 'light' ? 'bg-white text-slate-900 shadow-xl' : 'bg-zinc-900/60 backdrop-blur-md text-white/80 hover:text-white shadow-2xl'}
             `}
           >
@@ -160,14 +160,14 @@ export default function Vitta() {
         </div>
 
         {/* CENTRO: Avatar do Usuário */}
-        <div className="fixed top-6 left-0 right-0 z-[1001] pointer-events-none flex items-center justify-center animate-in fade-in duration-700">
+        <div className="fixed top-2 md:top-6 left-0 right-0 z-[1001] pointer-events-none flex items-center justify-center animate-in fade-in duration-700">
           {isAuthenticated && (
             <button 
               onClick={() => navigate('/app?tab=settings')} 
               className="group relative pointer-events-auto flex items-center justify-center transition-all hover:scale-110 hover:rotate-[360deg] duration-1000 rounded-full"
             >
               <div 
-                className="w-16 h-16 rounded-full overflow-hidden bg-zinc-950 border-2 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center justify-center"
+                className="w-10 h-10 md:w-16 md:h-16 rounded-full overflow-hidden bg-zinc-950 border-2 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center justify-center"
               >
                   {userAvatar ? 
                     <img src={userAvatar} className="w-full h-full object-cover rounded-full" alt="User" /> : 
@@ -181,7 +181,7 @@ export default function Vitta() {
         </div>
 
         {/* LADO DIREITO: Notificações (Sino sempre visível no sistema) */}
-        <div className="fixed top-6 right-8 z-[1001] pointer-events-none flex items-center gap-6 animate-in slide-in-from-right duration-700">
+        <div className="fixed top-3 right-3 md:top-6 md:right-8 z-[1001] pointer-events-none flex items-center gap-6 animate-in slide-in-from-right duration-700">
           <button 
             onClick={() => navigate('/app?tab=bills')} 
             className={`pointer-events-auto relative transition-all duration-500 hover:scale-110 px-1
@@ -216,7 +216,7 @@ export default function Vitta() {
   };
 
   return (
-    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
+    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' ? 'min-h-screen' : 'min-h-screen overflow-x-hidden'}`}>
       
       {location.pathname !== '/' && location.pathname !== '/login' && <NavigationHeader />}
 
@@ -257,7 +257,7 @@ export default function Vitta() {
             !isAuthenticated ? <Navigate to="/login" /> : (() => {
                 const tab = new URLSearchParams(location.search).get('tab') || 'hub';
                 return (
-                    <div className={`h-full w-full pt-20 md:pt-24 px-4 md:px-8 pb-12 ${['advisor', 'admin'].includes(tab) ? 'overflow-hidden' : 'overflow-y-auto'} custom-scrollbar`}>
+                    <div className={`h-full w-full pt-16 md:pt-24 px-2 md:px-8 pb-12 ${['advisor'].includes(tab) ? 'overflow-hidden' : 'overflow-y-auto'} custom-scrollbar`}>
                         {(() => {
                             const isTrial = trialDaysLeft > 0;
                             const isPremiumUser = subscriptionPlan === 'premium' || session?.user?.email === ADMIN_EMAIL;
@@ -468,3 +468,4 @@ function Lock(props: any) {
       <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
     )
 }
+
