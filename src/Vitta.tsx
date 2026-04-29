@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from './components/AuthProvider';
 import { appApi } from './services/api';
@@ -257,7 +257,7 @@ export default function Vitta() {
             !isAuthenticated ? <Navigate to="/login" /> : (() => {
                 const tab = new URLSearchParams(location.search).get('tab') || 'hub';
                 return (
-                    <div className={`h-full w-full pt-16 md:pt-24 px-2 md:px-8 pb-12 ${['advisor'].includes(tab) ? 'overflow-hidden' : 'overflow-y-auto'} custom-scrollbar`}>
+                    <div className={`h-full w-full pt-16 md:pt-24 px-2 md:px-8 pb-12 ${['advisor', 'admin'].includes(tab) ? 'overflow-hidden' : 'overflow-y-auto'} custom-scrollbar`}>
                         {(() => {
                             const isTrial = trialDaysLeft > 0;
                             const isPremiumUser = subscriptionPlan === 'premium' || session?.user?.email === ADMIN_EMAIL;

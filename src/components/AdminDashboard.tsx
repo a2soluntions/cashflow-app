@@ -220,8 +220,8 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
   return (
     <>
       <CustomAlert />
-      <div className="h-screen font-inter p-4 lg:p-6 transition-colors duration-500 text-slate-900 dark:text-white flex flex-col overflow-hidden">
-        <div className="max-w-7xl w-full mx-auto flex flex-col">
+      <div className="h-full font-inter p-4 lg:p-6 transition-colors duration-500 text-slate-900 dark:text-white flex flex-col overflow-hidden">
+        <div className="max-w-7xl w-full mx-auto flex flex-col flex-1 overflow-hidden">
           
           {/* HEADER & TABS */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
@@ -260,7 +260,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
           </div>
 
           {activeTab === 'vendas' ? (
-            <div className="animate-in fade-in duration-500">
+            <div className="animate-in fade-in duration-500 flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-6 pb-12">
               {/* KPI CARDS */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
                 {[
@@ -317,7 +317,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
               </div>
             </div>
           ) : (
-            <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 overflow-hidden h-full">
+            <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 overflow-hidden">
               
               {/* INDEXADORES FINANCEIROS */}
               <div>
@@ -396,10 +396,24 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                   </form>
                 </div>
 
-                <div className="lg:col-span-2 flex flex-col mt-8 lg:mt-0">
-                  <div className="pb-4 flex justify-between items-center mb-6">
+                <div className="lg:col-span-2 flex flex-col mt-8 lg:mt-0 overflow-hidden">
+                  <div className="pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <h3 id="active-feed" className="text-xs font-black uppercase tracking-widest text-slate-400">Feed Ativo (Conteúdos)</h3>
-                    <span className="text-[10px] font-bold text-slate-400 px-3 py-1 rounded-full bg-white/5">{siteContent.length} Item(ns) Ativo(s)</span>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-1 rounded-lg border border-slate-200 dark:border-white/5">
+                        <span className="text-[8px] font-black uppercase text-slate-400 ml-1 mr-1">Exibir:</span>
+                        {[5, 10, 20, 50].map(val => (
+                          <button 
+                            key={val}
+                            onClick={() => setVisibleCount(val)}
+                            className={`px-3 py-1 rounded text-[10px] font-black transition-all ${visibleCount === val ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-white'}`}
+                          >
+                            {val}
+                          </button>
+                        ))}
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-400 px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 whitespace-nowrap">{siteContent.length} Item(ns) Ativo(s)</span>
+                    </div>
                   </div>
                   <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-4 space-y-4 pb-20 overscroll-contain">
                     {siteContent.length === 0 && (
