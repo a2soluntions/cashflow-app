@@ -17,6 +17,7 @@ export interface Transaction {
   category: string;
   date: string;
   status: TransactionStatus;
+  interest?: number;
   paid_amount?: number;
   account_id?: string;
   is_recurring?: boolean;

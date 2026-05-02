@@ -1,9 +1,10 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
- Zap, ShieldCheck, TrendingUp, AlertTriangle, 
- CheckCircle2, ArrowRight, Newspaper, DollarSign, 
- Globe, LayoutGrid, Brain, Lock, Infinity, Clock,
- ExternalLink
+  Zap, ShieldCheck, TrendingUp, AlertTriangle, 
+  CheckCircle2, ArrowRight, Newspaper, DollarSign, 
+  Globe, LayoutGrid, Brain, Lock, Infinity, Clock,
+  ExternalLink, Cookie, Mail, Instagram, Youtube, Linkedin, MessageCircle
 } from 'lucide-react';
 import { supabase } from '../supabase';
 
@@ -30,7 +31,21 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   const [rightBanners, setRightBanners] = useState<News[]>([]);
   const [currentLeftIdx, setCurrentLeftIdx] = useState(0);
   const [currentRightIdx, setCurrentRightIdx] = useState(0);
- const [loading, setLoading] = useState(true);
+  const [corporateData, setCorporateData] = useState({
+    name: 'Vitta Cash Soluções Digitais Ltda',
+    cnpj: '00.000.000/0000-00',
+    address: 'Av. Paulista, 1000 - Bela Vista, São Paulo - SP'
+  });
+  const [showCookieConsent, setShowCookieConsent] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Verifica se já aceitou os cookies
+    const consent = localStorage.getItem('vitta_cookie_consent');
+    if (!consent) {
+      setTimeout(() => setShowCookieConsent(true), 2000);
+    }
+  }, []);
 
  const scrollToPlans = () => {
  const el = document.getElementById('pricing');
@@ -79,6 +94,15 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
          setLeftBanners(bData.filter(b => b.content_type === 'home_banner_left'));
          setRightBanners(bData.filter(b => b.content_type === 'home_banner_right'));
        }
+
+        const { data: corpData } = await supabase.from('site_content').select('*').eq('content_type', 'corporate_data').maybeSingle();
+        if (corpData) {
+          setCorporateData({
+            name: corpData.title,
+            cnpj: corpData.meta_value?.cnpj || '00.000.000/0000-00',
+            address: corpData.description
+          });
+        }
 
  } catch (e) { console.error("Erro ao carregar notícias", e); }
  finally { setLoading(false); }
@@ -401,14 +425,195 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   </div>
   </section>
 
-  {/* FOOTER */}
-  <footer className="py-10 px-6 border-t border-white/5 text-center mt-10">
-  <div className="flex justify-center mb-8">
-  <div className="p-3 bg-white/5"><ShieldCheck className="w-8 h-8 text-emerald-500" /></div>
-  </div>
-  <p className="text-[10px] font-black uppercase tracking-[0.6em] text-slate-500">
-  VittaCash © 2026 — Inteligência Financeira de Alto Nível
-  </p>
+  {/* ⚖️ ÁREA LEGAL E COMPLIANCE (RODAPÉ) */}
+  <footer className="py-24 px-6 border-t border-white/5 bg-zinc-950/30 relative overflow-hidden mt-20">
+    <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+    
+    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-16">
+      
+      {/* BRAND & MISSION */}
+      <div className="md:col-span-4 space-y-8">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-emerald-500 rounded-sm shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+            <ShieldCheck className="w-5 h-5 text-black" />
+          </div>
+          <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">VittaCash</h2>
+        </div>
+        
+        <div className="space-y-4">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Nossa Missão</h3>
+          <p className="text-[11px] text-slate-400 font-medium leading-relaxed max-w-sm">
+            Transformar o caos financeiro em clareza absoluta, capacitando indivíduos a assumirem o controle do seu destino através da inteligência e tecnologia de ponta.
+          </p>
+        </div>
+
+        <div className="space-y-2 pt-4">
+          <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500/40">Dados Corporativos</p>
+          <div className="space-y-1">
+            <p className="text-[11px] font-bold text-slate-300">{corporateData.name}</p>
+            <p className="text-[10px] font-bold text-slate-500">CNPJ: {corporateData.cnpj}</p>
+            <p className="text-[10px] font-bold text-slate-500 leading-tight">{corporateData.address}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* EMPRESA & CONTATO */}
+      <div className="md:col-span-3 space-y-10">
+        <div className="space-y-6">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Fale Conosco</h3>
+          <ul className="space-y-5">
+            <li>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs font-black text-white uppercase tracking-tighter">Suporte Técnico</span>
+                <a href="mailto:suporte@vittacash.com" className="text-[11px] text-emerald-400 font-bold hover:text-white transition-all flex items-center gap-2 group">
+                  <div className="p-1.5 bg-emerald-500/10 rounded group-hover:bg-emerald-500/20 transition-all">
+                    <Mail size={12} />
+                  </div>
+                  suporte@vittacash.com
+                </a>
+              </div>
+            </li>
+            <li>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs font-black text-white uppercase tracking-tighter">WhatsApp Direto</span>
+                <a href="https://wa.me/5534998408962" target="_blank" rel="noreferrer" className="text-[11px] text-emerald-400 font-bold hover:text-white transition-all flex items-center gap-2 group">
+                  <div className="p-1.5 bg-emerald-500/10 rounded group-hover:bg-emerald-500/20 transition-all">
+                    <MessageCircle size={12} />
+                  </div>
+                  (34) 99840-8962
+                </a>
+              </div>
+            </li>
+            <li>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs font-black text-white uppercase tracking-tighter">Comercial</span>
+                <span className="text-[11px] text-slate-500 font-medium italic">Parcerias e licenciamento</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div className="space-y-6">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Redes Sociais</h3>
+          <div className="flex flex-wrap gap-3">
+            <a href="https://instagram.com/vitta_cash" target="_blank" rel="noreferrer" className="p-2.5 bg-white/5 border border-white/10 rounded-lg hover:border-emerald-500/50 hover:bg-emerald-500/10 text-slate-400 hover:text-emerald-400 transition-all group" title="Instagram">
+              <Instagram size={18} className="group-hover:scale-110 transition-transform" />
+            </a>
+            <a href="https://youtube.com/@VittaCash" target="_blank" rel="noreferrer" className="p-2.5 bg-white/5 border border-white/10 rounded-lg hover:border-rose-500/50 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition-all group" title="YouTube">
+              <Youtube size={18} className="group-hover:scale-110 transition-transform" />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* LEGAL & COMPLIANCE */}
+      <div className="md:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-12">
+        <div className="space-y-8">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Legal</h3>
+          <ul className="space-y-6">
+            <li>
+              <Link to="/legal/privacy" className="group flex flex-col gap-1.5 text-left">
+                <span className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tighter italic">Política de Privacidade</span>
+                <span className="text-[9px] text-slate-500 font-medium leading-tight">Privacidade e Proteção de Dados (LGPD)</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/legal/terms" className="group flex flex-col gap-1.5 text-left">
+                <span className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tighter italic">Termos de Uso</span>
+                <span className="text-[9px] text-slate-500 font-medium leading-tight">Diretrizes e responsabilidades de uso</span>
+              </Link>
+            </li>
+          </ul>
+        </div>
+        <div className="space-y-8">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Transparência</h3>
+          <ul className="space-y-6">
+            <li>
+              <button onClick={() => window.location.href='/legal/cookies'} className="group flex flex-col gap-1.5 text-left">
+                <span className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tighter italic">Aviso de Cookies</span>
+                <span className="text-[9px] text-slate-500 font-medium leading-tight">Preferências de rastreamento e cookies</span>
+              </button>
+            </li>
+            <li>
+              <Link to="/legal/security" className="group flex flex-col gap-1.5 text-left">
+                <span className="text-xs font-black text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tighter italic">Segurança de Dados</span>
+                <span className="text-[9px] text-slate-500 font-medium leading-tight">Criptografia e protocolos de proteção</span>
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    {/* COPYRIGHT LINE */}
+    <div className="max-w-7xl mx-auto mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="flex flex-wrap items-center justify-center md:justify-start gap-8">
+        <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full bg-emerald-400 opacity-75 rounded-full"></span>
+            <span className="relative inline-flex h-1.5 w-1.5 bg-emerald-500 rounded-full"></span>
+          </span>
+          <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500">System Online</span>
+        </div>
+
+        {/* SECURITY SEALS */}
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/5 border border-cyan-500/20 rounded-lg group hover:border-cyan-500/50 transition-all">
+            <Lock size={16} className="text-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
+            <span className="text-[9px] font-black uppercase tracking-widest text-cyan-400/80">SSL Secure</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/20 rounded-lg group hover:border-emerald-500/50 transition-all">
+            <ShieldCheck size={16} className="text-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+            <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400/80">LGPD PRO</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/5 border border-indigo-500/20 rounded-lg group hover:border-indigo-500/50 transition-all">
+            <Globe size={16} className="text-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.5)]" />
+            <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400/80">Cloud Secured</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="text-center md:text-right">
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-600 mb-1.5 italic">A2soluntions © 2026</p>
+        <p className="text-[9px] font-bold text-slate-700 uppercase leading-none">Desenvolvimento de Sistemas de Alto Impacto</p>
+      </div>
+    </div>
+
+    {/* AVISO DE COOKIES */}
+    {showCookieConsent && (
+      <div className="fixed bottom-6 left-6 right-6 md:left-auto md:w-96 bg-zinc-900/95 backdrop-blur-xl border border-white/10 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[2000] animate-in slide-in-from-bottom-10 duration-700">
+        <div className="flex items-start gap-4 mb-4">
+          <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><Cookie size={24} /></div>
+          <div>
+            <h4 className="text-xs font-black uppercase tracking-widest text-white mb-1">Aviso de Cookies</h4>
+            <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
+              Utilizamos cookies para melhorar sua experiência. Ao aceitar, você concorda com nossa <Link to="/legal/privacy" className="text-emerald-500 underline">Política de Privacidade</Link>.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => {
+              localStorage.setItem('vitta_cookie_consent', 'denied');
+              setShowCookieConsent(false);
+            }}
+            className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest transition-all"
+          >
+            Não Aceitar
+          </button>
+          <button 
+            onClick={() => {
+              localStorage.setItem('vitta_cookie_consent', 'accepted');
+              setShowCookieConsent(false);
+            }}
+            className="flex-1 py-2.5 bg-emerald-500 text-black text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20"
+          >
+            Aceitar Cookies
+          </button>
+        </div>
+      </div>
+    )}
   </footer>
 
  </div>

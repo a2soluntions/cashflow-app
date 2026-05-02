@@ -81,6 +81,9 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
     DÓLAR: { value: '', symbol: 'R$' },
     BITCOIN: { value: '', symbol: 'R$' }
   });
+  const [corpName, setCorpName] = useState('');
+  const [corpCnpj, setCorpCnpj] = useState('');
+  const [corpAddress, setCorpAddress] = useState('');
 
   const fetchData = async () => {
     const { data: licData } = await supabase.from('licenses').select('*').order('created_at', { ascending: false });
@@ -97,6 +100,13 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
         }
       });
       setIndicators(newInds);
+
+      const corp = contData.find(c => c.content_type === 'corporate_data');
+      if (corp) {
+        setCorpName(corp.title || '');
+        setCorpCnpj(corp.meta_value?.cnpj || '');
+        setCorpAddress(corp.description || '');
+      }
     }
   };
 
@@ -201,6 +211,34 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
       if (error) throw error;
       showAlert("Atualizado", title + " atualizado com sucesso!", "info");
     } catch (err: any) { showAlert("Erro ao atualizar", err.message, "error"); } finally { setLoading(false); }
+  };
+
+  const handleUpdateCorporate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { data: existing } = await supabase.from('site_content').select('id').eq('content_type', 'corporate_data').single();
+      
+      if (existing) {
+        const { error } = await supabase.from('site_content').update({
+          title: corpName,
+          description: corpAddress,
+          meta_value: { cnpj: corpCnpj }
+        }).eq('id', existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('site_content').insert([{
+          content_type: 'corporate_data',
+          title: corpName,
+          description: corpAddress,
+          meta_value: { cnpj: corpCnpj },
+          is_active: true
+        }]);
+        if (error) throw error;
+      }
+      showAlert("Sucesso", "Dados corporativos atualizados!", "info");
+      fetchData();
+    } catch (err: any) { showAlert("Erro ao salvar", err.message, "error"); } finally { setLoading(false); }
   };
 
   const handleDeleteContent = async (id: string) => {
@@ -339,6 +377,32 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div className="w-full h-px bg-slate-200 dark:bg-zinc-800/50" />
+
+              {/* DADOS CORPORATIVOS */}
+              <div className="bg-slate-50 dark:bg-white/[0.02] p-6 rounded-2xl border border-slate-200 dark:border-white/5">
+                <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 mb-6 text-xs"><ShieldCheck size={16}/> Dados Corporativos & Compliance</h3>
+                <form onSubmit={handleUpdateCorporate} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                  <div>
+                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Razão Social</label>
+                    <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none" value={corpName} onChange={e => setCorpName(e.target.value)} placeholder="Ex: Vitta Digital Ltda" />
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">CNPJ</label>
+                    <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none" value={corpCnpj} onChange={e => setCorpCnpj(e.target.value)} placeholder="00.000.000/0000-00" />
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Endereço Completo</label>
+                    <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none" value={corpAddress} onChange={e => setCorpAddress(e.target.value)} placeholder="Rua, Número, Bairro, Cidade - UF" />
+                  </div>
+                  <div className="md:col-span-3 flex justify-end">
+                    <button className="px-8 py-3 bg-emerald-500 text-black font-black uppercase text-[10px] tracking-widest rounded-lg hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20">
+                      {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Salvar Dados Corporativos"}
+                    </button>
+                  </div>
+                </form>
               </div>
 
               <div className="w-full h-px bg-slate-200 dark:bg-zinc-800/50" />

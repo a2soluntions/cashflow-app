@@ -20,6 +20,7 @@ import DebtFreedom from './components/DebtFreedom';
 import SubscriptionWall from './components/SubscriptionWall';
 import AdminDashboard from './components/AdminDashboard';
 import SalesPage from './components/SalesPage';
+import LegalPage from './components/LegalPage';
 
 export default function Vitta() {
   const { session } = useAuth();
@@ -115,6 +116,15 @@ export default function Vitta() {
   useEffect(() => {
     if (session) loadAllData();
   }, [loadAllData, session]);
+
+  // Sincronização em tempo real entre componentes
+  useEffect(() => {
+    const handleSync = () => {
+      loadAllData();
+    };
+    window.addEventListener('storage', handleSync);
+    return () => window.removeEventListener('storage', handleSync);
+  }, [loadAllData]);
 
   const handleAuth = async (emailInput: string, passwordInput: string) => {
     setAuthLoading(true);
@@ -216,7 +226,7 @@ export default function Vitta() {
   };
 
   return (
-    <div className={`w-full h-screen overflow-hidden font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' ? 'min-h-screen overflow-auto' : ''}`}>
+    <div className={`w-full h-screen overflow-hidden font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-auto' : ''}`}>
       
       {location.pathname !== '/' && location.pathname !== '/login' && <NavigationHeader />}
 
@@ -240,6 +250,9 @@ export default function Vitta() {
                 window.location.href = checkouts[plan] || '#';
             }
         }} />} />
+        
+        {/* ROTAS LEGAIS */}
+        <Route path="/legal/:type" element={<LegalPage />} />
         
         {/* ROTA DE LOGIN */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : (

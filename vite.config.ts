@@ -33,7 +33,7 @@ export default defineConfig({
       registerType: 'prompt',
       strategies: 'injectManifest',
       srcDir: 'src',
-      filename: 'sw-v2.ts',
+      filename: 'sw-v2-1.ts',
       devOptions: {
         enabled: true,
         type: 'module'
