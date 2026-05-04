@@ -4,7 +4,7 @@
 
 @layer base {
   html, body {
-    @apply transition-colors duration-500 overflow-hidden h-full;
+    @apply transition-colors duration-500;
   }
   
   /* Garante que o fundo mude mesmo fora da div principal */

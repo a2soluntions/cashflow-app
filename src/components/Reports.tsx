@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
  BarChart3, 
  TrendingUp, 
@@ -225,7 +225,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  `}
  </style>
 
- <div id="vitta-printable-report" className={`h-full w-full flex flex-col gap-4 animate-in fade-in duration-700 overflow-hidden pb-2 print:bg-white print:text-black print:overflow-visible print:h-auto ${printMode === 'bw' ? 'print:grayscale print:contrast-125' : ''}`}>
+ <div id="vitta-printable-report" className={`h-full w-full flex flex-col gap-4 animate-in fade-in duration-700 pb-2 print:bg-white print:text-black print:overflow-visible print:h-auto ${printMode === 'bw' ? 'print:grayscale print:contrast-125' : ''}`}>
  
  {/* HEADER DA CENTRAL */}
  <div className="flex flex-col border-white/5 pb-4 shrink-0 gap-3 print:lack/10">
@@ -263,13 +263,13 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  </button>
 
  {printMenuOpen && (
- <div className="absolute top-full mt-2 right-0 w-[180px] bg-white dark:bg-[#0a0a0c] p-2 flex flex-col gap-2 -2xl backdrop-blur-md animate-in slide-in-from-top-2 z-[100]">
- <button onClick={() => executePrint('color')} className="flex items-center gap-3 p-3 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-white transition-all text-left">
- <span className="w-2 h-2 bg-gradient-to-tr from-rose-500 via-amber-500 to-[#00d06c] shrink-0" /> Colorido
- </button>
- <button onClick={() => executePrint('bw')} className="flex items-center gap-3 p-3 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-400 transition-all text-left">
- <span className="w-2 h-2 bg-zinc-400 shrink-0" /> Preto e Branco
- </button>
+  <div className="absolute top-full mt-2 left-0 md:left-auto md:right-0 w-[200px] bg-white dark:bg-[#0a0a0c] p-2 flex flex-col gap-2 rounded-2xl shadow-2xl backdrop-blur-md animate-in slide-in-from-top-2 z-[100] border border-black/5 dark:border-white/5">
+  <button onClick={() => executePrint('color')} className="flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-slate-900 dark:text-white transition-all text-left">
+  <span className="w-2 h-2 bg-gradient-to-tr from-rose-500 via-amber-500 to-[#00d06c] shrink-0" /> Colorido
+  </button>
+  <button onClick={() => executePrint('bw')} className="flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400 transition-all text-left">
+  <span className="w-2 h-2 bg-zinc-400 shrink-0" /> Preto e Branco
+  </button>
  </div>
  )}
  </div>

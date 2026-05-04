@@ -14,7 +14,7 @@ interface Transaction {
  description: string;
  category: string;
  date: string;
- status?: 'COMPLETED' | 'PENDING' | 'pending'; 
+ status?: 'COMPLETED' | 'completed' | 'PENDING' | 'pending'; 
  interest?: number;
 }
 

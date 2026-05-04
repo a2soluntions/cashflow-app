@@ -13,7 +13,7 @@ import {
 const CORES_FUNIL = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
-  const [activeTab, setActiveTab] = useState<'vendas' | 'conteudo'>('vendas');
+  const [activeTab, setActiveTab] = useState<'vendas' | 'conteudo' | 'dados'>('vendas');
   const [licenses, setLicenses] = useState<any[]>([]);
   const [siteContent, setSiteContent] = useState<any[]>([]);
   
@@ -84,6 +84,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
   const [corpName, setCorpName] = useState('');
   const [corpCnpj, setCorpCnpj] = useState('');
   const [corpAddress, setCorpAddress] = useState('');
+  const [corpPhone, setCorpPhone] = useState('');
 
   const fetchData = async () => {
     const { data: licData } = await supabase.from('licenses').select('*').order('created_at', { ascending: false });
@@ -105,6 +106,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
       if (corp) {
         setCorpName(corp.title || '');
         setCorpCnpj(corp.meta_value?.cnpj || '');
+        setCorpPhone(corp.meta_value?.phone || '');
         setCorpAddress(corp.description || '');
       }
     }
@@ -223,7 +225,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
         const { error } = await supabase.from('site_content').update({
           title: corpName,
           description: corpAddress,
-          meta_value: { cnpj: corpCnpj }
+          meta_value: { cnpj: corpCnpj, phone: corpPhone }
         }).eq('id', existing.id);
         if (error) throw error;
       } else {
@@ -231,7 +233,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
           content_type: 'corporate_data',
           title: corpName,
           description: corpAddress,
-          meta_value: { cnpj: corpCnpj },
+          meta_value: { cnpj: corpCnpj, phone: corpPhone },
           is_active: true
         }]);
         if (error) throw error;
@@ -262,7 +264,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
         <div className="max-w-7xl w-full mx-auto flex flex-col flex-1 overflow-hidden">
           
           {/* HEADER & TABS */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 shrink-0">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-emerald-500/10"><ShieldCheck className="w-8 h-8 text-emerald-500" /></div>
               <div><h1 className="text-2xl font-black uppercase tracking-tighter italic">Vitta Admin</h1><p className="text-slate-500 text-xs font-bold uppercase tracking-widest">SaaS Management Center <span className="text-[10px] bg-emerald-500 text-black px-2 py-0.5 rounded ml-2 font-black anim-pulse">v1.3.1 - ATUALIZADO</span></p></div>
@@ -290,6 +292,9 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                 <button onClick={() => setActiveTab('vendas')} className={"px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'vendas' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500')}>
                   Vendas & KPIS
                 </button>
+                <button onClick={() => setActiveTab('dados')} className={"px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'dados' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500')}>
+                  Dados Corporativos
+                </button>
                 <button onClick={() => setActiveTab('conteudo')} className={"px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'conteudo' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500')}>
                   Site & Notícias
                 </button>
@@ -297,7 +302,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
             </div>
           </div>
 
-          {activeTab === 'vendas' ? (
+          {activeTab === 'vendas' && (
             <div className="animate-in fade-in duration-500 flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-6 pb-12">
               {/* KPI CARDS */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
@@ -354,8 +359,10 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 overflow-hidden">
+          )}
+
+          {activeTab === 'dados' && (
+            <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-6 pb-12">
               
               {/* INDEXADORES FINANCEIROS */}
               <div>
@@ -394,6 +401,10 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                     <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none" value={corpCnpj} onChange={e => setCorpCnpj(e.target.value)} placeholder="00.000.000/0000-00" />
                   </div>
                   <div className="md:col-span-3">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Telefone / Contato</label>
+                    <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none" value={corpPhone} onChange={e => setCorpPhone(e.target.value)} placeholder="(00) 00000-0000" />
+                  </div>
+                  <div className="md:col-span-3">
                     <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Endereço Completo</label>
                     <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none" value={corpAddress} onChange={e => setCorpAddress(e.target.value)} placeholder="Rua, Número, Bairro, Cidade - UF" />
                   </div>
@@ -405,12 +416,18 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                 </form>
               </div>
 
-              <div className="w-full h-px bg-slate-200 dark:bg-zinc-800/50" />
 
+            </div>
+          )}
+
+          {activeTab === 'conteudo' && (
+            <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 pr-2 md:pr-6 overflow-hidden">
               {/* NOTÍCIAS */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 flex-1 overflow-hidden">
-                <div className="text-slate-900 dark:text-white">
-                  <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 mb-8 text-xs"><Newspaper size={16}/> Compor Conteúdo</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 flex-1 min-h-0">
+                <div className="text-slate-900 dark:text-white flex flex-col min-h-0">
+                  <div className="pb-4 mb-6 flex items-center shrink-0 min-h-[32px] lg:h-[48px] lg:min-h-[48px] lg:pb-0 border-b border-transparent">
+                    <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 text-xs"><Newspaper size={16}/> Compor Conteúdo</h3>
+                  </div>
                   <form onSubmit={handleAddNews} className="space-y-4">
                     <div>
                       <select className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none transition-colors text-slate-500 focus:text-slate-900 dark:focus:text-white" value={contentType} onChange={e => setContentType(e.target.value)}>
@@ -460,8 +477,8 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                   </form>
                 </div>
 
-                <div className="lg:col-span-2 flex flex-col mt-8 lg:mt-0 overflow-hidden">
-                  <div className="pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="lg:col-span-2 flex flex-col mt-8 lg:mt-0 min-h-0">
+                  <div className="pb-4 mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0 min-h-[32px] lg:h-[48px] lg:min-h-[48px] lg:pb-0 border-b border-slate-200 dark:border-white/5">
                     <h3 id="active-feed" className="text-xs font-black uppercase tracking-widest text-slate-400">Feed Ativo (Conteúdos)</h3>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-1 rounded-lg border border-slate-200 dark:border-white/5">
@@ -479,7 +496,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       <span className="text-[10px] font-bold text-slate-400 px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 whitespace-nowrap">{siteContent.length} Item(ns) Ativo(s)</span>
                     </div>
                   </div>
-                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-4 space-y-4 pb-20 overscroll-contain">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 md:pr-4 space-y-3 pb-32 overscroll-contain">
                     {siteContent.length === 0 && (
                       <div className="w-full h-64 flex flex-col items-center justify-center text-slate-400 opacity-50 border-2 border-dashed border-slate-300 dark:border-zinc-800 rounded-2xl">
                         <Newspaper size={32} className="mb-4" />
@@ -487,17 +504,17 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       </div>
                     )}
                     {siteContent.slice(0, visibleCount).map((item, i) => (
-                      <div key={item.id} className="flex flex-col sm:flex-row gap-3 sm:gap-5 p-4 sm:p-5 bg-white/5 rounded-2xl group relative transition-all hover:bg-white/[0.08]">
+                      <div key={item.id} className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 bg-white/5 rounded-2xl group relative transition-all hover:bg-white/[0.08]">
                         {item.image_url ? (
-                          <img src={item.image_url} className="w-full sm:w-24 h-40 sm:h-24 rounded-xl object-cover transition-all flex-shrink-0" referrerPolicy="no-referrer" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
+                          <img src={item.image_url} className="w-full sm:w-16 h-32 sm:h-16 rounded-lg object-contain bg-black/10 dark:bg-white/5 transition-all flex-shrink-0" referrerPolicy="no-referrer" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
                         ) : (
-                          <div className="w-full sm:w-24 h-20 sm:h-24 rounded-xl bg-slate-100 dark:bg-[#09090b] flex items-center justify-center text-slate-300 dark:text-zinc-700">
-                            <ImageIcon size={32} />
+                          <div className="w-full sm:w-16 h-20 sm:h-16 rounded-lg bg-slate-100 dark:bg-[#09090b] flex items-center justify-center text-slate-300 dark:text-zinc-700 flex-shrink-0">
+                            <ImageIcon size={24} />
                           </div>
                         )}
                         <div className="flex-1 overflow-hidden">
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-black text-slate-900 dark:text-white uppercase text-sm leading-tight italic pr-8">
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className="font-black text-slate-900 dark:text-white uppercase text-xs leading-tight italic pr-8">
                               <span className={"text-[8px] px-2 py-0.5 rounded-sm mr-2 " + (
                                   item.content_type === 'news' ? 'bg-indigo-500 text-white' : 
                                   item.content_type === 'marketing' ? 'bg-emerald-500 text-white' : 
@@ -510,9 +527,9 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                               {item.title}
                             </h4>
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xl">{item.description}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight max-w-xl line-clamp-2">{item.description}</p>
                           {item.meta_value?.external_url && (
-                            <a href={item.meta_value.external_url} target="_blank" rel="noreferrer" className="inline-block mt-3 text-[10px] uppercase font-bold tracking-widest text-emerald-500 hover:text-emerald-400 transition-colors">Ver Fonte</a>
+                            <a href={item.meta_value.external_url} target="_blank" rel="noreferrer" className="inline-block mt-2 text-[9px] uppercase font-bold tracking-widest text-emerald-500 hover:text-emerald-400 transition-colors">Ver Fonte</a>
                           )}
                         </div>
                         <button onClick={() => handleDeleteContent(item.id)} className="absolute top-4 right-4 p-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md"><Trash2 size={16}/></button>

@@ -160,7 +160,7 @@ export default function BillsManager({ mode = 'normal' }: BillsManagerProps) {
  };
 
  return (
- <div className="h-full w-full flex flex-col gap-4 overflow-hidden font-sans">
+ <div className="min-h-full w-full flex flex-col gap-4 font-sans">
   
   <CustomAlert 
     isOpen={errorAlert.isOpen}

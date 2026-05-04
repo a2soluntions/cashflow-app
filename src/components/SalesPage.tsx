@@ -4,7 +4,8 @@ import {
   Zap, ShieldCheck, TrendingUp, AlertTriangle, 
   CheckCircle2, ArrowRight, Newspaper, DollarSign, 
   Globe, LayoutGrid, Brain, Lock, Infinity, Clock,
-  ExternalLink, Cookie, Mail, Instagram, Youtube, Linkedin, MessageCircle
+  ExternalLink, Cookie, Mail, Instagram, Youtube, Linkedin, MessageCircle,
+  X, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { supabase } from '../supabase';
 
@@ -38,6 +39,17 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   });
   const [showCookieConsent, setShowCookieConsent] = useState(false);
   const [loading, setLoading] = useState(true);
+    // Modal state for enlarged image preview
+    const [modalImg, setModalImg] = useState<string | null>(null);
+    const [modalSide, setModalSide] = useState<'left' | 'right'>('left');
+    const [modalIdx, setModalIdx] = useState<number>(0);
+    // Helper to open modal with proper side and index
+    const openModal = (side: 'left' | 'right', idx: number) => {
+      setModalSide(side);
+      setModalIdx(idx);
+      const img = side === 'left' ? leftBanners[idx]?.image_url : rightBanners[idx]?.image_url;
+      setModalImg(img || null);
+    };
 
   useEffect(() => {
     // Verifica se já aceitou os cookies
@@ -83,10 +95,10 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
  const { data: newsData } = await supabase
  .from('site_content')
  .select('*')
- .eq('content_type', 'news')
+ .in('content_type', ['news', 'marketing'])
  .eq('is_active', true)
  .order('created_at', { ascending: false })
- .limit(3);
+ .limit(4);
  
        if (newsData) setNews(newsData);
        const { data: bData } = await supabase.from('site_content').select('*').in('content_type', ['home_banner_left', 'home_banner_right']).eq('is_active', true);
@@ -174,23 +186,25 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   <section className="relative pt-4 pb-16 px-6 overflow-hidden">
   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-500/10 blur-[120px] pointer-events-none" />
   
-  <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-32 relative z-10">
-   {/* Banner Esquerdo */}
-   <div className="hidden xl:block w-[440px] aspect-video overflow-hidden border border-white/10 bg-zinc-950 group relative shrink-0 shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-lg">
-   {leftBanners.length > 0 ? (
-     <a 
-       href={leftBanners[currentLeftIdx]?.meta_value?.external_url || "#"} 
-       target="_blank" 
-       rel="noopener noreferrer"
-       className="block w-full h-full animate-in fade-in duration-1000"
-       key={leftBanners[currentLeftIdx]?.id}
-     >
-       <img src={leftBanners[currentLeftIdx]?.image_url} alt="Sponsor" className="w-full h-full object-cover hover:scale-105 transition-all duration-700" />
-     </a>
-   ) : (
-     <img src="vitta_sponsor_banner_1_1776825587725.png" alt="Sponsor" className="w-full h-full object-cover" />
-   )}
-   </div>
+  <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-3">
+    {/* VittaCash Marketing - Web (Left) */}
+    <div className="flex-1 max-w-lg lg:max-w-2xl overflow-hidden rounded-lg border border-white/10 bg-zinc-950 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+      {leftBanners.length > 0 ? (
+        <div
+          onClick={() => openModal('left', currentLeftIdx)}
+          className="block w-full h-full cursor-pointer animate-in fade-in duration-1000 group"
+        >
+          <img src={leftBanners[currentLeftIdx]?.image_url} alt="VittaCash Web" className="w-full h-full aspect-[16/9] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
+        </div>
+      ) : (
+        <div
+          onClick={() => setModalImg("vitta_sponsor_banner_1_1776825587725.png")}
+          className="block w-full h-full cursor-pointer group"
+        >
+          <img src="vitta_sponsor_banner_1_1776825587725.png" alt="VittaCash Web" className="w-full h-full aspect-[16/9] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
+        </div>
+      )}
+    </div>
 
   <div className="flex-1 text-center">
   <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 mb-8">
@@ -229,22 +243,24 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   </div>
   </div>
   
-    {/* Banner Direito */}
-   <div className="hidden xl:block w-[440px] aspect-video overflow-hidden border border-white/10 bg-zinc-950 group relative shrink-0 shadow-[0_0_40px_rgba(0,0,0,0.5)] rounded-lg">
-   {rightBanners.length > 0 ? (
-     <a 
-       href={rightBanners[currentRightIdx]?.meta_value?.external_url || "#"} 
-       target="_blank" 
-       rel="noopener noreferrer"
-       className="block w-full h-full animate-in fade-in duration-1000"
-       key={rightBanners[currentRightIdx]?.id}
-     >
-       <img src={rightBanners[currentRightIdx]?.image_url} alt="Sponsor" className="w-full h-full object-cover hover:scale-105 transition-all duration-700" />
-     </a>
-   ) : (
-     <img src="vitta_sponsor_banner_2_1776825608562.png" alt="Sponsor" className="w-full h-full object-cover" />
-   )}
-   </div>
+    {/* VittaCash Marketing - Mobile (Right) */}
+    <div className="flex-1 max-w-xs overflow-hidden rounded-lg border border-white/10 bg-zinc-950 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+      {rightBanners.length > 0 ? (
+          <div
+            onClick={() => openModal('right', currentRightIdx)}
+            className="block w-full h-full cursor-pointer animate-in fade-in duration-1000 group"
+          >
+            <img src={rightBanners[currentRightIdx]?.image_url} alt="VittaCash Mobile" className="w-full h-full aspect-[9/16] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
+          </div>
+      ) : (
+        <div
+          onClick={() => setModalImg('vitta_sponsor_banner_2_1776825608562.png')}
+          className="block w-full h-full cursor-pointer group"
+        >
+          <img src="vitta_sponsor_banner_2_1776825608562.png" alt="VittaCash Mobile" className="w-full h-full aspect-[9/16] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
+        </div>
+      )}
+    </div>
   </div>
   </section>
 
@@ -255,13 +271,11 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">Radar <span className="text-emerald-500">Vitta</span></h2>
   <p className="text-slate-500 text-sm font-medium mt-2">Insights exclusivos que movem o mercado agora.</p>
   </div>
-  <div className="flex items-center gap-2 text-emerald-500 text-[10px] font-black uppercase tracking-widest  border-emerald-500/20 pb-1 cursor-pointer hover:gap-4 transition-all">
-  Marketing & Atualizações <ArrowRight size={14} />
-  </div>
+
   </div>
 
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-  {news.map(item => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  {news.slice(0, 4).map(item => (
   <div key={item.id} className="group relative overflow-hidden bg-white/5 border border-white/5 hover:border-emerald-500/30 transition-all flex flex-col">
   {item.image_url && (
   <div className="aspect-[16/10] overflow-hidden relative">
@@ -616,8 +630,65 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
     )}
   </footer>
 
- </div>
- );
+  {/* ===== MODAL AMPLIAÇÃO DE IMAGEM ===== */}
+  {modalImg && (
+    <div
+      className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300"
+      onClick={() => setModalImg(null)}
+    >
+      <div
+        className="relative max-w-5xl w-full max-h-[90vh] flex items-center justify-center animate-in zoom-in-95 duration-300"
+        onClick={e => e.stopPropagation()}
+      >
+        <button
+          onClick={() => setModalImg(null)}
+          className="absolute -top-12 right-0 text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full"
+        >
+          <X size={32} />
+        </button>
+        {(() => { const arr = modalSide === 'left' ? leftBanners : rightBanners; return arr.length > 1; })() && (
+          <button
+            onClick={() => {
+              const arr = modalSide === 'left' ? leftBanners : rightBanners;
+              const newIdx = (modalIdx - 1 + arr.length) % arr.length;
+              setModalIdx(newIdx);
+              setModalImg(arr[newIdx]?.image_url || null);
+            }}
+            className="absolute left-0 -translate-x-16 text-white/50 hover:text-white transition-all hover:scale-110 hidden md:block"
+          >
+            <ChevronLeft size={48} />
+          </button>
+        )}
+        <img
+          key={modalIdx}
+          src={modalImg}
+          alt="Preview"
+          className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500"
+          loading="lazy"
+        />
+        {(() => { const arr = modalSide === 'left' ? leftBanners : rightBanners; return arr.length > 1; })() && (
+          <button
+            onClick={() => {
+              const arr = modalSide === 'left' ? leftBanners : rightBanners;
+              const newIdx = (modalIdx + 1) % arr.length;
+              setModalIdx(newIdx);
+              setModalImg(arr[newIdx]?.image_url || null);
+            }}
+            className="absolute right-0 translate-x-16 text-white/50 hover:text-white transition-all hover:scale-110 hidden md:block"
+          >
+            <ChevronRight size={48} />
+          </button>
+        )}
+        {(() => { const arr = modalSide === 'left' ? leftBanners : rightBanners; return arr.length > 1 ? (
+          <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-white/50 text-[10px] font-black uppercase tracking-[0.2em] bg-white/5 px-4 py-1 rounded-full border border-white/10">
+            {modalIdx + 1} / {arr.length}
+          </span>
+        ) : null; })()}
+      </div>
+    </div>
+  )}
+</div>
+);
 }
 
 

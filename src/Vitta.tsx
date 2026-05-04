@@ -226,7 +226,7 @@ export default function Vitta() {
   };
 
   return (
-    <div className={`w-full h-screen overflow-hidden font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-auto' : ''}`}>
+    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-y-auto scroll-smooth' : 'h-screen overflow-hidden'}`}>
       
       {location.pathname !== '/' && location.pathname !== '/login' && <NavigationHeader />}
 
