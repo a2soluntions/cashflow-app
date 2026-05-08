@@ -137,8 +137,46 @@ export default async function handler(req: Request) {
       return new Response('Supabase update error', { status: 500 });
     }
 
+    // 4. Registrar a venda na tabela `licenses` para aparecer no Centro de Vendas
+    const priceMap: Record<string, number> = {
+      'free':    0,
+      'basic':   19.90,
+      'premium': 59.90,
+      'desktop': 497.00,
+    };
+
+    const licenseKey = 'VITTA-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    const clientFullName = `${body.customer?.first_name || body.Customer?.first_name || ''} ${body.customer?.last_name || body.Customer?.last_name || ''}`.trim() || email;
+
+    const licenseRes = await fetch(`${SUPABASE_URL}/rest/v1/licenses`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        key: licenseKey,
+        client_name: clientFullName,
+        status: 'active',
+        price: priceMap[planId] ?? 0,
+        origin: 'Kiwify',
+        product_type: planId === 'desktop' ? 'Desktop' : 'SaaS',
+      }),
+    });
+
+    if (!licenseRes.ok) {
+      // Não fatal — acesso já foi liberado. Apenas logamos o erro.
+      const licErr = await licenseRes.text();
+      console.warn('⚠️ Venda não registrada em licenses:', licErr);
+    } else {
+      console.log(`📋 Venda registrada em licenses: ${clientFullName} | ${planId} | Chave: ${licenseKey}`);
+    }
+
     console.log(`✅ Acesso liberado com sucesso: user=${userId} plano=${planId}`);
     return new Response('OK', { status: 200 });
+
 
   } catch (err: any) {
     console.error('Erro geral no webhook da Kiwify:', err);

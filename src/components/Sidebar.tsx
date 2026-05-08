@@ -25,7 +25,7 @@ export function Sidebar({ activeTab, onNavigate }: SidebarProps) {
  <img 
  src={logoVitta} 
  alt="VittaCash" 
- className="h-10 object-contain" // Ajuste o tamanho (h-10, h-12) conforme sua logo
+ className="h-10 object-contain mix-blend-multiply dark:mix-blend-screen" // Ajuste o tamanho (h-10, h-12) conforme sua logo
  />
  </div>
 
@@ -65,4 +65,5 @@ export function Sidebar({ activeTab, onNavigate }: SidebarProps) {
  </aside>
  );
 }
+
 

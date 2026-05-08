@@ -21,6 +21,7 @@ import SubscriptionWall from './components/SubscriptionWall';
 import AdminDashboard from './components/AdminDashboard';
 import SalesPage from './components/SalesPage';
 import LegalPage from './components/LegalPage';
+import VittaNews from './components/VittaNews';
 
 export default function Vitta() {
   const { session } = useAuth();
@@ -226,7 +227,7 @@ export default function Vitta() {
   };
 
   return (
-    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-y-auto scroll-smooth' : 'h-screen overflow-hidden'}`}>
+    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' || location.pathname === '/noticias' || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-y-auto scroll-smooth custom-scrollbar' : 'h-screen overflow-hidden'}`}>
       
       {location.pathname !== '/' && location.pathname !== '/login' && <NavigationHeader />}
 
@@ -253,6 +254,9 @@ export default function Vitta() {
         
         {/* ROTAS LEGAIS */}
         <Route path="/legal/:type" element={<LegalPage />} />
+        
+        {/* ROTA DE NOTÍCIAS */}
+        <Route path="/noticias" element={<VittaNews />} />
         
         {/* ROTA DE LOGIN */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : (
@@ -410,7 +414,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                 >
                     <ArrowLeft size={20} />
                 </button>
-                
+                <img src="/logo.png" alt="VittaCash" className="h-20 w-20 object-contain mx-auto mb-4 mix-blend-screen" />
                 <h2 className="text-2xl font-black text-white uppercase italic mb-8">{isSignUp ? 'Nova Conta' : 'Acesso VittaCash'}</h2>
                 
                 <div className="space-y-4 mb-8">
@@ -481,4 +485,5 @@ function Lock(props: any) {
       <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
     )
 }
+
 

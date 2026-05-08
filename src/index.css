@@ -5,6 +5,17 @@
 @layer base {
   html, body {
     @apply transition-colors duration-500;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  /* Oculta todas as barras de rolagem globalmente */
+  *::-webkit-scrollbar {
+    display: none;
+  }
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
   
   /* Garante que o fundo mude mesmo fora da div principal */
@@ -19,8 +30,6 @@
   /* 📏 ESTILO SHARP: REMOÇÃO TOTAL DE BORDAS ARREDONDADAS */
   * {
     border-radius: 0px !important;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE e Edge */
   }
 
   /* Exceção para elementos que PRECISAM ser redondos (Avatar, etc) */
@@ -28,8 +37,33 @@
     border-radius: 9999px !important;
   }
 
-  *::-webkit-scrollbar {
-    display: none; /* Chrome, Safari e Opera */
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
 
   /* EFEITO DE GRADIENTE DO PAINEL (Inspirado na imagem) */

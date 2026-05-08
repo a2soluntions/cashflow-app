@@ -33,7 +33,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   const [currentLeftIdx, setCurrentLeftIdx] = useState(0);
   const [currentRightIdx, setCurrentRightIdx] = useState(0);
   const [corporateData, setCorporateData] = useState({
-    name: 'Vitta Cash Soluções Digitais Ltda',
+    name: 'A2SOLUNTIONS SOLUÇÕES DIGITAIS',
     cnpj: '00.000.000/0000-00',
     address: 'Av. Paulista, 1000 - Bela Vista, São Paulo - SP'
   });
@@ -147,24 +147,32 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   
   {/* 📈 TICKER: ESTILO BOLSA DE VALORES */}
   <div className="fixed top-0 left-0 w-full bg-[#1a237e]/90 backdrop-blur-md border-b border-white/5 py-3 overflow-hidden whitespace-nowrap z-[1000] flex justify-start">
-  <div className="flex animate-marquee hover:pause gap-12 items-center justify-start min-w-full">
-  {/* Repetir para efeito infinito - Fallback se vazio (Repetição QUÁDRUPLA para garantir preenchimento) */}
-  {(() => {
-  const list = indicators.length > 0 ? indicators : [
-  { title: 'SELIC', value: '10.75', symbol: '%' },
-  { title: 'IPCA', value: '4.50', symbol: '%' },
-  { title: 'DÓLAR', value: '5.45', symbol: 'R$' }
-  ];
-  const repeatedList = [...list, ...list, ...list, ...list];
-  return repeatedList.map((ind, i) => (
-  <div key={i} className="flex items-center gap-2 group shrink-0">
-  <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 group-hover:text-emerald-400 transition-colors uppercase font-bold">{ind.title}</span>
-  <span className="text-xs font-black text-white italic">{ind.symbol} {ind.value}</span>
-  <TrendingUp size={10} className="text-emerald-500" />
-  </div>
-  ));
-  })()}
-  </div>
+    <div className="flex animate-marquee hover:pause gap-12 items-center justify-start min-w-full">
+      {/* 📅 DATA ATUAL (Estilo InfoMoney) */}
+      <div className="flex items-center gap-2 px-6 border-r border-white/10 mr-4 shrink-0">
+        <Clock size={12} className="text-emerald-400" />
+        <span className="text-[9px] font-black uppercase tracking-widest text-white/70 italic">
+          {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+        </span>
+      </div>
+
+      {/* Repetir para efeito infinito - Fallback se vazio (Repetição QUÁDRUPLA para garantir preenchimento) */}
+      {(() => {
+        const list = indicators.length > 0 ? indicators : [
+          { title: 'SELIC', value: '10.75', symbol: '%' },
+          { title: 'IPCA', value: '4.50', symbol: '%' },
+          { title: 'DÓLAR', value: '5.45', symbol: 'R$' }
+        ];
+        const repeatedList = [...list, ...list, ...list, ...list];
+        return repeatedList.map((ind, i) => (
+          <div key={i} className="flex items-center gap-2 group shrink-0">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 group-hover:text-emerald-400 transition-colors uppercase font-bold">{ind.title}</span>
+            <span className="text-xs font-black text-white italic">{ind.symbol} {ind.value}</span>
+            <TrendingUp size={10} className="text-emerald-500" />
+          </div>
+        ));
+      })()}
+    </div>
   </div>
 
   <style dangerouslySetInnerHTML={{ __html: `
@@ -182,8 +190,38 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   }
   `}} />
 
+  {/* 🏛️ TOP NAVIGATION */}
+  <nav className="fixed top-[41px] left-0 w-full z-[999] bg-indigo-950/80 backdrop-blur-xl border-b border-white/5 py-5 transition-all duration-500">
+    <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <div className="flex items-center gap-12">
+        <div className="flex flex-col leading-none">
+          <span className="text-2xl font-black italic tracking-tighter uppercase text-white">Vitta<span className="text-emerald-500">Cash</span></span>
+          <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-slate-500">Financial Intelligence</span>
+        </div>
+        
+        <div className="hidden lg:flex items-center gap-8">
+          <Link to="/noticias" className="group flex items-center gap-2">
+            <Newspaper size={14} className="text-emerald-500 group-hover:scale-110 transition-transform" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 group-hover:text-white transition-colors">Vitta Notícias</span>
+          </Link>
+          <button onClick={scrollToPlans} className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-white transition-colors">Nossos Planos</button>
+          <a href="#radar" className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-white transition-colors">Radar Econômico</a>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <Link to="/login" className="px-8 py-3 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest transition-all">
+          Acessar App
+        </Link>
+        <button onClick={() => onSelectPlan('start')} className="hidden md:block px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20">
+          Começar Agora
+        </button>
+      </div>
+    </div>
+  </nav>
+
   {/* 🚀 HERO SECTION */}
-  <section className="relative pt-4 pb-16 px-6 overflow-hidden">
+  <section className="relative pt-32 pb-16 px-6 overflow-hidden">
   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-500/10 blur-[120px] pointer-events-none" />
   
   <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-3">
@@ -265,13 +303,15 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   </section>
 
   {/* 📰 RADAR ECONÔMICO (NOTÍCIAS) */}
-  <section className="py-12 px-6 max-w-6xl mx-auto">
-  <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6  border-white/5 pb-8">
+  <section id="radar" className="py-12 px-6 max-w-6xl mx-auto">
+  <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 border-b border-white/5 pb-8">
   <div>
   <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">Radar <span className="text-emerald-500">Vitta</span></h2>
   <p className="text-slate-500 text-sm font-medium mt-2">Insights exclusivos que movem o mercado agora.</p>
   </div>
-
+  <Link to="/noticias" className="px-8 py-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all group flex items-center gap-2">
+    Acessar Vitta Notícias <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+  </Link>
   </div>
 
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -448,9 +488,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
       {/* BRAND & MISSION */}
       <div className="md:col-span-4 space-y-8">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-emerald-500 rounded-sm shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-            <ShieldCheck className="w-5 h-5 text-black" />
-          </div>
+          <img src="/logo.png" alt="VittaCash" className="h-12 w-12 object-contain rounded-full mix-blend-screen" />
           <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">VittaCash</h2>
         </div>
         
@@ -690,6 +728,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
 </div>
 );
 }
+
 
 
 

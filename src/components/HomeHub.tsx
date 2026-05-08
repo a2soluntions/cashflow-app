@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { 
- Plus, Settings, LayoutGrid, Target, 
- BarChart3, Brain, Sun, CheckCircle2, 
- Calendar, AppWindow, Fingerprint, Moon, LogOut,
- ShieldAlert, X, TrendingUp, ShieldCheck, Zap
+  Plus, Settings, LayoutGrid, Target, 
+  BarChart3, Brain, Sun, CheckCircle2, 
+  Calendar, AppWindow, Fingerprint, Moon, LogOut,
+  ShieldAlert, X, TrendingUp, ShieldCheck, Zap, Newspaper
 } from 'lucide-react';
 
 interface HomeHubProps {
@@ -21,23 +21,24 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
  // Mapeamento dos módulos (11 itens na órbita)
- const menuItems = [
- { id: 'add', label: 'Lançar', icon: <Plus size={22} />, color: 'bg-[#00f2ad]', action: onNewTransaction },
- { id: 'dashboard', label: 'Dashboard', icon: <LayoutGrid size={20} />, color: 'bg-blue-500', action: () => onNavigate('dashboard') },
- { id: 'investments', label: 'Carteira', icon: <TrendingUp size={20} />, color: 'bg-sky-500', action: () => onNavigate('investments') },
- { id: 'categories', label: 'Categorias', icon: <AppWindow size={20} />, color: 'bg-pink-500', action: () => onNavigate('categories') },
- { id: 'contas', label: 'Contas', icon: <CheckCircle2 size={20} />, color: 'bg-emerald-500', action: () => onNavigate('contas') },
- { id: 'history', label: 'Histórico', icon: <Calendar size={20} />, color: 'bg-rose-500', action: () => onNavigate('history') },
- { id: 'theme', label: 'Alternar Tema', icon: isLight ? <Moon size={20} /> : <Sun size={20} />, color: 'bg-amber-500', action: onToggleTheme },
- { id: 'advisor', label: 'Consultor IA', icon: <Brain size={20} />, color: 'bg-violet-600', action: () => onNavigate('advisor') },
- { id: 'report', label: 'Relatórios', icon: <BarChart3 size={20} />, color: 'bg-indigo-500', action: () => onNavigate('report') },
- { id: 'freedom', label: 'Liberdade $', icon: <ShieldAlert size={20} />, color: 'bg-teal-600', action: () => onNavigate('freedom') },
- { id: 'target', label: 'Vitta Horizons', icon: <Target size={20} />, color: 'bg-orange-600', action: () => onNavigate('target') },
- { id: 'settings', label: 'Ajustes', icon: <Settings size={20} />, color: 'bg-slate-500', action: () => onNavigate('settings') },
- ...(isAdmin ? [{ id: 'admin', label: 'Admin', icon: <ShieldCheck size={20} />, color: 'bg-amber-600', action: () => onNavigate('admin') }] : []),
- {id: 'sales', label: 'Planos & Pro', icon: <Zap size={20} />, color: 'bg-emerald-600', action: () => onNavigate('sales') },
- { id: 'exit', label: 'Sair', icon: <LogOut size={20} />, color: 'bg-rose-600', action: () => setShowExitConfirm(true) }, 
- ];
+  const menuItems = [
+  { id: 'add', label: 'Lançar', icon: <Plus size={22} />, color: 'bg-[#00f2ad]', action: onNewTransaction },
+  { id: 'dashboard', label: 'Dashboard', icon: <LayoutGrid size={20} />, color: 'bg-blue-500', action: () => onNavigate('dashboard') },
+  { id: 'investments', label: 'Carteira', icon: <TrendingUp size={20} />, color: 'bg-sky-500', action: () => onNavigate('investments') },
+  { id: 'categories', label: 'Categorias', icon: <AppWindow size={20} />, color: 'bg-pink-500', action: () => onNavigate('categories') },
+  { id: 'contas', label: 'Contas', icon: <CheckCircle2 size={20} />, color: 'bg-emerald-500', action: () => onNavigate('contas') },
+  { id: 'history', label: 'Histórico', icon: <Calendar size={20} />, color: 'bg-rose-500', action: () => onNavigate('history') },
+  { id: 'theme', label: 'Alternar Tema', icon: isLight ? <Moon size={20} /> : <Sun size={20} />, color: 'bg-amber-500', action: onToggleTheme },
+  { id: 'advisor', label: 'Consultor IA', icon: <Brain size={20} />, color: 'bg-violet-600', action: () => onNavigate('advisor') },
+  { id: 'report', label: 'Relatórios', icon: <BarChart3 size={20} />, color: 'bg-indigo-500', action: () => onNavigate('report') },
+  { id: 'freedom', label: 'Liberdade $', icon: <ShieldAlert size={20} />, color: 'bg-teal-600', action: () => onNavigate('freedom') },
+  { id: 'target', label: 'Vitta Horizons', icon: <Target size={20} />, color: 'bg-orange-600', action: () => onNavigate('target') },
+  { id: 'settings', label: 'Ajustes', icon: <Settings size={20} />, color: 'bg-slate-500', action: () => onNavigate('settings') },
+  ...(isAdmin ? [{ id: 'admin', label: 'Admin', icon: <ShieldCheck size={20} />, color: 'bg-amber-600', action: () => onNavigate('admin') }] : []),
+  {id: 'sales', label: 'Planos & Pro', icon: <Zap size={20} />, color: 'bg-emerald-600', action: () => onNavigate('sales') },
+  { id: 'noticias', label: 'Vitta Notícias', icon: <Newspaper size={20} />, color: 'bg-indigo-700', action: () => window.open('/noticias', '_blank') },
+  { id: 'exit', label: 'Sair', icon: <LogOut size={20} />, color: 'bg-rose-600', action: () => setShowExitConfirm(true) }, 
+  ];
 
  const confirmExit = () => {
    if (onLogout) {
