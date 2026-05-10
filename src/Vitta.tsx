@@ -22,6 +22,7 @@ import AdminDashboard from './components/AdminDashboard';
 import SalesPage from './components/SalesPage';
 import LegalPage from './components/LegalPage';
 import VittaNews from './components/VittaNews';
+import NewsArticle from './components/NewsArticle';
 
 export default function Vitta() {
   const { session } = useAuth();
@@ -53,6 +54,8 @@ export default function Vitta() {
 
   // --- ASSINATURA ---
   const [trialDaysLeft, setTrialDaysLeft] = useState<number>(999);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [subscriptionActive, setSubscriptionActive] = useState(true);
   const [subscriptionPlan, setSubscriptionPlan] = useState<'free' | 'basic' | 'premium'>('free');
   const ADMIN_EMAIL = 'a2soluntions@gmail.com';
@@ -60,7 +63,6 @@ export default function Vitta() {
   const isLimitReached = useMemo(() => {
     if (subscriptionPlan === 'premium' || session?.user?.email === ADMIN_EMAIL) return false;
     
-    // Contagem de transações do MÊS ATUAL
     const now = new Date();
     const currentMonthTxs = transactions.filter(t => {
       const d = new Date(t.date);
@@ -95,7 +97,6 @@ export default function Vitta() {
         setSubscriptionActive(isSubActive || session.user.email === ADMIN_EMAIL);
         setTrialDaysLeft(daysLeft);
 
-        // Carrega avatar e nome do Supabase (persist entre domínios)
         if (profile.avatar_url) {
           setUserAvatar(profile.avatar_url);
           localStorage.setItem('vittacash_user_avatar', profile.avatar_url);
@@ -105,7 +106,6 @@ export default function Vitta() {
           localStorage.setItem('vittacash_user_name', profile.name);
         }
       } else {
-        // Fallback: usa dados do localStorage se não tem no Supabase
         const savedAvatar = localStorage.getItem('vittacash_user_avatar');
         const savedName = localStorage.getItem('vittacash_user_name');
         if (savedAvatar) setUserAvatar(savedAvatar);
@@ -118,14 +118,35 @@ export default function Vitta() {
     if (session) loadAllData();
   }, [loadAllData, session]);
 
-  // Sincronização em tempo real entre componentes
   useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+        e.preventDefault();
+        setDeferredPrompt(e);
+        setShowInstallBanner(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
     const handleSync = () => {
       loadAllData();
     };
     window.addEventListener('storage', handleSync);
-    return () => window.removeEventListener('storage', handleSync);
+    return () => {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.removeEventListener('storage', handleSync);
+    };
   }, [loadAllData]);
+
+  const handleInstallClick = async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+      }
+      setDeferredPrompt(null);
+      setShowInstallBanner(false);
+  };
 
   const handleAuth = async (emailInput: string, passwordInput: string) => {
     setAuthLoading(true);
@@ -153,62 +174,46 @@ export default function Vitta() {
 
   const NavigationHeader = () => {
     const tab = new URLSearchParams(location.search).get('tab') || 'hub';
-    if (location.pathname === '/' || tab === 'hub' || tab === 'sales') return null;
+    if (location.pathname === '/' || location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal') || tab === 'hub' || tab === 'sales') return null;
 
     return (
-      <>
-        {/* LADO ESQUERDO: Voltar para o Hub (Home) */}
-        <div className="fixed top-3 left-3 md:top-6 md:left-8 z-[1001] pointer-events-none flex items-center animate-in slide-in-from-left duration-700">
+      <header className="fixed top-0 left-0 w-full z-[1001] bg-indigo-950/40 backdrop-blur-md border-b border-white/5 h-14 flex items-center justify-between px-4 animate-in slide-in-from-top duration-500">
+        <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/app')}
-            title="Voltar ao Hub"
-            className={`w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all group pointer-events-auto
-              ${theme === 'light' ? 'bg-white text-slate-900 shadow-xl' : 'bg-zinc-900/60 backdrop-blur-md text-white/80 hover:text-white shadow-2xl'}
-            `}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all group ${theme === 'light' ? 'bg-white text-slate-900' : 'bg-white/5 text-white/80'}`}
           >
-            <Home size={24} className="group-hover:scale-110 transition-transform duration-500" />
+            <Home size={18} />
           </button>
         </div>
 
-        {/* CENTRO: Avatar do Usuário */}
-        <div className="fixed top-2 md:top-6 left-0 right-0 z-[1001] pointer-events-none flex items-center justify-center animate-in fade-in duration-700">
-          {isAuthenticated && (
-            <button 
-              onClick={() => navigate('/app?tab=settings')} 
-              className="group relative pointer-events-auto flex items-center justify-center transition-all hover:scale-110 hover:rotate-[360deg] duration-1000 rounded-full"
-            >
-              <div 
-                className="w-10 h-10 md:w-16 md:h-16 rounded-full overflow-hidden bg-zinc-950 border-2 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center justify-center"
-              >
-                  {userAvatar ? 
-                    <img src={userAvatar} className="w-full h-full object-cover rounded-full" alt="User" /> : 
-                    <div className="w-full h-full flex items-center justify-center text-emerald-500 font-black text-lg bg-black rounded-full">
-                      {userName.substring(0, 2).toUpperCase()}
-                    </div>
-                  }
-              </div>
-            </button>
-          )}
+        <div className="flex items-center gap-2">
+          <img src="/icon.png" alt="Vitta" className="h-6 w-auto opacity-50" />
         </div>
 
-        {/* LADO DIREITO: Notificações (Sino sempre visível no sistema) */}
-        <div className="fixed top-3 right-3 md:top-6 md:right-8 z-[1001] pointer-events-none flex items-center gap-6 animate-in slide-in-from-right duration-700">
+        <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/app?tab=bills')} 
-            className={`pointer-events-auto relative transition-all duration-500 hover:scale-110 px-1
-              ${overdueCount > 0 ? 'text-rose-500 animate-pulse' : 'text-slate-400 hover:text-emerald-500'}
-            `}
-            title={overdueCount > 0 ? `${overdueCount} contas atrasadas` : "Alertas e Notificações"}
+            className={`relative transition-all ${overdueCount > 0 ? 'text-rose-500 animate-pulse' : 'text-slate-400'}`}
           >
-            <Bell size={24} />
+            <Bell size={20} />
             {overdueCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white text-[9px] font-black flex items-center justify-center rounded-full shadow-[0_0_10px_rgba(225,29,72,0.4)]">
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-600 text-white text-[8px] font-black flex items-center justify-center rounded-full">
                 {overdueCount}
               </span>
             )}
           </button>
+          
+          <button onClick={() => navigate('/app?tab=settings')} className="w-8 h-8 rounded-full overflow-hidden border border-emerald-500/30">
+            {userAvatar ? 
+              <img src={userAvatar} className="w-full h-full object-cover" alt="User" /> : 
+              <div className="w-full h-full flex items-center justify-center text-emerald-500 font-black text-[10px] bg-black">
+                {userName.substring(0, 2).toUpperCase()}
+              </div>
+            }
+          </button>
         </div>
-      </>
+      </header>
     );
   };
 
@@ -227,7 +232,7 @@ export default function Vitta() {
   };
 
   return (
-    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' || location.pathname === '/noticias' || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-y-auto scroll-smooth custom-scrollbar' : 'h-screen overflow-hidden'}`}>
+    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' || location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-y-auto scroll-smooth custom-scrollbar' : 'h-screen overflow-hidden'}`}>
       
       {location.pathname !== '/' && location.pathname !== '/login' && <NavigationHeader />}
 
@@ -257,6 +262,7 @@ export default function Vitta() {
         
         {/* ROTA DE NOTÍCIAS */}
         <Route path="/noticias" element={<VittaNews />} />
+        <Route path="/noticias/:id" element={<NewsArticle />} />
         
         {/* ROTA DE LOGIN */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : (
@@ -274,6 +280,33 @@ export default function Vitta() {
             !isAuthenticated ? <Navigate to="/login" /> : (() => {
                 const tab = new URLSearchParams(location.search).get('tab') || 'hub';
                 return (
+                    <>
+                        {showInstallBanner && (
+                        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[2000] w-[90%] max-w-sm animate-in slide-in-from-bottom-8 duration-500">
+                            <div className="bg-indigo-600 p-4 shadow-2xl flex items-center justify-between gap-4 border border-white/10">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-white/10 flex items-center justify-center rounded-lg">
+                                        <img src="/pwa-192x192.png" className="w-8 h-8 object-contain" alt="Icon" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-white text-xs font-black uppercase tracking-widest">Instalar VittaCash</span>
+                                        <span className="text-white/60 text-[8px] font-bold uppercase">Acesse mais rápido pelo menu</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button onClick={() => setShowInstallBanner(false)} className="p-2 text-white/50 hover:text-white transition-colors">
+                                        <X size={16} />
+                                    </button>
+                                    <button 
+                                        onClick={handleInstallClick}
+                                        className="bg-white text-indigo-600 px-4 py-2 text-[9px] font-black uppercase tracking-widest hover:bg-emerald-50 transition-all"
+                                    >
+                                        Instalar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     <div className={`h-full w-full pt-16 md:pt-24 px-2 md:px-8 pb-12 ${['advisor', 'admin'].includes(tab) ? 'overflow-hidden' : 'overflow-y-auto'} custom-scrollbar`}>
                         {(() => {
                             const isTrial = trialDaysLeft > 0;
@@ -344,9 +377,9 @@ export default function Vitta() {
                             return <div>Não encontrado</div>;
                         })()}
                     </div>
+                    </>
                 );
-            })()
-        } />
+            })()} />
 
         {/* REDIRECIONAMENTO DE SEGURANÇA */}
         <Route path="*" element={<Navigate to="/" />} />

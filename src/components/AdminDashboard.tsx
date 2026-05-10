@@ -90,6 +90,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
   const [hqCategory, setHqCategory] = useState('Mercado');
   const [hqRawText, setHqRawText] = useState('');
   const [hqImagePrompt, setHqImagePrompt] = useState('');
+  const [hqExternalUrl, setHqExternalUrl] = useState('');
 
   // NOVOS ESTADOS VITTANEWS HQ
   const [summaryCharLimit, setSummaryCharLimit] = useState<number>(300);
@@ -245,18 +246,27 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
       if (pendingAdSlot) {
         setLoading(true);
-        const currentAd = siteContent.find(c => c.content_type === pendingAdSlot);
+        // Se pendingAdSlot contém um ID após o tipo (ex: "home_banner_left:id"), é um update
+        const [type, id] = pendingAdSlot.split(':');
+        
+        const currentAd = id ? siteContent.find(c => c.id === id) : null;
+        
         const { error: upsertError } = await supabase.from('site_content').upsert({
-          id: currentAd?.id,
-          content_type: pendingAdSlot,
-          title: currentAd?.title || pendingAdSlot,
+          id: id || undefined,
+          content_type: type,
+          title: currentAd?.title || type,
           image_url: data.publicUrl,
           is_active: true,
           meta_value: { external_url: currentAd?.meta_value?.external_url || '#' }
         });
         setLoading(false);
         setPendingAdSlot(null);
-        if (!upsertError) fetchData();
+        if (upsertError) {
+          showAlert("Erro ao Salvar", upsertError.message, "error");
+        } else {
+          fetchData();
+          showAlert("Sucesso", "Imagem do carrossel atualizada!", "info");
+        }
       } else {
         setNewsImg(data.publicUrl);
       }
@@ -270,7 +280,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
 
   const handleClearHq = () => {
-    setHqTitle(''); setHqResume(''); setHqPov(''); setHqSource(''); setHqRawText(''); setNewsImg(''); setResumeOffset(0);
+    setHqTitle(''); setHqResume(''); setHqPov(''); setHqSource(''); setHqRawText(''); setNewsImg(''); setHqExternalUrl(''); setResumeOffset(0);
   };
 
   const handleHqPublish = async (e: React.FormEvent) => {
@@ -289,7 +299,10 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
         description: formattedDescription, 
         image_url: newsImg, 
         is_active: true,
-        meta_value: { category: hqCategory }
+        meta_value: { 
+          category: hqCategory,
+          external_url: hqExternalUrl 
+        }
       }]);
       if (error) throw error;
       
@@ -301,6 +314,34 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
       showAlert("Erro ao salvar", err.message, "error"); 
     } finally { 
       setLoading(false); 
+    }
+  };
+
+  const getYouTubeId = (url: string) => {
+    if (!url) return null;
+    if (url.length === 11) return url;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const handleCreateNewVideo = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.from('site_content').insert([{
+        content_type: 'ad_featured_video',
+        title: 'Novo Vídeo VittaCash TV',
+        description: 'Descreva o conteúdo do vídeo aqui para os usuários...',
+        is_active: true,
+        meta_value: { external_url: 'https://www.youtube.com/watch?v=' }
+      }]);
+      if (error) throw error;
+      fetchData();
+      showAlert("Vídeo Adicionado", "Um novo slot de vídeo foi criado. Agora você pode editar os detalhes.", "info");
+    } catch (err: any) {
+      showAlert("Erro ao adicionar", err.message, "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -510,13 +551,18 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
         <div className="max-w-7xl w-full mx-auto flex flex-col flex-1 overflow-hidden">
           
           {/* HEADER & TABS */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 shrink-0">
-            <div className="flex items-center gap-4">
-              <img src="/logo.png" alt="VittaCash" className="h-12 w-12 object-contain rounded-full mix-blend-multiply dark:mix-blend-screen" />
-              <div><h1 className="text-2xl font-black uppercase tracking-tighter italic">Vitta Admin</h1><p className="text-slate-500 text-xs font-bold uppercase tracking-widest">SaaS Management Center <span className="text-[10px] bg-emerald-500 text-black px-2 py-0.5 rounded ml-2 font-black anim-pulse">v1.3.1 - ATUALIZADO</span></p></div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8 shrink-0">
+            <div className="flex items-center gap-3 md:gap-4">
+              <img src="/logo.png" alt="VittaCash" className="h-8 w-8 md:h-12 md:w-12 object-contain rounded-full mix-blend-multiply dark:mix-blend-screen" />
+              <div>
+                <h1 className="text-lg md:text-2xl font-black uppercase tracking-tighter italic leading-none">Vitta Admin</h1>
+                <p className="text-slate-500 text-[8px] md:text-xs font-bold uppercase tracking-widest mt-0.5">
+                  HQ Center <span className="text-[8px] bg-emerald-500 text-black px-1.5 py-0.5 rounded ml-1 font-black">v1.3.1</span>
+                </p>
+              </div>
             </div>
             
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-3 md:gap-4">
               <button 
                 onClick={() => {
                   showAlert(
@@ -530,22 +576,24 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                     }
                   );
                 }}
-                className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-rose-500/20"
+                className="p-2 md:px-4 md:py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-rose-500/20"
+                title="Limpar Cache"
               >
-                Limpar Cache
+                <RefreshCw size={14} className="md:hidden" />
+                <span className="hidden md:inline">Limpar Cache</span>
               </button>
-              <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl overflow-x-auto custom-scrollbar">
-                <button onClick={() => setActiveTab('vendas')} className={"whitespace-nowrap px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'vendas' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500')}>
-                  Vendas & KPIS
+              <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl overflow-x-auto custom-scrollbar flex-1 md:flex-none">
+                <button onClick={() => setActiveTab('vendas')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'vendas' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500')}>
+                  Vendas
                 </button>
-                <button onClick={() => setActiveTab('dados')} className={"whitespace-nowrap px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'dados' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500')}>
+                <button onClick={() => setActiveTab('dados')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'dados' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500')}>
                   Corporativo
                 </button>
-                <button onClick={() => setActiveTab('vittanoticias')} className={"whitespace-nowrap px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'vittanoticias' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-indigo-500')}>
-                  Vitta Notícias HQ
+                <button onClick={() => setActiveTab('vittanoticias')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'vittanoticias' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-indigo-500')}>
+                  HQ
                 </button>
-                <button onClick={() => setActiveTab('publicidade')} className={"whitespace-nowrap px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'publicidade' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-slate-500 hover:text-amber-500')}>
-                  Publicidade
+                <button onClick={() => setActiveTab('publicidade')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'publicidade' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-slate-500 hover:text-amber-500')}>
+                  Ads
                 </button>
               </div>
             </div>
@@ -855,96 +903,85 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
               {/* CARROSSEL DA VITRINE */}
               <div>
-                <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 mb-2 text-xs">
-                  <ImageIcon size={16}/> Carrossel da Vitrine (Tela de Vendas)
-                </h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 text-xs">
+                    <ImageIcon size={16}/> Carrossel da Vitrine (Tela de Vendas)
+                  </h3>
+                </div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">
-                  Imagens exibidas nos painéis esquerdo (Web) e direito (Mobile) da tela inicial.
+                  Imagens exibidas nos painéis esquerdo (Web) e direito (Mobile) da tela inicial. Agora você pode adicionar múltiplas imagens para criar um carrossel automático.
                 </p>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {[
                     { type: 'home_banner_left', label: 'Painel Web — Esquerdo (16:9)', aspect: 'aspect-[16/9]' },
-                    { type: 'home_banner_right', label: 'Painel Mobile — Direito (9:16)', aspect: 'aspect-[9/16] max-h-64' }
+                    { type: 'home_banner_right', label: 'Painel Mobile — Direito (9:16)', aspect: 'aspect-[9/16]' }
                   ].map((slot) => {
-                    const existing = siteContent.find(c => c.content_type === slot.type);
+                    const items = siteContent.filter(c => c.content_type === slot.type);
                     return (
-                      <div key={slot.type} className="bg-slate-50 dark:bg-white/[0.02] p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4">
-                        <div className="flex items-center justify-between">
+                      <div key={slot.type} className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between bg-slate-50 dark:bg-white/[0.02] p-4 rounded-2xl border border-slate-200 dark:border-white/5">
                           <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">{slot.label}</h4>
-                          {existing?.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
+                          <button 
+                            onClick={() => { setPendingAdSlot(slot.type); fileInputRef.current?.click(); }}
+                            className="px-3 py-1.5 bg-emerald-500 text-black text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-all flex items-center gap-2"
+                          >
+                            <Plus size={12} /> Adicionar Imagem
+                          </button>
                         </div>
 
-                        {/* Preview */}
-                        <div className={`${slot.aspect} w-full bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group`}>
-                          {existing?.image_url ? (
-                            <img src={existing.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                          ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2">
-                              <ImageIcon size={28} className="opacity-20" />
-                              <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Sem imagem</span>
+                        <div className="grid grid-cols-1 gap-4">
+                          {items.length === 0 && (
+                            <div className={`${slot.aspect} w-full bg-slate-100 dark:bg-white/5 rounded-2xl flex flex-col items-center justify-center text-slate-300 gap-2 border border-dashed border-slate-300 dark:border-white/10`}>
+                              <ImageIcon size={32} className="opacity-20" />
+                              <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Nenhuma imagem configurada</span>
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button
-                              type="button"
-                              onClick={() => { setPendingAdSlot(slot.type); fileInputRef.current?.click(); }}
-                              disabled={uploading}
-                              className="px-4 py-2 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-lg shadow-xl hover:scale-105 transition-all flex items-center gap-2"
-                            >
-                              {uploading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
-                              Trocar Imagem
-                            </button>
-                          </div>
-                        </div>
+                          
+                          {items.map((item) => (
+                            <div key={item.id} className="bg-slate-50 dark:bg-white/[0.02] p-4 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                              <div className={`${slot.aspect} w-full bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-slate-200 dark:border-white/10`}>
+                                <img src={item.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => { setPendingAdSlot(`${slot.type}:${item.id}`); fileInputRef.current?.click(); }}
+                                    className="px-4 py-2 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-lg shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+                                  >
+                                    <Upload size={12} /> Trocar
+                                  </button>
+                                </div>
+                              </div>
 
-                        {/* URL Manual */}
-                        <input
-                          className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-emerald-500 transition-all placeholder:text-slate-400"
-                          placeholder="Ou cole a URL da imagem..."
-                          defaultValue={existing?.image_url || ''}
-                          onBlur={async (e) => {
-                            if (e.target.value === (existing?.image_url || '')) return;
-                            setLoading(true);
-                            await supabase.from('site_content').upsert({
-                              id: existing?.id,
-                              content_type: slot.type,
-                              title: slot.label,
-                              image_url: e.target.value,
-                              is_active: true,
-                            });
-                            setLoading(false);
-                            fetchData();
-                          }}
-                        />
 
-                        {/* Controles */}
-                        <div className="flex items-center justify-between">
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              if (!existing) return;
-                              setLoading(true);
-                              await supabase.from('site_content').update({ is_active: !existing.is_active }).eq('id', existing.id);
-                              setLoading(false);
-                              fetchData();
-                            }}
-                            className={`text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full border transition-all ${
-                              existing?.is_active
-                                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                                : 'bg-slate-500/10 text-slate-500 border-slate-500/20'
-                            }`}
-                          >
-                            {existing?.is_active ? 'Ativo' : 'Inativo'}
-                          </button>
-                          {existing && (
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteContent(existing.id)}
-                              className="text-rose-500 opacity-60 hover:opacity-100 transition-opacity"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
+
+                              <div className="flex items-center justify-between">
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    await supabase.from('site_content').update({ is_active: !item.is_active }).eq('id', item.id);
+                                    setLoading(false);
+                                    fetchData();
+                                  }}
+                                  className={`text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full border transition-all ${
+                                    item.is_active
+                                      ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                      : 'bg-slate-500/10 text-slate-500 border-slate-500/20'
+                                  }`}
+                                >
+                                  {item.is_active ? 'Ativo' : 'Inativo'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteContent(item.id)}
+                                  className="text-rose-500 opacity-60 hover:opacity-100 transition-opacity p-2 hover:bg-rose-500/10 rounded-lg"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     );
@@ -978,68 +1015,75 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                 </div>
 
                 <form onSubmit={handleHqPublish} className="space-y-6">
-                  {/* BLOCO DE BOTÕES E CONFIGURAÇÕES RÁPIDAS FIXO */}
-                  <div className="flex flex-col gap-4 sticky top-0 z-30 -mx-6 md:-mx-8 px-6 md:px-8 pt-2 pb-4 bg-slate-50 dark:bg-[#09090b] border-b border-slate-200 dark:border-white/5 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]">
-                    <div className="flex flex-wrap gap-3">
+                  {/* BLOCO DE BOTÕES E CONFIGURAÇÕES RÁPIDAS - STICKY APENAS EM DESKTOP */}
+                  <div className="flex flex-col gap-4 md:sticky md:top-0 z-30 -mx-6 md:-mx-8 px-6 md:px-8 pt-2 pb-4 bg-slate-50 dark:bg-[#09090b] border-b border-slate-200 dark:border-white/5 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]">
+                    <div className="flex flex-wrap gap-2 md:gap-3">
                       <button 
                         type="button"
                         onClick={() => handleAutoGenerate(false)}
-                        className="flex-1 bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[140px]"
+                        className="flex-1 bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[44px] md:min-w-[140px]"
+                        title="Resumo Automático"
                       >
                         <Zap size={16} />
-                        Resumo Automático
+                        <span className="hidden md:inline">Resumo Automático</span>
                       </button>
                       
                       <button 
                         type="button"
                         onClick={() => handleAutoGenerate(true)}
-                        className="flex-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[140px]"
+                        className="flex-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[44px] md:min-w-[140px]"
+                        title="Novo Contexto"
                       >
                         <RefreshCw size={14} />
-                        Novo Contexto
+                        <span className="hidden md:inline">Novo Contexto</span>
                       </button>
 
                       <button 
                         type="button"
                         onClick={handleGenerateMockImage}
-                        className="flex-1 bg-amber-500/10 text-amber-600 dark:text-amber-500 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest border border-amber-500/20 hover:bg-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[140px]"
+                        className="flex-1 bg-amber-500/10 text-amber-600 dark:text-amber-500 py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-amber-500/20 hover:bg-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[44px] md:min-w-[140px]"
+                        title="Imagem IA"
                       >
-                        <ImageIcon size={14}/> Imagem IA
+                        <ImageIcon size={14}/>
+                        <span className="hidden md:inline">Imagem IA</span>
                       </button>
 
                       <button 
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="flex-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest border border-emerald-500/20 hover:bg-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[140px]"
+                        className="flex-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-emerald-500/20 hover:bg-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[44px] md:min-w-[140px]"
+                        title="Upload Capa"
                       >
                         {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                        Upload Capa
+                        <span className="hidden md:inline">Upload Capa</span>
                       </button>
 
                       <button 
                         type="button"
                         onClick={handleClearHq}
-                        className="flex-1 bg-rose-500/10 text-rose-500 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest border border-rose-500/20 hover:bg-rose-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[140px]"
+                        className="flex-1 bg-rose-500/10 text-rose-500 py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-rose-500/20 hover:bg-rose-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[44px] md:min-w-[140px]"
+                        title="Limpar Tudo"
                       >
                         <Trash2 size={14} />
-                        Limpar Tudo
+                        <span className="hidden md:inline">Limpar Tudo</span>
                       </button>
 
                       <button 
                         type="submit"
                         disabled={loading}
-                        className="flex-[2] bg-indigo-600 text-white py-3 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[200px]"
+                        className="flex-[2] bg-indigo-600 text-white py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[120px] md:min-w-[200px]"
                       >
-                        {loading ? <Loader2 size={16} className="animate-spin" /> : "Publicar Notícia Curada"}
+                        {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={14} />}
+                        <span>Publicar Notícia</span>
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
-                      <div className="w-full flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap pl-2">Fonte:</label>
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 pt-1">
+                      <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
+                        <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Fonte:</label>
                         <input 
-                          className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500" 
+                          className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500" 
                           placeholder="Ex: InfoMoney" 
                           value={hqSource}
                           onChange={e => setHqSource(e.target.value)}
@@ -1047,10 +1091,10 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                         />
                       </div>
 
-                      <div className="w-full flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
-                         <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap pl-2">Categoria:</label>
+                      <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
+                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Cat:</label>
                          <select 
-                           className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
+                           className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
                            value={hqCategory}
                            onChange={e => setHqCategory(e.target.value)}
                          >
@@ -1064,41 +1108,41 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                          </select>
                       </div>
 
-                      <div className="w-full flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap pl-2">Tema Imagem:</label>
+                      <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
+                        <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Imagem:</label>
                         <input
-                          className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
-                          placeholder="Ex: homem no escritório"
+                          className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
+                          placeholder="Ex: homem..."
                           value={hqImagePrompt}
                           onChange={e => setHqImagePrompt(e.target.value)}
                         />
                       </div>
 
-                      <div className="w-full flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap pl-2">URL Capa:</label>
+                       <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
+                        <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Link:</label>
                         <input
-                          className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
-                          placeholder="https://..."
-                          value={newsImg}
-                          onChange={e => setNewsImg(e.target.value)}
+                          className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
+                          placeholder="Link da Matéria Original..."
+                          value={hqExternalUrl}
+                          onChange={e => setHqExternalUrl(e.target.value)}
                         />
                       </div>
 
-                      <div className="md:col-span-2 w-full flex items-center gap-3 bg-slate-100 dark:bg-white/5 p-2.5 rounded-xl border border-slate-200 dark:border-white/5 px-4">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap flex gap-1">
-                          Resumo <span className="text-indigo-500">({summaryCharLimit})</span>
+                      <div className="col-span-2 md:col-span-2 w-full flex items-center gap-3 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5 px-4 h-[46px]">
+                        <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap flex gap-1">
+                          Resumo <span className="text-indigo-500 md:inline hidden">({summaryCharLimit})</span>
                         </label>
                         <input 
                           type="range" min="100" max="1000" step="50" 
                           value={summaryCharLimit} 
                           onChange={(e) => setSummaryCharLimit(Number(e.target.value))} 
-                          className="w-full accent-indigo-500" 
+                          className="w-full accent-indigo-500 h-1.5" 
                         />
                       </div>
                       
-                      <div className="md:col-span-2 flex items-center bg-slate-100 dark:bg-white/5 p-2.5 rounded-xl border border-slate-200 dark:border-white/5 px-4 h-[46px]">
+                      <div className="col-span-2 md:col-span-2 flex items-center bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5 px-4 h-[46px]">
                         <label className="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
-                          <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${includeVittaPov ? 'bg-indigo-500 border-indigo-500' : 'bg-transparent border-slate-400 dark:border-zinc-700'}`}>
+                          <div className={`w-3.5 h-3.5 md:w-4 md:h-4 rounded flex items-center justify-center border transition-colors ${includeVittaPov ? 'bg-indigo-500 border-indigo-500' : 'bg-transparent border-slate-400 dark:border-zinc-700'}`}>
                             {includeVittaPov && <Zap size={10} className="text-white" />}
                           </div>
                           <input 
@@ -1107,129 +1151,123 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                             onChange={(e) => setIncludeVittaPov(e.target.checked)} 
                             className="hidden" 
                           />
-                          <span className="text-[9px] font-black uppercase tracking-widest text-indigo-500 group-hover:text-indigo-400 transition-colors">
+                          <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-indigo-500 group-hover:text-indigo-400 transition-colors">
                             Insights IA
                           </span>
                         </label>
                       </div>
                     </div>
-
                   </div>
 
-                  {/* LAYOUT PRINCIPAL: 2 COLUNAS SEM BORDAS */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 min-h-0">
-
-                    {/* COLUNA ESQUERDA: LIVE PORTAL PREVIEW (LOOK LIKE VITTANEWS) */}
-                    <div className="lg:col-span-7 flex flex-col gap-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
-                          <Monitor size={12} /> Visualização Real no Portal
-                        </h4>
-                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest px-2 py-1 bg-slate-100 dark:bg-white/5 rounded border border-slate-200 dark:border-white/5">Modo Destaque</span>
-                      </div>
-
-                      <div className="bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 overflow-hidden flex flex-col gap-6">
-                        {/* Header do Preview (Falsificando o VittaNews) */}
-                        <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-2">
-                           <div className="flex flex-col leading-none">
-                            <span className="text-sm font-black italic tracking-tighter uppercase text-zinc-900">Vitta<span className="text-indigo-600">Cash</span></span>
-                            <span className="text-[6px] font-bold uppercase tracking-[0.4em] text-zinc-400">Notícias</span>
-                          </div>
-                          <div className="flex gap-2">
-                            <div className="w-2 h-2 rounded-full bg-slate-100" />
-                            <div className="w-2 h-2 rounded-full bg-slate-100" />
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:flex-1 md:min-h-0">
+                      
+                      {/* COLUNA ESQUERDA: NOTÍCIA BRUTA INTEIRA (Ocupa 5 colunas no desktop) */}
+                      <div className="lg:col-span-5 flex flex-col gap-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                          <Newspaper size={12} /> Texto Bruto / Fonte de Dados
+                        </label>
+                        <div className="flex-1 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5 p-4 flex flex-col">
+                          <textarea
+                            className="flex-1 w-full bg-transparent border-0 outline-none font-medium text-sm text-slate-900 dark:text-white placeholder:text-slate-400 resize-none custom-scrollbar min-h-[300px] lg:min-h-[450px]"
+                            placeholder="Cole aqui o texto completo da notícia original..."
+                            value={hqRawText}
+                            onChange={e => setHqRawText(e.target.value)}
+                          />
+                          <div className="mt-2 pt-2 border-t border-slate-200 dark:border-white/5 flex items-center justify-between">
+                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{hqRawText.length} caracteres</span>
+                             <button 
+                              type="button"
+                              onClick={() => setHqRawText('')}
+                              className="text-[8px] font-black text-rose-500 uppercase tracking-widest hover:underline"
+                             >Limpar Texto</button>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="grid grid-cols-1 gap-6">
-                          {/* Capa */}
-                          <div className="aspect-video w-full overflow-hidden rounded-xl relative bg-zinc-50 border border-zinc-100">
-                            {newsImg ? (
-                              <img src={newsImg} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                            ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center text-zinc-300 gap-2">
-                                <ImageIcon size={32} className="opacity-20" />
-                                <span className="text-[8px] font-black uppercase">Aguardando Imagem</span>
-                              </div>
-                            )}
-                            <div className="absolute top-3 left-3">
-                              <span className="px-2 py-0.5 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest shadow-lg">{hqCategory}</span>
+                      {/* COLUNA DIREITA: LIVE PORTAL PREVIEW (Ocupa 7 colunas no desktop) */}
+                      <div className="lg:col-span-7 flex flex-col gap-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
+                            <Monitor size={12} /> Visualização Real no Portal
+                          </h4>
+                          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest px-2 py-1 bg-slate-100 dark:bg-white/5 rounded border border-slate-200 dark:border-white/5">Modo Destaque</span>
+                        </div>
+
+                        <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-2xl border border-slate-200 overflow-hidden flex flex-col gap-4 md:gap-6">
+                          {/* Header do Preview (Falsificando o VittaNews) */}
+                          <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-2">
+                             <div className="flex flex-col leading-none">
+                              <span className="text-sm font-black italic tracking-tighter uppercase text-zinc-900">Vitta<span className="text-indigo-600">Cash</span></span>
+                              <span className="text-[6px] font-bold uppercase tracking-[0.4em] text-zinc-400">Notícias</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <div className="w-2 h-2 rounded-full bg-slate-100" />
+                              <div className="w-2 h-2 rounded-full bg-slate-100" />
                             </div>
                           </div>
 
-                          {/* Texto */}
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-2 text-zinc-400 text-[8px] font-bold uppercase tracking-widest mb-3">
-                              <Clock size={10} /> {new Date().toLocaleDateString()} • 5 min de leitura
-                            </div>
-                            
-                            <input
-                              className="w-full bg-transparent border-0 font-black text-zinc-900 uppercase tracking-tighter italic leading-none mb-4 outline-none focus:ring-1 focus:ring-indigo-500/20 rounded py-1 text-xl md:text-2xl placeholder:text-zinc-200"
-                              placeholder="Título da Matéria..."
-                              value={hqTitle}
-                              onChange={e => setHqTitle(e.target.value)}
-                            />
-                            
-                            <div className="text-zinc-600 text-xs font-medium leading-relaxed space-y-4 max-h-[200px] overflow-y-auto custom-scrollbar pr-2 flex flex-col">
-                              <textarea
-                                className="w-full bg-transparent border-0 outline-none resize-none min-h-[80px] placeholder:text-zinc-300"
-                                placeholder="O resumo da notícia aparecerá aqui..."
-                                value={hqResume}
-                                onChange={e => setHqResume(e.target.value)}
-                              />
-
-                              {includeVittaPov && (
-                                <div className="mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-r-lg">
-                                  <span className="text-[10px] font-black uppercase text-indigo-600 mb-2 block flex items-center gap-1"><Zap size={10}/> VittaCash Insights</span>
-                                  <textarea
-                                    className="w-full bg-transparent border-0 outline-none resize-none font-bold italic text-indigo-900/80 placeholder:text-indigo-200"
-                                    placeholder="Insights da IA..."
-                                    value={hqPov}
-                                    onChange={e => setHqPov(e.target.value)}
-                                  />
-                                  <p className="text-[10px] text-indigo-500 mt-2 font-black uppercase tracking-widest">Conheça nosso aplicativo gratuito.</p>
+                          <div className="grid grid-cols-1 gap-6">
+                            {/* Capa */}
+                            <div className="aspect-video w-full overflow-hidden rounded-xl relative bg-zinc-50 border border-zinc-100">
+                              {newsImg ? (
+                                <img src={newsImg} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-zinc-300 gap-2">
+                                  <ImageIcon size={32} className="opacity-20" />
+                                  <span className="text-[8px] font-black uppercase">Aguardando Imagem</span>
                                 </div>
                               )}
+                              <div className="absolute top-3 left-3">
+                                <span className="px-2 py-0.5 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest shadow-lg">{hqCategory}</span>
+                              </div>
+                            </div>
 
+                            {/* Texto */}
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2 text-zinc-400 text-[8px] font-bold uppercase tracking-widest mb-3">
+                                <Clock size={10} /> {new Date().toLocaleDateString()} • 5 min de leitura
+                              </div>
                               
-                              <p className="text-[10px] text-zinc-400 font-bold mt-4">Informações originais baseadas na reportagem de {hqSource || "..."}</p>
+                              <input
+                                className="w-full bg-transparent border-0 font-black text-zinc-900 uppercase tracking-tighter italic leading-none mb-4 outline-none focus:ring-1 focus:ring-indigo-500/20 rounded py-1 text-lg md:text-2xl placeholder:text-zinc-200"
+                                placeholder="Título da Matéria..."
+                                value={hqTitle}
+                                onChange={e => setHqTitle(e.target.value)}
+                              />
+                              
+                              <div className="text-zinc-600 text-xs font-medium leading-relaxed space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2 flex flex-col">
+                                <textarea
+                                  className="w-full bg-transparent border-0 outline-none resize-none min-h-[80px] placeholder:text-zinc-300"
+                                  placeholder="O resumo da notícia aparecerá aqui..."
+                                  value={hqResume}
+                                  onChange={e => setHqResume(e.target.value)}
+                                />
+
+                                {includeVittaPov && (
+                                  <div className="mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-r-lg">
+                                    <span className="text-[10px] font-black uppercase text-indigo-600 mb-2 block flex items-center gap-1"><Zap size={10}/> VittaCash Insights</span>
+                                    <textarea
+                                      className="w-full bg-transparent border-0 outline-none resize-none font-bold italic text-indigo-900/80 placeholder:text-indigo-200"
+                                      placeholder="Insights da IA..."
+                                      value={hqPov}
+                                      onChange={e => setHqPov(e.target.value)}
+                                    />
+                                    <p className="text-[10px] text-indigo-500 mt-2 font-black uppercase tracking-widest">Conheça nosso aplicativo gratuito.</p>
+                                  </div>
+                                )}
+
+                                <p className="text-[10px] text-zinc-400 font-bold mt-4">Informações originais baseadas na reportagem de {hqSource || "..."}</p>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
+
                     </div>
-
-                    {/* COLUNA DIREITA: NOTÍCIA BRUTA INTEIRA */}
-                    <div className="lg:col-span-5 flex flex-col gap-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                        <Newspaper size={12} /> Texto Bruto / Fonte de Dados
-                      </label>
-                      <div className="flex-1 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5 p-4 flex flex-col">
-                        <textarea
-                          className="flex-1 w-full bg-transparent border-0 outline-none font-medium text-sm text-slate-900 dark:text-white placeholder:text-slate-400 resize-none custom-scrollbar min-h-[400px]"
-                          placeholder="Cole aqui o texto completo da notícia original..."
-                          value={hqRawText}
-                          onChange={e => setHqRawText(e.target.value)}
-                        />
-                        <div className="mt-2 pt-2 border-t border-slate-200 dark:border-white/5 flex items-center justify-between">
-                           <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{hqRawText.length} caracteres</span>
-                           <button 
-                            type="button"
-                            onClick={() => setHqRawText('')}
-                            className="text-[8px] font-black text-rose-500 uppercase tracking-widest hover:underline"
-                           >Limpar Texto</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-
-
-                </form>
+                  </form>
+                </div>
               </div>
-            </div>
-          )}
+            )}
           {activeTab === 'publicidade' && (
             <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 pr-2 md:pr-6 overflow-y-auto custom-scrollbar pb-12">
               <div className="bg-slate-50 dark:bg-white/[0.02] p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-white/5">
@@ -1239,29 +1277,228 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                   </div>
                   <div>
                     <h3 className="font-black uppercase tracking-widest text-amber-500 text-lg">Central de Publicidade</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Gerencie os banners e anúncios do Vitta Notícias</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Gerencie os anúncios diferenciados por página e valor</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {[
-                    { id: 'ad_top', label: 'Banner Topo (970x250)', type: 'ad_top' },
-                    { id: 'ad_skin_left', label: 'Skin Esquerda (200x600)', type: 'ad_skin_left' },
-                    { id: 'ad_skin_right', label: 'Skin Direita (200x600)', type: 'ad_skin_right' },
-                    { id: 'ad_sidebar_1', label: 'Sidebar Quadrado (300x300)', type: 'ad_sidebar_1' },
-                    { id: 'ad_sidebar_2', label: 'Sidebar Vertical (300x600)', type: 'ad_sidebar_2' }
-                  ].map((slot) => {
-                    const currentAd = siteContent.find(c => c.content_type === slot.type);
-                    return (
-                      <div key={slot.id} className="bg-white dark:bg-black/20 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                {/* SESSÃO: PÁGINA INICIAL */}
+                <div className="mb-12">
+                  <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500 mb-6 flex items-center gap-2">
+                    <Monitor size={14} /> Página Inicial (Portal Principal - Estático)
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {[
+                      { id: 'ad_top', label: 'Banner Topo (970x250)', type: 'ad_top' },
+                      { id: 'ad_vittacash_horizontal', label: 'Banner VittaCash (Horizontal)', type: 'ad_vittacash_horizontal' },
+                      { id: 'ad_skin_left_home', label: 'Skin Esquerda (200x600)', type: 'ad_skin_left_home' },
+                      { id: 'ad_skin_right_home', label: 'Skin Direita (200x600)', type: 'ad_skin_right_home' },
+                      { id: 'ad_sidebar_1', label: 'Sidebar Quadrado (300x300)', type: 'ad_sidebar_1' },
+                      { id: 'ad_sidebar_2', label: 'Sidebar Vertical (300x600)', type: 'ad_sidebar_2' }
+                    ].map((slot) => {
+                      let currentAd = siteContent.find(c => c.content_type === slot.type);
+                      
+                      // Fallback para tipos legados se for skin
+                      if (!currentAd && slot.type === 'ad_skin_left_home') {
+                        currentAd = siteContent.find(c => c.content_type === 'ad_skin_left');
+                      }
+                      if (!currentAd && slot.type === 'ad_skin_right_home') {
+                        currentAd = siteContent.find(c => c.content_type === 'ad_skin_right');
+                      }
+                      
+                      return (
+                        <div key={slot.id} className="bg-white dark:bg-black/20 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                          <div className="flex justify-between items-center">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{slot.label}</h4>
+                            {currentAd?.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
+                          </div>
+                          
+                          <div className="aspect-video bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img">
+                            {currentAd?.image_url ? (
+                              <img src={currentAd.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                <ImageIcon size={24} className="opacity-20" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                              <button 
+                                onClick={() => {
+                                  setPendingAdSlot(currentAd ? `${slot.type}:${currentAd.id}` : slot.type);
+                                  fileInputRef.current?.click();
+                                }}
+                                className="px-4 py-2 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-lg shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+                              >
+                                <Upload size={12} />
+                                Trocar Imagem
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {(slot.type === 'ad_featured_video') && (
+                              <>
+                                <input 
+                                  className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                  placeholder="Título do Vídeo..."
+                                  defaultValue={currentAd?.title || ''}
+                                  onBlur={async (e) => {
+                                    if (e.target.value === (currentAd?.title || '')) return;
+                                    setLoading(true);
+                                    await supabase.from('site_content').upsert({
+                                      id: currentAd?.id,
+                                      content_type: slot.type,
+                                      title: e.target.value,
+                                      image_url: currentAd?.image_url || '',
+                                      description: currentAd?.description || '',
+                                      is_active: true,
+                                      meta_value: { ...currentAd?.meta_value, external_url: currentAd?.meta_value?.external_url || '#' }
+                                    });
+                                    setLoading(false);
+                                    fetchData();
+                                  }}
+                                />
+                                <textarea 
+                                  className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all resize-none h-20"
+                                  placeholder="Resumo/Descrição do Vídeo..."
+                                  defaultValue={currentAd?.description || ''}
+                                  onBlur={async (e) => {
+                                    if (e.target.value === (currentAd?.description || '')) return;
+                                    setLoading(true);
+                                    await supabase.from('site_content').upsert({
+                                      id: currentAd?.id,
+                                      content_type: slot.type,
+                                      title: currentAd?.title || slot.label,
+                                      image_url: currentAd?.image_url || '',
+                                      description: e.target.value,
+                                      is_active: true,
+                                      meta_value: { ...currentAd?.meta_value, external_url: currentAd?.meta_value?.external_url || '#' }
+                                    });
+                                    setLoading(false);
+                                    fetchData();
+                                  }}
+                                />
+                              </>
+                            )}
+                            <input 
+                              className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                              placeholder={slot.type === 'ad_featured_video' ? "Link do YouTube..." : "URL da Imagem..."}
+                              defaultValue={slot.type === 'ad_featured_video' ? (currentAd?.meta_value?.external_url || '') : (currentAd?.image_url || '')}
+                              onBlur={async (e) => {
+                                const val = e.target.value;
+                                if (slot.type === 'ad_featured_video') {
+                                  if (val === (currentAd?.meta_value?.external_url || '')) return;
+                                  setLoading(true);
+                                  await supabase.from('site_content').upsert({
+                                    id: currentAd?.id,
+                                    content_type: slot.type,
+                                    title: currentAd?.title || slot.label,
+                                    image_url: currentAd?.image_url || '',
+                                    description: currentAd?.description || '',
+                                    is_active: true,
+                                    meta_value: { ...currentAd?.meta_value, external_url: val }
+                                  });
+                                } else {
+                                  if (val === (currentAd?.image_url || '')) return;
+                                  setLoading(true);
+                                  await supabase.from('site_content').upsert({
+                                    id: currentAd?.id,
+                                    content_type: slot.type,
+                                    title: slot.label,
+                                    image_url: val,
+                                    is_active: true,
+                                    meta_value: { ...currentAd?.meta_value, external_url: currentAd?.meta_value?.external_url || '#' }
+                                  });
+                                }
+                                setLoading(false);
+                                fetchData();
+                              }}
+                            />
+                            {slot.type !== 'ad_featured_video' && (
+                              <input 
+                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                placeholder="Link do Anunciante (URL)..."
+                                defaultValue={currentAd?.meta_value?.external_url || ''}
+                                onBlur={async (e) => {
+                                  if (e.target.value === (currentAd?.meta_value?.external_url || '')) return;
+                                  setLoading(true);
+                                  const { error } = await supabase.from('site_content').upsert({
+                                    id: currentAd?.id,
+                                    content_type: slot.type,
+                                    title: slot.label,
+                                    image_url: currentAd?.image_url || '',
+                                    is_active: true,
+                                    meta_value: { ...currentAd?.meta_value, external_url: e.target.value }
+                                  });
+                                  setLoading(false);
+                                  if (error) {
+                                    showAlert("Erro ao Salvar", error.message, "error");
+                                  } else {
+                                    fetchData();
+                                    showAlert("Sucesso", "Link do anunciante atualizado!", "info");
+                                  }
+                                }}
+                              />
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center justify-between pt-2">
+                             <button 
+                              onClick={async () => {
+                                if (!currentAd) return;
+                                setLoading(true);
+                                await supabase.from('site_content').update({ is_active: !currentAd.is_active }).eq('id', currentAd.id);
+                                setLoading(false);
+                                fetchData();
+                              }}
+                              className={`text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full border transition-all ${currentAd?.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20'}`}
+                             >
+                              {currentAd?.is_active ? 'Ativo' : 'Inativo'}
+                             </button>
+                             {currentAd && (
+                               <button onClick={() => handleDeleteContent(currentAd.id)} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
+                             )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* SESSÃO: VITTACASH TV (VÍDEOS E HISTÓRICO) */}
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-white/5 pb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-indigo-500/10 rounded-2xl">
+                        <Monitor size={24} className="text-indigo-500" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500">
+                          VittaCash TV (Destaque & Histórico)
+                        </h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">O vídeo mais recente será o destaque principal, os outros vão para o histórico.</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={handleCreateNewVideo}
+                      className="px-4 py-2 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg shadow-lg hover:bg-indigo-700 transition-all flex items-center gap-2"
+                    >
+                      <Plus size={14} /> Adicionar Vídeo
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {siteContent.filter(c => c.content_type === 'ad_featured_video').map((vid) => (
+                      <div key={vid.id} className="bg-white dark:bg-black/20 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
                         <div className="flex justify-between items-center">
-                          <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{slot.label}</h4>
-                          {currentAd?.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
+                          <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">ID: {vid.id.slice(0, 8)}</h4>
+                          {vid.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
                         </div>
                         
                         <div className="aspect-video bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img">
-                          {currentAd?.image_url ? (
-                            <img src={currentAd.image_url} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          {vid.image_url ? (
+                            <img src={vid.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                          ) : getYouTubeId(vid.meta_value?.external_url) ? (
+                            <img src={`https://img.youtube.com/vi/${getYouTubeId(vid.meta_value?.external_url)}/mqdefault.jpg`} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-300">
                               <ImageIcon size={24} className="opacity-20" />
@@ -1270,13 +1507,13 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                             <button 
                               onClick={() => {
-                                setPendingAdSlot(slot.type);
+                                setPendingAdSlot(`ad_featured_video:${vid.id}`);
                                 fileInputRef.current?.click();
                               }}
                               className="px-4 py-2 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-lg shadow-xl hover:scale-105 transition-all flex items-center gap-2"
                             >
                               <Upload size={12} />
-                              Trocar Imagem
+                              Capa Customizada
                             </button>
                           </div>
                         </div>
@@ -1284,40 +1521,38 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                         <div className="space-y-3">
                           <input 
                             className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
-                            placeholder="URL da Imagem..."
-                            defaultValue={currentAd?.image_url || ''}
+                            placeholder="Título do Vídeo..."
+                            defaultValue={vid.title || ''}
                             onBlur={async (e) => {
-                              if (e.target.value === (currentAd?.image_url || '')) return;
+                              if (e.target.value === (vid.title || '')) return;
                               setLoading(true);
-                              const { error } = await supabase.from('site_content').upsert({
-                                id: currentAd?.id,
-                                content_type: slot.type,
-                                title: slot.label,
-                                image_url: e.target.value,
-                                is_active: true,
-                                meta_value: { external_url: currentAd?.meta_value?.external_url || '#' }
-                              });
+                              await supabase.from('site_content').update({ title: e.target.value }).eq('id', vid.id);
                               setLoading(false);
-                              if (!error) fetchData();
+                              fetchData();
+                            }}
+                          />
+                          <textarea 
+                            className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all resize-none h-20"
+                            placeholder="Resumo/Descrição do Vídeo..."
+                            defaultValue={vid.description || ''}
+                            onBlur={async (e) => {
+                              if (e.target.value === (vid.description || '')) return;
+                              setLoading(true);
+                              await supabase.from('site_content').update({ description: e.target.value }).eq('id', vid.id);
+                              setLoading(false);
+                              fetchData();
                             }}
                           />
                           <input 
                             className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
-                            placeholder="Link de Destino (URL)..."
-                            defaultValue={currentAd?.meta_value?.external_url || ''}
+                            placeholder="Link do YouTube..."
+                            defaultValue={vid.meta_value?.external_url || ''}
                             onBlur={async (e) => {
-                              if (e.target.value === (currentAd?.meta_value?.external_url || '')) return;
+                              if (e.target.value === (vid.meta_value?.external_url || '')) return;
                               setLoading(true);
-                              const { error } = await supabase.from('site_content').upsert({
-                                id: currentAd?.id,
-                                content_type: slot.type,
-                                title: slot.label,
-                                image_url: currentAd?.image_url || '',
-                                is_active: true,
-                                meta_value: { external_url: e.target.value }
-                              });
+                              await supabase.from('site_content').update({ meta_value: { ...vid.meta_value, external_url: e.target.value } }).eq('id', vid.id);
                               setLoading(false);
-                              if (!error) fetchData();
+                              fetchData();
                             }}
                           />
                         </div>
@@ -1325,23 +1560,216 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                         <div className="flex items-center justify-between pt-2">
                            <button 
                             onClick={async () => {
-                              if (!currentAd) return;
                               setLoading(true);
-                              await supabase.from('site_content').update({ is_active: !currentAd.is_active }).eq('id', currentAd.id);
+                              await supabase.from('site_content').update({ is_active: !vid.is_active }).eq('id', vid.id);
                               setLoading(false);
                               fetchData();
                             }}
-                            className={`text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full border transition-all ${currentAd?.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20'}`}
+                            className={`text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full border transition-all ${vid.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20'}`}
                            >
-                            {currentAd?.is_active ? 'Ativo' : 'Inativo'}
+                            {vid.is_active ? 'Ativo' : 'Inativo'}
                            </button>
-                           {currentAd && (
-                             <button onClick={() => handleDeleteContent(currentAd.id)} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
-                           )}
+                           <button onClick={() => handleDeleteContent(vid.id)} className="text-rose-500 opacity-60 hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
                         </div>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
+                </div>
+
+                {/* SESSÃO: PÁGINA INTERNA */}
+                <div className="space-y-12">
+                  {/* NOVOS CARROSSEIS LATERAIS (PAGINA INTERNA) */}
+                  {[
+                    { type: 'ad_skin_left_carousel', label: 'Carrossel Lateral Esquerdo (Página Interna)', color: 'text-indigo-500' },
+                    { type: 'ad_skin_right_carousel', label: 'Carrossel Lateral Direito (Página Interna)', color: 'text-rose-500' }
+                  ].map(section => (
+                    <div key={section.type}>
+                      <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-white/5 pb-4">
+                        <h4 className={`text-xs font-black uppercase tracking-[0.3em] ${section.color} flex items-center gap-2`}>
+                          <Monitor size={14} /> {section.label}
+                        </h4>
+                        <button 
+                          onClick={() => {
+                            setPendingAdSlot(section.type);
+                            fileInputRef.current?.click();
+                          }}
+                          className="px-4 py-2 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg shadow-lg hover:bg-indigo-700 transition-all flex items-center gap-2"
+                        >
+                          <Plus size={14} /> Adicionar ao Carrossel
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {siteContent.filter(c => c.content_type === section.type).map((ad) => (
+                          <div key={ad.id} className="bg-white dark:bg-black/20 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                            <div className="flex justify-between items-center">
+                              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Anúncio {ad.id.slice(0, 4)}</h4>
+                              {ad.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
+                            </div>
+                            
+                            <div className="aspect-video bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img">
+                              <img src={ad.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                <button 
+                                  onClick={() => {
+                                    setPendingAdSlot(`${section.type}:${ad.id}`);
+                                    fileInputRef.current?.click();
+                                  }}
+                                  className="px-4 py-2 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-lg shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+                                >
+                                  <Upload size={12} /> Alterar Imagem
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="space-y-3">
+                              <input 
+                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                placeholder="Link do Anunciante (URL)..."
+                                defaultValue={ad.meta_value?.external_url || ''}
+                                onBlur={async (e) => {
+                                  if (e.target.value === (ad.meta_value?.external_url || '')) return;
+                                  setLoading(true);
+                                  await supabase.from('site_content').update({ meta_value: { ...ad.meta_value, external_url: e.target.value } }).eq('id', ad.id);
+                                  setLoading(false);
+                                  fetchData();
+                                }}
+                              />
+                            </div>
+                            
+                            <div className="flex items-center justify-between pt-2">
+                               <button 
+                                onClick={async () => {
+                                  setLoading(true);
+                                  await supabase.from('site_content').update({ is_active: !ad.is_active }).eq('id', ad.id);
+                                  setLoading(false);
+                                  fetchData();
+                                }}
+                                className={`text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full border transition-all ${ad.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20'}`}
+                               >
+                                {ad.is_active ? 'Ativo' : 'Inativo'}
+                               </button>
+                               <button onClick={() => handleDeleteContent(ad.id)} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-[0.3em] text-amber-600 mb-6 flex items-center gap-2">
+                      <Newspaper size={14} /> Anúncios de Texto (Página Interna)
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {[
+                        { id: 'ad_internal_inline_1', label: 'Anúncio Interno 01', type: 'ad_internal_inline_1' },
+                        { id: 'ad_internal_inline_2', label: 'Anúncio Interno 02', type: 'ad_internal_inline_2' },
+                        { id: 'ad_internal_inline_3', label: 'Anúncio Interno 03', type: 'ad_internal_inline_3' }
+                      ].map((slot) => {
+                        const currentAd = siteContent.find(c => c.content_type === slot.type);
+                        return (
+                          <div key={slot.id} className="bg-white dark:bg-black/20 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                            <div className="flex justify-between items-center">
+                              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{slot.label}</h4>
+                              {currentAd?.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
+                            </div>
+                            
+                            <div className="aspect-video bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img">
+                              {currentAd?.image_url ? (
+                                <img src={currentAd.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                  <ImageIcon size={24} className="opacity-20" />
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                <button 
+                                  onClick={() => {
+                                    setPendingAdSlot(currentAd ? `${slot.type}:${currentAd.id}` : slot.type);
+                                    fileInputRef.current?.click();
+                                  }}
+                                  className="px-4 py-2 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-lg shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+                                >
+                                  <Upload size={12} />
+                                  Trocar Imagem
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="space-y-3">
+                              <input 
+                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                placeholder="URL da Imagem..."
+                                defaultValue={currentAd?.image_url || ''}
+                                onBlur={async (e) => {
+                                  if (e.target.value === (currentAd?.image_url || '')) return;
+                                  setLoading(true);
+                                  const { error } = await supabase.from('site_content').upsert({
+                                    id: currentAd?.id,
+                                    content_type: slot.type,
+                                    title: slot.label,
+                                    image_url: e.target.value,
+                                    is_active: true,
+                                    meta_value: { ...currentAd?.meta_value, external_url: currentAd?.meta_value?.external_url || '#' }
+                                  });
+                                  setLoading(false);
+                                  if (error) {
+                                    showAlert("Erro ao Salvar", error.message, "error");
+                                  } else {
+                                    fetchData();
+                                    showAlert("Sucesso", "Anúncio interno atualizado!", "info");
+                                  }
+                                }}
+                              />
+                              <input 
+                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                placeholder="Link do Anunciante (URL)..."
+                                defaultValue={currentAd?.meta_value?.external_url || ''}
+                                onBlur={async (e) => {
+                                  if (e.target.value === (currentAd?.meta_value?.external_url || '')) return;
+                                  setLoading(true);
+                                  const { error } = await supabase.from('site_content').upsert({
+                                    id: currentAd?.id,
+                                    content_type: slot.type,
+                                    title: slot.label,
+                                    image_url: currentAd?.image_url || '',
+                                    is_active: true,
+                                    meta_value: { ...currentAd?.meta_value, external_url: e.target.value }
+                                  });
+                                  setLoading(false);
+                                  if (error) {
+                                    showAlert("Erro ao Salvar", error.message, "error");
+                                  } else {
+                                    fetchData();
+                                    showAlert("Sucesso", "Link interno atualizado!", "info");
+                                  }
+                                }}
+                              />
+                            </div>
+                            
+                            <div className="flex items-center justify-between pt-2">
+                               <button 
+                                onClick={async () => {
+                                  if (!currentAd) return;
+                                  setLoading(true);
+                                  await supabase.from('site_content').update({ is_active: !currentAd.is_active }).eq('id', currentAd.id);
+                                  setLoading(false);
+                                  fetchData();
+                                }}
+                                className={`text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full border transition-all ${currentAd?.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20'}`}
+                               >
+                                {currentAd?.is_active ? 'Ativo' : 'Inativo'}
+                               </button>
+                               {currentAd && (
+                                 <button onClick={() => handleDeleteContent(currentAd.id)} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
+                               )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

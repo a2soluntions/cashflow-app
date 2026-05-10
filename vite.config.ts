@@ -42,8 +42,8 @@ export default defineConfig({
         name: 'VittaCash',
         short_name: 'VittaCash',
         description: 'VittaCash - Seu aplicativo de finanças confiável',
-        theme_color: '#0a0a0c',
-        background_color: '#0a0a0c',
+        theme_color: '#1a237e',
+        background_color: '#1a237e',
         display: 'standalone',
         icons: [
           {
@@ -61,6 +61,11 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
+          },
+          {
+            src: 'apple-touch-icon.png',
+            sizes: '180x180',
+            type: 'image/png'
           }
         ]
       }

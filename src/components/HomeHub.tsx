@@ -53,7 +53,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  const totalItems = menuItems.length;
 
  return (
- <div className="relative h-full w-full flex items-center justify-center overflow-hidden bg-transparent">
+ <div className="relative min-h-full w-full flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-transparent custom-scrollbar py-8">
  
  {/* 🌌 SISTEMA ORBITAL (DESKTOP) */}
   <div className={`hidden md:flex relative items-center justify-center w-[650px] h-[650px] transition-all duration-700 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in zoom-in'}`}>
@@ -87,10 +87,10 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  </div>
 
  {/* 📱 SISTEMA EM GRID (MOBILE) */}
- <div className={`md:hidden flex flex-col items-center w-full max-w-sm px-4 pb-16 transition-all duration-700 z-10 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in slide-in-from-bottom-8'}`}>
- <div className="relative mb-8 group">
+ <div className={`md:hidden flex flex-col items-center w-full max-w-sm px-4 pt-8 pb-12 transition-all duration-700 z-10 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in slide-in-from-bottom-8'}`}>
+ <div className="relative mb-6 group shrink-0">
  <div className={`absolute inset-0 blur-3xl rounded-full scale-[2] animate-pulse ${isLight ? 'bg-indigo-400/20' : 'bg-indigo-500/20'}`} />
- <img src="./icon.png" alt="VittaCash" className="w-24 h-auto object-contain relative z-10 drop- -2xl" />
+ <img src="./icon.png" alt="VittaCash" className="w-20 h-auto object-contain relative z-10" />
  </div>
 
  <div className="grid grid-cols-3 gap-6 w-full">
@@ -154,7 +154,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  )}
 
  {/* FOOTER */}
- <footer className="absolute bottom-6 w-full flex flex-col items-center gap-2 select-none pointer-events-none">
+ <footer className="mt-12 w-full flex flex-col items-center gap-2 select-none pointer-events-none pb-8 shrink-0">
  <div className="flex items-center gap-4">
  <div className={`h-[1px] w-12 ${isLight ? 'bg-slate-300' : 'bg-white/10'}`} />
  <Fingerprint size={14} className={isLight ? 'text-indigo-600 opacity-60' : 'text-indigo-400 opacity-40'} />
