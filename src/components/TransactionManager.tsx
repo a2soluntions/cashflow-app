@@ -283,7 +283,7 @@ export function TransactionManager() {
  </span>
  </div>
  
- <div className="w-full h-1.5 bg-black/30 rounded-full overflow-hidden mb-2">
+ <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-2">
  <div 
  className={`h-full transition-all duration-300 ${budgetStatus.isOver ? 'bg-rose-500' : budgetStatus.isWarning ? 'bg-amber-500' : 'bg-indigo-500'}`}
  style={{ width: `${Math.min(budgetStatus.percent || 0, 100)}%` }}

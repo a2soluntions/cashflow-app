@@ -28,7 +28,7 @@ export function FinancialAdvisor({ currentBalance, transactions, theme = 'dark' 
   {/* 🟢 TOP NAVIGATION BAR (SUBSTITUINDO O SIDEBAR) */}
   <header className={`w-full shrink-0 z-10 ${activeTab === 'welcome' ? 'mb-1' : 'mb-4'}`}>
     <div className={`p-1.5 flex items-center justify-between overflow-x-auto no-scrollbar border border-white/5 ${
-      isLight ? 'bg-white/70' : 'bg-black/30 backdrop-blur-xl shadow-2xl'
+      isLight ? 'bg-white/70' : 'bg-white/5 backdrop-blur-xl shadow-2xl'
     }`}>
       {/* Grupo Esquerda: Painel, Radar e Diagnóstico */}
       <div className="flex gap-1 md:gap-3 items-center">

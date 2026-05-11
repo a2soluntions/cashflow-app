@@ -106,7 +106,7 @@ export default function DebtManager({ theme }: { theme: string }) {
 
  return (
  <div className="h-full flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-0">
- <div className={`shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center p-4 rounded-[2rem] transition-all ${isLight ? 'bg-white  ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
+ <div className={`shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center p-4 rounded-[2rem] transition-all ${isLight ? 'bg-white  ' : 'bg-white/5 border-white/5 backdrop-blur-xl border'}`}>
  <div>
  <h2 className={`text-xl font-black uppercase italic tracking-tighter flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
  <History className="text-indigo-500" size={24} /> Máquina do Tempo
@@ -117,7 +117,7 @@ export default function DebtManager({ theme }: { theme: string }) {
 
  <div className="flex-1 grid grid-cols-12 gap-2 min-h-0">
  <div className="col-span-12 lg:col-span-4 flex flex-col gap-2 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
- <div className={`shrink-0 p-4 rounded-[1.5rem] transition-all ${isLight ? 'bg-white  ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
+ <div className={`shrink-0 p-4 rounded-[1.5rem] transition-all ${isLight ? 'bg-white  ' : 'bg-white/5 border-white/5 backdrop-blur-xl border'}`}>
  <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-4 flex items-center gap-2"><Plus size={14}/> Novo Passivo</h3>
  <div className="space-y-4">
  <div>
@@ -150,7 +150,7 @@ export default function DebtManager({ theme }: { theme: string }) {
  <button onClick={handleAddDebt} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all -indigo-500/20 active:scale-95">Gravar Passivo</button>
  </div>
  </div>
- <div className={`shrink-0 p-4 rounded-[1.5rem] transition-all flex-1 ${isLight ? 'bg-white  ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
+ <div className={`shrink-0 p-4 rounded-[1.5rem] transition-all flex-1 ${isLight ? 'bg-white  ' : 'bg-white/5 border-white/5 backdrop-blur-xl border'}`}>
  <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-4 flex items-center gap-2"><Calculator size={14}/> Tática de Guerra</h3>
  <div className="flex flex-col gap-2 mb-6">
  <button onClick={() => setStrategy('avalanche')} className={`p-3 rounded-xl flex items-center gap-3 transition-all ${strategy === 'avalanche' ? 'bg-rose-500/10 border-rose-500 text-rose-500' : 'bg-transparent   text-slate-400'}`}><Zap size={16} /><span className="text-[10px] font-black uppercase tracking-widest text-left w-full">Avalanche <span className="block text-[8px] opacity-70 mt-0.5 normal-case tracking-normal">Foca no maior juro primeiro.</span></span></button>
@@ -160,7 +160,7 @@ export default function DebtManager({ theme }: { theme: string }) {
  <label className="text-[9px] font-black uppercase tracking-widest text-indigo-500 ml-1">Aporte Mensal Extra</label>
  <div className="flex items-center gap-3 mt-2">
  <input type="range" min="0" max="2000" step="50" value={extraPayment} onChange={e => setExtraPayment(Number(e.target.value))} className="flex-1 accent-indigo-500 h-1.5 rounded-full bg-slate-200 dark:bg-[#09090b]/30 appearance-none cursor-pointer" />
- <span className={`text-xs font-black px-3 py-1.5 rounded-lg w-20 text-center ${isLight ? 'bg-slate-50  text-slate-900' : 'bg-black/30 border-white/10 text-white'}`}>{extraPayment}</span>
+ <span className={`text-xs font-black px-3 py-1.5 rounded-lg w-20 text-center ${isLight ? 'bg-slate-50  text-slate-900' : 'bg-white/5 border-white/10 text-white'}`}>{extraPayment}</span>
  </div>
  </div>
  </div>
@@ -196,7 +196,7 @@ export default function DebtManager({ theme }: { theme: string }) {
  </div>
  </div>
  )}
- <div className={`flex-1 flex flex-col min-h-0 rounded-[2rem] p-4 transition-all ${isLight ? 'bg-white/60 /50 ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
+ <div className={`flex-1 flex flex-col min-h-0 rounded-[2rem] p-4 transition-all ${isLight ? 'bg-white/60 /50 ' : 'bg-white/5 border-white/5 backdrop-blur-xl border'}`}>
  <div className="flex justify-between items-center mb-6 shrink-0">
  <h3 className={`text-[10px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Seu Passivo Atual</h3>
  {debts.length > 0 && <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-500/10 px-3 py-1.5 rounded-lg border-rose-500/20">Total: R$ {totalBalance.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>}

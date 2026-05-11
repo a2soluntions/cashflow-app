@@ -238,13 +238,13 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         )}
       </nav>
 
-      <div className="pt-32 md:pt-40" />
+      <div className="pt-[180px] md:pt-40" />
 
       <section className="relative pt-16 pb-16 px-6 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-500/10 blur-[120px] pointer-events-none" />
         
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-3">
-          <div className="flex-1 max-w-lg lg:max-w-2xl overflow-hidden rounded-lg border border-white/10 bg-zinc-950 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+          <div className="flex-1 max-w-lg lg:max-w-2xl overflow-hidden rounded-lg border border-white/10 bg-indigo-950/40 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
             {leftBanners.length > 0 ? (
               <div
                 onClick={() => openModal('left', currentLeftIdx)}
@@ -289,7 +289,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
             </div>
           </div>
           
-          <div className="flex-1 max-w-xs overflow-hidden rounded-lg border border-white/10 bg-zinc-950 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+          <div className="flex-1 max-w-xs overflow-hidden rounded-lg border border-white/10 bg-indigo-950/40 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
             {rightBanners.length > 0 ? (
                 <div
                   onClick={() => openModal('right', currentRightIdx)}
@@ -433,7 +433,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         </div>
       </section>
 
-      <footer className="py-24 px-6 border-t border-white/5 bg-zinc-950/30 relative overflow-hidden mt-20">
+      <footer className="py-24 px-6 border-t border-white/5 bg-indigo-950/40 relative overflow-hidden mt-20">
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-16">
           <div className="md:col-span-4 space-y-8">

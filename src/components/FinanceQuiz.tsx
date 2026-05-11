@@ -102,12 +102,12 @@ export function FinanceQuiz({ theme = 'dark' }: { theme?: string }) {
     <Swords size={64} className="text-indigo-500 mb-6" />
     <h2 className={`text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'} uppercase tracking-tighter mb-4`}>Escolha seu Destino</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-      <button onClick={() => setMode('easy')} className={`group p-8 ${isLight ? 'bg-white border-slate-200' : 'bg-black/30 backdrop-blur-xl border-white/5'} rounded-[2.5rem] hover:border-emerald-500/50 transition-all border shadow-sm`}>
+      <button onClick={() => setMode('easy')} className={`group p-8 ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 backdrop-blur-xl border-white/5'} rounded-[2.5rem] hover:border-emerald-500/50 transition-all border shadow-sm`}>
         <Zap className="text-emerald-400 mx-auto mb-4 group-hover:scale-110 transition-transform" size={40} />
         <h3 className={`${isLight ? 'text-slate-900' : 'text-white'} font-black uppercase`}>Modo Aprendiz</h3>
         <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'} mt-2 font-bold uppercase tracking-widest`}>Respostas imediatas e explicações</p>
       </button>
-      <button onClick={() => setMode('hard')} className={`group p-8 ${isLight ? 'bg-white border-slate-200' : 'bg-black/30 backdrop-blur-xl border-white/5'} rounded-[2.5rem] hover:border-rose-500/50 transition-all border shadow-sm`}>
+      <button onClick={() => setMode('hard')} className={`group p-8 ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 backdrop-blur-xl border-white/5'} rounded-[2.5rem] hover:border-rose-500/50 transition-all border shadow-sm`}>
         <Flame className="text-rose-500 mx-auto mb-4 group-hover:scale-110 transition-transform" size={40} />
         <h3 className={`${isLight ? 'text-slate-900' : 'text-white'} font-black uppercase`}>Modo Gladiador</h3>
         <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'} mt-2 font-bold uppercase tracking-widest`}>Sem dicas. Apenas os fortes sobrevivem.</p>
@@ -120,7 +120,7 @@ export function FinanceQuiz({ theme = 'dark' }: { theme?: string }) {
  if (showPhrase) {
  return (
   <div className="h-full flex flex-col items-center justify-center p-6 text-center animate-in zoom-in duration-500">
-    <div className={`${isLight ? 'bg-indigo-50 border-indigo-200 shadow-xl' : 'bg-black/30 backdrop-blur-xl border-white/5'} p-12 rounded-[3rem] max-w-lg border`}>
+    <div className={`${isLight ? 'bg-indigo-50 border-indigo-200 shadow-xl' : 'bg-white/5 backdrop-blur-xl border-white/5'} p-12 rounded-[3rem] max-w-lg border`}>
       <Sparkles className="text-yellow-500 mx-auto mb-6" size={60} />
       <h3 className={`text-2xl font-black ${isLight ? 'text-indigo-900' : 'text-white'} uppercase mb-4`}>{phrases[phase - 1]}</h3>
       <p className={`${isLight ? 'text-indigo-700' : 'text-indigo-200'} text-sm mb-8 font-medium`}>Você concluiu a Fase {phase}. Sua mente está mais afiada.</p>
@@ -148,7 +148,7 @@ export function FinanceQuiz({ theme = 'dark' }: { theme?: string }) {
  return (
  <div className="h-full flex flex-col gap-6 animate-in fade-in duration-500">
  {/* HUD DE FASE */}
-    <div className={`flex justify-between items-center px-4 ${isLight ? 'bg-white border-slate-200' : 'bg-black/30 backdrop-blur-xl border-white/5'} p-4 rounded-[2rem] border shadow-sm`}>
+    <div className={`flex justify-between items-center px-4 ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 backdrop-blur-xl border-white/5'} p-4 rounded-[2rem] border shadow-sm`}>
       <div className="flex items-center gap-3">
         <ShieldCheck className="text-indigo-500" size={24} />
         <div>
@@ -165,7 +165,7 @@ export function FinanceQuiz({ theme = 'dark' }: { theme?: string }) {
 
  {/* CARD DA PERGUNTA */}
  <div className="flex-1 flex flex-col items-center justify-center max-w-3xl mx-auto w-full">
- <div className={`w-full ${isLight ? 'bg-white border-slate-200' : 'bg-black/30 backdrop-blur-xl border-white/5'} border p-10 rounded-[3rem] relative overflow-hidden shadow-sm`}>
+ <div className={`w-full ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 backdrop-blur-xl border-white/5'} border p-10 rounded-[3rem] relative overflow-hidden shadow-sm`}>
  <span className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-4 block">Pergunta {currentInPhase + 1}/5</span>
  <h3 className={`text-xl md:text-2xl font-black ${isLight ? 'text-slate-900' : 'text-white'} mb-8 leading-tight`}>{q.question}</h3>
 

@@ -183,7 +183,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
  return (
   <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-700 h-[calc(100vh-140px)] min-h-0 overflow-hidden pr-2">
   {/* HEADER */}
-  <div className={`shrink-0 p-4 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 transition-all ${isLight ? 'bg-white  ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
+  <div className={`shrink-0 p-4 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 transition-all ${isLight ? 'bg-white  ' : 'bg-white/5 border-white/5 backdrop-blur-xl border'}`}>
   <div>
   <h2 className={`text-xl font-black uppercase italic tracking-tighter flex items-center gap-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>
   <FileText className="text-indigo-500" size={24} /> Raio-X Financeiro
@@ -197,7 +197,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
   </div>
 
   {/* VELOCÍMETROS */}
-  <div className={`p-4 rounded-3xl grid grid-cols-2 md:grid-cols-4 gap-3 items-center shrink-0 transition-all ${isLight ? 'bg-white ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
+  <div className={`p-4 rounded-3xl grid grid-cols-2 md:grid-cols-4 gap-3 items-center shrink-0 transition-all ${isLight ? 'bg-white ' : 'bg-white/5 border-white/5 backdrop-blur-xl border'}`}>
   <MiniGauge value={analysis.savingsRate} label="Retenção (Lucro)" color="#6366f1" />
   <MiniGauge value={analysis.rule503020.needs.percent} label="Custo Fixo" color={analysis.rule503020.needs.percent > 55 ? "#f43f5e" : "#10b981"} />
   <MiniGauge value={analysis.debtRatio} label="Dívidas/Renda" color={analysis.debtRatio > 30 ? "#f43f5e" : "#10b981"} />
@@ -209,7 +209,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
   
   {/* LADO ESQUERDO */}
   <div className="lg:col-span-5 flex flex-col gap-4 min-h-0 h-full overflow-hidden">
-  <div className={`p-4 rounded-2xl flex items-center gap-3 shrink-0 transition-all ${isLight ? 'bg-white  ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
+  <div className={`p-4 rounded-2xl flex items-center gap-3 shrink-0 transition-all ${isLight ? 'bg-white  ' : 'bg-white/5 border-white/5 backdrop-blur-xl border'}`}>
   <div className={`p-3 rounded-full shrink-0 ${analysis.status === 'danger' ? 'bg-rose-500/20 text-rose-500' : 'bg-indigo-500/20 text-indigo-500'}`}><Brain size={24} /></div>
   <div className="flex-1">
   <h3 className={`text-[10px] font-black uppercase tracking-widest mb-1 ${isLight ? 'text-slate-900' : 'text-white'}`}>Análise do Consultor</h3>
@@ -218,7 +218,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
   </div>
 
   {/* TOP VAZAMENTOS (ÚNICO COM SCROLL) */}
-  <div className={`flex-1 flex flex-col rounded-3xl p-4 transition-all overflow-hidden ${isLight ? 'bg-white border-slate-100' : 'bg-black/30 border-white/5 backdrop-blur-xl border'} min-h-0`}>
+  <div className={`flex-1 flex flex-col rounded-3xl p-4 transition-all overflow-hidden ${isLight ? 'bg-white border-slate-100' : 'bg-white/5 border-white/5 backdrop-blur-xl border'} min-h-0`}>
   <h3 className={`text-[9px] font-black uppercase tracking-widest mb-4 shrink-0 flex items-center gap-2 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}><TrendingDown size={14}/> Top Vazamentos de Riqueza</h3>
   <div className="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
   {analysis.topCategories.length === 0 ? (
@@ -254,7 +254,7 @@ export default function ConsultantReport({ theme, transactions }: ConsultantRepo
   <h3 className="text-xl font-black tracking-tighter">R$ {(analysis.totalInterest || 0).toLocaleString('pt-BR')}</h3>
   {analysis.avgDelay > 0 && <p className={`text-[9px] font-bold mt-1 ${analysis.totalInterest > 0 ? 'text-white/70' : 'opacity-50'}`}>Média: {analysis.avgDelay.toFixed(0)} d atraso</p>}
   </div>
-  <div className={`p-4 rounded-2xl flex flex-col justify-center min-h-[70px] transition-all ${isLight ? 'bg-slate-50 ' : 'bg-black/30 border-white/5 backdrop-blur-xl border'}`}>
+  <div className={`p-4 rounded-2xl flex flex-col justify-center min-h-[70px] transition-all ${isLight ? 'bg-slate-50 ' : 'bg-white/5 border-white/5 backdrop-blur-xl border'}`}>
   <p className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-1.5 flex items-center gap-1.5"><Wallet size={12}/> Saldo Real</p>
   <h3 className={`text-xl font-black tracking-tighter ${isLight ? 'text-slate-900' : 'text-white'}`}>R$ {(analysis.realBalance || 0).toLocaleString('pt-BR')}</h3>
   </div>

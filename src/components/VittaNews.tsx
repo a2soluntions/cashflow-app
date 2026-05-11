@@ -613,7 +613,7 @@ export default function VittaNews() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <button className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors"><Search size={20} /></button>
             <button onClick={() => navigate('/login')} className="px-5 md:px-8 py-2.5 md:py-3 bg-indigo-600 hover:bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/10">
               Assinar Pro
@@ -635,7 +635,7 @@ export default function VittaNews() {
         </div>
       </nav>
 
-      <div className="pt-48 md:pt-40" />
+      <div className="pt-[260px] md:pt-40" />
 
       {/* SKIN ADS (LATERAIS EXTREMAS - ESQUERDA E DIREITA) */}
       <div className="hidden 2xl:flex fixed top-48 left-0 w-[calc(50vw-40rem)] h-[600px] z-[10] justify-end pr-4 pointer-events-none">
@@ -666,7 +666,7 @@ export default function VittaNews() {
       <div className="max-w-7xl mx-auto px-6 py-6 flex justify-center">
         <div 
           onClick={() => openLink(getAd('ad_top')?.meta_value?.external_url)}
-          className="w-full max-w-[970px] h-[90px] md:h-[250px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative group overflow-hidden cursor-pointer"
+          className="w-full max-w-[970px] h-[120px] md:h-[250px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative group overflow-hidden cursor-pointer"
         >
           <span className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm">Publicidade</span>
           {getAd('ad_top') ? (

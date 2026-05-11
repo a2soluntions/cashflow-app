@@ -451,7 +451,7 @@ export function PsychologyModule({ theme = 'dark' }: { theme?: string }) {
  <div 
  key={trap.id} 
  className={`relative rounded-[2rem] transition-all duration-500 overflow-hidden cursor-pointer flex flex-col justify-center
- ${isLight ? 'bg-white border border-slate-200 shadow-sm' : 'bg-black/30 backdrop-blur-xl'}
+ ${isLight ? 'bg-white border border-slate-200 shadow-sm' : 'bg-white/5 backdrop-blur-xl'}
  ${isActive ? 'md:col-span-2 xl:col-span-2 row-span-2 p-6 rounded-[2.5rem] ' + (isLight ? 'bg-slate-50 border-indigo-200' : 'bg-white/10') : 'hover:bg-white/10 p-4'}`}
  onClick={() => !isActive && setActiveTrap(trap.id)}
  >

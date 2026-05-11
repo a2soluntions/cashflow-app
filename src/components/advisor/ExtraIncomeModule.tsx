@@ -453,13 +453,13 @@ export function ExtraIncomeModule({ theme = 'dark' }: { theme?: string }) {
             key={op.id}
             onClick={() => !isSelected && setSelectedId(op.id)}
             className={`group relative rounded-[1.5rem] p-4 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-center
-            ${isLight ? 'bg-white border border-slate-200 shadow-sm' : 'bg-black/30 backdrop-blur-xl border border-white/5'}
+            ${isLight ? 'bg-white border border-slate-200 shadow-sm' : 'bg-white/5 backdrop-blur-xl border border-white/5'}
             ${isSelected ? 'md:col-span-2 xl:col-span-2 row-span-2 ' + (isLight ? 'bg-slate-50 border-indigo-200' : 'bg-black/40 border-white/10') + ' p-6 rounded-[2.5rem]' : 'hover:bg-white/10'}`}
           >
  {/* Cabeçalho do Card */}
  <div className={`flex ${isSelected ? 'flex-col items-start' : 'items-center gap-3'} justify-between relative z-10 w-full`}>
  <div className={`flex ${isSelected ? 'flex-col items-start' : 'items-center gap-3'} w-full`}>
- <div className={`p-2.5 rounded-2xl bg-black/30 shrink-0 ${isSelected ? 'text-yellow-400 mb-4' : 'text-slate-400 group-hover:text-white'}`}>
+ <div className={`p-2.5 rounded-2xl bg-white/5 shrink-0 ${isSelected ? 'text-yellow-400 mb-4' : 'text-slate-400 group-hover:text-white'}`}>
  {op.icon}
  </div>
  <div className="flex-1 min-w-0 pr-2">

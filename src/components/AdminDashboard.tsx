@@ -38,7 +38,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
     if (!alertConfig?.show) return null;
     return (
       <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-        <div className="w-full max-w-sm bg-zinc-900 border border-white/10 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="w-full max-w-sm bg-[#1a237e] border border-white/10 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-300">
           <h4 className={"font-black uppercase tracking-widest text-[10px] mb-2 " + (alertConfig.type === 'error' ? 'text-rose-500' : 'text-emerald-500')}>{alertConfig.title}</h4>
           <p className="text-white/70 text-sm font-medium mb-8 leading-relaxed">{alertConfig.message}</p>
           
@@ -650,16 +650,16 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                     <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-xl font-bold text-sm outline-none transition-colors placeholder:text-slate-400" placeholder="Valor R$ 0,00" value={saleValue} onChange={e => setSaleValue(e.target.value)} required />
                     <div className="grid grid-cols-2 gap-2">
                       <select className="bg-slate-100 dark:bg-white/5 p-3 rounded-xl font-bold text-sm outline-none text-slate-500 focus:text-slate-900 dark:focus:text-white" value={productType} onChange={e => setProductType(e.target.value)}>
-                        <option value="SaaS" className="bg-white dark:bg-[#09090b]">SaaS</option>
-                        <option value="Desktop" className="bg-white dark:bg-[#09090b]">Desktop</option>
-                        <option value="Publicidade" className="bg-white dark:bg-[#09090b]">Publicidade</option>
+                        <option value="SaaS" className="bg-white dark:bg-[#283593]">SaaS</option>
+                        <option value="Desktop" className="bg-white dark:bg-[#283593]">Desktop</option>
+                        <option value="Publicidade" className="bg-white dark:bg-[#283593]">Publicidade</option>
                       </select>
                       <select className="bg-slate-100 dark:bg-white/5 p-3 rounded-xl font-bold text-sm outline-none text-slate-500 focus:text-slate-900 dark:focus:text-white" value={origin} onChange={e => setOrigin(e.target.value)}>
-                        <option className="bg-white dark:bg-[#09090b]">Instagram</option>
-                        <option className="bg-white dark:bg-[#09090b]">A2 App</option>
-                        <option className="bg-white dark:bg-[#09090b]">Indicação</option>
-                        <option className="bg-white dark:bg-[#09090b]">Direto</option>
-                        <option className="bg-white dark:bg-[#09090b]">WhatsApp</option>
+                        <option className="bg-white dark:bg-[#283593]">Instagram</option>
+                        <option className="bg-white dark:bg-[#283593]">A2 App</option>
+                        <option className="bg-white dark:bg-[#283593]">Indicação</option>
+                        <option className="bg-white dark:bg-[#283593]">Direto</option>
+                        <option className="bg-white dark:bg-[#283593]">WhatsApp</option>
                       </select>
                     </div>
                     {/* Campo de anunciante (só aparece quando tipo = Publicidade) */}
@@ -1016,7 +1016,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
                 <form onSubmit={handleHqPublish} className="space-y-6">
                   {/* BLOCO DE BOTÕES E CONFIGURAÇÕES RÁPIDAS - STICKY APENAS EM DESKTOP */}
-                  <div className="flex flex-col gap-4 md:sticky md:top-0 z-30 -mx-6 md:-mx-8 px-6 md:px-8 pt-2 pb-4 bg-slate-50 dark:bg-[#09090b] border-b border-slate-200 dark:border-white/5 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]">
+                  <div className="flex flex-col gap-4 md:sticky md:top-0 z-30 -mx-6 md:-mx-8 px-6 md:px-8 pt-2 pb-4 bg-slate-50 dark:bg-[#283593] border-b border-slate-200 dark:border-white/5 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]">
                     <div className="flex flex-wrap gap-2 md:gap-3">
                       <button 
                         type="button"
@@ -1083,7 +1083,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Fonte:</label>
                         <input 
-                          className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500" 
+                          className="w-full bg-white dark:bg-[#283593] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500" 
                           placeholder="Ex: InfoMoney" 
                           value={hqSource}
                           onChange={e => setHqSource(e.target.value)}
@@ -1094,7 +1094,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
                          <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Cat:</label>
                          <select 
-                           className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
+                           className="w-full bg-white dark:bg-[#283593] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
                            value={hqCategory}
                            onChange={e => setHqCategory(e.target.value)}
                          >
@@ -1111,7 +1111,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Imagem:</label>
                         <input
-                          className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
+                          className="w-full bg-white dark:bg-[#283593] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
                           placeholder="Ex: homem..."
                           value={hqImagePrompt}
                           onChange={e => setHqImagePrompt(e.target.value)}
@@ -1121,7 +1121,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                        <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Link:</label>
                         <input
-                          className="w-full bg-white dark:bg-[#09090b] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
+                          className="w-full bg-white dark:bg-[#283593] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
                           placeholder="Link da Matéria Original..."
                           value={hqExternalUrl}
                           onChange={e => setHqExternalUrl(e.target.value)}
@@ -1306,7 +1306,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       }
                       
                       return (
-                        <div key={slot.id} className="bg-white dark:bg-black/20 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                        <div key={slot.id} className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
                           <div className="flex justify-between items-center">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{slot.label}</h4>
                             {currentAd?.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
@@ -1338,7 +1338,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                             {(slot.type === 'ad_featured_video') && (
                               <>
                                 <input 
-                                  className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                  className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
                                   placeholder="Título do Vídeo..."
                                   defaultValue={currentAd?.title || ''}
                                   onBlur={async (e) => {
@@ -1358,7 +1358,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                                   }}
                                 />
                                 <textarea 
-                                  className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all resize-none h-20"
+                                  className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all resize-none h-20"
                                   placeholder="Resumo/Descrição do Vídeo..."
                                   defaultValue={currentAd?.description || ''}
                                   onBlur={async (e) => {
@@ -1380,7 +1380,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                               </>
                             )}
                             <input 
-                              className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                              className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
                               placeholder={slot.type === 'ad_featured_video' ? "Link do YouTube..." : "URL da Imagem..."}
                               defaultValue={slot.type === 'ad_featured_video' ? (currentAd?.meta_value?.external_url || '') : (currentAd?.image_url || '')}
                               onBlur={async (e) => {
@@ -1415,7 +1415,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                             />
                             {slot.type !== 'ad_featured_video' && (
                               <input 
-                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
                                 placeholder="Link do Anunciante (URL)..."
                                 defaultValue={currentAd?.meta_value?.external_url || ''}
                                 onBlur={async (e) => {
@@ -1488,7 +1488,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {siteContent.filter(c => c.content_type === 'ad_featured_video').map((vid) => (
-                      <div key={vid.id} className="bg-white dark:bg-black/20 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                      <div key={vid.id} className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
                         <div className="flex justify-between items-center">
                           <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">ID: {vid.id.slice(0, 8)}</h4>
                           {vid.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
@@ -1520,7 +1520,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
                         <div className="space-y-3">
                           <input 
-                            className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                            className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
                             placeholder="Título do Vídeo..."
                             defaultValue={vid.title || ''}
                             onBlur={async (e) => {
@@ -1532,7 +1532,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                             }}
                           />
                           <textarea 
-                            className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all resize-none h-20"
+                            className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all resize-none h-20"
                             placeholder="Resumo/Descrição do Vídeo..."
                             defaultValue={vid.description || ''}
                             onBlur={async (e) => {
@@ -1544,7 +1544,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                             }}
                           />
                           <input 
-                            className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                            className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
                             placeholder="Link do YouTube..."
                             defaultValue={vid.meta_value?.external_url || ''}
                             onBlur={async (e) => {
@@ -1601,7 +1601,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {siteContent.filter(c => c.content_type === section.type).map((ad) => (
-                          <div key={ad.id} className="bg-white dark:bg-black/20 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                          <div key={ad.id} className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
                             <div className="flex justify-between items-center">
                               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Anúncio {ad.id.slice(0, 4)}</h4>
                               {ad.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
@@ -1624,7 +1624,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
                             <div className="space-y-3">
                               <input 
-                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
                                 placeholder="Link do Anunciante (URL)..."
                                 defaultValue={ad.meta_value?.external_url || ''}
                                 onBlur={async (e) => {
@@ -1669,7 +1669,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       ].map((slot) => {
                         const currentAd = siteContent.find(c => c.content_type === slot.type);
                         return (
-                          <div key={slot.id} className="bg-white dark:bg-black/20 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                          <div key={slot.id} className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
                             <div className="flex justify-between items-center">
                               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{slot.label}</h4>
                               {currentAd?.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
@@ -1699,7 +1699,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
                             <div className="space-y-3">
                               <input 
-                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
                                 placeholder="URL da Imagem..."
                                 defaultValue={currentAd?.image_url || ''}
                                 onBlur={async (e) => {
@@ -1723,7 +1723,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                                 }}
                               />
                               <input 
-                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
                                 placeholder="Link do Anunciante (URL)..."
                                 defaultValue={currentAd?.meta_value?.external_url || ''}
                                 onBlur={async (e) => {

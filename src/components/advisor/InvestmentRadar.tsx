@@ -131,7 +131,7 @@ export function InvestmentRadar({ theme = 'dark' }: InvestmentRadarProps) {
 
         {/* LADO ESQUERDO: CARDS */}
         <div className="w-full lg:w-72 flex flex-col gap-4 shrink-0">
-          <div className={`p-4 flex-1 flex flex-col rounded-2xl ${isLight ? 'bg-white ' : 'bg-black/30 border border-white/5 backdrop-blur-xl'}`}>
+          <div className={`p-4 flex-1 flex flex-col rounded-2xl ${isLight ? 'bg-white ' : 'bg-white/5 border border-white/5 backdrop-blur-xl'}`}>
             <div className="p-2.5 bg-indigo-500/20 text-indigo-400 rounded-xl w-fit mb-3"><ShieldCheck size={20} /></div>
             <h3 className={`text-sm font-black uppercase tracking-wide ${isLight ? 'text-slate-900' : 'text-white'}`}>Conservador</h3>
             <p className="text-[10px] text-slate-500 mb-4">Liquidez Diária</p>
@@ -141,7 +141,7 @@ export function InvestmentRadar({ theme = 'dark' }: InvestmentRadarProps) {
             </div>
           </div>
 
-          <div className={`p-4 flex-1 flex flex-col rounded-2xl ${isLight ? 'bg-white ' : 'bg-black/30 border border-white/5 backdrop-blur-xl'}`}>
+          <div className={`p-4 flex-1 flex flex-col rounded-2xl ${isLight ? 'bg-white ' : 'bg-white/5 border border-white/5 backdrop-blur-xl'}`}>
             <div className="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl w-fit mb-3"><Building2 size={20} /></div>
             <h3 className={`text-sm font-black uppercase tracking-wide ${isLight ? 'text-slate-900' : 'text-white'}`}>Moderado</h3>
             <p className="text-[10px] text-slate-500 mb-4">Renda Mensal</p>
@@ -153,7 +153,7 @@ export function InvestmentRadar({ theme = 'dark' }: InvestmentRadarProps) {
         </div>
 
         {/* CENTRO: SIMULADOR (AUTO-FIT) */}
-        <div className={`flex-1 p-4 rounded-2xl flex flex-col relative overflow-hidden ${isLight ? 'bg-white ' : 'bg-black/30 border border-white/5 backdrop-blur-xl'}`}>
+        <div className={`flex-1 p-4 rounded-2xl flex flex-col relative overflow-hidden ${isLight ? 'bg-white ' : 'bg-white/5 border border-white/5 backdrop-blur-xl'}`}>
           <div className="absolute top-0 right-0 p-32 rounded-full blur-[100px] bg-[#00d06c]/10 pointer-events-none" />
 
           <div className="flex items-center justify-between mb-6">
@@ -213,7 +213,7 @@ export function InvestmentRadar({ theme = 'dark' }: InvestmentRadarProps) {
 
         {/* LADO DIREITO: CARDS */}
         <div className="w-full lg:w-72 flex flex-col gap-4 shrink-0">
-          <div className={`p-4 flex-1 flex flex-col rounded-2xl ${isLight ? 'bg-white ' : 'bg-black/30 border border-white/5 backdrop-blur-xl'}`}>
+          <div className={`p-4 flex-1 flex flex-col rounded-2xl ${isLight ? 'bg-white ' : 'bg-white/5 border border-white/5 backdrop-blur-xl'}`}>
             <div className="p-2.5 bg-purple-500/20 text-purple-400 rounded-xl w-fit mb-3"><Globe size={20} /></div>
             <h3 className={`text-sm font-black uppercase tracking-wide ${isLight ? 'text-slate-900' : 'text-white'}`}>Global Alpha</h3>
             <p className="text-[10px] text-slate-500 mb-4">Proteção em Dólar</p>
@@ -223,7 +223,7 @@ export function InvestmentRadar({ theme = 'dark' }: InvestmentRadarProps) {
             </div>
           </div>
 
-          <div className={`p-4 flex-1 flex flex-col rounded-2xl ${isLight ? 'bg-white ' : 'bg-black/30 border border-white/5 backdrop-blur-xl'}`}>
+          <div className={`p-4 flex-1 flex flex-col rounded-2xl ${isLight ? 'bg-white ' : 'bg-white/5 border border-white/5 backdrop-blur-xl'}`}>
             <div className="p-2.5 bg-indigo-500/20 text-indigo-400 rounded-xl w-fit mb-3"><Zap size={20} /></div>
             <h3 className={`text-sm font-black uppercase tracking-wide ${isLight ? 'text-slate-900' : 'text-white'}`}>Poder Real</h3>
             <p className="text-[10px] text-slate-500 mb-2 italic">Juros Compostos</p>

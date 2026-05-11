@@ -54,10 +54,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
  signOut,
  };
 
- return (
- <AuthContext.Provider value={value}>
- {!loading && children}
- </AuthContext.Provider>
- );
+  return (
+    <AuthContext.Provider value={value}>
+      {loading ? (
+        <div className="fixed inset-0 bg-[#1a237e] flex flex-col items-center justify-center z-[9999]">
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-white/10 border-t-emerald-400 rounded-full animate-spin" />
+            <img src="/logo.png" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 object-contain mix-blend-screen" alt="Loading" />
+          </div>
+          <p className="mt-6 text-white/40 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">Sincronizando VittaCash</p>
+        </div>
+      ) : children}
+    </AuthContext.Provider>
+  );
 };
 

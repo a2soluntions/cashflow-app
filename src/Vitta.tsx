@@ -207,7 +207,7 @@ export default function Vitta() {
           <button onClick={() => navigate('/app?tab=settings')} className="w-8 h-8 rounded-full overflow-hidden border border-emerald-500/30">
             {userAvatar ? 
               <img src={userAvatar} className="w-full h-full object-cover" alt="User" /> : 
-              <div className="w-full h-full flex items-center justify-center text-emerald-500 font-black text-[10px] bg-black">
+              <div className="w-full h-full flex items-center justify-center text-emerald-500 font-black text-[10px] bg-[#1a237e]">
                 {userName.substring(0, 2).toUpperCase()}
               </div>
             }
@@ -438,7 +438,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
     
     return (
         <div className="w-screen h-screen bg-[#283593] flex items-center justify-center p-6 animate-in fade-in duration-700">
-            <form onSubmit={handleSubmit} className="w-full max-w-sm bg-zinc-900/70 backdrop-blur-md p-10 text-center shadow-2xl relative overflow-hidden">
+            <form onSubmit={handleSubmit} className="w-full max-w-sm bg-[#1a237e]/70 backdrop-blur-md p-10 text-center shadow-2xl relative overflow-hidden">
                 <button 
                     type="button"
                     onClick={() => navigate('/')}
@@ -456,7 +456,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                         placeholder="E-mail" 
                         value={localEmail} 
                         onChange={e => setLocalEmail(e.target.value)} 
-                        className="w-full bg-black p-4 text-white outline-none focus:bg-zinc-800 transition-all font-bold" 
+                        className="w-full bg-[#1a237e] p-4 text-white outline-none focus:bg-zinc-800 transition-all font-bold" 
                         required
                     />
                     
@@ -466,7 +466,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                             placeholder="Senha" 
                             value={localPassword} 
                             onChange={e => setLocalPassword(e.target.value)} 
-                            className="w-full bg-black p-4 text-white outline-none focus:bg-zinc-800 transition-all pr-12 font-bold" 
+                            className="w-full bg-[#1a237e] p-4 text-white outline-none focus:bg-zinc-800 transition-all pr-12 font-bold" 
                             required
                         />
                         <button 

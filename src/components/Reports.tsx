@@ -305,7 +305,7 @@ const Reports: React.FC<ReportsProps> = ({ transactions = [] }) => {
  {activeTab === 'summary' && (
  <>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0 print:grid-cols-3 print:gap-4 print:mb-6">
- <div className="lg:col-span-2 p-5 bg-white/5 dark:bg-black/30 backdrop-blur-xl relative overflow-hidden group flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 border border-white/5">
+ <div className="lg:col-span-2 p-5 bg-white/5 dark:bg-white/5 backdrop-blur-xl relative overflow-hidden group flex flex-col justify-between min-h-[160px] print:lack/20 print:bg-gray-50 border border-white/5">
  <div className="absolute top-0 right-0 p-4 opacity-5 dark:opacity-10 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity">
  <Zap size={80} className="text-emerald-500 dark:text-[#00d06c] fill-emerald-500 dark:fill-[#00d06c] print:text-gray-300 print:fill-gray-300" />
  </div>
