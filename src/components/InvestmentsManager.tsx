@@ -45,7 +45,7 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
  
  {/* CABEÇALHO */}
  <div className="flex items-center gap-3 mb-6 px-2 shrink-0">
- <div className="p-3 bg-blue-500/10 text-blue-500">
+ <div className="p-3 bg-brand-orange/10 text-brand-orange">
  <TrendingUp size={22} />
  </div>
  <div>
@@ -71,7 +71,7 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
  className="flex-1 w-full bg-slate-50 dark:bg-white/[0.03]  px-6 py-4 outline-none text-xs font-black text-slate-900 dark:text-white placeholder:text-slate-400 transition-all "
  value={currentDisplay} onChange={(e) => handleCurrencyInput(e.target.value, setCurrentDisplay, setCurrentValue)}
  />
- <button type="submit" className="w-full lg:w-14 h-14 flex items-center justify-center bg-blue-500 text-white transition-all active:scale-95 shrink-0 hover:bg-blue-600">
+ <button type="submit" className="w-full lg:w-14 h-14 flex items-center justify-center bg-brand-orange text-white transition-all active:scale-95 shrink-0 hover:bg-brand-orange/90">
  <Plus size={24} />
  </button>
  </form>
@@ -96,7 +96,7 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
  return (
  <div key={inv.id} className="grid grid-cols-1 md:grid-cols-12 items-center px-6 py-5 mb-3 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
  <div className="col-span-1 md:col-span-5 flex items-center gap-4">
- <div className={`w-3 h-3 rounded-full ${isPositive ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+ <div className={`w-3 h-3 rounded-full ${isPositive ? 'bg-brand-green' : 'bg-brand-purple'}`} />
  <div>
  <h4 className="font-black text-xs text-slate-900 dark:text-white uppercase tracking-tight italic">{displayName}</h4>
  <span className="text-[9px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Ativo Financeiro</span>
@@ -110,7 +110,7 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
  <div className="col-span-1 md:col-span-4 flex items-center justify-end gap-6">
  <div className="text-right">
  <p className="text-sm font-black text-slate-800 dark:text-white">{formatCurrency(inv.current_amount)}</p>
- <p className={`text-[10px] font-black uppercase flex items-center justify-end gap-1 ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+ <p className={`text-[10px] font-black uppercase flex items-center justify-end gap-1 ${isPositive ? 'text-brand-green' : 'text-brand-purple'}`}>
  {isPositive ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
  {isPositive ? '+' : ''}{percent}%
  </p>

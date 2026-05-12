@@ -257,7 +257,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
                 onClick={() => setModalImg("vitta_sponsor_banner_1_1776825587725.png")}
                 className="block w-full h-full cursor-pointer group"
               >
-                <img src="vitta_sponsor_banner_1_1776825587725.png" alt="VittaCash Web" className="w-full h-full aspect-[16/9] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
+                <img src="/vitta_sponsor_banner_1_1776825587725.png" alt="VittaCash Web" className="w-full h-full aspect-[16/9] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
               </div>
             )}
           </div>
@@ -302,7 +302,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
                 onClick={() => setModalImg('vitta_sponsor_banner_2_1776825608562.png')}
                 className="block w-full h-full cursor-pointer group"
               >
-                <img src="vitta_sponsor_banner_2_1776825608562.png" alt="VittaCash Mobile" className="w-full h-full aspect-[9/16] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
+                <img src="/vitta_sponsor_banner_2_1776825608562.png" alt="VittaCash Mobile" className="w-full h-full aspect-[9/16] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
               </div>
             )}
           </div>

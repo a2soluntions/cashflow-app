@@ -34,13 +34,14 @@ export default function Vitta() {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
 
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'blue' | 'black' | 'white'>('blue');
   
   useEffect(() => {
-    if (theme === 'dark') {
+    document.documentElement.classList.remove('theme-blue', 'theme-black', 'theme-white', 'dark');
+    document.documentElement.classList.add(`theme-${theme}`);
+    
+    if (theme === 'blue' || theme === 'black') {
       document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
     }
   }, [theme]);
   
@@ -181,7 +182,7 @@ export default function Vitta() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/app')}
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all group ${theme === 'light' ? 'bg-white text-slate-900' : 'bg-white/5 text-white/80'}`}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all group ${theme === 'white' ? 'bg-white text-slate-900' : 'bg-white/5 text-white/80'}`}
           >
             <Home size={18} />
           </button>
@@ -232,7 +233,7 @@ export default function Vitta() {
   };
 
   return (
-    <div className={`w-full font-sans relative ${theme === 'light' ? 'bg-[#F3E5F5] text-slate-900' : 'dark bg-[#283593] text-white'} ${location.pathname === '/' || location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-y-auto scroll-smooth custom-scrollbar' : 'h-screen overflow-hidden'}`}>
+    <div className={`w-full font-sans relative text-slate-900 dark:text-white ${location.pathname === '/' || location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-y-auto scroll-smooth custom-scrollbar' : 'h-screen overflow-hidden'}`}>
       
       {location.pathname !== '/' && location.pathname !== '/login' && <NavigationHeader />}
 
@@ -350,7 +351,7 @@ export default function Vitta() {
                                 );
                             }
 
-                            if (tab === 'hub') return <HomeHub onNavigate={(t) => navigate(`/app?tab=${t}`)} onNewTransaction={() => setIsModalOpen(true)} currentTheme={theme} onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} isAdmin={session?.user?.email === ADMIN_EMAIL} onLogout={handleLogout} userAvatar={userAvatar} />;
+                            if (tab === 'hub') return <HomeHub onNavigate={(t) => navigate(`/app?tab=${t}`)} onNewTransaction={() => setIsModalOpen(true)} currentTheme={theme} onToggleTheme={(newTheme) => setTheme(newTheme)} isAdmin={session?.user?.email === ADMIN_EMAIL} onLogout={handleLogout} userAvatar={userAvatar} />;
                             if (tab === 'sales') return <SalesPage onSelectPlan={(plan) => {
                                 if (plan === 'free' || plan === 'start') {
                                     navigate('/app?tab=settings');
@@ -437,8 +438,18 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
     };
     
     return (
-        <div className="w-screen h-screen bg-[#283593] flex items-center justify-center p-6 animate-in fade-in duration-700">
-            <form onSubmit={handleSubmit} className="w-full max-w-sm bg-[#1a237e]/70 backdrop-blur-md p-10 text-center shadow-2xl relative overflow-hidden">
+        <div className="w-screen h-screen bg-[#000001] flex items-center justify-center p-6 animate-in fade-in duration-700 relative overflow-hidden">
+            {/* EFEITO HONEYCOMB COM GLOW */}
+            <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+                <div className="absolute inset-0" style={{ 
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='69' viewBox='0 0 40 69' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 11.5L40 0v23L20 34.5 0 23V0l20 11.5zM20 46l20-11.5v23L20 69 0 57.5v-23L20 46zM20 23L0 34.5v-23L20 0v23z' fill='none' stroke='%23ffffff' stroke-width='1.5' stroke-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E")` 
+                }}></div>
+                <div className="absolute inset-0" style={{ 
+                    background: `radial-gradient(circle at center, rgba(16, 35, 255, 0.15) 0%, transparent 70%)`
+                }}></div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="w-full max-w-sm bg-transparent p-10 text-center relative z-10">
                 <button 
                     type="button"
                     onClick={() => navigate('/')}
@@ -456,7 +467,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                         placeholder="E-mail" 
                         value={localEmail} 
                         onChange={e => setLocalEmail(e.target.value)} 
-                        className="w-full bg-[#1a237e] p-4 text-white outline-none focus:bg-zinc-800 transition-all font-bold" 
+                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:bg-white/10 focus:border-indigo-500 transition-all font-bold" 
                         required
                     />
                     
@@ -466,7 +477,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                             placeholder="Senha" 
                             value={localPassword} 
                             onChange={e => setLocalPassword(e.target.value)} 
-                            className="w-full bg-[#1a237e] p-4 text-white outline-none focus:bg-zinc-800 transition-all pr-12 font-bold" 
+                            className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:bg-white/10 focus:border-indigo-500 transition-all pr-12 font-bold" 
                             required
                         />
                         <button 
@@ -492,7 +503,7 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                     )}
                 </div>
 
-                <button className="w-full py-4 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                <button className="w-full py-4 bg-emerald-500 rounded-xl text-black font-black uppercase text-xs tracking-widest hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
                     {authLoading ? 'Verificando...' : (isSignUp ? 'Cadastrar' : 'Entrar')}
                 </button>
                 

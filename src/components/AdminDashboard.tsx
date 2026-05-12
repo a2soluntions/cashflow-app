@@ -13,7 +13,8 @@ import {
 
 const CORES_FUNIL = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
+const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ theme }) => {
+  const isLight = theme === 'white';
   const [activeTab, setActiveTab] = useState<'vendas' | 'dados' | 'vittanoticias' | 'publicidade'>('vendas');
   const [licenses, setLicenses] = useState<any[]>([]);
   const [siteContent, setSiteContent] = useState<any[]>([]);
@@ -38,7 +39,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
     if (!alertConfig?.show) return null;
     return (
       <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-        <div className="w-full max-w-sm bg-[#1a237e] border border-white/10 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className={`w-full max-w-sm ${isLight ? 'bg-white' : 'bg-white/5 backdrop-blur-3xl'} border border-white/10 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-300`}>
           <h4 className={"font-black uppercase tracking-widest text-[10px] mb-2 " + (alertConfig.type === 'error' ? 'text-rose-500' : 'text-emerald-500')}>{alertConfig.title}</h4>
           <p className="text-white/70 text-sm font-medium mb-8 leading-relaxed">{alertConfig.message}</p>
           
@@ -547,7 +548,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
         onChange={handleFileUpload} 
         accept="image/*" 
       />
-      <div className="h-full font-inter p-4 lg:p-6 transition-colors duration-500 text-slate-900 dark:text-white flex flex-col overflow-hidden">
+      <div className={`h-full font-inter p-4 lg:p-6 transition-colors duration-500 ${isLight ? 'text-slate-900' : 'text-white'} flex flex-col overflow-hidden`}>
         <div className="max-w-7xl w-full mx-auto flex flex-col flex-1 overflow-hidden">
           
           {/* HEADER & TABS */}
@@ -582,7 +583,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                 <RefreshCw size={14} className="md:hidden" />
                 <span className="hidden md:inline">Limpar Cache</span>
               </button>
-              <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl overflow-x-auto custom-scrollbar flex-1 md:flex-none">
+              <div className={`flex ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-1 rounded-xl overflow-x-auto custom-scrollbar flex-1 md:flex-none`}>
                 <button onClick={() => setActiveTab('vendas')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'vendas' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500')}>
                   Vendas
                 </button>
@@ -608,10 +609,10 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                   { label: 'MRR (Recorrente)', val: formatCurrency(stats.mrr), sub: `${stats.mrrGrowth >= 0 ? '▲' : '▼'} ${Math.abs(stats.mrrGrowth).toFixed(1)}% vs mês ant.`, color: 'text-emerald-500', subColor: stats.mrrGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' },
                   { label: 'Receita Publicidade', val: formatCurrency(stats.adRevenue), sub: `Este mês: ${formatCurrency(stats.adRevenueThisMonth)}`, color: 'text-amber-500', subColor: 'text-slate-400' },
                   { label: 'Churn Rate', val: `${stats.churnRate.toFixed(1)}%`, sub: `${stats.inactiveClients.length} inativos`, color: stats.churnRate > 15 ? 'text-rose-500' : stats.churnRate > 5 ? 'text-amber-500' : 'text-emerald-500', subColor: 'text-slate-400' },
-                  { label: 'Clientes Ativos', val: String(stats.activeClients.length), sub: `Base total: ${stats.totalClients}`, color: 'text-slate-900 dark:text-white', subColor: 'text-slate-400' },
+                  { label: 'Clientes Ativos', val: String(stats.activeClients.length), sub: `Base total: ${stats.totalClients}`, color: isLight ? 'text-slate-900' : 'text-white', subColor: 'text-slate-400' },
                   { label: 'LTV Médio (12m)', val: formatCurrency(stats.ltv), sub: `Ticket: ${formatCurrency(stats.averageTicket)}`, color: 'text-blue-500', subColor: 'text-slate-400' },
                 ].map((kpi, i) => (
-                  <div key={i} className="bg-slate-50 dark:bg-white/[0.02] p-5 rounded-2xl border border-slate-200 dark:border-white/5">
+                  <div key={i} className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                     <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{kpi.label}</p>
                     <h3 className={`text-xl font-black ${kpi.color}`}>{kpi.val}</h3>
                     <p className={`text-[9px] font-bold mt-1 ${kpi.subColor}`}>{kpi.sub}</p>
@@ -633,33 +634,33 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                         <span className={`text-[8px] font-black uppercase tracking-widest ${ins.type === 'danger' ? 'text-rose-500' : ins.type === 'warning' ? 'text-amber-500' : 'text-blue-400'}`}>
                           {ins.type === 'danger' ? '🚨 Crítico' : ins.type === 'warning' ? '⚠️ Atenção' : 'ℹ️ Insight'}
                         </span>
-                        <p className="text-xs font-black text-slate-900 dark:text-white leading-tight">{ins.title}</p>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{ins.action}</p>
+                        <p className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'} leading-tight`}>{ins.title}</p>
+                        <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'} font-medium leading-relaxed`}>{ins.action}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Formulário — ocupa 1 coluna, alinhado ao topo */}
-                <div className="bg-slate-50 dark:bg-white/[0.02] p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4">
+                <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4`}>
                   <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 text-xs">
                     <Plus size={14}/> Registrar Nova Venda
                   </h3>
                   <form onSubmit={handleCreateLicense} className="flex flex-col gap-3 flex-1">
-                    <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-xl font-bold text-sm outline-none transition-colors placeholder:text-slate-400" placeholder="Nome do Cliente" value={clientName} onChange={e => setClientName(e.target.value)} required />
-                    <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-xl font-bold text-sm outline-none transition-colors placeholder:text-slate-400" placeholder="Valor R$ 0,00" value={saleValue} onChange={e => setSaleValue(e.target.value)} required />
+                    <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-xl font-bold text-sm outline-none transition-colors placeholder:text-slate-400`} placeholder="Nome do Cliente" value={clientName} onChange={e => setClientName(e.target.value)} required />
+                    <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-xl font-bold text-sm outline-none transition-colors placeholder:text-slate-400`} placeholder="Valor R$ 0,00" value={saleValue} onChange={e => setSaleValue(e.target.value)} required />
                     <div className="grid grid-cols-2 gap-2">
-                      <select className="bg-slate-100 dark:bg-white/5 p-3 rounded-xl font-bold text-sm outline-none text-slate-500 focus:text-slate-900 dark:focus:text-white" value={productType} onChange={e => setProductType(e.target.value)}>
-                        <option value="SaaS" className="bg-white dark:bg-[#283593]">SaaS</option>
-                        <option value="Desktop" className="bg-white dark:bg-[#283593]">Desktop</option>
-                        <option value="Publicidade" className="bg-white dark:bg-[#283593]">Publicidade</option>
+                      <select className={`${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-xl font-bold text-sm outline-none text-slate-500 focus:text-slate-900 dark:focus:text-white`} value={productType} onChange={e => setProductType(e.target.value)}>
+                        <option value="SaaS" className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>SaaS</option>
+                        <option value="Desktop" className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>Desktop</option>
+                        <option value="Publicidade" className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>Publicidade</option>
                       </select>
-                      <select className="bg-slate-100 dark:bg-white/5 p-3 rounded-xl font-bold text-sm outline-none text-slate-500 focus:text-slate-900 dark:focus:text-white" value={origin} onChange={e => setOrigin(e.target.value)}>
-                        <option className="bg-white dark:bg-[#283593]">Instagram</option>
-                        <option className="bg-white dark:bg-[#283593]">A2 App</option>
-                        <option className="bg-white dark:bg-[#283593]">Indicação</option>
-                        <option className="bg-white dark:bg-[#283593]">Direto</option>
-                        <option className="bg-white dark:bg-[#283593]">WhatsApp</option>
+                      <select className={`${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-xl font-bold text-sm outline-none text-slate-500 focus:text-slate-900 dark:focus:text-white`} value={origin} onChange={e => setOrigin(e.target.value)}>
+                        <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>Instagram</option>
+                        <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>A2 App</option>
+                        <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>Indicação</option>
+                        <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>Direto</option>
+                        <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>WhatsApp</option>
                       </select>
                     </div>
                     {/* Campo de anunciante (só aparece quando tipo = Publicidade) */}
@@ -681,7 +682,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
               </div>
 
               {/* ── TIMELINE COMPACTA ── */}
-              <div className="bg-slate-50 dark:bg-white/[0.02] rounded-2xl border border-slate-200 dark:border-white/5 p-5">
+              <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} p-5`}>
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Receita por Venda — Timeline</h3>
                 <div className="h-[160px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -698,7 +699,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
               {/* ── CHURN RADAR + FUNIL DE CONVERSÃO ── */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Radar de Churn */}
-                <div className="bg-slate-50 dark:bg-white/[0.02] p-6 rounded-2xl border border-slate-200 dark:border-white/5">
+                <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-4 flex items-center gap-2"><AlertTriangle size={14}/> Radar de Churn — Clientes em Risco</h3>
                   {stats.atRisk.length === 0 ? (
                     <div className="flex items-center gap-3 p-4 bg-emerald-500/5 rounded-xl border border-emerald-500/20">
@@ -713,7 +714,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                         return (
                           <div key={client.id} className="flex items-center justify-between p-3 bg-rose-500/5 rounded-xl border border-rose-500/10">
                             <div>
-                              <p className="text-xs font-black text-slate-900 dark:text-white">{client.client_name}</p>
+                              <p className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{client.client_name}</p>
                               <p className="text-[9px] font-bold text-rose-400">{days} dias · Trial sem conversão</p>
                             </div>
                             <a href={`https://wa.me/5534998408962?text=${msg}`} target="_blank" rel="noreferrer"
@@ -728,7 +729,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                 </div>
 
                 {/* Funil de Conversão */}
-                <div className="bg-slate-50 dark:bg-white/[0.02] p-6 rounded-2xl border border-slate-200 dark:border-white/5">
+                <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-5 flex items-center gap-2"><Filter size={14}/> Funil de Conversão</h3>
                   <div className="space-y-4">
                     {[
@@ -740,7 +741,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       <div key={stage.label}>
                         <div className="flex justify-between items-center mb-1.5">
                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{stage.label}</span>
-                          <span className="text-[10px] font-black text-slate-900 dark:text-white">{stage.count}</span>
+                          <span className={`text-[10px] font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{stage.count}</span>
                         </div>
                         <div className="w-full bg-slate-200 dark:bg-white/5 rounded-full h-1.5">
                           <div className={`${stage.color} h-1.5 rounded-full transition-all duration-700`}
@@ -761,7 +762,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
               {/* ── ORIGEM + SCRIPTS DE RECUPERAÇÃO ── */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Radar de Origem */}
-                <div className="bg-slate-50 dark:bg-white/[0.02] p-6 rounded-2xl border border-slate-200 dark:border-white/5">
+                <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 flex items-center gap-2"><Globe size={14}/> Radar de Origem</h3>
                   {stats.originData.length > 0 ? (
                     <div className="h-[180px]">
@@ -780,7 +781,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                 </div>
 
                 {/* Scripts WhatsApp */}
-                <div className="bg-slate-50 dark:bg-white/[0.02] p-6 rounded-2xl border border-slate-200 dark:border-white/5">
+                <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-4 flex items-center gap-2"><MessageCircle size={14}/> Scripts de Recuperação</h3>
                   <div className="space-y-3">
                     {[
@@ -805,10 +806,10 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
               {/* ── TABELA DE LICENÇAS ── */}
               <div>
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2"><Users size={14}/> Base de Clientes</h3>
-                <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-white/5">
+                <div className={`overflow-x-auto rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/[0.02]">
+                      <tr className={`border-b ${isLight ? 'border-slate-200' : 'border-white/5'} ${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'}`}>
                         {['Cliente', 'Produto', 'Origem', 'Valor', 'Status', 'Data', 'Ação'].map(h => (
                           <th key={h} className="text-left p-3 text-[9px] font-black uppercase tracking-widest text-slate-400">{h}</th>
                         ))}
@@ -817,7 +818,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                     <tbody>
                       {licenses.slice(0, 20).map((l: any) => (
                         <tr key={l.id} className="border-b border-slate-100 dark:border-white/[0.03] hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
-                          <td className="p-3 font-black text-slate-900 dark:text-white">{l.client_name}</td>
+                          <td className={`p-3 font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{l.client_name}</td>
                           <td className="p-3"><span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${l.product_type === 'SaaS' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-amber-500/10 text-amber-500'}`}>{l.product_type}</span></td>
                           <td className="p-3 text-slate-500 font-bold">{l.origin || '—'}</td>
                           <td className="p-3 font-black text-emerald-500">{formatCurrency(l.price || 0)}</td>
@@ -856,7 +857,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">{key}</label>
                       <div className="flex items-center gap-2">
                         <input 
-                          className="bg-transparent text-lg font-black font-mono text-slate-900 dark:text-white w-full outline-none focus:text-blue-500 transition-colors" 
+                          className={`bg-transparent text-lg font-black font-mono ${isLight ? 'text-slate-900' : 'text-white'} w-full outline-none focus:text-blue-500 transition-colors`} 
                           value={indicators[key]?.value || ''} 
                           onChange={e => setIndicators({ ...indicators, [key]: { ...indicators[key], value: e.target.value } })}
                           placeholder="0.00"
@@ -872,24 +873,24 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
               <div className="w-full h-px bg-slate-200 dark:bg-zinc-800/50" />
 
               {/* DADOS CORPORATIVOS */}
-              <div className="bg-slate-50 dark:bg-white/[0.02] p-6 rounded-2xl border border-slate-200 dark:border-white/5">
+              <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                 <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 mb-6 text-xs"><ShieldCheck size={16}/> Dados Corporativos & Compliance</h3>
                 <form onSubmit={handleUpdateCorporate} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                   <div>
                     <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Razão Social</label>
-                    <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none" value={corpName} onChange={e => setCorpName(e.target.value)} placeholder="Ex: Vitta Digital Ltda" />
+                    <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-lg font-bold text-sm outline-none`} value={corpName} onChange={e => setCorpName(e.target.value)} placeholder="Ex: Vitta Digital Ltda" />
                   </div>
                   <div>
                     <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">CNPJ</label>
-                    <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none" value={corpCnpj} onChange={e => setCorpCnpj(e.target.value)} placeholder="00.000.000/0000-00" />
+                    <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-lg font-bold text-sm outline-none`} value={corpCnpj} onChange={e => setCorpCnpj(e.target.value)} placeholder="00.000.000/0000-00" />
                   </div>
                   <div className="md:col-span-3">
                     <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Telefone / Contato</label>
-                    <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none" value={corpPhone} onChange={e => setCorpPhone(e.target.value)} placeholder="(00) 00000-0000" />
+                    <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-lg font-bold text-sm outline-none`} value={corpPhone} onChange={e => setCorpPhone(e.target.value)} placeholder="(00) 00000-0000" />
                   </div>
                   <div className="md:col-span-3">
                     <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Endereço Completo</label>
-                    <input className="w-full bg-slate-100 dark:bg-white/5 p-3 rounded-lg font-bold text-sm outline-none" value={corpAddress} onChange={e => setCorpAddress(e.target.value)} placeholder="Rua, Número, Bairro, Cidade - UF" />
+                    <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-lg font-bold text-sm outline-none`} value={corpAddress} onChange={e => setCorpAddress(e.target.value)} placeholder="Rua, Número, Bairro, Cidade - UF" />
                   </div>
                   <div className="md:col-span-3 flex justify-end">
                     <button className="px-8 py-3 bg-emerald-500 text-black font-black uppercase text-[10px] tracking-widest rounded-lg hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20">
@@ -920,7 +921,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                     const items = siteContent.filter(c => c.content_type === slot.type);
                     return (
                       <div key={slot.type} className="flex flex-col gap-4">
-                        <div className="flex items-center justify-between bg-slate-50 dark:bg-white/[0.02] p-4 rounded-2xl border border-slate-200 dark:border-white/5">
+                        <div className={`flex items-center justify-between ${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-4 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                           <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">{slot.label}</h4>
                           <button 
                             onClick={() => { setPendingAdSlot(slot.type); fileInputRef.current?.click(); }}
@@ -932,15 +933,15 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
                         <div className="grid grid-cols-1 gap-4">
                           {items.length === 0 && (
-                            <div className={`${slot.aspect} w-full bg-slate-100 dark:bg-white/5 rounded-2xl flex flex-col items-center justify-center text-slate-300 gap-2 border border-dashed border-slate-300 dark:border-white/10`}>
+                            <div className={`${slot.aspect} w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-2xl flex flex-col items-center justify-center text-slate-300 gap-2 border border-dashed border-slate-300 dark:border-white/10`}>
                               <ImageIcon size={32} className="opacity-20" />
                               <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Nenhuma imagem configurada</span>
                             </div>
                           )}
                           
                           {items.map((item) => (
-                            <div key={item.id} className="bg-slate-50 dark:bg-white/[0.02] p-4 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
-                              <div className={`${slot.aspect} w-full bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-slate-200 dark:border-white/10`}>
+                            <div key={item.id} className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-4 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4 group`}>
+                              <div className={`${slot.aspect} w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-xl overflow-hidden relative border border-slate-200 dark:border-white/10`}>
                                 <img src={item.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                   <button
@@ -992,16 +993,16 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
             </div>
           )}
           {activeTab === 'vittanoticias' && (
-            <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 pr-2 md:pr-6 overflow-y-auto custom-scrollbar pb-12">
-              <div className="bg-slate-50 dark:bg-white/[0.02] p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-white/5">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 border-b border-slate-200 dark:border-white/5 pb-4">
+            <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 pr-2 md:pr-6 overflow-hidden custom-scrollbar pb-12">
+              <div className={`flex flex-col h-full overflow-hidden ${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                <div className={`flex-shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 border-b ${isLight ? 'border-slate-200' : 'border-white/5'} pb-4`}>
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-indigo-500/10 rounded-2xl">
                       <Newspaper size={24} className="text-indigo-500" />
                     </div>
                     <div>
                       <h3 className="font-black uppercase tracking-widest text-indigo-500 text-lg">Quartel General: Curadoria Manual</h3>
-                      <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Publique notícias estruturadas diretamente no portal</p>
+                      <p className={`${isLight ? 'text-slate-500' : 'text-slate-400'} text-[10px] font-bold uppercase tracking-widest mt-1`}>Publique notícias estruturadas diretamente no portal</p>
                     </div>
                   </div>
                   <button 
@@ -1014,9 +1015,9 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                   </button>
                 </div>
 
-                <form onSubmit={handleHqPublish} className="space-y-6">
-                  {/* BLOCO DE BOTÕES E CONFIGURAÇÕES RÁPIDAS - STICKY APENAS EM DESKTOP */}
-                  <div className="flex flex-col gap-4 md:sticky md:top-0 z-30 -mx-6 md:-mx-8 px-6 md:px-8 pt-2 pb-4 bg-slate-50 dark:bg-[#283593] border-b border-slate-200 dark:border-white/5 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]">
+                <form onSubmit={handleHqPublish} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                  {/* CONTROLES FIXOS (NÃO ROLAM) */}
+                  <div className={`flex-shrink-0 flex flex-col gap-4 -mx-6 md:-mx-8 px-6 md:px-8 pb-4 mb-4 border-b ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                     <div className="flex flex-wrap gap-2 md:gap-3">
                       <button 
                         type="button"
@@ -1080,10 +1081,10 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 pt-1">
-                      <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
-                        <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Fonte:</label>
+                      <div className={`w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                        <label className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'} whitespace-nowrap md:pl-2`}>Fonte:</label>
                         <input 
-                          className="w-full bg-white dark:bg-[#283593] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500" 
+                          className={`w-full ${isLight ? 'bg-white' : 'bg-white/10'} border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500`} 
                           placeholder="Ex: InfoMoney" 
                           value={hqSource}
                           onChange={e => setHqSource(e.target.value)}
@@ -1091,10 +1092,10 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                         />
                       </div>
 
-                      <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
-                         <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Cat:</label>
+                      <div className={`w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                         <label className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'} whitespace-nowrap md:pl-2`}>Cat:</label>
                          <select 
-                           className="w-full bg-white dark:bg-[#283593] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
+                           className={`w-full ${isLight ? 'bg-white' : 'bg-white/10'} border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500`}
                            value={hqCategory}
                            onChange={e => setHqCategory(e.target.value)}
                          >
@@ -1108,28 +1109,28 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                          </select>
                       </div>
 
-                      <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
-                        <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Imagem:</label>
+                      <div className={`w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                        <label className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'} whitespace-nowrap md:pl-2`}>Imagem:</label>
                         <input
-                          className="w-full bg-white dark:bg-[#283593] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
+                          className={`w-full ${isLight ? 'bg-white' : 'bg-white/10'} border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500`}
                           placeholder="Ex: homem..."
                           value={hqImagePrompt}
                           onChange={e => setHqImagePrompt(e.target.value)}
                         />
                       </div>
 
-                       <div className="w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5">
-                        <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap md:pl-2">Link:</label>
+                       <div className={`w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                        <label className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'} whitespace-nowrap md:pl-2`}>Link:</label>
                         <input
-                          className="w-full bg-white dark:bg-[#283593] border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500"
+                          className={`w-full ${isLight ? 'bg-white' : 'bg-white/10'} border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500`}
                           placeholder="Link da Matéria Original..."
                           value={hqExternalUrl}
                           onChange={e => setHqExternalUrl(e.target.value)}
                         />
                       </div>
 
-                      <div className="col-span-2 md:col-span-2 w-full flex items-center gap-3 bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5 px-4 h-[46px]">
-                        <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap flex gap-1">
+                      <div className={`col-span-2 md:col-span-2 w-full flex items-center gap-3 ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'} px-4 h-[46px]`}>
+                        <label className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'} whitespace-nowrap flex gap-1`}>
                           Resumo <span className="text-indigo-500 md:inline hidden">({summaryCharLimit})</span>
                         </label>
                         <input 
@@ -1140,7 +1141,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                         />
                       </div>
                       
-                      <div className="col-span-2 md:col-span-2 flex items-center bg-slate-100 dark:bg-white/5 p-2 md:p-2.5 rounded-xl border border-slate-200 dark:border-white/5 px-4 h-[46px]">
+                      <div className={`col-span-2 md:col-span-2 flex items-center ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'} px-4 h-[46px]`}>
                         <label className="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
                           <div className={`w-3.5 h-3.5 md:w-4 md:h-4 rounded flex items-center justify-center border transition-colors ${includeVittaPov ? 'bg-indigo-500 border-indigo-500' : 'bg-transparent border-slate-400 dark:border-zinc-700'}`}>
                             {includeVittaPov && <Zap size={10} className="text-white" />}
@@ -1159,21 +1160,21 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:flex-1 md:min-h-0">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 min-h-0 overflow-hidden">
                       
                       {/* COLUNA ESQUERDA: NOTÍCIA BRUTA INTEIRA (Ocupa 5 colunas no desktop) */}
-                      <div className="lg:col-span-5 flex flex-col gap-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                      <div className="lg:col-span-5 flex flex-col gap-2 h-full min-h-0">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 flex-shrink-0">
                           <Newspaper size={12} /> Texto Bruto / Fonte de Dados
                         </label>
-                        <div className="flex-1 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5 p-4 flex flex-col">
+                        <div className={`flex-1 min-h-0 overflow-hidden ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} p-4 flex flex-col`}>
                           <textarea
-                            className="flex-1 w-full bg-transparent border-0 outline-none font-medium text-sm text-slate-900 dark:text-white placeholder:text-slate-400 resize-none custom-scrollbar min-h-[300px] lg:min-h-[450px]"
+                            className={`flex-1 w-full bg-transparent border-0 outline-none font-medium text-sm ${isLight ? 'text-slate-900' : 'text-white'} placeholder:text-slate-400 resize-none custom-scrollbar overflow-y-auto`}
                             placeholder="Cole aqui o texto completo da notícia original..."
                             value={hqRawText}
                             onChange={e => setHqRawText(e.target.value)}
                           />
-                          <div className="mt-2 pt-2 border-t border-slate-200 dark:border-white/5 flex items-center justify-between">
+                          <div className={`mt-2 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-white/5'} flex items-center justify-between`}>
                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{hqRawText.length} caracteres</span>
                              <button 
                               type="button"
@@ -1185,15 +1186,15 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       </div>
 
                       {/* COLUNA DIREITA: LIVE PORTAL PREVIEW (Ocupa 7 colunas no desktop) */}
-                      <div className="lg:col-span-7 flex flex-col gap-4">
-                        <div className="flex items-center justify-between mb-2">
+                      <div className="lg:col-span-7 flex flex-col gap-4 h-full min-h-0">
+                        <div className="flex items-center justify-between mb-2 flex-shrink-0">
                           <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
                             <Monitor size={12} /> Visualização Real no Portal
                           </h4>
-                          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest px-2 py-1 bg-slate-100 dark:bg-white/5 rounded border border-slate-200 dark:border-white/5">Modo Destaque</span>
+                          <span className={`text-[8px] font-bold text-slate-400 uppercase tracking-widest px-2 py-1 ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>Modo Destaque</span>
                         </div>
 
-                        <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-2xl border border-slate-200 overflow-hidden flex flex-col gap-4 md:gap-6">
+                        <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-2xl border border-slate-200 flex-1 min-h-0 flex flex-col gap-4 md:gap-6 custom-scrollbar overflow-y-auto">
                           {/* Header do Preview (Falsificando o VittaNews) */}
                           <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-2">
                              <div className="flex flex-col leading-none">
@@ -1270,14 +1271,14 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
             )}
           {activeTab === 'publicidade' && (
             <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 pr-2 md:pr-6 overflow-y-auto custom-scrollbar pb-12">
-              <div className="bg-slate-50 dark:bg-white/[0.02] p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-white/5">
-                <div className="flex items-center gap-4 mb-8 border-b border-slate-200 dark:border-white/5 pb-4">
+              <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                <div className={`flex items-center gap-4 mb-8 border-b ${isLight ? 'border-slate-200' : 'border-white/5'} pb-4`}>
                   <div className="p-3 bg-amber-500/10 rounded-2xl">
                     <ImageIcon size={24} className="text-amber-500" />
                   </div>
                   <div>
                     <h3 className="font-black uppercase tracking-widest text-amber-500 text-lg">Central de Publicidade</h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Gerencie os anúncios diferenciados por página e valor</p>
+                    <p className={`${isLight ? 'text-slate-500' : 'text-slate-400'} text-[10px] font-bold uppercase tracking-widest mt-1`}>Gerencie os anúncios diferenciados por página e valor</p>
                   </div>
                 </div>
 
@@ -1306,13 +1307,13 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       }
                       
                       return (
-                        <div key={slot.id} className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                        <div key={slot.id} className={`${isLight ? 'bg-white' : 'bg-white/10'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4 group`}>
                           <div className="flex justify-between items-center">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{slot.label}</h4>
                             {currentAd?.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
                           </div>
                           
-                          <div className="aspect-video bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img">
+                          <div className={`aspect-video ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img`}>
                             {currentAd?.image_url ? (
                               <img src={currentAd.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                             ) : (
@@ -1466,7 +1467,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
                 {/* SESSÃO: VITTACASH TV (VÍDEOS E HISTÓRICO) */}
                 <div className="mb-12">
-                  <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-white/5 pb-4">
+                  <div className={`flex items-center justify-between mb-6 border-b ${isLight ? 'border-slate-200' : 'border-white/5'} pb-4`}>
                     <div className="flex items-center gap-4">
                       <div className="p-3 bg-indigo-500/10 rounded-2xl">
                         <Monitor size={24} className="text-indigo-500" />
@@ -1488,13 +1489,13 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {siteContent.filter(c => c.content_type === 'ad_featured_video').map((vid) => (
-                      <div key={vid.id} className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                      <div key={vid.id} className={`${isLight ? 'bg-white' : 'bg-white/10'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4 group`}>
                         <div className="flex justify-between items-center">
                           <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">ID: {vid.id.slice(0, 8)}</h4>
                           {vid.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
                         </div>
                         
-                        <div className="aspect-video bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img">
+                        <div className={`aspect-video ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img`}>
                           {vid.image_url ? (
                             <img src={vid.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                           ) : getYouTubeId(vid.meta_value?.external_url) ? (
@@ -1584,7 +1585,7 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                     { type: 'ad_skin_right_carousel', label: 'Carrossel Lateral Direito (Página Interna)', color: 'text-rose-500' }
                   ].map(section => (
                     <div key={section.type}>
-                      <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-white/5 pb-4">
+                      <div className={`flex items-center justify-between mb-6 border-b ${isLight ? 'border-slate-200' : 'border-white/5'} pb-4`}>
                         <h4 className={`text-xs font-black uppercase tracking-[0.3em] ${section.color} flex items-center gap-2`}>
                           <Monitor size={14} /> {section.label}
                         </h4>
@@ -1601,13 +1602,13 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {siteContent.filter(c => c.content_type === section.type).map((ad) => (
-                          <div key={ad.id} className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                          <div key={ad.id} className={`${isLight ? 'bg-white' : 'bg-white/10'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4 group`}>
                             <div className="flex justify-between items-center">
                               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Anúncio {ad.id.slice(0, 4)}</h4>
                               {ad.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
                             </div>
                             
-                            <div className="aspect-video bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img">
+                            <div className={`aspect-video ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img`}>
                               <img src={ad.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                                 <button 
@@ -1669,13 +1670,13 @@ const AdminDashboard: React.FC<{ theme?: 'light' | 'dark' }> = ({ theme }) => {
                       ].map((slot) => {
                         const currentAd = siteContent.find(c => c.content_type === slot.type);
                         return (
-                          <div key={slot.id} className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col gap-4 group">
+                          <div key={slot.id} className={`${isLight ? 'bg-white' : 'bg-white/10'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4 group`}>
                             <div className="flex justify-between items-center">
                               <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{slot.label}</h4>
                               {currentAd?.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
                             </div>
                             
-                            <div className="aspect-video bg-slate-100 dark:bg-white/5 rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img">
+                            <div className={`aspect-video ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img`}>
                               {currentAd?.image_url ? (
                                 <img src={currentAd.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
                               ) : (

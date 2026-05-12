@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
  X, Check, ArrowUpCircle, ArrowDownCircle, 
  CreditCard, Wallet, Divide, X as Multiply, 
@@ -24,10 +24,10 @@ interface NewTransactionModalProps {
  onClose: () => void;
  onSave: (transactions: any[]) => void;
  isLimitReached?: boolean;
- theme?: 'light' | 'dark';
+ theme?: 'blue' | 'black' | 'white';
 }
 
-export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitReached = false, theme = 'dark' }: NewTransactionModalProps) {
+export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitReached = false, theme = 'blue' }: NewTransactionModalProps) {
  const [type, setType] = useState<'income' | 'expense'>('expense');
  const [displayValue, setDisplayValue] = useState(''); 
  const [rawValue, setRawValue] = useState(0); 
@@ -47,7 +47,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  const [sendToWhatsApp, setSendToWhatsApp] = useState(false);
  const [errorAlert, setErrorAlert] = useState<{ isOpen: boolean; title: string; message: string }>({ isOpen: false, title: '', message: '' });
 
- const isLight = theme === 'light';
+ const isLight = theme === 'white';
 
  useEffect(() => {
  if (isOpen) {
@@ -189,7 +189,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
 
  return (
  <div 
- className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md animate-in fade-in duration-300"
+ className={`fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-300 ${isLight ? 'bg-slate-900/40' : theme === 'blue' ? 'bg-[#1023FF]/40' : 'bg-[#000001]/80'}`}
  onClick={onClose}
  >
  
@@ -202,12 +202,12 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  />
 
  <div 
- className={`relative w-full max-w-md border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 ${isLight ? 'bg-[#F3E5F5] border-slate-200' : 'bg-[#283593] border-white/10'}`}
+ className={`relative w-full max-w-md border shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 backdrop-blur-2xl border-white/10'}`}
  onClick={(e) => e.stopPropagation()}
  >
  
  {showSuccess && (
-   <div className="absolute inset-0 z-[200] bg-emerald-500 flex flex-col items-center justify-center text-black animate-in fade-in duration-300">
+   <div className="absolute inset-0 z-[200] bg-brand-green flex flex-col items-center justify-center text-black animate-in fade-in duration-300">
      <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4 animate-bounce">
        <Check size={48} strokeWidth={4} />
      </div>
@@ -219,7 +219,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  {/* ALERTA DE ORÇAMENTO */}
  {budgetStatus && (budgetStatus.isOver || budgetStatus.isWarning) && (
  <div className={`absolute right-0 top-0 px-4 py-1 z-[110] flex items-center gap-2
- ${budgetStatus.isOver ? 'bg-rose-600' : 'bg-amber-500'}`}>
+ ${budgetStatus.isOver ? 'bg-brand-orange' : 'bg-amber-500'}`}>
  {budgetStatus.isOver ? <AlertTriangle size={12} className="text-white" /> : <Zap size={12} className="text-white" />}
  <span className="text-[9px] font-black text-white uppercase tracking-widest">
  {budgetStatus.percent.toFixed(0)}% DO TETO
@@ -249,14 +249,14 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  <button 
  onClick={() => setType('income')} 
  className={`py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all border
- ${type === 'income' ? 'bg-emerald-500 border-emerald-400 text-white' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40 hover:bg-black/40')}`}
+ ${type === 'income' ? 'bg-brand-green border-brand-green/50 text-white' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40 hover:bg-black/40')}`}
  >
  <ArrowUpCircle size={16} /> Entrada
  </button>
  <button 
  onClick={() => setType('expense')} 
  className={`py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all border
- ${type === 'expense' ? 'bg-rose-500 border-rose-400 text-white' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40 hover:bg-black/40')}`}
+ ${type === 'expense' ? 'bg-brand-orange border-brand-orange/50 text-white' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40 hover:bg-black/40')}`}
  >
  <ArrowDownCircle size={16} /> Saída
  </button>
@@ -273,7 +273,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  value={displayValue} 
  onChange={handleAmountChange} 
  placeholder="R$ 0,00" 
- className={`w-full text-left px-5 py-4 border text-3xl font-black outline-none transition-all focus:border-indigo-400 ${isLight ? 'bg-white border-slate-200 text-slate-900 placeholder:text-slate-200' : 'bg-black/40 border-white/10 text-white placeholder:text-white/5'}`} 
+ className={`w-full text-left px-5 py-4 border text-3xl font-black outline-none transition-all focus:border-brand-blue/50 ${isLight ? 'bg-white border-slate-200 text-slate-900 placeholder:text-slate-200' : 'bg-black/40 border-white/10 text-white placeholder:text-white/5'}`} 
  />
  </div>
  </div>
@@ -287,7 +287,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  value={description} 
  onChange={(e) => setDescription(e.target.value.toUpperCase())} 
  placeholder="EX: INVESTIMENTO" 
- className={`w-full px-4 py-3 border text-xs font-bold uppercase outline-none focus:border-indigo-500 transition-all ${isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-black/20 border-white/5 text-white'}`} 
+ className={`w-full px-4 py-3 border text-xs font-bold uppercase outline-none focus:border-brand-blue/50 transition-all ${isLight ? 'bg-white border-slate-200 text-slate-700' : 'bg-black/20 border-white/5 text-white'}`} 
  />
  </div>
  <div className="space-y-1">
@@ -296,7 +296,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  type="date" 
  value={date} 
  onChange={(e) => setDate(e.target.value)} 
- className={`w-full px-4 py-3 border text-xs font-bold outline-none focus:border-indigo-500 transition-all ${isLight ? 'bg-white border-slate-200 text-slate-700 [color-scheme:light]' : 'bg-black/20 border-white/5 text-white [color-scheme:dark]'}`} 
+ className={`w-full px-4 py-3 border text-xs font-bold outline-none focus:border-brand-blue/50 transition-all ${isLight ? 'bg-white border-slate-200 text-slate-700 [color-scheme:light]' : 'bg-black/20 border-white/5 text-white [color-scheme:dark]'}`} 
  />
  </div>
  </div>
@@ -306,7 +306,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  <button 
  onClick={() => { setPaymentMethod('cash'); setInstallments(1); setCashPrice(''); }} 
  className={`p-4 border transition-all flex flex-col items-center justify-center gap-1
- ${paymentMethod === 'cash' ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/30 hover:bg-black/40')}`}
+ ${paymentMethod === 'cash' ? 'bg-brand-blue border-brand-blue/50 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/30 hover:bg-black/40')}`}
  >
  <Wallet size={18} />
  <span className="text-[9px] font-black uppercase tracking-widest">À Vista</span>
@@ -314,7 +314,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  <button 
  onClick={() => { setPaymentMethod('installment'); setInstallments(2); }} 
  className={`p-4 border transition-all flex flex-col items-center justify-center gap-1
- ${paymentMethod === 'installment' ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/30 hover:bg-black/40')}`}
+ ${paymentMethod === 'installment' ? 'bg-brand-blue border-brand-blue/50 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/30 hover:bg-black/40')}`}
  >
  <Clock size={18} />
  <span className="text-[9px] font-black uppercase tracking-widest">A Prazo</span>
@@ -326,7 +326,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  <div className="space-y-1 animate-in slide-in-from-top-4 duration-500">
  <div className="flex justify-between items-center px-1">
  <label className={`text-[9px] font-black uppercase tracking-[0.2em] ${isLight ? 'text-slate-400' : 'text-white/40'}`}>Ciclos / Parcelas</label>
- <span className={`text-10px font-black ${isLight ? 'text-indigo-600' : 'text-indigo-400'}`}>{installments}x</span>
+ <span className={`text-10px font-black ${isLight ? 'text-brand-blue' : 'text-indigo-400'}`}>{installments}x</span>
  </div>
  <input 
  type="range" 
@@ -337,8 +337,8 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  className={`w-full h-1 rounded-none appearance-none cursor-pointer accent-indigo-500 ${isLight ? 'bg-slate-200' : 'bg-black/40'}`}
  />
  <div className="flex gap-2 mt-2">
- <button onClick={() => setAmountType('installment')} className={`flex-1 py-2 text-[9px] font-black uppercase border transition-all ${amountType === 'installment' ? 'bg-indigo-600 text-white border-indigo-500' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40')}`}>Valor Unitário</button>
- <button onClick={() => setAmountType('total')} className={`flex-1 py-2 text-[9px] font-black uppercase border transition-all ${amountType === 'total' ? 'bg-indigo-600 text-white border-indigo-500' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40')}`}>Valor Total</button>
+ <button onClick={() => setAmountType('installment')} className={`flex-1 py-2 text-[9px] font-black uppercase border transition-all ${amountType === 'installment' ? 'bg-brand-blue text-white border-brand-blue/50' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40')}`}>Valor Unitário</button>
+ <button onClick={() => setAmountType('total')} className={`flex-1 py-2 text-[9px] font-black uppercase border transition-all ${amountType === 'total' ? 'bg-brand-blue text-white border-brand-blue/50' : (isLight ? 'bg-white border-slate-200 text-slate-400' : 'bg-black/20 border-white/5 text-white/40')}`}>Valor Total</button>
  </div>
  </div>
  )}
@@ -356,7 +356,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  key={cat.id} 
  onClick={() => setSelectedCategory(cat.name)} 
  className={`px-2 py-2 border text-[8px] font-black uppercase tracking-wider transition-all truncate
- ${selectedCategory === cat.name ? (isLight ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-white text-black border-white') : (isLight ? 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50' : 'bg-black/20 border-white/5 text-white/40 hover:border-white/20')}`}
+ ${selectedCategory === cat.name ? (isLight ? 'bg-brand-blue text-white border-brand-blue/50' : 'bg-white text-black border-white') : (isLight ? 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50' : 'bg-black/20 border-white/5 text-white/40 hover:border-white/20')}`}
  >
  {cat.name}
  </button>
@@ -369,21 +369,21 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
   {/* TOGGLE WHATSAPP */}
   <div className="flex items-center justify-between px-2 mb-1">
     <div className="flex items-center gap-2">
-      <div className={`p-1.5 rounded-lg ${sendToWhatsApp ? 'bg-emerald-500/20 text-emerald-500' : 'bg-white/5 text-slate-500'}`}>
+      <div className={`p-1.5 rounded-lg ${sendToWhatsApp ? 'bg-brand-green/20 text-emerald-500' : 'bg-white/5 text-slate-500'}`}>
         <MessageSquare size={14} />
       </div>
       <span className={`text-[9px] font-black uppercase tracking-widest ${sendToWhatsApp ? 'text-emerald-500' : 'text-slate-500'}`}>Notificar WhatsApp</span>
     </div>
     <button 
       onClick={() => setSendToWhatsApp(!sendToWhatsApp)}
-      className={`w-10 h-5 rounded-full relative transition-all duration-300 border ${sendToWhatsApp ? 'bg-emerald-500 border-emerald-400' : 'bg-white/5 border-white/10'}`}
+      className={`w-10 h-5 rounded-full relative transition-all duration-300 border ${sendToWhatsApp ? 'bg-brand-green border-brand-green/50' : 'bg-white/5 border-white/10'}`}
     >
       <div className={`absolute top-1 w-3 h-3 bg-white transition-all duration-300 ${sendToWhatsApp ? 'left-6' : 'left-1'}`} />
     </button>
   </div>
 
  {isLimitReached ? (
- <div className={`border p-4 text-center animate-in zoom-in-95 duration-500 ${isLight ? 'bg-rose-50 border-rose-200' : 'bg-rose-500/10 border-rose-500/30'}`}>
+ <div className={`border p-4 text-center animate-in zoom-in-95 duration-500 ${isLight ? 'bg-rose-50 border-rose-200' : 'bg-brand-orange/10 border-rose-500/30'}`}>
  <AlertTriangle className="text-rose-500 mx-auto mb-1" size={24} />
  <h4 className="text-[10px] font-black text-rose-500 uppercase tracking-tighter italic">Capacidade Máxima</h4>
  <p className={`text-[8px] mt-1 uppercase font-black tracking-widest leading-relaxed ${isLight ? 'text-slate-500' : 'text-white/40'}`}>
@@ -391,7 +391,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  </p>
  <button 
  onClick={onClose}
- className="w-full mt-3 py-3 bg-rose-600 text-white font-black uppercase text-xs tracking-widest active:scale-95 transition-all shadow-xl"
+ className="w-full mt-3 py-3 bg-brand-orange text-white font-black uppercase text-xs tracking-widest active:scale-95 transition-all shadow-xl"
  >
  Ver Planos
  </button>
@@ -407,7 +407,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  <button 
  onClick={handleSave} 
  className={`flex-[2] py-4 font-black uppercase tracking-widest text-[9px] text-white transition-all active:scale-95 flex items-center justify-center gap-2 shadow-2xl
- ${type === 'income' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-900/20' : 'bg-rose-600 hover:bg-rose-500 shadow-rose-900/20'}`}
+ ${type === 'income' ? 'bg-emerald-600 hover:bg-brand-green shadow-emerald-900/20' : 'bg-brand-orange hover:bg-brand-orange shadow-rose-900/20'}`}
  >
  <Check size={16} strokeWidth={4} /> {paymentMethod === 'installment' ? 'Lançar Parcelas' : 'Lançar'}
  </button>

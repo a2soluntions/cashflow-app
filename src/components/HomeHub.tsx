@@ -9,36 +9,65 @@ import {
 interface HomeHubProps {
   onNavigate: (tabId: string) => void;
   onNewTransaction: () => void; 
-  currentTheme: 'light' | 'dark';
-  onToggleTheme: () => void;
+  currentTheme: 'blue' | 'black' | 'white';
+  onToggleTheme: (theme: 'blue' | 'black' | 'white') => void;
   isAdmin?: boolean;
   onLogout?: () => void;
   userAvatar?: string | null;
 }
 
 export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTheme, isAdmin, onLogout, userAvatar }: HomeHubProps) {
- const isLight = currentTheme === 'light';
+ const isLight = currentTheme === 'white';
  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
+ const getNextTheme = (): 'blue' | 'black' | 'white' => {
+   if (currentTheme === 'blue') return 'black';
+   if (currentTheme === 'black') return 'white';
+   return 'blue';
+ };
+
  // Mapeamento dos módulos (11 itens na órbita)
-  const menuItems = [
-  { id: 'add', label: 'Lançar', icon: <Plus size={22} />, color: 'bg-[#00f2ad]', action: onNewTransaction },
-  { id: 'dashboard', label: 'Dashboard', icon: <LayoutGrid size={20} />, color: 'bg-blue-500', action: () => onNavigate('dashboard') },
-  { id: 'investments', label: 'Carteira', icon: <TrendingUp size={20} />, color: 'bg-sky-500', action: () => onNavigate('investments') },
-  { id: 'categories', label: 'Categorias', icon: <AppWindow size={20} />, color: 'bg-pink-500', action: () => onNavigate('categories') },
-  { id: 'contas', label: 'Contas', icon: <CheckCircle2 size={20} />, color: 'bg-emerald-500', action: () => onNavigate('contas') },
-  { id: 'history', label: 'Histórico', icon: <Calendar size={20} />, color: 'bg-rose-500', action: () => onNavigate('history') },
-  { id: 'theme', label: 'Alternar Tema', icon: isLight ? <Moon size={20} /> : <Sun size={20} />, color: 'bg-amber-500', action: onToggleTheme },
-  { id: 'advisor', label: 'Consultor IA', icon: <Brain size={20} />, color: 'bg-violet-600', action: () => onNavigate('advisor') },
-  { id: 'report', label: 'Relatórios', icon: <BarChart3 size={20} />, color: 'bg-indigo-500', action: () => onNavigate('report') },
-  { id: 'freedom', label: 'Liberdade $', icon: <ShieldAlert size={20} />, color: 'bg-teal-600', action: () => onNavigate('freedom') },
-  { id: 'target', label: 'Vitta Horizons', icon: <Target size={20} />, color: 'bg-orange-600', action: () => onNavigate('target') },
-  { id: 'settings', label: 'Ajustes', icon: <Settings size={20} />, color: 'bg-slate-500', action: () => onNavigate('settings') },
-  ...(isAdmin ? [{ id: 'admin', label: 'Admin', icon: <ShieldCheck size={20} />, color: 'bg-amber-600', action: () => onNavigate('admin') }] : []),
-  {id: 'sales', label: 'Planos & Pro', icon: <Zap size={20} />, color: 'bg-emerald-600', action: () => onNavigate('sales') },
-  { id: 'noticias', label: 'Vitta Notícias', icon: <Newspaper size={20} />, color: 'bg-indigo-700', action: () => window.open('/noticias', '_blank') },
-  { id: 'exit', label: 'Sair', icon: <LogOut size={20} />, color: 'bg-rose-600', action: () => setShowExitConfirm(true) }, 
-  ];
+ const GRADIENT_COLORS = [
+  { from: '#f43f5e', to: '#fb923c' },
+  { from: '#fb923c', to: '#fbbf24' },
+  { from: '#fbbf24', to: '#fde047' },
+  { from: '#fde047', to: '#a3e635' },
+  { from: '#a3e635', to: '#4ade80' },
+  { from: '#4ade80', to: '#10b981' },
+  { from: '#10b981', to: '#2dd4bf' },
+  { from: '#2dd4bf', to: '#22d3ee' },
+  { from: '#22d3ee', to: '#3b82f6' },
+  { from: '#3b82f6', to: '#6366f1' },
+  { from: '#6366f1', to: '#8b5cf6' },
+  { from: '#8b5cf6', to: '#a855f7' },
+  { from: '#a855f7', to: '#d946ef' },
+  { from: '#d946ef', to: '#ec4899' },
+  { from: '#ec4899', to: '#f43f5e' }
+ ];
+
+ const rawMenuItems = [
+  { id: 'add', label: 'Lançar', icon: <Plus size={22} />, action: onNewTransaction },
+  { id: 'dashboard', label: 'Dashboard', icon: <LayoutGrid size={20} />, action: () => onNavigate('dashboard') },
+  { id: 'investments', label: 'Carteira', icon: <TrendingUp size={20} />, action: () => onNavigate('investments') },
+  { id: 'categories', label: 'Categorias', icon: <AppWindow size={20} />, action: () => onNavigate('categories') },
+  { id: 'contas', label: 'Contas', icon: <CheckCircle2 size={20} />, action: () => onNavigate('contas') },
+  { id: 'history', label: 'Histórico', icon: <Calendar size={20} />, action: () => onNavigate('history') },
+  { id: 'theme', label: `Tema: ${currentTheme === 'blue' ? 'Azul' : currentTheme === 'black' ? 'Preto' : 'Branco'}`, icon: isLight ? <Moon size={20} /> : <Sun size={20} />, action: () => onToggleTheme(getNextTheme()) },
+  { id: 'advisor', label: 'Consultor IA', icon: <Brain size={20} />, action: () => onNavigate('advisor') },
+  { id: 'report', label: 'Relatórios', icon: <BarChart3 size={20} />, action: () => onNavigate('report') },
+  { id: 'freedom', label: 'Liberdade $', icon: <ShieldAlert size={20} />, action: () => onNavigate('freedom') },
+  { id: 'target', label: 'Vitta Horizons', icon: <Target size={20} />, action: () => onNavigate('target') },
+  { id: 'settings', label: 'Ajustes', icon: <Settings size={20} />, action: () => onNavigate('settings') },
+  ...(isAdmin ? [{ id: 'admin', label: 'Admin', icon: <ShieldCheck size={20} />, action: () => onNavigate('admin') }] : []),
+  {id: 'sales', label: 'Planos & Pro', icon: <Zap size={20} />, action: () => onNavigate('sales') },
+  { id: 'noticias', label: 'Vitta Notícias', icon: <Newspaper size={20} />, action: () => window.open('/noticias', '_blank') },
+  { id: 'exit', label: 'Sair', icon: <LogOut size={20} />, isExit: true, action: () => setShowExitConfirm(true) }, 
+ ];
+
+ const menuItems = rawMenuItems.map((item, index) => {
+   if (item.isExit) return { ...item, grad: { from: '#334155', to: '#0f172a' } };
+   return { ...item, grad: GRADIENT_COLORS[index % GRADIENT_COLORS.length] };
+ });
 
  const confirmExit = () => {
    if (onLogout) {
@@ -55,6 +84,20 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  return (
  <div className="relative min-h-full w-full flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-transparent custom-scrollbar py-8">
  
+ {/* EFEITO HONEYCOMB COM GLOW */}
+ <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-40">
+  <div className="absolute inset-0" style={{ 
+    backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='69' viewBox='0 0 40 69' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 11.5L40 0v23L20 34.5 0 23V0l20 11.5zM20 46l20-11.5v23L20 69 0 57.5v-23L20 46zM20 23L0 34.5v-23L20 0v23z' fill='none' stroke='${currentTheme === 'white' ? '%23000000' : '%23ffffff'}' stroke-width='1.5' stroke-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E")` 
+  }}></div>
+  <div className="absolute inset-0" style={{ 
+    background: currentTheme === 'white' 
+      ? `radial-gradient(circle at center, rgba(0, 0, 0, 0.05) 0%, transparent 80%)` 
+      : currentTheme === 'black' 
+        ? `radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%)` 
+        : `radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%)`
+  }}></div>
+ </div>
+
  {/* 🌌 SISTEMA ORBITAL (DESKTOP) */}
   <div className={`hidden md:flex relative items-center justify-center w-[650px] h-[650px] transition-all duration-700 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in zoom-in'}`}>
  {/* NÚCLEO CENTRAL */}
@@ -71,7 +114,14 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  const y = radius * Math.sin(angle * (Math.PI / 180));
  return (
   <div key={item.id} className="absolute z-40 flex flex-col items-center group transition-all duration-700" style={{ transform: `translate(${x}px, ${y}px)` }}>
-  <button onClick={item.action} className={`p-5 ${item.color} text-white transition-all duration-300 hover:scale-125 hover:rotate-[360deg] active:scale-95 shadow-lg group-hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]`} style={{ boxShadow : `0 10px 30px ${item.color}66` }}>
+  <button 
+    onClick={item.action} 
+    className="p-5 text-white transition-all duration-300 hover:scale-125 hover:rotate-[360deg] active:scale-95 shadow-lg group-hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]" 
+    style={{ 
+      background: `linear-gradient(135deg, ${item.grad.from}, ${item.grad.to})`, 
+      boxShadow: `0 10px 30px ${item.grad.from}66` 
+    }}
+  >
   {item.icon}
   </button>
   <span className={`absolute ${item.id === 'add' ? 'top-20' : (x >= 0 ? 'left-24' : 'right-24')} ${item.id === 'add' ? '' : 'top-1/2 -translate-y-1/2'} opacity-0 group-hover:opacity-100 group-hover:translate-x-3 transition-all duration-300 pointer-events-none whitespace-nowrap text-[10px] font-black uppercase tracking-[0.3em] ${isLight ? 'text-slate-900' : 'text-white'} z-[100]`}>
@@ -101,8 +151,11 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  className="flex flex-col items-center gap-3 group active:scale-90 transition-all"
  >
  <div 
- className={`w-16 h-16 ${item.color} text-white flex items-center justify-center group-hover:scale-110 transition-transform`} 
- style={{ boxShadow : `0 8px 25px ${item.color}40` }}
+ className="w-16 h-16 text-white flex items-center justify-center group-hover:scale-110 transition-transform" 
+ style={{ 
+   background: `linear-gradient(135deg, ${item.grad.from}, ${item.grad.to})`, 
+   boxShadow: `0 8px 25px ${item.grad.from}40` 
+ }}
  >
  {item.icon}
  </div>

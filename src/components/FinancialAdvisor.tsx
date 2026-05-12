@@ -15,12 +15,12 @@ interface FinancialAdvisorProps {
  currentBalance: number;
  transactions: any[];
  categories?: any[];
- theme?: 'light' | 'dark';
+  theme?: 'blue' | 'black' | 'white';
 }
 
-export function FinancialAdvisor({ currentBalance, transactions, theme = 'dark' }: FinancialAdvisorProps) {
+export function FinancialAdvisor({ currentBalance, transactions, theme = 'blue' }: FinancialAdvisorProps) {
  const [activeTab, setActiveTab] = useState('welcome');
- const isLight = theme === 'light';
+ const isLight = theme === 'white';
 
   return (
   <div className="h-full w-full flex flex-col p-4 transition-colors duration-500 overflow-hidden">

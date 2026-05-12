@@ -18,13 +18,25 @@
     -ms-overflow-style: none;
   }
   
-  /* Garante que o fundo mude mesmo fora da div principal */
-  html.dark body {
-    background-color: #283593; /* Novo tom Indigo Dark */
+  :root {
+    --bg-app: #ffffff;
   }
   
-  html.light body {
-    background-color: #F3E5F5; /* Novo tom Lavender Light */
+  html.theme-blue {
+    --bg-app: #1023FF;
+  }
+  
+  html.theme-black {
+    --bg-app: #000001;
+  }
+  
+  html.theme-white {
+    --bg-app: #ffffff;
+  }
+
+  /* Garante que o fundo mude mesmo fora da div principal */
+  html body {
+    background-color: var(--bg-app);
   }
 
   /* 📏 ESTILO SHARP: REMOÇÃO TOTAL DE BORDAS ARREDONDADAS */
