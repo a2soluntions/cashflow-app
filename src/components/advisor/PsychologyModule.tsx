@@ -411,7 +411,7 @@ const traps: Trap[] = [
 ];
 
 export function PsychologyModule({ theme = 'dark' }: { theme?: string }) {
-  const isLight = theme === 'light';
+  const isLight = theme === 'light' || theme === 'white' || theme === 'white-orange';
   const [activeTrap, setActiveTrap] = useState<string | null>(null);
 
  return (

@@ -12,7 +12,7 @@ interface ConsultantReportProps {
 }
 
 export default function ConsultantReport({ theme, transactions }: ConsultantReportProps) {
- const isLight = theme === 'light';
+ const isLight = theme === 'light' || theme === 'white' || theme === 'white-orange';
  const [timeFilter, setTimeFilter] = useState<'month' | 'year'>('month');
 
  const analysis = useMemo(() => {

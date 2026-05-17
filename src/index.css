@@ -33,6 +33,28 @@
   html.theme-white {
     --bg-app: #ffffff;
   }
+  
+  html.theme-black-orange {
+    --bg-app: #000001;
+  }
+  
+  html.theme-white-orange {
+    --bg-app: #ffffff;
+  }
+
+  html.theme-black-orange,
+  html.theme-white-orange {
+    --color-primary-400: 251 146 60;
+    --color-primary-500: 249 115 22;
+    --color-primary-600: 234 88 12;
+    --color-secondary-400: 251 146 60;
+    --color-secondary-500: 249 115 22;
+    --color-secondary-600: 234 88 12;
+    --color-tertiary-400: 251 146 60;
+    --color-tertiary-500: 249 115 22;
+    --color-tertiary-600: 234 88 12;
+    --color-brand-blue: 249 115 22;
+  }
 
   /* Garante que o fundo mude mesmo fora da div principal */
   html body {

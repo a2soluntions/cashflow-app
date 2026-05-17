@@ -3,19 +3,42 @@ import ReactDOM from 'react-dom/client'
 import Vitta from './Vitta' // Referência única e exata
 import './index.css'
 
-// Importa a função virtual gerada automagicamente pelo vite-plugin-pwa
-import { registerSW } from 'virtual:pwa-register';
+// Desativa o Service Worker para evitar cache de versões antigas durante a transição
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+    }
+  });
+}
 
-// Registro do Service Worker (atualização automática sem popup nativo)
-const updateSW = registerSW({
-  onNeedRefresh() {
-    console.log('[VittaCash] Nova versão detectada — atualizando automaticamente...');
-    updateSW(true);
-  },
-  onOfflineReady() {
-    console.log('[VittaCash] App pronto para uso offline!');
-  },
-});
+// Migração segura de localStorage para usuários antigos (VittaCash -> A2Finanças)
+try {
+  const oldKeys = [
+    'vittacash_pro_categories',
+    'vittacash_pro_budgets',
+    'vittacash_pro_transactions',
+    'vittacash_user_phone',
+    'vittacash_machine_id',
+    'vittacash_saved_key',
+    'vittacash_debts_desktop',
+    'vittacash_budgets',
+    'vitta_cookie_consent',
+    'vitta_debts'
+  ];
+  oldKeys.forEach(oldKey => {
+    const value = localStorage.getItem(oldKey);
+    if (value) {
+      const newKey = oldKey.replace('vittacash', 'a2financas').replace('vitta_', 'a2financas_');
+      if (!localStorage.getItem(newKey)) {
+        localStorage.setItem(newKey, value);
+        console.log(`[Migration] Copying legacy data: ${oldKey} -> ${newKey}`);
+      }
+    }
+  });
+} catch (e) {
+  console.warn('[Migration] LocalStorage migration failed:', e);
+}
 
 import { AuthProvider } from './components/AuthProvider'
 import { BrowserRouter } from 'react-router-dom'

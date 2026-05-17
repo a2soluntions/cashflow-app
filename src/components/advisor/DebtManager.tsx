@@ -10,7 +10,7 @@ export interface Debt {
 }
 
 export default function DebtManager({ theme }: { theme: string }) {
- const isLight = theme === 'light';
+ const isLight = theme === 'light' || theme === 'white' || theme === 'white-orange';
  
  const [debts, setDebts] = useState<Debt[]>([]);
  const [extraPayment, setExtraPayment] = useState<number>(0);
@@ -22,13 +22,13 @@ export default function DebtManager({ theme }: { theme: string }) {
  });
 
  useEffect(() => {
- const saved = localStorage.getItem('vitta_debts');
+ const saved = localStorage.getItem('a2financas_debts');
  if (saved) setDebts(JSON.parse(saved));
  }, []);
 
  const saveDebts = (updated: Debt[]) => {
  setDebts(updated);
- localStorage.setItem('vitta_debts', JSON.stringify(updated));
+ localStorage.setItem('a2financas_debts', JSON.stringify(updated));
  };
 
  const handleAddDebt = () => {

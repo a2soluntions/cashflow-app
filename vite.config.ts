@@ -39,9 +39,9 @@ export default defineConfig({
         type: 'module'
       },
       manifest: {
-        name: 'VittaCash',
-        short_name: 'VittaCash',
-        description: 'VittaCash - Seu aplicativo de finanças confiável',
+        name: 'A2Finanças',
+        short_name: 'A2Finanças',
+        description: 'A2Finanças - Seu aplicativo de finanças confiável',
         theme_color: '#1a237e',
         background_color: '#1a237e',
         display: 'standalone',

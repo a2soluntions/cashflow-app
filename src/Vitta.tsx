@@ -34,13 +34,13 @@ export default function Vitta() {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
 
-  const [theme, setTheme] = useState<'blue' | 'black' | 'white'>('blue');
+  const [theme, setTheme] = useState<'blue' | 'black' | 'white' | 'black-orange' | 'white-orange'>('blue');
   
   useEffect(() => {
-    document.documentElement.classList.remove('theme-blue', 'theme-black', 'theme-white', 'dark');
+    document.documentElement.classList.remove('theme-blue', 'theme-black', 'theme-white', 'theme-black-orange', 'theme-white-orange', 'dark');
     document.documentElement.classList.add(`theme-${theme}`);
     
-    if (theme === 'blue' || theme === 'black') {
+    if (theme === 'blue' || theme === 'black' || theme === 'black-orange') {
       document.documentElement.classList.add('dark');
     }
   }, [theme]);
@@ -50,8 +50,8 @@ export default function Vitta() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userAvatar, setUserAvatar] = useState<string | null>(localStorage.getItem('vittacash_user_avatar'));
-  const [userName, setUserName] = useState<string>(localStorage.getItem('vittacash_user_name') || 'Comandante');
+  const [userAvatar, setUserAvatar] = useState<string | null>(localStorage.getItem('a2financas_user_avatar'));
+  const [userName, setUserName] = useState<string>(localStorage.getItem('a2financas_user_name') || 'Comandante');
 
   // --- ASSINATURA ---
   const [trialDaysLeft, setTrialDaysLeft] = useState<number>(999);
@@ -100,15 +100,15 @@ export default function Vitta() {
 
         if (profile.avatar_url) {
           setUserAvatar(profile.avatar_url);
-          localStorage.setItem('vittacash_user_avatar', profile.avatar_url);
+          localStorage.setItem('a2financas_user_avatar', profile.avatar_url);
         }
         if (profile.name) {
           setUserName(profile.name);
-          localStorage.setItem('vittacash_user_name', profile.name);
+          localStorage.setItem('a2financas_user_name', profile.name);
         }
       } else {
-        const savedAvatar = localStorage.getItem('vittacash_user_avatar');
-        const savedName = localStorage.getItem('vittacash_user_name');
+        const savedAvatar = localStorage.getItem('a2financas_user_avatar');
+        const savedName = localStorage.getItem('a2financas_user_name');
         if (savedAvatar) setUserAvatar(savedAvatar);
         if (savedName) setUserName(savedName);
       }
@@ -182,7 +182,7 @@ export default function Vitta() {
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate('/app')}
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all group ${theme === 'white' ? 'bg-white text-slate-900' : 'bg-white/5 text-white/80'}`}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all group ${theme === 'white' || theme === 'white-orange' ? 'bg-white text-slate-900' : 'bg-white/5 text-white/80'}`}
           >
             <Home size={18} />
           </button>
@@ -220,12 +220,12 @@ export default function Vitta() {
 
   const handleLogout = async () => {
     // Limpa dados de perfil do localStorage para não vazar para outro usuário
-    localStorage.removeItem('vittacash_user_avatar');
-    localStorage.removeItem('vittacash_user_name');
-    localStorage.removeItem('vittacash_user_company');
-    localStorage.removeItem('vittacash_user_email');
-    localStorage.removeItem('vittacash_user_phone');
-    localStorage.removeItem('vittacash_notification_channel');
+    localStorage.removeItem('a2financas_user_avatar');
+    localStorage.removeItem('a2financas_user_name');
+    localStorage.removeItem('a2financas_user_company');
+    localStorage.removeItem('a2financas_user_email');
+    localStorage.removeItem('a2financas_user_phone');
+    localStorage.removeItem('a2financas_notification_channel');
     setUserAvatar(null);
     setUserName('Comandante');
     await supabase.auth.signOut();
@@ -290,7 +290,7 @@ export default function Vitta() {
                                         <img src="/pwa-192x192.png" className="w-8 h-8 object-contain" alt="Icon" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-white text-xs font-black uppercase tracking-widest">Instalar VittaCash</span>
+                                        <span className="text-white text-xs font-black uppercase tracking-widest">Instalar A2Finanças</span>
                                         <span className="text-white/60 text-[8px] font-bold uppercase">Acesse mais rápido pelo menu</span>
                                     </div>
                                 </div>
@@ -458,8 +458,8 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
                 >
                     <ArrowLeft size={20} />
                 </button>
-                <img src="/logo.png" alt="VittaCash" className="h-20 w-20 object-contain mx-auto mb-4 mix-blend-screen" />
-                <h2 className="text-2xl font-black text-white uppercase italic mb-8">{isSignUp ? 'Nova Conta' : 'Acesso VittaCash'}</h2>
+                <img src="/logo.png" alt="A2Finanças" className="h-20 w-20 object-contain mx-auto mb-4 mix-blend-screen" />
+                <h2 className="text-2xl font-black text-white uppercase italic mb-8">{isSignUp ? 'Nova Conta' : 'Acesso A2Finanças'}</h2>
                 
                 <div className="space-y-4 mb-8">
                     <input 

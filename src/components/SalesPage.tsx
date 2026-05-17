@@ -53,7 +53,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   };
 
   useEffect(() => {
-    const consent = localStorage.getItem('vitta_cookie_consent');
+    const consent = localStorage.getItem('a2_cookie_consent');
     if (!consent) {
       setTimeout(() => setShowCookieConsent(true), 2000);
     }
@@ -65,67 +65,94 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   };
 
   useEffect(() => {
+    const SUPA_URL = 'https://fhjdymzjikjnyafadhim.supabase.co';
+    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoamR5bXpqaWtqbnlhZmFkaGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2Mjc2NjUsImV4cCI6MjA5MjIwMzY2NX0.7qQAYfwddqaDO7ywZUeSELs1UDzPFa3F1hwlVNOvNrs';
+
+    async function fetchFromSupabase(query: string) {
+      const url = `${SUPA_URL}/rest/v1/site_content?${query}`;
+      console.log('[SalesPage] Fetching:', url);
+      const res = await fetch(url, {
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': `Bearer ${SUPA_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!res.ok) {
+        console.error('[SalesPage] Supabase error:', res.status, res.statusText);
+        return [];
+      }
+      return await res.json();
+    }
+
     async function loadDynamicContent() {
+      // 1. Indicadores (Valores estáveis)
+      setIndicators([
+        { title: 'SELIC', value: '10.75', symbol: '%' },
+        { title: 'IPCA', value: '4.50', symbol: '%' },
+        { title: 'DÓLAR', value: '5.45', symbol: 'R$' },
+        { title: 'BITCOIN', value: '345.200', symbol: 'R$' },
+      ]);
+
+      // 2. Banners — busca direta do Supabase (sem depender de serverless /api/banners)
       try {
-        const res = await fetch('/api/get-financial-data');
-        if (!res.ok) throw new Error("API Offline");
-        const data = await res.json();
-        
-        if (data.selic) {
-          setIndicators([
-            { title: 'SELIC', value: data.selic.value, symbol: '%' },
-            { title: 'IPCA', value: data.ipca.value, symbol: '%' },
-            { title: 'DÓLAR', value: data.dolar.value, symbol: 'R$' },
-            { title: 'IBOVESPA', value: '127.450', symbol: 'pts' },
-            { title: 'BITCOIN', value: '345.200', symbol: 'R$' },
-          ]);
+        const bannerData = await fetchFromSupabase(
+          'content_type=in.(home_banner_left,home_banner_right)&is_active=eq.true&select=id,content_type,image_url,title,meta_value&order=created_at.desc'
+        );
+        console.log('[SalesPage] Banners recebidos:', bannerData?.length, bannerData);
+
+        if (bannerData && Array.isArray(bannerData) && bannerData.length > 0) {
+          const left = bannerData.filter((b: any) => b.content_type === 'home_banner_left');
+          const right = bannerData.filter((b: any) => b.content_type === 'home_banner_right');
+          console.log('[SalesPage] Left banners:', left.length, '| Right banners:', right.length);
+          if (left.length > 0) setLeftBanners(left);
+          if (right.length > 0) setRightBanners(right);
         }
       } catch (e) {
-        setIndicators([
-          { title: 'SELIC', value: '10.75', symbol: '%' },
-          { title: 'IPCA', value: '4.50', symbol: '%' },
-          { title: 'INPC', value: '3.90', symbol: '%' },
-          { title: 'DÓLAR', value: '5.45', symbol: 'R$' },
-          { title: 'BITCOIN', value: '345.200', symbol: 'R$' },
-        ]);
+        console.warn('[SalesPage] Falha ao carregar banners:', e);
       }
 
+      // 3. Notícias recentes
       try {
-        const { data: newsData } = await supabase
-          .from('site_content')
-          .select('*')
-          .in('content_type', ['news', 'marketing'])
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(4);
-        
-        if (newsData) setNews(newsData);
-
-        const { data: bData } = await supabase.from('site_content').select('*').in('content_type', ['home_banner_left', 'home_banner_right']).eq('is_active', true);
-        if (bData) {
-          setLeftBanners(bData.filter(b => b.content_type === 'home_banner_left'));
-          setRightBanners(bData.filter(b => b.content_type === 'home_banner_right'));
+        const newsData = await fetchFromSupabase(
+          'content_type=in.(news,marketing)&is_active=eq.true&order=created_at.desc&limit=4&select=id,title,description,image_url,meta_value'
+        );
+        console.log('[SalesPage] News recebidas:', newsData?.length);
+        if (newsData && Array.isArray(newsData) && newsData.length > 0) {
+          setNews(newsData);
         }
+      } catch (e) {
+        console.warn('[SalesPage] Falha ao carregar notícias:', e);
+      }
 
-        const { data: corpData } = await supabase.from('site_content').select('*').eq('content_type', 'corporate_data').maybeSingle();
-        if (corpData) {
+      // 4. Dados Corporativos (Silencioso)
+      try {
+        const corpData = await fetchFromSupabase('content_type=eq.corporate_data&limit=1');
+        const cData = corpData?.[0];
+        if (cData) {
           setCorporateData({
-            name: corpData.title,
-            cnpj: corpData.meta_value?.cnpj || '00.000.000/0000-00',
-            address: corpData.description
+            name: cData.title,
+            cnpj: cData.meta_value?.cnpj || '00.000.000/0000-00',
+            address: cData.description
           });
         }
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
+      } catch (_) {}
+
+      setLoading(false);
     }
     loadDynamicContent();
 
+    // Realtime para atualizar conteúdo automaticamente
     const channel = supabase
       .channel('site-content-changes')
       .on('postgres_changes', { event: '*', table: 'site_content', schema: 'public' }, () => {
         loadDynamicContent();
       })
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('Realtime subscription failed, using polling fallback');
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -143,9 +170,9 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#283593] text-slate-200 font-sans selection:bg-emerald-500/30 scroll-smooth pb-20 overflow-x-hidden">
+    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-emerald-500/30 scroll-smooth pb-20 overflow-x-hidden">
       
-      <div className="fixed top-0 left-0 w-full bg-[#1a237e]/90 backdrop-blur-md border-b border-white/5 py-3 overflow-hidden whitespace-nowrap z-[1000] flex justify-start">
+      <div className="fixed top-0 left-0 w-full bg-slate-950/90 backdrop-blur-md border-b border-white/5 py-3 overflow-hidden whitespace-nowrap z-[1000] flex justify-start">
         <div className="flex animate-marquee hover:pause gap-12 items-center justify-start min-w-full">
           <div className="flex items-center gap-2 px-6 border-r border-white/10 mr-4 shrink-0">
             <Clock size={12} className="text-emerald-400" />
@@ -187,18 +214,18 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
       }
       `}} />
 
-      <nav className="fixed top-[41px] left-0 w-full z-[999] bg-indigo-950/80 backdrop-blur-xl border-b border-white/5 py-5 transition-all duration-500">
+      <nav className="fixed top-[41px] left-0 w-full z-[999] bg-slate-950/80 backdrop-blur-xl border-b border-white/5 py-5 transition-all duration-500">
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-12">
             <div className="flex flex-col leading-none">
-              <span className="text-2xl font-black italic tracking-tighter uppercase text-white">Vitta<span className="text-emerald-500">Cash</span></span>
+              <span className="text-2xl font-black italic tracking-tighter uppercase text-white">A2<span className="text-emerald-500">Finanças</span></span>
               <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-slate-500">Financial Intelligence</span>
             </div>
             
             <div className="hidden lg:flex items-center gap-8">
               <Link to="/noticias" className="group flex items-center gap-2">
                 <Newspaper size={14} className="text-emerald-500 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 group-hover:text-white transition-colors">Vitta Notícias</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 group-hover:text-white transition-colors">A2 Notícias</span>
               </Link>
               <button onClick={scrollToPlans} className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-white transition-colors">Nossos Planos</button>
               <a href="#radar" className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-white transition-colors">Radar Econômico</a>
@@ -222,10 +249,10 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
 
         {/* Mobile Menu Overlay */}
         {isMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 w-full bg-indigo-950 border-b border-white/5 p-6 animate-in slide-in-from-top-4 duration-300">
+          <div className="lg:hidden absolute top-full left-0 w-full bg-slate-950 border-b border-white/5 p-6 animate-in slide-in-from-top-4 duration-300">
             <div className="flex flex-col gap-6">
               <Link to="/noticias" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-white">
-                <Newspaper size={18} className="text-emerald-500" /> Vitta Notícias
+                <Newspaper size={18} className="text-emerald-500" /> A2 Notícias
               </Link>
               <button onClick={() => { scrollToPlans(); setIsMenuOpen(false); }} className="text-left text-sm font-black uppercase tracking-widest text-white">Nossos Planos</button>
               <a href="#radar" onClick={() => setIsMenuOpen(false)} className="text-sm font-black uppercase tracking-widest text-white">Radar Econômico</a>
@@ -238,31 +265,14 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         )}
       </nav>
 
-      <div className="pt-[180px] md:pt-40" />
+      <div className="pt-[140px] md:pt-40" />
 
       <section className="relative pt-16 pb-16 px-6 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-500/10 blur-[120px] pointer-events-none" />
         
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-3">
-          <div className="flex-1 max-w-lg lg:max-w-2xl overflow-hidden rounded-lg border border-white/10 bg-indigo-950/40 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-            {leftBanners.length > 0 ? (
-              <div
-                onClick={() => openModal('left', currentLeftIdx)}
-                className="block w-full h-full cursor-pointer animate-in fade-in duration-1000 group"
-              >
-                <img src={leftBanners[currentLeftIdx]?.image_url} alt="VittaCash Web" className="w-full h-full aspect-[16/9] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
-              </div>
-            ) : (
-              <div
-                onClick={() => setModalImg("vitta_sponsor_banner_1_1776825587725.png")}
-                className="block w-full h-full cursor-pointer group"
-              >
-                <img src="/vitta_sponsor_banner_1_1776825587725.png" alt="VittaCash Web" className="w-full h-full aspect-[16/9] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1 text-center">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-3">
+          {/* Mobile: Text first, then banners. Desktop: Left Banner -> Text -> Right Banner */}
+          <div className="flex-1 text-center lg:order-2">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 mb-8">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full bg-emerald-400 opacity-75"></span>
@@ -288,21 +298,43 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
               <button onClick={scrollToPlans} className="px-10 py-5 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest transition-all active:scale-95">Ver Planos</button>
             </div>
           </div>
-          
-          <div className="flex-1 max-w-xs overflow-hidden rounded-lg border border-white/10 bg-indigo-950/40 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-            {rightBanners.length > 0 ? (
-                <div
-                  onClick={() => openModal('right', currentRightIdx)}
-                  className="block w-full h-full cursor-pointer animate-in fade-in duration-1000 group"
-                >
-                  <img src={rightBanners[currentRightIdx]?.image_url} alt="VittaCash Mobile" className="w-full h-full aspect-[9/16] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
-                </div>
+
+          <div className="flex-1 w-full lg:max-w-2xl lg:order-1 flex justify-center">
+            {leftBanners.length > 0 ? (
+              <div className="w-full max-w-lg lg:max-w-2xl overflow-hidden rounded-xl cursor-pointer" onClick={() => openModal('left', currentLeftIdx)}>
+                <img
+                  src={leftBanners[currentLeftIdx]?.image_url}
+                  alt="A2Finanças Web"
+                  className="w-full h-auto object-contain hover:scale-[1.03] transition-transform duration-700 rounded-xl shadow-2xl"
+                />
+              </div>
             ) : (
-              <div
-                onClick={() => setModalImg('vitta_sponsor_banner_2_1776825608562.png')}
-                className="block w-full h-full cursor-pointer group"
-              >
-                <img src="/vitta_sponsor_banner_2_1776825608562.png" alt="VittaCash Mobile" className="w-full h-full aspect-[9/16] object-contain hover:scale-[1.05] transition-transform duration-700" loading="lazy" />
+              <div className="w-full max-w-lg lg:max-w-2xl overflow-hidden rounded-xl">
+                <img
+                  src="/vitta_sponsor_banner_1_1776825587725.png"
+                  alt="A2Finanças Web"
+                  className="w-full h-auto object-contain rounded-xl shadow-2xl"
+                />
+              </div>
+            )}
+          </div>
+          
+          <div className="flex-1 w-full lg:max-w-xs lg:order-3 flex justify-center">
+            {rightBanners.length > 0 ? (
+              <div className="w-full max-w-xs overflow-hidden rounded-xl cursor-pointer" onClick={() => openModal('right', currentRightIdx)}>
+                <img
+                  src={rightBanners[currentRightIdx]?.image_url}
+                  alt="A2Finanças Mobile"
+                  className="w-full h-auto object-contain hover:scale-[1.03] transition-transform duration-700 rounded-xl shadow-2xl"
+                />
+              </div>
+            ) : (
+              <div className="w-full max-w-xs overflow-hidden rounded-xl">
+                <img
+                  src="/vitta_sponsor_banner_2_1776825608562.png"
+                  alt="A2Finanças Mobile"
+                  className="w-full h-auto object-contain rounded-xl shadow-2xl"
+                />
               </div>
             )}
           </div>
@@ -312,11 +344,11 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
       <section id="radar" className="py-12 px-6 max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 border-b border-white/5 pb-8">
           <div>
-            <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">Radar <span className="text-emerald-500">Vitta</span></h2>
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">Radar <span className="text-emerald-500">A2</span></h2>
             <p className="text-slate-500 text-sm font-medium mt-2">Insights exclusivos que movem o mercado agora.</p>
           </div>
           <Link to="/noticias" className="px-8 py-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all group flex items-center gap-2">
-            Acessar Vitta Notícias <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            Acessar A2 Notícias <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
@@ -336,7 +368,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
                 {item.meta_value?.external_url ? (
                   <a href={item.meta_value.external_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-400 hover:text-white transition-colors">Ler Matéria Completa <ExternalLink size={12} /></a>
                 ) : (
-                  <button className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500/50 cursor-default">Fonte: VittaCash Direct</button>
+                  <button className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500/50 cursor-default">Fonte: A2Finanças Direct</button>
                 )}
               </div>
             </div>
@@ -433,13 +465,13 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         </div>
       </section>
 
-      <footer className="py-24 px-6 border-t border-white/5 bg-indigo-950/40 relative overflow-hidden mt-20">
+      <footer className="py-24 px-6 border-t border-white/5 bg-slate-950 relative overflow-hidden mt-20">
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-16">
           <div className="md:col-span-4 space-y-8">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="VittaCash" className="h-12 w-12 object-contain rounded-full mix-blend-screen" />
-              <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">VittaCash</h2>
+              <img src="/logo.png" alt="A2Finanças" className="h-12 w-12 object-contain rounded-full mix-blend-screen" />
+              <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">A2Finanças</h2>
             </div>
             <div className="space-y-4">
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Nossa Missão</h3>
@@ -458,7 +490,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
             <div className="space-y-6">
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Fale Conosco</h3>
               <ul className="space-y-5">
-                <li><a href="mailto:suporte@vittacash.com" className="text-[11px] text-emerald-400 font-bold hover:text-white transition-all flex items-center gap-2 group"><Mail size={12} /> suporte@vittacash.com</a></li>
+                <li><a href="mailto:suporte@a2financas.com" className="text-[11px] text-emerald-400 font-bold hover:text-white transition-all flex items-center gap-2 group"><Mail size={12} /> suporte@a2financas.com</a></li>
                 <li><a href="https://wa.me/5534998408962" target="_blank" rel="noreferrer" className="text-[11px] text-emerald-400 font-bold hover:text-white transition-all flex items-center gap-2 group"><MessageCircle size={12} /> (34) 99840-8962</a></li>
               </ul>
             </div>

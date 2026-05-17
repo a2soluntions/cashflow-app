@@ -17,7 +17,7 @@ interface Question {
 const questionsPool: Question[] = [
  // FASE 1: O DESPERTAR (Básico)
  { id: 1, question: "O que é o 'Efeito Diderot'?", options: ["Guardar 10%", "Uma compra que gera outras compras", "Pedir desconto", "Pagar à vista"], correct: 1, explanation: "Uma compra nova cria uma espiral de consumo para 'combinar' o ambiente." },
- { id: 2, question: "Qual a regra VittaCash para aumentos?", options: ["Gastar tudo", "Mudar de casa", "50% Investir / 50% Viver", "Comprar um carro"], correct: 2, explanation: "Isso trava a inflação do seu estilo de vida." },
+ { id: 2, question: "Qual a regra A2Finanças para aumentos?", options: ["Gastar tudo", "Mudar de casa", "50% Investir / 50% Viver", "Comprar um carro"], correct: 2, explanation: "Isso trava a inflação do seu estilo de vida." },
  { id: 3, question: "O que é Custo Irrecuperável?", options: ["Dinheiro perdido", "Investir no erro por já ter gasto muito", "Taxa de banco", "Preço de revenda"], correct: 1, explanation: "Não jogue dinheiro bom em cima de dinheiro ruim." },
  { id: 4, question: "Pagar com Pix gera qual efeito?", options: ["Economia", "Anestesia do pagamento", "Mais cashback", "Segurança total"], correct: 1, explanation: "A falta de dinheiro físico faz o cérebro 'sentir' menos a perda." },
  { id: 5, question: "O que é Reserva de Emergência?", options: ["Limite do cartão", "Dinheiro para imprevistos", "Empréstimo de parentes", "Saldo do FGTS"], correct: 1, explanation: "É o seu seguro contra o caos da vida." },
@@ -41,19 +41,19 @@ const questionsPool: Question[] = [
  { id: 17, question: "A 'Regra das 48 Horas' serve para:", options: ["Dormir mais", "Esperar o impulso de compra passar", "Pagar o boleto", "Limpar a casa"], correct: 1, explanation: "Se após 2 dias você ainda quiser, a compra é consciente." },
  { id: 18, question: "A 'Paralisia por Análise' ocorre ao:", options: ["Ter pouca opção", "Ter opções demais e não escolher nenhuma", "Estar cansado", "Ficar sem internet"], correct: 1, explanation: "Excesso de escolha gera medo de errar e trava a ação." },
  { id: 19, question: "Otimismo Tóxico Financeiro é:", options: ["Acreditar que vai ganhar na mega", "Achar que nunca terá imprevistos", "Ser feliz", "Investir em ações"], correct: 1, explanation: "Faz você ignorar a necessidade de seguros e reservas." },
- { id: 20, question: "A Riqueza no VittaCash é definida por:", options: ["Ter carros", "Liberdade e controle sobre o tempo", "Saldo alto no banco", "Gastar muito"], correct: 1, explanation: "Dinheiro é apenas a ferramenta para sua liberdade real." },
+ { id: 20, question: "A Riqueza no A2Finanças é definida por:", options: ["Ter carros", "Liberdade e controle sobre o tempo", "Saldo alto no banco", "Gastar muito"], correct: 1, explanation: "Dinheiro é apenas a ferramenta para sua liberdade real." },
 ];
 
 const phrases = [
  "Você é mais forte que qualquer impulso de marketing!",
  "Sua mente está se tornando uma fortaleza inabalável.",
  "Cada acerto é um tijolo na construção da sua liberdade.",
- "O mercado treina pessoas para gastar. O VittaCash treina você para dominar!",
+ "O mercado treina pessoas para gastar. O A2Finanças treina você para dominar!",
  "Você deixou de ser um escravo do consumo para ser o mestre do seu destino."
 ];
 
 export function FinanceQuiz({ theme = 'dark' }: { theme?: string }) {
-  const isLight = theme === 'light';
+  const isLight = theme === 'light' || theme === 'white' || theme === 'white-orange';
   const [mode, setMode] = useState<'easy' | 'hard' | null>(null);
  const [phase, setPhase] = useState(1);
  const [currentInPhase, setCurrentInPhase] = useState(0); // 0 a 4

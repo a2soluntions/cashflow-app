@@ -24,7 +24,7 @@ const DebtFreedom = () => {
 
  // --- ESTADOS DE DÍVIDAS ---
  const [debts, setDebts] = useState<Debt[]>(() => {
- const saved = localStorage.getItem('vittacash_debts_desktop');
+ const saved = localStorage.getItem('a2financas_debts_desktop');
  return saved ? JSON.parse(saved) : [];
  });
  const [strategy, setStrategy] = useState<StrategyType>('avalanche');
@@ -41,7 +41,7 @@ const DebtFreedom = () => {
 
  // --- EFEITOS ---
  useEffect(() => {
- localStorage.setItem('vittacash_debts_desktop', JSON.stringify(debts));
+ localStorage.setItem('a2financas_debts_desktop', JSON.stringify(debts));
  }, [debts]);
 
  // --- LÓGICA DE DÍVIDAS ---

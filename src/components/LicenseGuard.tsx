@@ -19,15 +19,15 @@ const LicenseGuard: React.FC<LicenseGuardProps> = ({ onUnlock }) => {
  // Inicialização
  useEffect(() => {
  // 1. Garante um ID de máquina persistente
- let id = localStorage.getItem('vittacash_machine_id');
+ let id = localStorage.getItem('a2financas_machine_id');
  if (!id) {
  id = Math.random().toString(36).substring(7);
- localStorage.setItem('vittacash_machine_id', id);
+ localStorage.setItem('a2financas_machine_id', id);
  }
  setMachineId(id);
 
  // 2. Verifica se já tem chave salva
- const savedKey = localStorage.getItem('vittacash_saved_key');
+ const savedKey = localStorage.getItem('a2financas_saved_key');
  if (savedKey) {
  console.log("Chave encontrada na memória:", savedKey);
  setLicenseKey(savedKey); // Preenche o campo visualmente
@@ -65,7 +65,7 @@ const LicenseGuard: React.FC<LicenseGuardProps> = ({ onUnlock }) => {
  }
 
  // SUCESSO ABSOLUTO
- localStorage.setItem('vittacash_saved_key', cleanKey); // Garante que salvou
+ localStorage.setItem('a2financas_saved_key', cleanKey); // Garante que salvou
  setLoading(false);
  onUnlock(); // Entra no App
 

@@ -16,13 +16,13 @@ export default function GoalsManager() {
  const categories = ["Lazer", "Alimentação", "Transporte", "Saúde", "Educação", "Moradia", "Outros"];
 
  useEffect(() => {
- const saved = localStorage.getItem('vittacash_pro_budgets');
+ const saved = localStorage.getItem('a2financas_pro_budgets');
  if (saved) setBudgets(JSON.parse(saved));
  }, []);
 
  const saveBudgets = (updated: BudgetGoal[]) => {
  setBudgets(updated);
- localStorage.setItem('vittacash_pro_budgets', JSON.stringify(updated));
+ localStorage.setItem('a2financas_pro_budgets', JSON.stringify(updated));
  window.dispatchEvent(new Event('storage'));
  };
 

@@ -412,7 +412,7 @@ const opportunities: IncomeOpportunity[] = [
 ];
 
 export function ExtraIncomeModule({ theme = 'dark' }: { theme?: string }) {
-  const isLight = theme === 'light';
+  const isLight = theme === 'light' || theme === 'white' || theme === 'white-orange';
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
  return (
@@ -529,7 +529,7 @@ export function ExtraIncomeModule({ theme = 'dark' }: { theme?: string }) {
 
                 <div className={`${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-emerald-500/5 border-emerald-500/10'} rounded-[2rem] p-6 flex flex-col justify-center items-center text-center`}>
                   <CheckCircle2 size={32} className="text-emerald-400 mb-3" />
-                  <h5 className="text-[10px] font-black uppercase text-emerald-500 mb-2 tracking-widest">Mindset VittaCash</h5>
+                  <h5 className="text-[10px] font-black uppercase text-emerald-500 mb-2 tracking-widest">Mindset A2Finanças</h5>
                   <p className={`text-[11px] ${isLight ? 'text-slate-900' : 'text-slate-300'} italic font-bold leading-relaxed`}>"Renda extra não é apenas dinheiro a mais; é o capital que vai comprar sua liberdade. Reinvista 100% disso no seu futuro."</p>
                 </div>
  </div>

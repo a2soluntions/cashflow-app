@@ -9,20 +9,23 @@ import {
 interface HomeHubProps {
   onNavigate: (tabId: string) => void;
   onNewTransaction: () => void; 
-  currentTheme: 'blue' | 'black' | 'white';
-  onToggleTheme: (theme: 'blue' | 'black' | 'white') => void;
+  currentTheme: 'blue' | 'black' | 'white' | 'black-orange' | 'white-orange';
+  onToggleTheme: (theme: 'blue' | 'black' | 'white' | 'black-orange' | 'white-orange') => void;
   isAdmin?: boolean;
   onLogout?: () => void;
   userAvatar?: string | null;
 }
 
 export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTheme, isAdmin, onLogout, userAvatar }: HomeHubProps) {
- const isLight = currentTheme === 'white';
+ const isLight = currentTheme === 'white' || currentTheme === 'white-orange';
+ const isOrange = currentTheme === 'black-orange' || currentTheme === 'white-orange';
  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
- const getNextTheme = (): 'blue' | 'black' | 'white' => {
+ const getNextTheme = (): 'blue' | 'black' | 'white' | 'black-orange' | 'white-orange' => {
    if (currentTheme === 'blue') return 'black';
    if (currentTheme === 'black') return 'white';
+   if (currentTheme === 'white') return 'black-orange';
+   if (currentTheme === 'black-orange') return 'white-orange';
    return 'blue';
  };
 
@@ -52,20 +55,21 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
   { id: 'categories', label: 'Categorias', icon: <AppWindow size={20} />, action: () => onNavigate('categories') },
   { id: 'contas', label: 'Contas', icon: <CheckCircle2 size={20} />, action: () => onNavigate('contas') },
   { id: 'history', label: 'Histórico', icon: <Calendar size={20} />, action: () => onNavigate('history') },
-  { id: 'theme', label: `Tema: ${currentTheme === 'blue' ? 'Azul' : currentTheme === 'black' ? 'Preto' : 'Branco'}`, icon: isLight ? <Moon size={20} /> : <Sun size={20} />, action: () => onToggleTheme(getNextTheme()) },
+  { id: 'theme', label: `Tema: ${currentTheme === 'blue' ? 'Azul' : currentTheme === 'black' ? 'Preto' : currentTheme === 'white' ? 'Branco' : currentTheme === 'black-orange' ? 'Preto Laranja' : 'Branco Laranja'}`, icon: isLight ? <Moon size={20} /> : <Sun size={20} />, action: () => onToggleTheme(getNextTheme()) },
   { id: 'advisor', label: 'Consultor IA', icon: <Brain size={20} />, action: () => onNavigate('advisor') },
   { id: 'report', label: 'Relatórios', icon: <BarChart3 size={20} />, action: () => onNavigate('report') },
   { id: 'freedom', label: 'Liberdade $', icon: <ShieldAlert size={20} />, action: () => onNavigate('freedom') },
-  { id: 'target', label: 'Vitta Horizons', icon: <Target size={20} />, action: () => onNavigate('target') },
+  { id: 'target', label: 'A2 Horizons', icon: <Target size={20} />, action: () => onNavigate('target') },
   { id: 'settings', label: 'Ajustes', icon: <Settings size={20} />, action: () => onNavigate('settings') },
   ...(isAdmin ? [{ id: 'admin', label: 'Admin', icon: <ShieldCheck size={20} />, action: () => onNavigate('admin') }] : []),
   {id: 'sales', label: 'Planos & Pro', icon: <Zap size={20} />, action: () => onNavigate('sales') },
-  { id: 'noticias', label: 'Vitta Notícias', icon: <Newspaper size={20} />, action: () => window.open('/noticias', '_blank') },
+  { id: 'noticias', label: 'A2 Notícias', icon: <Newspaper size={20} />, action: () => window.open('/noticias', '_blank') },
   { id: 'exit', label: 'Sair', icon: <LogOut size={20} />, isExit: true, action: () => setShowExitConfirm(true) }, 
  ];
 
  const menuItems = rawMenuItems.map((item, index) => {
    if (item.isExit) return { ...item, grad: { from: '#334155', to: '#0f172a' } };
+   if (isOrange) return { ...item, grad: { from: '#f97316', to: '#ea580c' } };
    return { ...item, grad: GRADIENT_COLORS[index % GRADIENT_COLORS.length] };
  });
 
@@ -82,17 +86,17 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  const totalItems = menuItems.length;
 
  return (
- <div className="relative min-h-full w-full flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-transparent custom-scrollbar py-8">
+ <div className="relative min-h-full w-full flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-transparent custom-scrollbar md:py-8">
  
  {/* EFEITO HONEYCOMB COM GLOW */}
  <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-40">
   <div className="absolute inset-0" style={{ 
-    backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='69' viewBox='0 0 40 69' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 11.5L40 0v23L20 34.5 0 23V0l20 11.5zM20 46l20-11.5v23L20 69 0 57.5v-23L20 46zM20 23L0 34.5v-23L20 0v23z' fill='none' stroke='${currentTheme === 'white' ? '%23000000' : '%23ffffff'}' stroke-width='1.5' stroke-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E")` 
+    backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='69' viewBox='0 0 40 69' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 11.5L40 0v23L20 34.5 0 23V0l20 11.5zM20 46l20-11.5v23L20 69 0 57.5v-23L20 46zM20 23L0 34.5v-23L20 0v23z' fill='none' stroke='${isLight ? '%23000000' : '%23ffffff'}' stroke-width='1.5' stroke-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E")` 
   }}></div>
   <div className="absolute inset-0" style={{ 
-    background: currentTheme === 'white' 
+    background: isLight 
       ? `radial-gradient(circle at center, rgba(0, 0, 0, 0.05) 0%, transparent 80%)` 
-      : currentTheme === 'black' 
+      : currentTheme === 'black' || currentTheme === 'black-orange'
         ? `radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%)` 
         : `radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%)`
   }}></div>
@@ -103,7 +107,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  {/* NÚCLEO CENTRAL */}
  <div className="relative z-50 group transition-all duration-700">
   <div className="flex items-center justify-center transition-all relative">
-    <img src="./icon.png" alt="VittaCash" className="w-56 h-auto object-contain z-10 transition-transform duration-700 group-hover:scale-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]" />
+    <img src="./icon.png" alt="A2Finanças" className="w-56 h-auto object-contain z-10 transition-transform duration-700 group-hover:scale-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]" />
   </div>
  </div>
 
@@ -133,33 +137,33 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
 
  {/* ANÉIS DECORATIVOS (Bordas Removidas) */}
  <div className={`absolute w-[480px] h-[480px] rounded-full opacity-5 bg-gradient-to-r ${isLight ? 'from-slate-200 to-transparent' : 'from-white/10 to-transparent'}`} />
- <div className={`absolute w-[480px] h-[480px] rounded-full opacity-5 ${isLight ? 'bg-indigo-600/5' : 'bg-indigo-400/5'}`} />
+ <div className={`absolute w-[480px] h-[480px] rounded-full opacity-5 ${isOrange ? (isLight ? 'bg-orange-600/5' : 'bg-orange-400/5') : (isLight ? 'bg-indigo-600/5' : 'bg-indigo-400/5')}`} />
  </div>
 
  {/* 📱 SISTEMA EM GRID (MOBILE) */}
- <div className={`md:hidden flex flex-col items-center w-full max-w-sm px-4 pt-8 pb-12 transition-all duration-700 z-10 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in slide-in-from-bottom-8'}`}>
- <div className="relative mb-6 group shrink-0">
- <div className={`absolute inset-0 blur-3xl rounded-full scale-[2] animate-pulse ${isLight ? 'bg-indigo-400/20' : 'bg-indigo-500/20'}`} />
- <img src="./icon.png" alt="VittaCash" className="w-20 h-auto object-contain relative z-10" />
+ <div className={`md:hidden flex flex-col items-center w-full px-3 pt-3 pb-4 transition-all duration-700 z-10 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in slide-in-from-bottom-8'}`}>
+ <div className="relative mb-3 group shrink-0">
+ <div className={`absolute inset-0 blur-3xl rounded-full scale-[2] animate-pulse ${isOrange ? (isLight ? 'bg-orange-400/20' : 'bg-orange-500/20') : (isLight ? 'bg-indigo-400/20' : 'bg-indigo-500/20')}`} />
+ <img src="./icon.png" alt="A2Finanças" className="w-14 h-auto object-contain relative z-10" />
  </div>
 
- <div className="grid grid-cols-3 gap-6 w-full">
+ <div className="grid grid-cols-4 gap-2 w-full">
  {menuItems.map((item) => (
  <button 
  key={item.id} 
  onClick={item.action} 
- className="flex flex-col items-center gap-3 group active:scale-90 transition-all"
+ className="flex flex-col items-center gap-1.5 group active:scale-90 transition-all"
  >
  <div 
- className="w-16 h-16 text-white flex items-center justify-center group-hover:scale-110 transition-transform" 
+ className="w-14 h-14 text-white flex items-center justify-center group-hover:scale-110 transition-transform rounded-xl" 
  style={{ 
    background: `linear-gradient(135deg, ${item.grad.from}, ${item.grad.to})`, 
-   boxShadow: `0 8px 25px ${item.grad.from}40` 
+   boxShadow: `0 4px 12px ${item.grad.from}40` 
  }}
  >
  {item.icon}
  </div>
- <span className={`text-[9px] font-black uppercase tracking-widest text-center leading-tight ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
+ <span className={`text-[8px] font-black uppercase tracking-wide text-center leading-tight ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
  {item.label}
  </span>
  </button>
@@ -182,7 +186,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  Encerrar Sessão?
  </h2>
  <p className={`text-xs font-medium leading-relaxed opacity-60 px-6 mb-8 ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
- Você está prestes a fechar o VittaCash. Certifique-se de que todos os lançamentos foram salvos.
+ Você está prestes a fechar o A2Finanças. Certifique-se de que todos os lançamentos foram salvos.
  </p>
 
  <div className="flex gap-4 w-full">
@@ -214,9 +218,9 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  <div className={`h-[1px] w-12 ${isLight ? 'bg-slate-300' : 'bg-white/10'}`} />
  </div>
  <div className="flex flex-col items-center gap-0.5">
- <p className={`text-[9px] font-black uppercase tracking-[0.6em] ${isLight ? 'text-slate-900' : 'text-white'}`}>VittaCash</p>
- <p className={`text-[7px] font-bold uppercase tracking-[0.4em] ${isLight ? 'text-slate-400' : 'text-indigo-200 opacity-30'}`}>
- Desenvolvido por <span className={isLight ? 'text-indigo-600 font-black' : 'text-indigo-400'}>A2Solutions</span>
+ <p className={`text-[9px] font-black uppercase tracking-[0.6em] ${isLight ? 'text-slate-900' : 'text-white'}`}>A2Finanças</p>
+ <p className={`text-[7px] font-bold uppercase tracking-[0.4em] ${isLight ? 'text-slate-400' : isOrange ? 'text-orange-200 opacity-30' : 'text-indigo-200 opacity-30'}`}>
+ Desenvolvido por <span className={isLight ? (isOrange ? 'text-orange-600 font-black' : 'text-indigo-600 font-black') : (isOrange ? 'text-orange-400' : 'text-indigo-400')}>A2Solutions</span>
  </p>
  </div>
  </footer>

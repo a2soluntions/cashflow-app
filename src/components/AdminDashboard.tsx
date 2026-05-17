@@ -13,9 +13,9 @@ import {
 
 const CORES_FUNIL = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ theme }) => {
-  const isLight = theme === 'white';
-  const [activeTab, setActiveTab] = useState<'vendas' | 'dados' | 'vittanoticias' | 'publicidade'>('vendas');
+const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-orange' | 'white-orange' }> = ({ theme }) => {
+  const isLight = theme === 'white' || theme === 'white-orange';
+  const [activeTab, setActiveTab] = useState<'vendas' | 'dados' | 'a2noticias' | 'publicidade'>('vendas');
   const [licenses, setLicenses] = useState<any[]>([]);
   const [siteContent, setSiteContent] = useState<any[]>([]);
   
@@ -83,7 +83,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
   const [corpAddress, setCorpAddress] = useState('');
   const [corpPhone, setCorpPhone] = useState('');
 
-  // FORMULÁRIO MANUAL HQ (Vitta Notícias)
+  // FORMULÁRIO MANUAL HQ (A2 Notícias)
   const [hqTitle, setHqTitle] = useState('');
   const [hqResume, setHqResume] = useState('');
   const [hqPov, setHqPov] = useState('');
@@ -290,7 +290,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
     try {
       let formattedDescription = hqResume;
       if (includeVittaPov && hqPov.trim() !== '') {
-        formattedDescription += `\n\n**VittaCash Insights:**\n${hqPov}\n\nQuer organizar suas finanças na palma da mão e sem interrupções? Conheça nosso aplicativo gratuito.`;
+        formattedDescription += `\n\n**A2 Insights:**\n${hqPov}\n\nQuer organizar suas finanças na palma da mão e sem interrupções? Conheça nosso aplicativo gratuito.`;
       }
       formattedDescription += `\n\nInformações originais baseadas na reportagem de ${hqSource}`;
       
@@ -309,8 +309,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
       
       handleClearHq();
       fetchData();
-      showAlert("Notícia Publicada!", "A curadoria foi salva e já está no ar no Vitta Notícias.", "info");
-      setActiveTab('vittanoticias');
+      showAlert("Notícia Publicada!", "A curadoria foi salva e já está no ar no A2 Notícias.", "info");
+      setActiveTab('a2noticias');
     } catch (err: any) { 
       showAlert("Erro ao salvar", err.message, "error"); 
     } finally { 
@@ -331,7 +331,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
     try {
       const { error } = await supabase.from('site_content').insert([{
         content_type: 'ad_featured_video',
-        title: 'Novo Vídeo VittaCash TV',
+        title: 'Novo Vídeo A2 TV',
         description: 'Descreva o conteúdo do vídeo aqui para os usuários...',
         is_active: true,
         meta_value: { external_url: 'https://www.youtube.com/watch?v=' }
@@ -420,7 +420,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
 
     setHqResume(resume);
 
-    // Inteligência Baseada em Regras (VittaCash Insights)
+    // Inteligência Baseada em Regras (A2 Insights)
     let generatedTitle = "Giro de Notícias: O que você precisa saber hoje";
     const genericPOVs = [
       "Esta notícia destaca um movimento importante no cenário econômico. É essencial acompanhar essas tendências para entender como o mercado pode influenciar decisões estratégicas e o planejamento financeiro no curto e médio prazo.",
@@ -461,7 +461,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
     setHqTitle(generatedTitle);
 
     if (!isNew) {
-      showAlert("Curadoria Gerada!", "A Inteligência Vitta analisou o texto e gerou o conteúdo automaticamente.", "info");
+      showAlert("Curadoria Gerada!", "A Inteligência A2 analisou o texto e gerou o conteúdo automaticamente.", "info");
     }
   };
 
@@ -554,9 +554,9 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
           {/* HEADER & TABS */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8 shrink-0">
             <div className="flex items-center gap-3 md:gap-4">
-              <img src="/logo.png" alt="VittaCash" className="h-8 w-8 md:h-12 md:w-12 object-contain rounded-full mix-blend-multiply dark:mix-blend-screen" />
+              <img src="/logo.png" alt="A2Finanças" className="h-8 w-8 md:h-12 md:w-12 object-contain rounded-full mix-blend-multiply dark:mix-blend-screen" />
               <div>
-                <h1 className="text-lg md:text-2xl font-black uppercase tracking-tighter italic leading-none">Vitta Admin</h1>
+                <h1 className="text-lg md:text-2xl font-black uppercase tracking-tighter italic leading-none">A2 Admin</h1>
                 <p className="text-slate-500 text-[8px] md:text-xs font-bold uppercase tracking-widest mt-0.5">
                   HQ Center <span className="text-[8px] bg-emerald-500 text-black px-1.5 py-0.5 rounded ml-1 font-black">v1.3.1</span>
                 </p>
@@ -590,7 +590,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
                 <button onClick={() => setActiveTab('dados')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'dados' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500')}>
                   Corporativo
                 </button>
-                <button onClick={() => setActiveTab('vittanoticias')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'vittanoticias' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-indigo-500')}>
+                <button onClick={() => setActiveTab('a2noticias')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'a2noticias' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-indigo-500')}>
                   HQ
                 </button>
                 <button onClick={() => setActiveTab('publicidade')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'publicidade' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-slate-500 hover:text-amber-500')}>
@@ -626,7 +626,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
                 {/* Insights — ocupa 2 colunas */}
                 <div className="lg:col-span-2 flex flex-col gap-3">
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-500 flex items-center gap-2">
-                    <Brain size={14} /> Plano de Ação Inteligente — Vitta Growth Engine
+                    <Brain size={14} /> Plano de Ação Inteligente — A2 Growth Engine
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 flex-1">
                     {stats.insights.map((ins, i) => (
@@ -710,7 +710,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
                     <div className="space-y-2 max-h-[260px] overflow-y-auto custom-scrollbar pr-1">
                       {stats.atRisk.map((client: any) => {
                         const days = Math.floor((Date.now() - new Date(client.created_at).getTime()) / 86400000);
-                        const msg = encodeURIComponent(`Olá ${client.client_name}! Vi que você ainda não aproveitou tudo que o VittaCash tem a oferecer. Posso te ajudar com algo? 🚀`);
+                        const msg = encodeURIComponent(`Olá ${client.client_name}! Vi que você ainda não aproveitou tudo que o A2Finanças tem a oferecer. Posso te ajudar com algo? 🚀`);
                         return (
                           <div key={client.id} className="flex items-center justify-between p-3 bg-rose-500/5 rounded-xl border border-rose-500/10">
                             <div>
@@ -785,7 +785,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-4 flex items-center gap-2"><MessageCircle size={14}/> Scripts de Recuperação</h3>
                   <div className="space-y-3">
                     {[
-                      { label: 'Variação A · Abandono de Checkout', color: 'rose', msg: 'Olá! Notei que você iniciou seu cadastro no VittaCash mas não finalizou. Tivemos algum problema técnico ou posso esclarecer alguma dúvida sobre os planos? 😊' },
+                      { label: 'Variação A · Abandono de Checkout', color: 'rose', msg: 'Olá! Notei que você iniciou seu cadastro no A2Finanças mas não finalizou. Tivemos algum problema técnico ou posso esclarecer alguma dúvida sobre os planos? 😊' },
                       { label: 'Variação B · Reengajamento Premium', color: 'indigo', msg: 'Oi! Faz alguns dias que não te vejo por aqui. Sabia que o módulo de IA Advisor pode identificar onde seu dinheiro está vazando? Vale 5 minutos 🚀' },
                       { label: 'Variação C · Upsell Básico → Premium', color: 'amber', msg: 'Olá! Você está no plano Básico e pode estar perdendo funcionalidades que fariam a diferença. Posso te dar 7 dias grátis no Premium para você testar?' },
                     ].map((script) => (
@@ -825,7 +825,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
                           <td className="p-3"><span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${l.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>{l.status}</span></td>
                           <td className="p-3 text-slate-400 font-bold">{new Date(l.created_at).toLocaleDateString('pt-BR')}</td>
                           <td className="p-3">
-                            <a href={`https://wa.me/5534998408962?text=${encodeURIComponent(`Olá ${l.client_name}! Aqui é da equipe VittaCash.`)}`} target="_blank" rel="noreferrer"
+                            <a href={`https://wa.me/5534998408962?text=${encodeURIComponent(`Olá ${l.client_name}! Aqui é da equipe A2Finanças.`)}`} target="_blank" rel="noreferrer"
                               className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all inline-flex">
                               <MessageCircle size={13}/>
                             </a>
@@ -992,32 +992,36 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
 
             </div>
           )}
-          {activeTab === 'vittanoticias' && (
-            <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 pr-2 md:pr-6 overflow-hidden custom-scrollbar pb-12">
-              <div className={`flex flex-col h-full overflow-hidden ${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-                <div className={`flex-shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 border-b ${isLight ? 'border-slate-200' : 'border-white/5'} pb-4`}>
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-indigo-500/10 rounded-2xl">
-                      <Newspaper size={24} className="text-indigo-500" />
+          {activeTab === 'a2noticias' && (
+            <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto custom-scrollbar pb-16 pr-2 md:pr-6">
+              <div className={`flex flex-col min-h-full ${isLight ? 'lg:bg-slate-50 lg:border-slate-200' : 'lg:bg-white/5 lg:backdrop-blur-3xl lg:border-white/5'} lg:p-8 lg:rounded-3xl lg:border`}>
+                <div className={`flex-shrink-0 flex flex-row items-center justify-between gap-4 mb-4 border-b ${isLight ? 'border-slate-200' : 'border-white/5'} pb-4`}>
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="p-2.5 md:p-3 bg-indigo-500/10 rounded-xl md:rounded-2xl">
+                      <Newspaper size={20} className="text-indigo-500 md:w-6 md:h-6" />
                     </div>
                     <div>
-                      <h3 className="font-black uppercase tracking-widest text-indigo-500 text-lg">Quartel General: Curadoria Manual</h3>
-                      <p className={`${isLight ? 'text-slate-500' : 'text-slate-400'} text-[10px] font-bold uppercase tracking-widest mt-1`}>Publique notícias estruturadas diretamente no portal</p>
+                      <h3 className="font-black uppercase tracking-widest text-indigo-500 text-base md:text-lg">
+                        <span className="md:hidden">HQ: Curadoria</span>
+                        <span className="hidden md:inline">Quartel General: Curadoria Manual</span>
+                      </h3>
+                      <p className={`${isLight ? 'text-slate-500' : 'text-slate-400'} text-[10px] font-bold uppercase tracking-widest mt-1 hidden md:block`}>Publique notícias estruturadas diretamente no portal</p>
                     </div>
                   </div>
                   <button 
                     type="button"
                     onClick={handleCleanupNews}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all whitespace-nowrap"
+                    className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all whitespace-nowrap"
                   >
                     <Trash2 size={14} />
-                    Limpar Notícias Antigas (+7 Dias)
+                    <span className="hidden md:inline">Limpar Notícias Antigas (+7 Dias)</span>
+                    <span className="md:hidden">Limpar (+7d)</span>
                   </button>
                 </div>
 
-                <form onSubmit={handleHqPublish} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                <form onSubmit={handleHqPublish} className="flex flex-col gap-6">
                   {/* CONTROLES FIXOS (NÃO ROLAM) */}
-                  <div className={`flex-shrink-0 flex flex-col gap-4 -mx-6 md:-mx-8 px-6 md:px-8 pb-4 mb-4 border-b ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                  <div className={`flex flex-col gap-4 pb-4 mb-4 border-b ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                     <div className="flex flex-wrap gap-2 md:gap-3">
                       <button 
                         type="button"
@@ -1160,16 +1164,16 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 min-h-0 overflow-hidden">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                       
                       {/* COLUNA ESQUERDA: NOTÍCIA BRUTA INTEIRA (Ocupa 5 colunas no desktop) */}
-                      <div className="lg:col-span-5 flex flex-col gap-2 h-full min-h-0">
+                      <div className="lg:col-span-5 flex flex-col gap-2">
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 flex-shrink-0">
                           <Newspaper size={12} /> Texto Bruto / Fonte de Dados
                         </label>
-                        <div className={`flex-1 min-h-0 overflow-hidden ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} p-4 flex flex-col`}>
+                        <div className={`min-h-[300px] lg:flex-1 lg:min-h-0 overflow-hidden ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} p-4 flex flex-col`}>
                           <textarea
-                            className={`flex-1 w-full bg-transparent border-0 outline-none font-medium text-sm ${isLight ? 'text-slate-900' : 'text-white'} placeholder:text-slate-400 resize-none custom-scrollbar overflow-y-auto`}
+                            className={`min-h-[260px] lg:flex-1 w-full bg-transparent border-0 outline-none font-medium text-sm ${isLight ? 'text-slate-900' : 'text-white'} placeholder:text-slate-400 resize-none custom-scrollbar overflow-y-auto`}
                             placeholder="Cole aqui o texto completo da notícia original..."
                             value={hqRawText}
                             onChange={e => setHqRawText(e.target.value)}
@@ -1186,7 +1190,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
                       </div>
 
                       {/* COLUNA DIREITA: LIVE PORTAL PREVIEW (Ocupa 7 colunas no desktop) */}
-                      <div className="lg:col-span-7 flex flex-col gap-4 h-full min-h-0">
+                      <div className="lg:col-span-7 flex flex-col gap-4 min-h-[600px] lg:h-full lg:min-h-0">
                         <div className="flex items-center justify-between mb-2 flex-shrink-0">
                           <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
                             <Monitor size={12} /> Visualização Real no Portal
@@ -1198,7 +1202,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
                           {/* Header do Preview (Falsificando o VittaNews) */}
                           <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-2">
                              <div className="flex flex-col leading-none">
-                              <span className="text-sm font-black italic tracking-tighter uppercase text-zinc-900">Vitta<span className="text-indigo-600">Cash</span></span>
+                              <span className="text-sm font-black italic tracking-tighter uppercase text-zinc-900">A2<span className="text-indigo-600">Finanças</span></span>
                               <span className="text-[6px] font-bold uppercase tracking-[0.4em] text-zinc-400">Notícias</span>
                             </div>
                             <div className="flex gap-2">
@@ -1246,7 +1250,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' }> = ({ them
 
                                 {includeVittaPov && (
                                   <div className="mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-r-lg">
-                                    <span className="text-[10px] font-black uppercase text-indigo-600 mb-2 block flex items-center gap-1"><Zap size={10}/> VittaCash Insights</span>
+                                    <span className="text-[10px] font-black uppercase text-indigo-600 mb-2 block flex items-center gap-1"><Zap size={10}/> A2Finanças Insights</span>
                                     <textarea
                                       className="w-full bg-transparent border-0 outline-none resize-none font-bold italic text-indigo-900/80 placeholder:text-indigo-200"
                                       placeholder="Insights da IA..."

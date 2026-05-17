@@ -33,8 +33,8 @@ export function TransactionManager() {
  useEffect(() => {
  const loadData = () => {
  // Sincronizado para o cofre PRO
- setTransactions(JSON.parse(localStorage.getItem('vittacash_pro_transactions') || '[]'));
- const savedCats = JSON.parse(localStorage.getItem('vittacash_pro_categories') || '[]');
+ setTransactions(JSON.parse(localStorage.getItem('a2financas_pro_transactions') || '[]'));
+ const savedCats = JSON.parse(localStorage.getItem('a2financas_pro_categories') || '[]');
  if (savedCats.length > 0) {
  setCategories(savedCats);
  } else {
@@ -45,7 +45,7 @@ export function TransactionManager() {
  { id: '4', name: 'Salário', color: '#10b981' }
  ]);
  }
- setBudgets(JSON.parse(localStorage.getItem('vittacash_pro_budgets') || '[]'));
+ setBudgets(JSON.parse(localStorage.getItem('a2financas_pro_budgets') || '[]'));
  };
  loadData();
  window.addEventListener('storage', loadData);
@@ -110,7 +110,7 @@ export function TransactionManager() {
 
  const updated = [newTx, ...transactions];
  setTransactions(updated);
- localStorage.setItem('vittacash_pro_transactions', JSON.stringify(updated));
+ localStorage.setItem('a2financas_pro_transactions', JSON.stringify(updated));
  window.dispatchEvent(new Event('storage')); 
  
  setIsModalOpen(false);
@@ -121,7 +121,7 @@ export function TransactionManager() {
  if (confirm('Tem certeza que deseja excluir este lançamento?')) {
  const updated = transactions.filter(t => t.id !== id);
  setTransactions(updated);
- localStorage.setItem('vittacash_pro_transactions', JSON.stringify(updated));
+ localStorage.setItem('a2financas_pro_transactions', JSON.stringify(updated));
  window.dispatchEvent(new Event('storage'));
  }
  };

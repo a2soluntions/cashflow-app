@@ -46,7 +46,7 @@ export default function BillsManager({ mode = 'normal' }: BillsManagerProps) {
  }, [mode]);
 
  const loadData = () => {
- const saved = localStorage.getItem('vittacash_pro_transactions');
+ const saved = localStorage.getItem('a2financas_pro_transactions');
  if (saved) {
  const allTxs: Transaction[] = JSON.parse(saved);
  const pending = allTxs.filter(t => t.status === 'PENDING' || t.status === 'pending');
@@ -108,11 +108,11 @@ export default function BillsManager({ mode = 'normal' }: BillsManagerProps) {
       // 2. ATUALIZAÇÃO OTIMISTA (Local)
       setBills(prev => prev.filter(b => b.id !== originalId));
       
-      const saved = localStorage.getItem('vittacash_pro_transactions');
+      const saved = localStorage.getItem('a2financas_pro_transactions');
       if (saved) {
         const allTxs: Transaction[] = JSON.parse(saved);
         const updatedTxs = allTxs.map(t => t.id === originalId ? updatedTransaction : t);
-        localStorage.setItem('vittacash_pro_transactions', JSON.stringify(updatedTxs));
+        localStorage.setItem('a2financas_pro_transactions', JSON.stringify(updatedTxs));
       }
 
       setIsPaymentModalOpen(false);

@@ -24,7 +24,7 @@ interface NewTransactionModalProps {
  onClose: () => void;
  onSave: (transactions: any[]) => void;
  isLimitReached?: boolean;
- theme?: 'blue' | 'black' | 'white';
+ theme?: 'blue' | 'black' | 'white' | 'black-orange' | 'white-orange';
 }
 
 export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitReached = false, theme = 'blue' }: NewTransactionModalProps) {
@@ -47,11 +47,11 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
  const [sendToWhatsApp, setSendToWhatsApp] = useState(false);
  const [errorAlert, setErrorAlert] = useState<{ isOpen: boolean; title: string; message: string }>({ isOpen: false, title: '', message: '' });
 
- const isLight = theme === 'white';
+ const isLight = theme === 'white' || theme === 'white-orange';
 
  useEffect(() => {
  if (isOpen) {
-  const savedCats = JSON.parse(localStorage.getItem('vittacash_pro_categories') || '[]');
+  const savedCats = JSON.parse(localStorage.getItem('a2financas_pro_categories') || '[]');
   if (savedCats.length > 0) {
   setCategories(savedCats);
   } else {
@@ -63,8 +63,8 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
   { id: '5', name: 'Investimentos', color: '#8b5cf6' }
   ] as any[]);
   }
- setBudgets(JSON.parse(localStorage.getItem('vittacash_pro_budgets') || '[]'));
- setAllTransactions(JSON.parse(localStorage.getItem('vittacash_pro_transactions') || '[]'));
+ setBudgets(JSON.parse(localStorage.getItem('a2financas_pro_budgets') || '[]'));
+ setAllTransactions(JSON.parse(localStorage.getItem('a2financas_pro_transactions') || '[]'));
  // Reset whatsapp toggle on open
  setSendToWhatsApp(false);
  }
@@ -153,7 +153,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
 
  // --- AUTOMAÇÃO WHATSAPP (OPCIONAL) ---
  if (sendToWhatsApp) {
-   const savedPhone = localStorage.getItem('vittacash_user_phone');
+   const savedPhone = localStorage.getItem('a2financas_user_phone');
    if (savedPhone) {
      const cleanPhone = savedPhone.replace(/\D/g, '');
      const formattedAmount = rawValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -161,7 +161,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, isLimitRe
      const checkEmoji = '✅';
      
      const messageText = 
-       `*VittaCash - Alerta de Lançamento*\n\n` +
+       `*A2Finanças - Alerta de Lançamento*\n\n` +
        `*Tipo:* ${typeLabel}\n` +
        `*Identificação:* ${description.toUpperCase()}\n` +
        `*Valor:* ${formattedAmount}\n` +

@@ -118,9 +118,9 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
  <div className="flex flex-col md:flex-row md:items-end justify-between pb-8 gap-6">
  <div>
  <h2 className="text-[10px] font-black text-emerald-500 dark:text-[#00d06c] uppercase tracking-[0.5em] mb-2 flex items-center gap-2">
- <Brain size={14} className="text-emerald-500 dark:text-[#00d06c]" /> Vitta Intelligence
+ <Brain size={14} className="text-emerald-500 dark:text-[#00d06c]" /> A2 Intelligence
  </h2>
- <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter italic uppercase leading-none">Vitta Horizons</h1>
+ <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter italic uppercase leading-none">A2 Horizons</h1>
  </div>
 
  <button 
@@ -173,7 +173,7 @@ const HorizonsManager: React.FC<Props> = ({ goals, onUpdate, currentUserId }) =>
 
  {!isCompleted ? (
  <div className={`p-4 ${impactLevel > 40 ? 'bg-rose-50 dark:bg-rose-500/5 border-rose-100 dark:border-rose-500/10' : 'bg-indigo-50 dark:bg-indigo-500/5 border-indigo-100 dark:border-indigo-500/10'}`}>
- <p className={`text-xs font-black uppercase tracking-[0.2em] mb-2 ${impactLevel > 40 ? 'text-rose-500' : 'text-indigo-500 dark:text-indigo-400'}`}>Vitta Analysis</p>
+ <p className={`text-xs font-black uppercase tracking-[0.2em] mb-2 ${impactLevel > 40 ? 'text-rose-500' : 'text-indigo-500 dark:text-indigo-400'}`}>A2 Analysis</p>
  <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed italic">
  {impactLevel > 40 
  ? `Este desejo compromete ${impactLevel.toFixed(0)}% da sua sobra mensal. Cuidado com o impulso.` 

@@ -9,7 +9,7 @@ interface SyncAction {
   timestamp: number;
 }
 
-const OFFLINE_QUEUE_KEY = 'vittacash_offline_queue';
+const OFFLINE_QUEUE_KEY = 'a2financas_offline_queue';
 
 class ApiService {
   // --- OFFLINE SYNC MECHANISM ---
@@ -85,13 +85,13 @@ class ApiService {
   // TRANSACTIONS
   async getTransactions(userId: string): Promise<Transaction[]> {
     if (!navigator.onLine) {
-      const fallback = localStorage.getItem('vittacash_pro_transactions');
+      const fallback = localStorage.getItem('a2financas_pro_transactions');
       return fallback ? JSON.parse(fallback) : [];
     }
     const { data, error } = await supabase.from('transactions').select('*').eq('user_id', userId).order('date', { ascending: false });
     if (error) throw error;
     // Cache local imediato para fallback
-    localStorage.setItem('vittacash_pro_transactions', JSON.stringify(data || []));
+    localStorage.setItem('a2financas_pro_transactions', JSON.stringify(data || []));
     return data as Transaction[];
   }
 
@@ -110,12 +110,12 @@ class ApiService {
   // CATEGORIES
   async getCategories(userId: string): Promise<Category[]> {
     if (!navigator.onLine) {
-      const fallback = localStorage.getItem('vittacash_pro_categories');
+      const fallback = localStorage.getItem('a2financas_pro_categories');
       return fallback ? JSON.parse(fallback) : [];
     }
     const { data, error } = await supabase.from('categories').select('*').eq('user_id', userId).order('name', { ascending: true });
     if (error) throw error;
-    localStorage.setItem('vittacash_pro_categories', JSON.stringify(data || []));
+    localStorage.setItem('a2financas_pro_categories', JSON.stringify(data || []));
     return data as Category[];
   }
 
@@ -134,12 +134,12 @@ class ApiService {
   // GOALS (HORIZONS)
   async getGoals(userId: string): Promise<Goal[]> {
     if (!navigator.onLine) {
-      const fallback = localStorage.getItem('vittacash_pro_goals');
+      const fallback = localStorage.getItem('a2financas_pro_goals');
       return fallback ? JSON.parse(fallback) : [];
     }
     const { data, error } = await supabase.from('goals').select('*').eq('user_id', userId).order('created_at', { ascending: false });
     if (error) throw error;
-    localStorage.setItem('vittacash_pro_goals', JSON.stringify(data || []));
+    localStorage.setItem('a2financas_pro_goals', JSON.stringify(data || []));
     return data as Goal[];
   }
 
@@ -157,12 +157,12 @@ class ApiService {
   // INVESTMENTS (CARTEIRA DE ATIVOS)
   async getInvestments(userId: string): Promise<Investment[]> {
     if (!navigator.onLine) {
-      const fallback = localStorage.getItem('vittacash_pro_investments');
+      const fallback = localStorage.getItem('a2financas_pro_investments');
       return fallback ? JSON.parse(fallback) : [];
     }
     const { data, error } = await supabase.from('investments').select('*').eq('user_id', userId).order('created_at', { ascending: false });
     if (error) throw error;
-    localStorage.setItem('vittacash_pro_investments', JSON.stringify(data || []));
+    localStorage.setItem('a2financas_pro_investments', JSON.stringify(data || []));
     return data as Investment[];
   }
 

@@ -15,12 +15,12 @@ interface FinancialAdvisorProps {
  currentBalance: number;
  transactions: any[];
  categories?: any[];
-  theme?: 'blue' | 'black' | 'white';
+  theme?: 'blue' | 'black' | 'white' | 'black-orange' | 'white-orange';
 }
 
 export function FinancialAdvisor({ currentBalance, transactions, theme = 'blue' }: FinancialAdvisorProps) {
  const [activeTab, setActiveTab] = useState('welcome');
- const isLight = theme === 'white';
+ const isLight = theme === 'white' || theme === 'white-orange';
 
   return (
   <div className="h-full w-full flex flex-col p-4 transition-colors duration-500 overflow-hidden">
@@ -55,7 +55,7 @@ export function FinancialAdvisor({ currentBalance, transactions, theme = 'blue' 
   <div className="w-full p-2 md:px-6 pb-20">
  <div className="max-w-6xl mx-auto flex flex-col">
  {/* 1. Painel Consultor */}
- {activeTab === 'welcome' && <DashboardOverview {...({ theme, transactions } as any)} />}
+ {activeTab === 'welcome' && <DashboardOverview theme={theme} />}
  
  {/* 2. Diagnóstico Raio-X */}
  {activeTab === 'report' && <ConsultantReport theme={theme} transactions={transactions} currentBalance={currentBalance} />}
@@ -67,7 +67,7 @@ export function FinancialAdvisor({ currentBalance, transactions, theme = 'blue' 
  {activeTab === 'debt' && <DebtManager theme={theme ?? 'dark'} />}
 
  {/* 5. Psicologia Financeira */}
- {activeTab === 'psychology' && <PsychologyModule {...({ theme } as any)} />}
+ {activeTab === 'psychology' && <PsychologyModule theme={theme} />}
  
  {/* 6. Renda Extra */}
  {activeTab === 'income' && <ExtraIncomeModule theme={theme} />}

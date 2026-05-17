@@ -243,7 +243,7 @@ const DividendCalculator = ({ initialAsset }: { initialAsset?: any }) => {
           </div>
 
           <button className="w-full py-4 bg-indigo-600/50 text-white/50 text-[9px] font-black uppercase tracking-widest cursor-not-allowed border border-white/5 shadow-lg">
-            Montar Carteira VittaCash (Em desenvolvimento)
+            Montar Carteira A2Finanças (Em desenvolvimento)
           </button>
         </div>
       </div>
@@ -362,10 +362,10 @@ export default function VittaNews() {
   };
 
   const handleEmailClick = () => {
-    navigator.clipboard.writeText('suporte@vittacash.com');
+    navigator.clipboard.writeText('suporte@a2financas.com');
     setEmailCopied(true);
     setTimeout(() => setEmailCopied(false), 2000);
-    window.location.href = 'mailto:suporte@vittacash.com';
+    window.location.href = 'mailto:suporte@a2financas.com';
   };
 
   useEffect(() => {
@@ -386,7 +386,7 @@ export default function VittaNews() {
   }, []);
 
   useEffect(() => {
-    if (activeCategory === 'VittaCash') {
+    if (activeCategory === 'VittaConsultoria') {
       const vids = news.filter(item => item.content_type === 'ad_featured_video' && item.is_active);
       if (vids.length > 0 && !selectedVideo) {
         setSelectedVideo(vids[0]);
@@ -396,7 +396,7 @@ export default function VittaNews() {
     }
   }, [activeCategory, news]);
 
-  const categories = ['Todas', 'Mercado Financeiro', 'Empreendedorismo', 'Criptomoedas', 'Tecnologia', 'VittaCash'];
+  const categories = ['Todas', 'Mercado Financeiro', 'Empreendedorismo', 'Criptomoedas', 'Tecnologia', 'VittaConsultoria'];
 
   const filteredMarketData = React.useMemo(() => {
     const searchLower = marketSearch.toLowerCase().trim();
@@ -501,7 +501,7 @@ export default function VittaNews() {
 
   const handleShare = (item: NewsItem) => {
     if (navigator.share) {
-      navigator.share({ title: item.title, text: 'Confira no VittaCash: ' + item.title, url: item.meta_value?.external_url || window.location.href }).catch(console.error);
+      navigator.share({ title: item.title, text: 'Confira no A2 Notícias: ' + item.title, url: item.meta_value?.external_url || window.location.href }).catch(console.error);
     } else {
       navigator.clipboard.writeText(item.meta_value?.external_url || window.location.href);
       alert('Link copiado!');
@@ -537,7 +537,7 @@ export default function VittaNews() {
     return undefined;
   };
 
-  const allFeaturedVideos = activeCategory === 'VittaCash' ? news.filter(item => item.content_type === 'ad_featured_video' && item.is_active) : [];
+  const allFeaturedVideos = activeCategory === 'VittaConsultoria' ? news.filter(item => item.content_type === 'ad_featured_video' && item.is_active) : [];
   const videoFeatured = allFeaturedVideos[0];
   const featured = videoFeatured || filteredNews[0];
   const secondary = videoFeatured ? filteredNews.slice(0, 3) : filteredNews.slice(1, 4);
@@ -592,10 +592,10 @@ export default function VittaNews() {
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-12">
             <button onClick={() => navigate('/')} className="flex items-center gap-3 group">
-              <img src="/logo.png" alt="VittaCash" className="h-10 w-10 object-contain rounded-full mix-blend-multiply" />
+              <img src="/logo.png" alt="A2Finanças" className="h-10 w-10 object-contain rounded-full mix-blend-multiply" />
               <div className="flex flex-col leading-none">
-                <span className="text-2xl font-black italic tracking-tighter uppercase text-zinc-900">Vitta<span className="text-indigo-600">Cash</span></span>
-                <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-zinc-400">Notícias &amp; Inteligência</span>
+                <span className="text-2xl font-black italic tracking-tighter uppercase text-zinc-900">A2<span className="text-indigo-600">Notícias</span></span>
+                <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-zinc-400">Inteligência Financeira</span>
               </div>
             </button>
             
@@ -690,7 +690,7 @@ export default function VittaNews() {
             {/* DESTAQUE PRINCIPAL - ESTILO INFOMONEY / YOUTUBE */}
             {featured && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start border-b border-zinc-100 pb-16">
-                {activeCategory === 'VittaCash' && videoFeatured ? (
+                {activeCategory === 'VittaConsultoria' && videoFeatured ? (
                   <>
                     {/* LAYOUT VITTACASH: VÍDEO + HISTÓRICO */}
                     <div className="lg:col-span-8 flex flex-col gap-8">
@@ -707,7 +707,7 @@ export default function VittaNews() {
                           <div className="absolute top-4 left-4">
                             <span className="px-3 py-1 bg-[#1a237e] text-white text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
                               <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                              VittaCash TV
+                              A2 TV
                             </span>
                           </div>
                         </div>
@@ -815,7 +815,7 @@ export default function VittaNews() {
                         <div className="absolute top-4 left-4">
                           <span className="px-3 py-1 bg-[#1a237e] text-white text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                            {featured.content_type === 'ad_featured_video' ? 'VittaCash TV' : (featured.meta_value?.category || 'Destaque')}
+                            {featured.content_type === 'ad_featured_video' ? 'A2 TV' : (featured.meta_value?.category || 'Destaque')}
                           </span>
                         </div>
                       </div>
@@ -868,8 +868,8 @@ export default function VittaNews() {
               </div>
             )}
 
-            {/* GRID SECUNDÁRIO - Oculto na categoria VittaCash */}
-            {activeCategory !== 'VittaCash' && (
+            {/* GRID SECUNDÁRIO - Oculto na categoria VittaConsultoria */}
+            {activeCategory !== 'VittaConsultoria' && (
               <div id="news-grid" className="grid grid-cols-1 md:grid-cols-3 gap-12">
                 {secondary.map(item => (
                   <div key={item.id} className="group cursor-pointer flex flex-col" onClick={() => navigate(`/noticias/${item.id}`)}>
@@ -887,8 +887,8 @@ export default function VittaNews() {
               </div>
             )}
 
-            {/* BANNER HORIZONTAL (VittaCash TV -> B3) */}
-            {activeCategory === 'VittaCash' && (
+            {/* BANNER HORIZONTAL (VittaConsultoria -> B3) */}
+            {activeCategory === 'VittaConsultoria' && (
               <div 
                 onClick={() => openLink(getAd('ad_vittacash_horizontal')?.meta_value?.external_url)}
                 className="w-full h-24 md:h-32 bg-zinc-100 mb-8 rounded-2xl overflow-hidden relative group cursor-pointer border border-zinc-100 shadow-sm animate-in fade-in duration-1000"
@@ -898,7 +898,7 @@ export default function VittaNews() {
                   <img src={getAd('ad_vittacash_horizontal')?.image_url} alt="Advertisement" className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-700" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-300">Banner Horizontal VittaCash TV</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-300">Banner Horizontal A2 TV</span>
                   </div>
                 )}
               </div>
@@ -909,7 +909,7 @@ export default function VittaNews() {
               
               {/* FEED DE NOTÍCIAS */}
               <div className="lg:col-span-8 space-y-12">
-                {activeCategory === 'VittaCash' ? (
+                {activeCategory === 'VittaConsultoria' ? (
                   <div className="bg-white rounded-3xl border border-zinc-100 overflow-hidden shadow-xl animate-in fade-in duration-700">
                     {/* Market Tool Content (B3 Radar) */}
                     <div className="p-4 md:p-8 border-b border-zinc-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 md:gap-6 bg-zinc-50/50">
@@ -1140,7 +1140,7 @@ export default function VittaNews() {
                 </div>
               </div>
                 ) : null}
-                {activeCategory !== 'VittaCash' && (
+                {activeCategory !== 'VittaConsultoria' && (
                   <>
                     <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                       <h2 className="text-2xl font-black uppercase italic tracking-tighter">Últimas <span className="text-indigo-600">Notícias</span></h2>
@@ -1226,7 +1226,7 @@ export default function VittaNews() {
               <span className="text-3xl font-black italic tracking-tighter uppercase">Vitta <span className="text-indigo-500">Notícias</span></span>
             </div>
             <p className="text-zinc-500 text-xs font-medium max-w-sm mb-12 leading-relaxed">
-              O portal de notícias oficial da VittaCash. Nossa missão é democratizar a inteligência financeira através de dados precisos e insights estratégicos para o seu crescimento.
+              O portal de notícias oficial da A2Finanças. Nossa missão é democratizar a inteligência financeira através de dados precisos e insights estratégicos para o seu crescimento.
             </p>
             <div className="flex gap-4">
               <button className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all"><Globe size={18} /></button>
@@ -1246,7 +1246,7 @@ export default function VittaNews() {
             <ul className="space-y-4 text-xs font-bold uppercase tracking-tight text-zinc-500">
               <li><Link to="/legal/privacy" className="hover:text-indigo-400 transition-colors">Privacidade</Link></li>
               <li><Link to="/legal/terms" className="hover:text-indigo-400 transition-colors">Termos de Uso</Link></li>
-              <li><a href="/#pricing" className="hover:text-indigo-400 transition-colors">VittaCash App</a></li>
+              <li><a href="/#pricing" className="hover:text-indigo-400 transition-colors">A2Finanças App</a></li>
               <li>
                 <div className="flex flex-col gap-2 pt-2">
                   <a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Gostaria de falar com o suporte do Vitta Notícias." target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-bold">
@@ -1257,7 +1257,7 @@ export default function VittaNews() {
                       onClick={handleEmailClick}
                       className="text-zinc-500 hover:text-indigo-400 transition-colors flex items-center gap-1.5 font-medium lowercase text-left"
                     >
-                      <Mail size={14} /> suporte@vittacash.com
+                      <Mail size={14} /> suporte@a2financas.com
                     </button>
                     {emailCopied && (
                       <span className="absolute -top-8 left-0 bg-emerald-500 text-black text-[8px] font-black uppercase px-2 py-1 rounded animate-bounce">

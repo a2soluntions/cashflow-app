@@ -30,7 +30,7 @@ const INITIAL_GOALS: BudgetGoal[] = [
 
 export const BudgetModule: React.FC<BudgetModuleProps> = ({ transactions }) => {
  const [goals, setGoals] = useState<BudgetGoal[]>(() => {
- const saved = localStorage.getItem('vittacash_budgets');
+ const saved = localStorage.getItem('a2financas_budgets');
  return saved ? JSON.parse(saved) : INITIAL_GOALS;
  });
  
@@ -39,7 +39,7 @@ export const BudgetModule: React.FC<BudgetModuleProps> = ({ transactions }) => {
 
  // Salvar no LocalStorage sempre que atualizar
  useEffect(() => {
- localStorage.setItem('vittacash_budgets', JSON.stringify(goals));
+ localStorage.setItem('a2financas_budgets', JSON.stringify(goals));
  }, [goals]);
 
  // Cálculos em Tempo Real

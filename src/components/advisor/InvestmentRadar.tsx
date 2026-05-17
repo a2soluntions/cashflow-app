@@ -7,11 +7,11 @@ import {
 } from 'lucide-react';
 
 interface InvestmentRadarProps {
-  theme?: 'light' | 'dark';
+  theme?: 'blue' | 'black' | 'white' | 'light' | 'dark' | 'black-orange' | 'white-orange';
 }
 
 export function InvestmentRadar({ theme = 'dark' }: InvestmentRadarProps) {
-  const isLight = theme === 'light';
+  const isLight = theme === 'light' || theme === 'white' || theme === 'white-orange';
 
   // Simulator State
   const [initialAmount, setInitialAmount] = useState<number | ''>('');
@@ -154,16 +154,16 @@ export function InvestmentRadar({ theme = 'dark' }: InvestmentRadarProps) {
 
         {/* CENTRO: SIMULADOR (AUTO-FIT) */}
         <div className={`flex-1 p-4 rounded-2xl flex flex-col relative overflow-hidden ${isLight ? 'bg-white ' : 'bg-white/5 border border-white/5 backdrop-blur-xl'}`}>
-          <div className="absolute top-0 right-0 p-32 rounded-full blur-[100px] bg-[#00d06c]/10 pointer-events-none" />
+          <div className="absolute top-0 right-0 p-32 rounded-full blur-[100px] bg-emerald-500/10 pointer-events-none" />
 
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className={`text-lg font-black uppercase tracking-tighter flex items-center gap-3 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                <Clock size={20} className="text-[#00d06c]" /> A Máquina do Tempo
+                <Clock size={20} className="text-emerald-500" /> A Máquina do Tempo
               </h2>
               <p className="text-[10px] text-slate-400 mt-1">Simule o poder da bola de neve em sua jornada.</p>
             </div>
-            <Rocket className="text-[#00d06c]/10" size={48} />
+            <Rocket className="text-emerald-500/10" size={48} />
           </div>
 
           {/* INPUTS - LEITURA FÁCIL */}
@@ -193,15 +193,15 @@ export function InvestmentRadar({ theme = 'dark' }: InvestmentRadarProps) {
               <div className={`h-4 ${isLight ? 'bg-rose-50 border border-rose-200' : 'bg-white/5 border border-rose-500/10'} rounded-full overflow-hidden`}><div className="h-full bg-rose-500 transition-all duration-1000" style={{ width: `${widthSavings}%` }} /></div>
             </div>
             <div className="space-y-1.5">
-              <div className="flex justify-between text-[10px] font-black text-[#00d06c] uppercase"><span>Estratégia VittaCash</span><span>{formatCurrency(vittaFV)}</span></div>
-              <div className={`h-4 ${isLight ? 'bg-emerald-50 border border-emerald-500/20' : 'bg-[#00d06c]/10 border border-emerald-500/20'} rounded-full overflow-hidden`}><div className="h-full bg-gradient-to-r from-emerald-500 to-[#00d06c] transition-all duration-1000" style={{ width: `${widthVitta}%` }} /></div>
+              <div className="flex justify-between text-[10px] font-black text-emerald-500 uppercase"><span>Estratégia A2Finanças</span><span>{formatCurrency(vittaFV)}</span></div>
+              <div className={`h-4 ${isLight ? 'bg-emerald-50 border border-emerald-500/20' : 'bg-emerald-500/10 border border-emerald-500/20'} rounded-full overflow-hidden`}><div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-1000" style={{ width: `${widthVitta}%` }} /></div>
             </div>
           </div>
 
           {/* DIFERENÇA (HIGHLIGHT PREMIUM) */}
           <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-[#00d06c] text-black rounded-full shadow-[0_0_15px_rgba(0,208,108,0.4)]"><Percent size={16} /></div>
+              <div className="p-2 bg-emerald-500 text-black rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)]"><Percent size={16} /></div>
               <div>
                 <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Diferença de Patrimônio</p>
                 <p className="text-[9px] text-slate-500">Poder de Liberdade Gerado</p>

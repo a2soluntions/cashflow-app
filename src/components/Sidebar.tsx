@@ -24,9 +24,9 @@ export function Sidebar({ activeTab, onNavigate }: SidebarProps) {
  <div className="mb-10 px-2">
  <img 
  src={logoVitta} 
- alt="VittaCash" 
- className="h-10 object-contain mix-blend-multiply dark:mix-blend-screen" // Ajuste o tamanho (h-10, h-12) conforme sua logo
- />
+ alt="A2Finanças" 
+ className="h-10 object-contain mix-blend-multiply dark:mix-blend-screen"
+/>
  </div>
 
  {/* --- MENU DE NAVEGAÇÃO --- */}

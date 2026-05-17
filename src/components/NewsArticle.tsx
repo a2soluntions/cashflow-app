@@ -29,7 +29,7 @@ export default function NewsArticle() {
 
   useEffect(() => {
     // Verifica se já aceitou os cookies
-    const consent = localStorage.getItem('vitta_cookie_consent');
+    const consent = localStorage.getItem('a2_cookie_consent');
     if (!consent) {
       setTimeout(() => setShowCookieConsent(true), 2000);
     }
@@ -40,10 +40,10 @@ export default function NewsArticle() {
   const [emailCopied, setEmailCopied] = useState(false);
 
   const handleEmailClick = () => {
-    navigator.clipboard.writeText('suporte@vittacash.com');
+    navigator.clipboard.writeText('suporte@a2financas.com');
     setEmailCopied(true);
     setTimeout(() => setEmailCopied(false), 2000);
-    window.location.href = 'mailto:suporte@vittacash.com';
+    window.location.href = 'mailto:suporte@a2financas.com';
   };
 
   const openLink = (url?: string) => {
@@ -201,7 +201,7 @@ export default function NewsArticle() {
     if (navigator.share) {
       navigator.share({
         title: item.title,
-        text: 'Confira esta notícia no VittaCash: ' + item.title,
+        text: 'Confira esta notícia no A2 Notícias: ' + item.title,
         url: window.location.href,
       }).catch(console.error);
     } else {
@@ -258,8 +258,8 @@ export default function NewsArticle() {
           </button>
           
           <div className="flex flex-col leading-none items-center">
-            <span className="text-base md:text-lg font-black italic tracking-tighter uppercase text-zinc-900">Vitta<span className="text-indigo-600">Cash</span></span>
-            <span className="text-[6px] font-bold uppercase tracking-[0.4em] text-zinc-400">Notícias</span>
+            <span className="text-base md:text-lg font-black italic tracking-tighter uppercase text-zinc-900">A2<span className="text-indigo-600">Notícias</span></span>
+            <span className="text-[6px] font-bold uppercase tracking-[0.4em] text-zinc-400">Inteligência Financeira</span>
           </div>
 
           <button onClick={handleShare} className="p-2 text-zinc-400 hover:text-indigo-600 transition-colors">
@@ -294,8 +294,8 @@ export default function NewsArticle() {
               <User size={20} />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-900">Por {item.meta_value?.author || 'Vitta Team'}</span>
-              <span className="text-[10px] font-bold uppercase text-zinc-400">Redação VittaCash Notícias</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-900">Por {item.meta_value?.author || 'A2 Team'}</span>
+              <span className="text-[10px] font-bold uppercase text-zinc-400">Redação A2 Notícias</span>
             </div>
           </div>
         </header>
@@ -331,10 +331,10 @@ export default function NewsArticle() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 text-left">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-8">
-              <span className="text-3xl font-black italic tracking-tighter uppercase">Vitta <span className="text-indigo-500">Notícias</span></span>
+              <span className="text-3xl font-black italic tracking-tighter uppercase">A2 <span className="text-indigo-500">Notícias</span></span>
             </div>
             <p className="text-zinc-500 text-xs font-medium max-w-sm mb-12 leading-relaxed">
-              O portal de notícias oficial da VittaCash. Nossa missão é democratizar a inteligência financeira através de dados precisos e insights estratégicos para o seu crescimento.
+              O portal de notícias oficial da A2Finanças. Nossa missão é democratizar a inteligência financeira através de dados precisos e insights estratégicos para o seu crescimento.
             </p>
             <div className="flex gap-4">
               <button className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all"><Globe size={18} /></button>
@@ -347,6 +347,7 @@ export default function NewsArticle() {
               <li><Link to="/noticias?category=Empreendedorismo" className="hover:text-indigo-400 transition-colors uppercase">Empreendedorismo</Link></li>
               <li><Link to="/noticias?category=Criptomoedas" className="hover:text-indigo-400 transition-colors uppercase">Criptomoedas</Link></li>
               <li><Link to="/noticias?category=Tecnologia" className="hover:text-indigo-400 transition-colors uppercase">Tecnologia</Link></li>
+              <li><Link to="/noticias?category=VittaConsultoria" className="hover:text-indigo-400 transition-colors uppercase">VittaConsultoria</Link></li>
             </ul>
           </div>
           <div>
@@ -354,7 +355,7 @@ export default function NewsArticle() {
             <ul className="space-y-4 text-xs font-bold uppercase tracking-tight text-zinc-500">
               <li><Link to="/legal/privacy" className="hover:text-indigo-400 transition-colors">Privacidade</Link></li>
               <li><Link to="/legal/terms" className="hover:text-indigo-400 transition-colors">Termos de Uso</Link></li>
-              <li><a href="/#pricing" className="hover:text-indigo-400 transition-colors">VittaCash App</a></li>
+              <li><a href="/#pricing" className="hover:text-indigo-400 transition-colors">VittaConsultoria App</a></li>
               <li>
                 <div className="flex flex-col gap-2 pt-2">
                   <a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Gostaria de falar com o suporte do Vitta Notícias." target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-bold">
@@ -365,7 +366,7 @@ export default function NewsArticle() {
                       onClick={handleEmailClick}
                       className="text-zinc-500 hover:text-indigo-400 transition-colors flex items-center gap-1.5 font-medium lowercase text-left"
                     >
-                      <Mail size={14} /> suporte@vittacash.com
+                      <Mail size={14} /> suporte@a2financas.com
                     </button>
                     {emailCopied && (
                       <span className="absolute -top-8 left-0 bg-emerald-500 text-black text-[8px] font-black uppercase px-2 py-1 rounded animate-bounce">
@@ -397,7 +398,7 @@ export default function NewsArticle() {
             <div className="flex gap-2">
               <button 
                 onClick={() => {
-                  localStorage.setItem('vitta_cookie_consent', 'denied');
+                  localStorage.setItem('a2_cookie_consent', 'denied');
                   setShowCookieConsent(false);
                 }}
                 className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest transition-all"
@@ -406,7 +407,7 @@ export default function NewsArticle() {
               </button>
               <button 
                 onClick={() => {
-                  localStorage.setItem('vitta_cookie_consent', 'accepted');
+                  localStorage.setItem('a2_cookie_consent', 'accepted');
                   setShowCookieConsent(false);
                 }}
                 className="flex-1 py-2.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20"

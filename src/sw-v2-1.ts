@@ -26,7 +26,7 @@ interface PushData {
 self.addEventListener('push', (event) => {
   console.log('[SW] Push Recebido:', event);
 
-  let data: PushData = { title: 'VittaCash', body: 'Você tem uma nova notificação!', icon: '/pwa-192x192.png' };
+  let data: PushData = { title: 'A2Finanças', body: 'Você tem uma nova notificação!', icon: '/pwa-192x192.png' };
   
   if (event.data) {
     try {
