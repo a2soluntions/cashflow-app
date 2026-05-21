@@ -218,7 +218,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-12">
             <div className="flex flex-col leading-none">
-              <span className="text-2xl font-black italic tracking-tighter uppercase text-white">A2<span className="text-emerald-500">Finanças</span></span>
+              <span className="text-2xl font-black italic tracking-tighter uppercase text-white">A2<span className="text-emerald-500"> Mentor</span></span>
               <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-slate-500">Financial Intelligence</span>
             </div>
             
@@ -304,7 +304,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
               <div className="w-full max-w-lg lg:max-w-2xl overflow-hidden rounded-xl cursor-pointer" onClick={() => openModal('left', currentLeftIdx)}>
                 <img
                   src={leftBanners[currentLeftIdx]?.image_url}
-                  alt="A2Finanças Web"
+                  alt="A2 Mentor Web"
                   className="w-full h-auto object-contain hover:scale-[1.03] transition-transform duration-700 rounded-xl shadow-2xl"
                 />
               </div>
@@ -312,7 +312,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
               <div className="w-full max-w-lg lg:max-w-2xl overflow-hidden rounded-xl">
                 <img
                   src="/vitta_sponsor_banner_1_1776825587725.png"
-                  alt="A2Finanças Web"
+                  alt="A2 Mentor Web"
                   className="w-full h-auto object-contain rounded-xl shadow-2xl"
                 />
               </div>
@@ -324,7 +324,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
               <div className="w-full max-w-xs overflow-hidden rounded-xl cursor-pointer" onClick={() => openModal('right', currentRightIdx)}>
                 <img
                   src={rightBanners[currentRightIdx]?.image_url}
-                  alt="A2Finanças Mobile"
+                  alt="A2 Mentor Mobile"
                   className="w-full h-auto object-contain hover:scale-[1.03] transition-transform duration-700 rounded-xl shadow-2xl"
                 />
               </div>
@@ -332,7 +332,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
               <div className="w-full max-w-xs overflow-hidden rounded-xl">
                 <img
                   src="/vitta_sponsor_banner_2_1776825608562.png"
-                  alt="A2Finanças Mobile"
+                  alt="A2 Mentor Mobile"
                   className="w-full h-auto object-contain rounded-xl shadow-2xl"
                 />
               </div>
@@ -368,7 +368,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
                 {item.meta_value?.external_url ? (
                   <a href={item.meta_value.external_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-400 hover:text-white transition-colors">Ler Matéria Completa <ExternalLink size={12} /></a>
                 ) : (
-                  <button className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500/50 cursor-default">Fonte: A2Finanças Direct</button>
+                  <button className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500/50 cursor-default">Fonte: A2 Mentor Direct</button>
                 )}
               </div>
             </div>
@@ -470,8 +470,8 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-16">
           <div className="md:col-span-4 space-y-8">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="A2Finanças" className="h-12 w-12 object-contain rounded-full mix-blend-screen" />
-              <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">A2Finanças</h2>
+              <img src="/logo.png" alt="A2 Mentor" className="h-12 w-12 object-cover rounded-full mix-blend-screen" />
+              <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">A2 Mentor</h2>
             </div>
             <div className="space-y-4">
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Nossa Missão</h3>
@@ -490,7 +490,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
             <div className="space-y-6">
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Fale Conosco</h3>
               <ul className="space-y-5">
-                <li><a href="mailto:suporte@a2financas.com" className="text-[11px] text-emerald-400 font-bold hover:text-white transition-all flex items-center gap-2 group"><Mail size={12} /> suporte@a2financas.com</a></li>
+                <li><a href="mailto:suporte@a2mentor.com" className="text-[11px] text-emerald-400 font-bold hover:text-white transition-all flex items-center gap-2 group"><Mail size={12} /> suporte@a2mentor.com</a></li>
                 <li><a href="https://wa.me/5534998408962" target="_blank" rel="noreferrer" className="text-[11px] text-emerald-400 font-bold hover:text-white transition-all flex items-center gap-2 group"><MessageCircle size={12} /> (34) 99840-8962</a></li>
               </ul>
             </div>

@@ -243,7 +243,7 @@ const DividendCalculator = ({ initialAsset }: { initialAsset?: any }) => {
           </div>
 
           <button className="w-full py-4 bg-indigo-600/50 text-white/50 text-[9px] font-black uppercase tracking-widest cursor-not-allowed border border-white/5 shadow-lg">
-            Montar Carteira A2Finanças (Em desenvolvimento)
+            Montar Carteira A2 Mentor (Em desenvolvimento)
           </button>
         </div>
       </div>
@@ -362,10 +362,10 @@ export default function VittaNews() {
   };
 
   const handleEmailClick = () => {
-    navigator.clipboard.writeText('suporte@a2financas.com');
+    navigator.clipboard.writeText('suporte@a2mentor.com');
     setEmailCopied(true);
     setTimeout(() => setEmailCopied(false), 2000);
-    window.location.href = 'mailto:suporte@a2financas.com';
+    window.location.href = 'mailto:suporte@a2mentor.com';
   };
 
   useEffect(() => {
@@ -592,7 +592,7 @@ export default function VittaNews() {
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-12">
             <button onClick={() => navigate('/')} className="flex items-center gap-3 group">
-              <img src="/logo.png" alt="A2Finanças" className="h-10 w-10 object-contain rounded-full mix-blend-multiply" />
+              <img src="/logo.png" alt="A2 Mentor" className="h-10 w-10 object-cover rounded-full mix-blend-multiply" />
               <div className="flex flex-col leading-none">
                 <span className="text-2xl font-black italic tracking-tighter uppercase text-zinc-900">A2<span className="text-indigo-600">Notícias</span></span>
                 <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-zinc-400">Inteligência Financeira</span>
@@ -1226,7 +1226,7 @@ export default function VittaNews() {
               <span className="text-3xl font-black italic tracking-tighter uppercase">Vitta <span className="text-indigo-500">Notícias</span></span>
             </div>
             <p className="text-zinc-500 text-xs font-medium max-w-sm mb-12 leading-relaxed">
-              O portal de notícias oficial da A2Finanças. Nossa missão é democratizar a inteligência financeira através de dados precisos e insights estratégicos para o seu crescimento.
+              O portal de notícias oficial da A2 Mentor. Nossa missão é democratizar a inteligência financeira através de dados precisos e insights estratégicos para o seu crescimento.
             </p>
             <div className="flex gap-4">
               <button className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all"><Globe size={18} /></button>
@@ -1246,7 +1246,7 @@ export default function VittaNews() {
             <ul className="space-y-4 text-xs font-bold uppercase tracking-tight text-zinc-500">
               <li><Link to="/legal/privacy" className="hover:text-indigo-400 transition-colors">Privacidade</Link></li>
               <li><Link to="/legal/terms" className="hover:text-indigo-400 transition-colors">Termos de Uso</Link></li>
-              <li><a href="/#pricing" className="hover:text-indigo-400 transition-colors">A2Finanças App</a></li>
+              <li><a href="/#pricing" className="hover:text-indigo-400 transition-colors">A2 Mentor App</a></li>
               <li>
                 <div className="flex flex-col gap-2 pt-2">
                   <a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Gostaria de falar com o suporte do Vitta Notícias." target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-bold">
@@ -1257,7 +1257,7 @@ export default function VittaNews() {
                       onClick={handleEmailClick}
                       className="text-zinc-500 hover:text-indigo-400 transition-colors flex items-center gap-1.5 font-medium lowercase text-left"
                     >
-                      <Mail size={14} /> suporte@a2financas.com
+                      <Mail size={14} /> suporte@a2mentor.com
                     </button>
                     {emailCopied && (
                       <span className="absolute -top-8 left-0 bg-emerald-500 text-black text-[8px] font-black uppercase px-2 py-1 rounded animate-bounce">

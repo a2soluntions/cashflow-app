@@ -11,6 +11,10 @@ export default defineConfig({
     strictPort: true,
   },
 
+  optimizeDeps: {
+    exclude: ['workbox-precaching'],
+  },
+
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -33,18 +37,21 @@ export default defineConfig({
       registerType: 'prompt',
       strategies: 'injectManifest',
       srcDir: 'src',
-      filename: 'sw-v2-1.ts',
+      filename: 'sw-v3.ts',
       devOptions: {
         enabled: true,
         type: 'module'
       },
       manifest: {
-        name: 'A2Finanças',
-        short_name: 'A2Finanças',
-        description: 'A2Finanças - Seu aplicativo de finanças confiável',
-        theme_color: '#1a237e',
-        background_color: '#1a237e',
+        name: 'A2 Mentor',
+        short_name: 'A2 Mentor',
+        description: 'A2 Mentor - Seu aplicativo de finanças confiável',
+        theme_color: '#0f172a',
+        background_color: '#0f172a',
         display: 'standalone',
+        id: 'a2mentor-v3',
+        start_url: '/?mode=pwa',
+        scope: '/',
         icons: [
           {
             src: 'pwa-192x192.png',

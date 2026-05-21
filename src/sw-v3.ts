@@ -7,6 +7,17 @@ declare let self: ServiceWorkerGlobalScope;
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
+// Fallback manual para requisições de navegação (evita tela em branco no celular ao abrir a raiz /)
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches.match('/index.html') as Promise<Response>;
+      })
+    );
+  }
+});
+
 self.addEventListener('install', () => {
     self.skipWaiting();
 });
@@ -26,7 +37,7 @@ interface PushData {
 self.addEventListener('push', (event) => {
   console.log('[SW] Push Recebido:', event);
 
-  let data: PushData = { title: 'A2Finanças', body: 'Você tem uma nova notificação!', icon: '/pwa-192x192.png' };
+  let data: PushData = { title: 'A2 Mentor', body: 'Você tem uma nova notificação!', icon: '/pwa-192x192.png' };
   
   if (event.data) {
     try {
@@ -43,8 +54,8 @@ self.addEventListener('push', (event) => {
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
-      primaryKey: '2',
-      url: data.url || '/'
+      primaryKey: '3',
+      url: data.url || '/?mode=pwa'
     },
     actions: [
       { action: 'explore', title: 'Ver agora' },
@@ -62,17 +73,15 @@ self.addEventListener('notificationclick', (event) => {
   console.log('[SW] Clique na Notificação detectado.');
   event.notification.close();
 
-  const urlToOpen = event.notification.data.url || '/';
+  const urlToOpen = event.notification.data.url || '/?mode=pwa';
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Se já houver uma aba aberta, foca nela e navega
       for (const client of clientList) {
         if (client.url === urlToOpen && 'focus' in client) {
           return client.focus();
         }
       }
-      // Caso contrário, abre uma nova aba
       if (self.clients.openWindow) {
         return self.clients.openWindow(urlToOpen);
       }

@@ -29,9 +29,8 @@ export default async function handler(req: Request) {
   try {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-    // 1. Busca transações pendentes para HOJE
-    // Nota: Filtramos no JS para simplificar o fetch sem dependência de lib Supabase na API Edge/Node
-    const txsRes = await fetch(`${SUPABASE_URL}/rest/v1/transactions?status=eq.PENDING&date=eq.${today}`, {
+    // 1. Busca transações pendentes para HOJE ou ATRASADAS (<= hoje)
+    const txsRes = await fetch(`${SUPABASE_URL}/rest/v1/transactions?status=eq.PENDING&date=lte.${today}`, {
       headers: {
         'apikey': SUPABASE_SERVICE_KEY,
         'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
@@ -40,7 +39,7 @@ export default async function handler(req: Request) {
     const transactions = await txsRes.json();
 
     if (!Array.isArray(transactions) || transactions.length === 0) {
-      return new Response(JSON.stringify({ message: 'Nenhuma conta vencendo hoje.' }), { status: 200 });
+      return new Response(JSON.stringify({ message: 'Nenhuma conta pendente para hoje ou atrasada.' }), { status: 200 });
     }
 
     // 2. Busca perfis que têm push_subscription ativo
@@ -59,9 +58,18 @@ export default async function handler(req: Request) {
       const userProfile = profiles.find((p: any) => p.user_id === tx.user_id);
       
       if (userProfile && userProfile.push_subscription) {
+        const isOverdue = tx.date < today;
+        const title = isOverdue ? 'Conta Atrasada 🚨' : 'Vencimento Hoje 🔔';
+        
+        let bodyText = `${tx.description}: R$ ${tx.amount.toFixed(2).replace('.', ',')}`;
+        if (isOverdue) {
+          const [year, month, day] = tx.date.split('-');
+          bodyText += ` (Venceu em ${day}/${month}/${year})`;
+        }
+
         const payload = JSON.stringify({
-          title: 'Vencimento Hoje 🔔',
-          body: `${tx.description}: R$ ${tx.amount.toFixed(2).replace('.', ',')}`,
+          title: title,
+          body: bodyText,
           url: '/?tab=contas'
         });
 

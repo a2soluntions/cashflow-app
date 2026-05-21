@@ -22,13 +22,13 @@ export default function DebtManager({ theme }: { theme: string }) {
  });
 
  useEffect(() => {
- const saved = localStorage.getItem('a2financas_debts');
+ const saved = localStorage.getItem('a2mentor_debts');
  if (saved) setDebts(JSON.parse(saved));
  }, []);
 
  const saveDebts = (updated: Debt[]) => {
  setDebts(updated);
- localStorage.setItem('a2financas_debts', JSON.stringify(updated));
+ localStorage.setItem('a2mentor_debts', JSON.stringify(updated));
  };
 
  const handleAddDebt = () => {

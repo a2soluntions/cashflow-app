@@ -24,7 +24,7 @@ export function Sidebar({ activeTab, onNavigate }: SidebarProps) {
  <div className="mb-10 px-2">
  <img 
  src={logoVitta} 
- alt="A2Finanças" 
+ alt="A2 Mentor" 
  className="h-10 object-contain mix-blend-multiply dark:mix-blend-screen"
 />
  </div>

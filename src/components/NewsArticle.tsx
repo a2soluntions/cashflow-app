@@ -40,10 +40,10 @@ export default function NewsArticle() {
   const [emailCopied, setEmailCopied] = useState(false);
 
   const handleEmailClick = () => {
-    navigator.clipboard.writeText('suporte@a2financas.com');
+    navigator.clipboard.writeText('suporte@a2mentor.com');
     setEmailCopied(true);
     setTimeout(() => setEmailCopied(false), 2000);
-    window.location.href = 'mailto:suporte@a2financas.com';
+    window.location.href = 'mailto:suporte@a2mentor.com';
   };
 
   const openLink = (url?: string) => {
@@ -334,7 +334,7 @@ export default function NewsArticle() {
               <span className="text-3xl font-black italic tracking-tighter uppercase">A2 <span className="text-indigo-500">Notícias</span></span>
             </div>
             <p className="text-zinc-500 text-xs font-medium max-w-sm mb-12 leading-relaxed">
-              O portal de notícias oficial da A2Finanças. Nossa missão é democratizar a inteligência financeira através de dados precisos e insights estratégicos para o seu crescimento.
+              O portal de notícias oficial da A2 Mentor. Nossa missão é democratizar a inteligência financeira através de dados precisos e insights estratégicos para o seu crescimento.
             </p>
             <div className="flex gap-4">
               <button className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all"><Globe size={18} /></button>
@@ -366,7 +366,7 @@ export default function NewsArticle() {
                       onClick={handleEmailClick}
                       className="text-zinc-500 hover:text-indigo-400 transition-colors flex items-center gap-1.5 font-medium lowercase text-left"
                     >
-                      <Mail size={14} /> suporte@a2financas.com
+                      <Mail size={14} /> suporte@a2mentor.com
                     </button>
                     {emailCopied && (
                       <span className="absolute -top-8 left-0 bg-emerald-500 text-black text-[8px] font-black uppercase px-2 py-1 rounded animate-bounce">

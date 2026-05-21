@@ -11,7 +11,7 @@ const LegalPage: React.FC = () => {
       title: 'Política de Privacidade',
       icon: <ShieldCheck size={32} className="text-emerald-500" />,
       text: `
-        Esta Política de Privacidade descreve como o A2Finanças coleta, utiliza e protege suas informações pessoais.
+        Esta Política de Privacidade descreve como o A2 Mentor coleta, utiliza e protege suas informações pessoais.
         
         1. Coleta de Dados: Coletamos apenas os dados necessários para o funcionamento da plataforma, como e-mail e dados financeiros inseridos voluntariamente.
         2. Proteção: Utilizamos criptografia de ponta a ponta e protocolos de segurança rigorosos para garantir a integridade dos seus dados.
@@ -23,7 +23,7 @@ const LegalPage: React.FC = () => {
       title: 'Termos de Uso',
       icon: <FileText size={32} className="text-blue-500" />,
       text: `
-        Ao utilizar o A2Finanças, você concorda com os seguintes termos e condições:
+        Ao utilizar o A2 Mentor, você concorda com os seguintes termos e condições:
         
         1. Licença de Uso: Concedemos uma licença pessoal e intransferível para uso da plataforma de acordo com o plano contratado.
         2. Responsabilidade: O usuário é o único responsável pela veracidade dos dados inseridos e pelas decisões financeiras tomadas com base nos insights gerados.
@@ -40,7 +40,7 @@ const LegalPage: React.FC = () => {
         1. O que são: Cookies são pequenos arquivos armazenados no seu navegador para lembrar suas preferências.
         2. Necessários: Alguns cookies são essenciais para manter sua sessão ativa e segura.
         3. Analíticos: Podemos usar cookies de terceiros para entender como os usuários utilizam o site e melhorar nossos serviços.
-        4. Controle: Você pode desativar os cookies nas configurações do seu navegador, mas isso pode afetar o funcionamento de algumas partes do A2Finanças.
+        4. Controle: Você pode desativar os cookies nas configurações do seu navegador, mas isso pode afetar o funcionamento de algumas partes do A2 Mentor.
       `
     },
     security: {
@@ -82,7 +82,7 @@ const LegalPage: React.FC = () => {
         </div>
 
         <div className="mt-16 pt-8 border-t border-white/5 flex flex-col items-center text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 mb-2">A2Finanças Compliance</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 mb-2">A2 Mentor Compliance</p>
           <p className="text-[9px] font-bold text-zinc-600 uppercase italic">A2soluntions Desenvolvimento de Sistemas</p>
         </div>
       </div>

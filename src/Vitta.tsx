@@ -23,6 +23,7 @@ import SalesPage from './components/SalesPage';
 import LegalPage from './components/LegalPage';
 import VittaNews from './components/VittaNews';
 import NewsArticle from './components/NewsArticle';
+import NetworkBackground from './components/NetworkBackground';
 
 export default function Vitta() {
   const { session } = useAuth();
@@ -50,8 +51,8 @@ export default function Vitta() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userAvatar, setUserAvatar] = useState<string | null>(localStorage.getItem('a2financas_user_avatar'));
-  const [userName, setUserName] = useState<string>(localStorage.getItem('a2financas_user_name') || 'Comandante');
+  const [userAvatar, setUserAvatar] = useState<string | null>(localStorage.getItem('a2mentor_user_avatar'));
+  const [userName, setUserName] = useState<string>(localStorage.getItem('a2mentor_user_name') || 'Comandante');
 
   // --- ASSINATURA ---
   const [trialDaysLeft, setTrialDaysLeft] = useState<number>(999);
@@ -100,15 +101,15 @@ export default function Vitta() {
 
         if (profile.avatar_url) {
           setUserAvatar(profile.avatar_url);
-          localStorage.setItem('a2financas_user_avatar', profile.avatar_url);
+          localStorage.setItem('a2mentor_user_avatar', profile.avatar_url);
         }
         if (profile.name) {
           setUserName(profile.name);
-          localStorage.setItem('a2financas_user_name', profile.name);
+          localStorage.setItem('a2mentor_user_name', profile.name);
         }
       } else {
-        const savedAvatar = localStorage.getItem('a2financas_user_avatar');
-        const savedName = localStorage.getItem('a2financas_user_name');
+        const savedAvatar = localStorage.getItem('a2mentor_user_avatar');
+        const savedName = localStorage.getItem('a2mentor_user_name');
         if (savedAvatar) setUserAvatar(savedAvatar);
         if (savedName) setUserName(savedName);
       }
@@ -175,7 +176,7 @@ export default function Vitta() {
 
   const NavigationHeader = () => {
     const tab = new URLSearchParams(location.search).get('tab') || 'hub';
-    if (location.pathname === '/' || location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal') || tab === 'hub' || tab === 'sales') return null;
+    if (location.pathname === '/' || location.pathname === '/vendas' || location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal') || tab === 'hub' || tab === 'sales') return null;
 
     return (
       <header className="fixed top-0 left-0 w-full z-[1001] bg-indigo-950/40 backdrop-blur-md border-b border-white/5 h-14 flex items-center justify-between px-4 animate-in slide-in-from-top duration-500">
@@ -189,7 +190,7 @@ export default function Vitta() {
         </div>
 
         <div className="flex items-center gap-2">
-          <img src="/icon.png" alt="Vitta" className="h-6 w-auto opacity-50" />
+          <img src="/icon.png" alt="A2 Mentor" className="h-6 w-6 object-cover opacity-50 rounded-full" />
         </div>
 
         <div className="flex items-center gap-4">
@@ -220,12 +221,12 @@ export default function Vitta() {
 
   const handleLogout = async () => {
     // Limpa dados de perfil do localStorage para não vazar para outro usuário
-    localStorage.removeItem('a2financas_user_avatar');
-    localStorage.removeItem('a2financas_user_name');
-    localStorage.removeItem('a2financas_user_company');
-    localStorage.removeItem('a2financas_user_email');
-    localStorage.removeItem('a2financas_user_phone');
-    localStorage.removeItem('a2financas_notification_channel');
+    localStorage.removeItem('a2mentor_user_avatar');
+    localStorage.removeItem('a2mentor_user_name');
+    localStorage.removeItem('a2mentor_user_company');
+    localStorage.removeItem('a2mentor_user_email');
+    localStorage.removeItem('a2mentor_user_phone');
+    localStorage.removeItem('a2mentor_notification_channel');
     setUserAvatar(null);
     setUserName('Comandante');
     await supabase.auth.signOut();
@@ -233,9 +234,9 @@ export default function Vitta() {
   };
 
   return (
-    <div className={`w-full font-sans relative text-slate-900 dark:text-white ${location.pathname === '/' || location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-y-auto scroll-smooth custom-scrollbar' : 'h-screen overflow-hidden'}`}>
+    <div className={`w-full font-sans relative text-slate-900 dark:text-white ${location.pathname === '/' || location.pathname === '/vendas' || location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-y-auto scroll-smooth custom-scrollbar' : 'h-screen overflow-hidden'}`}>
       
-      {location.pathname !== '/' && location.pathname !== '/login' && <NavigationHeader />}
+      {location.pathname !== '/' && location.pathname !== '/vendas' && location.pathname !== '/login' && <NavigationHeader />}
 
       {/* SubscriptionWall agora só aparece se o usuário tentar acessar algo bloqueado ou se você quiser manter um banner */}
       {/* {!subscriptionActive && trialDaysLeft <= 0 && isAuthenticated && (
@@ -243,8 +244,11 @@ export default function Vitta() {
       )} */}
 
       <Routes>
-        {/* ROTA INICIAL: SALES PAGE (MARKETING) */}
-        <Route path="/" element={<SalesPage onSelectPlan={(plan) => {
+        {/* ROTA INICIAL: REDIRECIONA PARA APP OU LOGIN */}
+        <Route path="/" element={<Navigate to={isAuthenticated ? "/app" : "/login"} />} />
+
+        {/* ROTA DE VENDAS (ACESSO POR LINK) */}
+        <Route path="/vendas" element={<SalesPage onSelectPlan={(plan) => {
             if (plan === 'free' || plan === 'start') {
                 navigate('/login');
             } else {
@@ -290,7 +294,7 @@ export default function Vitta() {
                                         <img src="/pwa-192x192.png" className="w-8 h-8 object-contain" alt="Icon" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-white text-xs font-black uppercase tracking-widest">Instalar A2Finanças</span>
+                                        <span className="text-white text-xs font-black uppercase tracking-widest">Instalar A2 Mentor</span>
                                         <span className="text-white/60 text-[8px] font-bold uppercase">Acesse mais rápido pelo menu</span>
                                     </div>
                                 </div>
@@ -439,27 +443,19 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
     
     return (
         <div className="w-screen h-screen bg-[#000001] flex items-center justify-center p-6 animate-in fade-in duration-700 relative overflow-hidden">
-            {/* EFEITO HONEYCOMB COM GLOW */}
-            <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
-                <div className="absolute inset-0" style={{ 
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='69' viewBox='0 0 40 69' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 11.5L40 0v23L20 34.5 0 23V0l20 11.5zM20 46l20-11.5v23L20 69 0 57.5v-23L20 46zM20 23L0 34.5v-23L20 0v23z' fill='none' stroke='%23ffffff' stroke-width='1.5' stroke-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E")` 
-                }}></div>
-                <div className="absolute inset-0" style={{ 
-                    background: `radial-gradient(circle at center, rgba(16, 35, 255, 0.15) 0%, transparent 70%)`
-                }}></div>
-            </div>
+            <NetworkBackground />
 
             <form onSubmit={handleSubmit} className="w-full max-w-sm bg-transparent p-10 text-center relative z-10">
                 <button 
                     type="button"
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate('/vendas')}
                     className="absolute top-4 left-4 text-white/40 hover:text-white transition-colors"
-                    title="Voltar"
+                    title="Ver Planos"
                 >
                     <ArrowLeft size={20} />
                 </button>
-                <img src="/logo.png" alt="A2Finanças" className="h-20 w-20 object-contain mx-auto mb-4 mix-blend-screen" />
-                <h2 className="text-2xl font-black text-white uppercase italic mb-8">{isSignUp ? 'Nova Conta' : 'Acesso A2Finanças'}</h2>
+                <img src="/logo.png" alt="A2 Mentor" className="h-20 w-20 object-cover mx-auto mb-4 mix-blend-screen rounded-full" />
+                <h2 className="text-2xl font-black text-white uppercase italic mb-8">{isSignUp ? 'Nova Conta' : 'Acesso A2 Mentor'}</h2>
                 
                 <div className="space-y-4 mb-8">
                     <input 

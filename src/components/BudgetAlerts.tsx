@@ -17,8 +17,8 @@ interface Budget {
 
 export default function BudgetAlerts() {
  const alerts = useMemo(() => {
- const transactions: Transaction[] = JSON.parse(localStorage.getItem('a2financas_pro_transactions') || '[]');
- const budgets: Budget[] = JSON.parse(localStorage.getItem('a2financas_pro_budgets') || '[]');
+ const transactions: Transaction[] = JSON.parse(localStorage.getItem('a2mentor_pro_transactions') || '[]');
+ const budgets: Budget[] = JSON.parse(localStorage.getItem('a2mentor_pro_budgets') || '[]');
  
  const currentMonth = new Date().getMonth();
  const currentYear = new Date().getFullYear();

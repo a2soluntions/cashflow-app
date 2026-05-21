@@ -118,7 +118,7 @@ export default function SubscriptionWall({ userEmail, userId, trialDaysLeft, onS
  </div>
  <div>
  <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Acesso Liberado!</h2>
- <p className="text-emerald-400 font-bold text-sm mt-2 uppercase tracking-widest">Bem-vindo ao A2Finanças</p>
+ <p className="text-emerald-400 font-bold text-sm mt-2 uppercase tracking-widest">Bem-vindo ao A2 Mentor</p>
  </div>
  <div className="w-48 h-1 bg-emerald-500/30 overflow-hidden">
  <div className="h-full bg-emerald-500 animate-[progress_2.5s_ease-in-out_forwards]" style={{ width: '100%' }} />

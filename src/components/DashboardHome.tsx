@@ -155,7 +155,7 @@ export default function DashboardHome({ transactions, categories = [] }: Dashboa
  useEffect(() => {
  const processData = () => {
  try {
- const rawTxs = localStorage.getItem('a2financas_pro_transactions');
+ const rawTxs = localStorage.getItem('a2mentor_pro_transactions');
  const allTxs: Transaction[] = rawTxs ? JSON.parse(rawTxs) : (transactions || []);
  const now = new Date();
  const curYear = now.getFullYear();

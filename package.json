@@ -1,11 +1,11 @@
 {
-  "name": "a2financas",
+  "name": "a2mentor",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "main": "electron.cjs",
   "author": "A2 Solutions",
-  "description": "Sistema de Gestão Financeira A2Finanças",
+  "description": "Sistema de Gestão Financeira A2 Mentor",
   "homepage": "./",
   "scripts": {
     "dev": "vite",
@@ -52,8 +52,8 @@
     "wait-on": "^7.2.0"
   },
   "build": {
-    "appId": "com.a2financas.desktop",
-    "productName": "A2Finanças",
+    "appId": "com.a2mentor.desktop",
+    "productName": "A2 Mentor",
     "directories": {
       "output": "release"
     },
@@ -69,7 +69,7 @@
       "oneClick": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "A2Finanças"
+      "shortcutName": "A2 Mentor"
     }
   }
 }

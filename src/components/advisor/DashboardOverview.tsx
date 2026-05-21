@@ -89,7 +89,7 @@ export function DashboardOverview({ theme = 'dark' }: DashboardOverviewProps) {
  </div>
  </div>
  <h2 className={`text-4xl lg:text-5xl font-black italic tracking-tighter leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
- E é exatamente aqui que a <span className="text-indigo-500">A2Finanças</span> vai ajudar você.
+ E é exatamente aqui que a <span className="text-indigo-500">A2 Mentor</span> vai ajudar você.
  </h2>
  </section>
 
@@ -115,7 +115,7 @@ export function DashboardOverview({ theme = 'dark' }: DashboardOverviewProps) {
  <div className="space-y-2">
  <h4 className="font-black text-indigo-500 uppercase text-xs tracking-widest">Protocolo I: O Despertar</h4>
  <p>
- O primeiro passo é a honestidade radical. O **Diagnóstico** do A2Finanças revela a simetria real entre sua receita e seus vazamentos. Não olhe para os números apenas como dinheiro, mas como horas de vida protegidas ou perdidas.
+ O primeiro passo é a honestidade radical. O **Diagnóstico** do A2 Mentor revela a simetria real entre sua receita e seus vazamentos. Não olhe para os números apenas como dinheiro, mas como horas de vida protegidas ou perdidas.
  </p>
  </div>
 
@@ -144,7 +144,7 @@ export function DashboardOverview({ theme = 'dark' }: DashboardOverviewProps) {
  Assuma o comando da sua história.
  </p>
  <p className="text-[9px] font-black uppercase tracking-[0.5em] opacity-30">
- A2Finanças v3.0 // The New Economic Order
+ A2 Mentor v3.0 // The New Economic Order
  </p>
  </div>
 

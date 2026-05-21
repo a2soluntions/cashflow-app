@@ -54,12 +54,12 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
 
  const loadProfile = async () => {
  // 1. SEMPRE carrega do localStorage primeiro (rápido e confiável)
- const savedName = localStorage.getItem('a2financas_user_name');
- const savedCompany = localStorage.getItem('a2financas_user_company');
- const savedEmail = localStorage.getItem('a2financas_user_email');
- const savedPhone = localStorage.getItem('a2financas_user_phone');
- const savedChannel = localStorage.getItem('a2financas_notification_channel');
- const savedAvatar = localStorage.getItem('a2financas_user_avatar');
+ const savedName = localStorage.getItem('a2mentor_user_name');
+ const savedCompany = localStorage.getItem('a2mentor_user_company');
+ const savedEmail = localStorage.getItem('a2mentor_user_email');
+ const savedPhone = localStorage.getItem('a2mentor_user_phone');
+ const savedChannel = localStorage.getItem('a2mentor_notification_channel');
+ const savedAvatar = localStorage.getItem('a2mentor_user_avatar');
  if (savedName) setFullName(savedName);
  if (savedCompany) setCompanyName(savedCompany);
  if (savedEmail) setUserEmail(savedEmail);
@@ -78,8 +78,8 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  .single();
 
  if (profile) {
- if (profile.name) { setFullName(profile.name); localStorage.setItem('a2financas_user_name', profile.name); }
- if (profile.avatar_url) { setAvatarUrl(profile.avatar_url); localStorage.setItem('a2financas_user_avatar', profile.avatar_url); }
+ if (profile.name) { setFullName(profile.name); localStorage.setItem('a2mentor_user_name', profile.name); }
+ if (profile.avatar_url) { setAvatarUrl(profile.avatar_url); localStorage.setItem('a2mentor_user_avatar', profile.avatar_url); }
  }
  } catch (err) {
  console.warn('[Profile] Supabase indisponível, usando dados locais:', err);
@@ -94,7 +94,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
   reader.onload = (event) => {
   const result = event.target?.result as string;
   setAvatarUrl(result);
-  localStorage.setItem('a2financas_user_avatar', result);
+  localStorage.setItem('a2mentor_user_avatar', result);
   onUpdate(); // Atualiza o avatar no resto do app imediatamente
   showInternalToast('Avatar atualizado com sucesso!', 'success');
   };
@@ -107,44 +107,44 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
  v = v.replace(/(\d)(\d{4})$/, '$1-$2');
  setUserPhone(v);
- localStorage.setItem('a2financas_user_phone', v);
+ localStorage.setItem('a2mentor_user_phone', v);
  } else if (v === '') {
  setUserPhone('');
- localStorage.setItem('a2financas_user_phone', '');
+ localStorage.setItem('a2mentor_user_phone', '');
  }
  };
 
  // Auto-save: salva no localStorage a cada digitação para nunca perder dados
  const handleNameChange = (value: string) => {
  setFullName(value);
- localStorage.setItem('a2financas_user_name', value);
+ localStorage.setItem('a2mentor_user_name', value);
  };
 
  const handleCompanyChange = (value: string) => {
  setCompanyName(value);
- localStorage.setItem('a2financas_user_company', value);
+ localStorage.setItem('a2mentor_user_company', value);
  };
 
  const handleEmailChange = (value: string) => {
  setUserEmail(value);
- localStorage.setItem('a2financas_user_email', value);
+ localStorage.setItem('a2mentor_user_email', value);
  };
 
  const handleChannelChange = (channel: 'email'|'whatsapp'|'both') => {
  setNotificationChannel(channel);
- localStorage.setItem('a2financas_notification_channel', channel);
+ localStorage.setItem('a2mentor_notification_channel', channel);
  };
 
  const handleSave = async (e: React.FormEvent) => {
  e.preventDefault();
  try {
  // Salva localmente (cache rápido)
- localStorage.setItem('a2financas_user_name', fullName);
- localStorage.setItem('a2financas_user_company', companyName);
- localStorage.setItem('a2financas_user_email', userEmail);
- localStorage.setItem('a2financas_user_phone', userPhone);
- localStorage.setItem('a2financas_notification_channel', notificationChannel);
- if (avatarUrl) localStorage.setItem('a2financas_user_avatar', avatarUrl);
+ localStorage.setItem('a2mentor_user_name', fullName);
+ localStorage.setItem('a2mentor_user_company', companyName);
+ localStorage.setItem('a2mentor_user_email', userEmail);
+ localStorage.setItem('a2mentor_user_phone', userPhone);
+ localStorage.setItem('a2mentor_notification_channel', notificationChannel);
+ if (avatarUrl) localStorage.setItem('a2mentor_user_avatar', avatarUrl);
 
  // Salva na nuvem (Supabase) — apenas colunas que existem na tabela profiles
  if (session?.user?.id) {
@@ -168,9 +168,9 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  const handleExportBackup = () => {
  try {
  const backupData = {
- transactions: localStorage.getItem('a2financas_pro_transactions'),
- categories: localStorage.getItem('a2financas_pro_categories'),
- budgets: localStorage.getItem('a2financas_pro_budgets'),
+ transactions: localStorage.getItem('a2mentor_pro_transactions'),
+ categories: localStorage.getItem('a2mentor_pro_categories'),
+ budgets: localStorage.getItem('a2mentor_pro_budgets'),
  profile: { name: fullName, company: companyName, avatar: avatarUrl },
  date: new Date().toISOString()
  };
@@ -178,7 +178,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  const url = URL.createObjectURL(blob);
  const a = document.createElement('a');
  a.href = url;
- a.download = `A2Finanças_Backup_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
+ a.download = `A2 Mentor_Backup_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.json`;
  a.click();
  showInternalToast('Backup exportado com sucesso!', 'success');
  } catch (err) {
@@ -195,14 +195,14 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
   try {
   const data = JSON.parse(event.target?.result as string);
   
-  if (data.transactions) localStorage.setItem('a2financas_pro_transactions', data.transactions);
-  if (data.categories) localStorage.setItem('a2financas_pro_categories', data.categories);
-  if (data.budgets) localStorage.setItem('a2financas_pro_budgets', data.budgets);
+  if (data.transactions) localStorage.setItem('a2mentor_pro_transactions', data.transactions);
+  if (data.categories) localStorage.setItem('a2mentor_pro_categories', data.categories);
+  if (data.budgets) localStorage.setItem('a2mentor_pro_budgets', data.budgets);
 
   if (data.profile) {
-  if (data.profile.name) localStorage.setItem('a2financas_user_name', data.profile.name);
-  if (data.profile.company) localStorage.setItem('a2financas_user_company', data.profile.company);
-  if (data.profile.avatar) localStorage.setItem('a2financas_user_avatar', data.profile.avatar);
+  if (data.profile.name) localStorage.setItem('a2mentor_user_name', data.profile.name);
+  if (data.profile.company) localStorage.setItem('a2mentor_user_company', data.profile.company);
+  if (data.profile.avatar) localStorage.setItem('a2mentor_user_avatar', data.profile.avatar);
   }
 
   loadProfile();
@@ -252,7 +252,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter italic uppercase">{fullName || 'Comandante'}</h1>
  <p className="text-xs text-emerald-600 dark:text-[#00d06c] font-black uppercase tracking-[0.4em] flex items-center gap-2">
  <span className="w-2 h-2 bg-emerald-500 dark:bg-[#00d06c] animate-pulse" />
- {companyName || 'A2Finanças System'}
+ {companyName || 'A2 Mentor System'}
  </p>
  </div>
  </div>
@@ -372,7 +372,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  </h2>
  <div className="flex flex-col gap-6">
  <div>
- <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase italic">Alertas A2Finanças</h3>
+ <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase italic">Alertas A2 Mentor</h3>
  <p className="text-emerald-500 dark:text-[#00d06c] text-[10px] font-black uppercase tracking-[0.3em] mt-1 flex items-center gap-2"><CheckCircle2 size={12}/> Sincronização Web Ativa</p>
  <p className="text-xs text-slate-500 dark:text-zinc-500 mt-3 leading-relaxed">
  Cadastre seus contatos para receber relatórios de desempenho e ser alertado sobre contas próximas do vencimento diretamente no seu aparelho.

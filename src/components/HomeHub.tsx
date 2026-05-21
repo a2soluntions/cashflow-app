@@ -5,6 +5,7 @@ import {
   Calendar, AppWindow, Fingerprint, Moon, LogOut,
   ShieldAlert, X, TrendingUp, ShieldCheck, Zap, Newspaper
 } from 'lucide-react';
+import NetworkBackground from './NetworkBackground';
 
 interface HomeHubProps {
   onNavigate: (tabId: string) => void;
@@ -88,18 +89,12 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  return (
  <div className="relative min-h-full w-full flex flex-col items-center justify-start overflow-y-auto overflow-x-hidden bg-transparent custom-scrollbar md:py-8">
  
- {/* EFEITO HONEYCOMB COM GLOW */}
- <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-40">
-  <div className="absolute inset-0" style={{ 
-    backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='69' viewBox='0 0 40 69' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 11.5L40 0v23L20 34.5 0 23V0l20 11.5zM20 46l20-11.5v23L20 69 0 57.5v-23L20 46zM20 23L0 34.5v-23L20 0v23z' fill='none' stroke='${isLight ? '%23000000' : '%23ffffff'}' stroke-width='1.5' stroke-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E")` 
-  }}></div>
-  <div className="absolute inset-0" style={{ 
-    background: isLight 
-      ? `radial-gradient(circle at center, rgba(0, 0, 0, 0.05) 0%, transparent 80%)` 
-      : currentTheme === 'black' || currentTheme === 'black-orange'
-        ? `radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%)` 
-        : `radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%)`
-  }}></div>
+ {/* EFEITO DE PARTÍCULAS EM REDE */}
+ <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-50">
+    <NetworkBackground 
+        particleColor={isLight ? '0, 0, 0' : '255, 255, 255'} 
+        lineColor={isLight ? '0, 0, 0' : '255, 255, 255'} 
+    />
  </div>
 
  {/* 🌌 SISTEMA ORBITAL (DESKTOP) */}
@@ -107,7 +102,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  {/* NÚCLEO CENTRAL */}
  <div className="relative z-50 group transition-all duration-700">
   <div className="flex items-center justify-center transition-all relative">
-    <img src="./icon.png" alt="A2Finanças" className="w-56 h-auto object-contain z-10 transition-transform duration-700 group-hover:scale-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]" />
+    <img src="/icon.png" alt="A2 Mentor" className="w-56 h-56 object-cover z-10 transition-transform duration-700 group-hover:scale-110 drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] rounded-full" />
   </div>
  </div>
 
@@ -144,7 +139,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  <div className={`md:hidden flex flex-col items-center w-full px-3 pt-3 pb-4 transition-all duration-700 z-10 ${showExitConfirm ? 'blur-sm scale-95 opacity-50' : 'animate-in fade-in slide-in-from-bottom-8'}`}>
  <div className="relative mb-3 group shrink-0">
  <div className={`absolute inset-0 blur-3xl rounded-full scale-[2] animate-pulse ${isOrange ? (isLight ? 'bg-orange-400/20' : 'bg-orange-500/20') : (isLight ? 'bg-indigo-400/20' : 'bg-indigo-500/20')}`} />
- <img src="./icon.png" alt="A2Finanças" className="w-14 h-auto object-contain relative z-10" />
+ <img src="/icon.png" alt="A2 Mentor" className="w-14 h-14 object-cover relative z-10 rounded-full" />
  </div>
 
  <div className="grid grid-cols-4 gap-2 w-full">
@@ -186,7 +181,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  Encerrar Sessão?
  </h2>
  <p className={`text-xs font-medium leading-relaxed opacity-60 px-6 mb-8 ${isLight ? 'text-slate-600' : 'text-zinc-400'}`}>
- Você está prestes a fechar o A2Finanças. Certifique-se de que todos os lançamentos foram salvos.
+ Você está prestes a fechar o A2 Mentor. Certifique-se de que todos os lançamentos foram salvos.
  </p>
 
  <div className="flex gap-4 w-full">
@@ -218,7 +213,7 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  <div className={`h-[1px] w-12 ${isLight ? 'bg-slate-300' : 'bg-white/10'}`} />
  </div>
  <div className="flex flex-col items-center gap-0.5">
- <p className={`text-[9px] font-black uppercase tracking-[0.6em] ${isLight ? 'text-slate-900' : 'text-white'}`}>A2Finanças</p>
+ <p className={`text-[9px] font-black uppercase tracking-[0.6em] ${isLight ? 'text-slate-900' : 'text-white'}`}>A2 Mentor</p>
  <p className={`text-[7px] font-bold uppercase tracking-[0.4em] ${isLight ? 'text-slate-400' : isOrange ? 'text-orange-200 opacity-30' : 'text-indigo-200 opacity-30'}`}>
  Desenvolvido por <span className={isLight ? (isOrange ? 'text-orange-600 font-black' : 'text-indigo-600 font-black') : (isOrange ? 'text-orange-400' : 'text-indigo-400')}>A2Solutions</span>
  </p>
