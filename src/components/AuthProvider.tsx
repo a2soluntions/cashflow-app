@@ -81,12 +81,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthContext.Provider value={value}>
       {loading ? (
-        <div className="fixed inset-0 bg-[#1a237e] flex flex-col items-center justify-center z-[9999]">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-white/10 border-t-emerald-400 rounded-full animate-spin" />
-            <img src="/logo.png" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 object-cover mix-blend-screen rounded-full" alt="Loading" />
+        <div className="fixed inset-0 flex flex-col items-center justify-center z-[9999] overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #0D0E1A 0%, #141527 50%, #0D0E1A 100%)' }}>
+          {/* Glow de fundo */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full opacity-10"
+              style={{ background: 'radial-gradient(circle, #6C63FF 0%, transparent 70%)' }} />
           </div>
-          <p className="mt-6 text-white/40 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">Sincronizando A2 Mentor</p>
+
+          {/* Spinner + Logo */}
+          <div className="relative mb-8">
+            {/* Anel externo */}
+            <div className="w-24 h-24 rounded-full animate-spin"
+              style={{ border: '2px solid transparent', borderTopColor: '#6C63FF', borderRightColor: 'rgba(108,99,255,0.2)' }} />
+            {/* Anel interno */}
+            <div className="absolute inset-2 rounded-full animate-spin"
+              style={{ border: '2px solid transparent', borderBottomColor: '#00D4AA', animationDirection: 'reverse', animationDuration: '0.8s' }} />
+            {/* Logo */}
+            <img
+              src="/logo.png"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 object-cover mix-blend-screen rounded-full"
+              alt="A2 Mentor"
+            />
+          </div>
+
+          {/* Texto */}
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-white font-black uppercase tracking-[0.5em] text-xs animate-pulse"
+              style={{ letterSpacing: '0.4em' }}>A2 Mentor</p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.25em] animate-pulse"
+              style={{ color: '#7B7FA3' }}>Carregando seu painel...</p>
+          </div>
+
+          {/* Barra de progresso animada */}
+          <div className="mt-8 w-48 h-0.5 overflow-hidden" style={{ background: 'rgba(108,99,255,0.15)' }}>
+            <div className="h-full animate-shimmer" style={{ background: 'linear-gradient(90deg, transparent, #6C63FF, #00D4AA, transparent)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s linear infinite' }} />
+          </div>
         </div>
       ) : children}
     </AuthContext.Provider>

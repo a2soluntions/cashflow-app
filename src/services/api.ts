@@ -69,14 +69,14 @@ class ApiService {
       } catch (err: any) {
         if (err.message && err.message.includes('fetch')) {
           // Fallback pra fila offline se foi timeout/rede
-          this.saveToOfflineQueue({ id: Math.random().toString(), table, method, payload, timestamp: Date.now() });
+          this.saveToOfflineQueue({ id: crypto.randomUUID(), table, method, payload, timestamp: Date.now() });
         } else {
           console.error("Erro na mutação de BD:", err);
           throw err;
         }
       }
     } else {
-      this.saveToOfflineQueue({ id: Math.random().toString(), table, method, payload, timestamp: Date.now() });
+      this.saveToOfflineQueue({ id: crypto.randomUUID(), table, method, payload, timestamp: Date.now() });
     }
   }
 

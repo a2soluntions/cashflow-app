@@ -160,140 +160,198 @@ export default function BillsManager({ mode = 'normal' }: BillsManagerProps) {
  };
 
  return (
- <div className="min-h-full w-full flex flex-col gap-4 font-sans">
-  
-  <CustomAlert 
-    isOpen={errorAlert.isOpen}
-    onClose={() => setErrorAlert(prev => ({ ...prev, isOpen: false }))}
-    title={errorAlert.title}
-    message={errorAlert.message}
-    type="error"
-  />
+  <div className="min-h-full w-full flex flex-col gap-4 font-sans p-2">
+   
+   <CustomAlert 
+     isOpen={errorAlert.isOpen}
+     onClose={() => setErrorAlert(prev => ({ ...prev, isOpen: false }))}
+     title={errorAlert.title}
+     message={errorAlert.message}
+     type="error"
+   />
 
-  <div className="flex justify-between items-end shrink-0 px-2 h-[8%] min-h-[60px]">
-  <div>
-  <div className="flex items-center gap-2 mb-1">
-  <div className={`w-2 h-2 rounded-full animate-pulse ${activeTab === 'expense' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'} `}/>
-  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-white/60">
-  {mode === 'overdue' ? 'Alertas de Atraso Ativo' : 'Gestão de Vencimentos'}
-  </span>
-  <span className="text-[8px] bg-white/10 px-1.5 py-0.5 rounded text-white/40 ml-2">v2.9</span>
-  </div>
-  <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-  {activeTab === 'expense' ? 'Contas a Pagar' : 'Valores a Receber'}
-  </h2>
-  </div>
+   {/* 🔝 CABEÇALHO */}
+    <div className="flex justify-between items-center shrink-0">
+    <div>
+      <h2 className="text-xl font-black tracking-tight flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+        {activeTab === 'expense' ? 'Contas a Pagar' : 'Valores a Receber'}
+      </h2>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        {mode === 'overdue' ? 'Alertas de Atraso Ativo' : 'Gestão de Vencimentos'}
+      </p>
+    </div>
 
-  <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-xl ">
-  <button onClick={() => setActiveTab('expense')} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'expense' ? 'bg-white text-rose-600 dark:bg-rose-500 dark:text-white shadow-lg' : 'text-slate-400 dark:text-white/40'}`}><ArrowDownCircle size={12} /> A Pagar</button>
-  <button onClick={() => setActiveTab('income')} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'income' ? 'bg-white text-emerald-600 dark:bg-emerald-500 dark:text-white shadow-lg' : 'text-slate-400 dark:text-white/40'}`}><ArrowUpCircle size={12} /> A Receber</button>
-  </div>
-  </div>
+    <div className="flex items-center gap-1 p-1" style={{ background: 'var(--bg-surface)', border: '1px solid var(--bg-border)', borderRadius: '12px' }}>
+      <button onClick={() => setActiveTab('expense')} 
+        className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5"
+        style={{
+          background: activeTab === 'expense' ? '#FF4757' : 'transparent',
+          color: activeTab === 'expense' ? '#fff' : 'var(--text-muted)',
+        }}>
+        <ArrowDownCircle size={11} /> A Pagar
+      </button>
+      <button onClick={() => setActiveTab('income')} 
+        className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5"
+        style={{
+          background: activeTab === 'income' ? '#00D4AA' : 'transparent',
+          color: activeTab === 'income' ? '#fff' : 'var(--text-muted)',
+        }}>
+        <ArrowUpCircle size={11} /> A Receber
+      </button>
+    </div>
+    </div>
 
-  <div className="flex-1 min-h-0 grid grid-cols-12 gap-6 pb-4">
-  <div className="col-span-12 md:col-span-4 flex flex-col gap-4 min-h-0">
-  <div className={`p-6 relative overflow-hidden bg-white/5 border border-white/5 rounded-2xl`}>
-  <div className={`absolute top-0 right-0 p-32 rounded-full blur-[80px] opacity-20 ${activeTab === 'expense' ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Total Pendente</p>
-  <h1 className={`text-3xl font-black tracking-tighter ${activeTab === 'expense' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>{formatCurrency(totalValue)}</h1>
-  </div>
+    {/* ⚡ CONTEÚDO PRINCIPAL */}
+    <div className="flex-1 min-h-0 grid grid-cols-12 gap-4 pb-2">
+      <div className="col-span-12 md:col-span-4 flex flex-col gap-4 min-h-0 shrink-0">
+        
+        {/* Card Resumo Valor */}
+        <div className="p-6 relative overflow-hidden"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '24px', boxShadow: 'var(--shadow-card)' }}>
+          <div className="absolute -top-16 -right-16 w-48 h-48 pointer-events-none"
+            style={{ background: `radial-gradient(circle, ${activeTab === 'expense' ? 'rgba(255,71,87,0.12)' : 'rgba(0,212,170,0.12)'} 0%, transparent 70%)` }} />
+          <p className="text-[10px] font-black uppercase tracking-widest mb-2 relative z-10" style={{ color: 'var(--text-muted)' }}>Total Pendente</p>
+          <h1 className="text-3xl font-black tracking-tighter relative z-10" style={{ color: activeTab === 'expense' ? '#FF4757' : '#00D4AA' }}>
+            {formatCurrency(totalValue)}
+          </h1>
+        </div>
 
-  <div className="flex-1 p-6 flex flex-col gap-4 min-h-0 bg-white/5 border border-white/5 rounded-2xl">
-  <div className="relative group shrink-0">
-  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Buscar conta..." className="w-full pl-10 pr-4 py-3 rounded-xl text-xs font-bold uppercase bg-slate-50 dark:bg-white/5 dark:text-white outline-none" />
-  </div>
-  <div className="mt-auto p-4 rounded-xl bg-indigo-500/10 flex gap-3 items-start border border-indigo-500/20">
-  <AlertCircle size={20} className="text-indigo-500 mt-0.5"/>
-  <div><p className="text-[9px] font-black uppercase text-indigo-500 mb-1">Dica Pro</p><p className="text-[9px] text-slate-500 dark:text-white/60 leading-relaxed">Confirme o pagamento para mover ao histórico.</p></div>
-  </div>
-  </div>
-  </div>
+        {/* Busca */}
+        <div className="p-4 flex flex-col justify-center"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '20px', boxShadow: 'var(--shadow-card)' }}>
+          <div className="relative group">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input 
+              type="text" 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+              placeholder="BUSCAR CONTA..." 
+              className="w-full pl-9 pr-3 py-2.5 text-[10px] font-black uppercase tracking-wider outline-none rounded-lg text-slate-900 dark:text-white" 
+              style={{ background: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}
+            />
+          </div>
+        </div>
 
-  <div className="col-span-12 md:col-span-8 p-6 flex flex-col min-h-0 bg-white/5 border border-white/5 rounded-2xl">
-  <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
-  {filteredBills.length === 0 ? (
-  <div className="h-full flex flex-col items-center justify-center opacity-40">
-  <CheckCircle2 size={40} className={`mb-3 ${activeTab === 'expense' ? 'text-rose-300' : 'text-emerald-300'}`} />
-  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tudo em dia!</p>
-  </div>
-  ) : (
-  filteredBills.map((bill) => {
-  const isOverdue = new Date(bill.date) < new Date() && new Date(bill.date).toDateString() !== new Date().toDateString();
-  return (
-  <div key={bill.id} className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-transparent hover:border-white/10 transition-all">
-  <div className="flex items-center gap-4">
-  <div className={`flex flex-col items-center justify-center w-12 h-12 rounded-xl border ${isOverdue ? 'bg-rose-500/20 border-rose-500/30 text-rose-400' : 'bg-white/5 border-white/5 text-white/60'}`}>
-  <span className="text-[9px] font-black uppercase">{formatDate(bill.date).split('/')[1]}</span>
-  <span className="text-sm font-black">{formatDate(bill.date).split('/')[0]}</span>
-  </div>
-  <div>
-  <h4 className="text-xs font-black text-white uppercase mb-0.5">{bill.description}</h4>
-  <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 bg-white/5 px-1.5 py-0.5 rounded">{bill.category}</span>
-  {isOverdue && <span className="ml-2 text-[8px] font-black uppercase text-rose-400 animate-pulse">Atrasado</span>}
-  </div>
-  </div>
-  <div className="flex items-center gap-2">
-  <span className={`text-sm font-black mr-2 ${activeTab === 'expense' ? 'text-rose-500' : 'text-emerald-500'}`}>{formatCurrency(bill.amount)}</span>
-  <button onClick={() => handleOpenPayment(bill)} className="p-3 rounded-xl bg-white/5 hover:bg-emerald-500 hover:text-black transition-all"><CheckCircle2 size={18} /></button>
-  </div>
-  </div>
-  );
-  })
-  )}
-  </div>
-  </div>
-  </div>
+        {/* Dica Pro */}
+        <div className="p-4 flex gap-3 items-start border"
+          style={{ background: 'var(--bg-card)', borderColor: 'var(--bg-border)', borderRadius: '20px' }}>
+          <AlertCircle size={16} style={{ color: '#6C63FF' }} className="mt-0.5 shrink-0" />
+          <div>
+            <p className="text-[9px] font-black uppercase mb-1" style={{ color: '#6C63FF' }}>Dica de Gestão</p>
+            <p className="text-[9px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Confirme o pagamento de cada conta para registrá-las no histórico realizado.</p>
+          </div>
+        </div>
+      </div>
 
-  {isPaymentModalOpen && selectedBill && (
-  <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-  <div className="w-full max-w-sm bg-[#18181b] border border-white/10 rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-300">
-  <div className="flex justify-between items-center mb-6">
-  <h4 className="text-emerald-500 font-black uppercase tracking-widest text-[10px]">Confirmar Pagamento</h4>
-  <button onClick={() => setIsPaymentModalOpen(false)} className="text-white/40 hover:text-white"><X size={18} /></button>
-  </div>
+      {/* DIREITA: Lista de Contas */}
+      <div className="col-span-12 md:col-span-8 p-5 flex flex-col min-h-0"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '24px', boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
+          {filteredBills.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center opacity-40">
+              <CheckCircle2 size={36} style={{ color: activeTab === 'expense' ? '#FF4757' : '#00D4AA' }} className="mb-3" />
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Tudo em dia por aqui!</p>
+            </div>
+          ) : (
+            filteredBills.map((bill) => {
+              const isOverdue = new Date(bill.date) < new Date() && new Date(bill.date).toDateString() !== new Date().toDateString();
+              return (
+                <div key={bill.id} className="flex items-center justify-between p-3"
+                  style={{ borderBottom: '1px solid var(--bg-border)' }}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    {/* Calendário miniatura */}
+                    <div className="flex flex-col items-center justify-center w-10 h-10 rounded-lg shrink-0"
+                      style={{ 
+                        background: isOverdue ? 'rgba(255,71,87,0.1)' : 'var(--bg-surface)', 
+                        border: `1.5px solid ${isOverdue ? 'rgba(255,71,87,0.3)' : 'var(--bg-border)'}`, 
+                        color: isOverdue ? '#FF4757' : 'var(--text-muted)' 
+                      }}>
+                      <span className="text-[8px] font-bold uppercase">{formatDate(bill.date).split('/')[1]}</span>
+                      <span className="text-xs font-black">{formatDate(bill.date).split('/')[0]}</span>
+                    </div>
 
-  <div className="space-y-5 mb-8">
-  <div className="flex justify-between gap-3">
-  <div className="flex-1 p-3 bg-white/5 rounded-2xl border border-white/5">
-  <p className="text-[8px] font-black uppercase text-slate-500 mb-1">Original</p>
-  <p className="text-xs font-black text-white">{formatCurrency(selectedBill.amount)}</p>
-  </div>
-  {interestAmount > 0 && (
-  <div className="flex-1 p-3 bg-rose-500/10 rounded-2xl border border-rose-500/20 animate-in slide-in-from-right-4 duration-300">
-  <p className="text-[8px] font-black uppercase text-rose-500 mb-1 flex items-center gap-1"><TrendingUp size={10}/> Juros (+{interestPercent.toFixed(1)}%)</p>
-  <p className="text-xs font-black text-rose-500">+{formatCurrency(interestAmount)}</p>
-  </div>
-  )}
-  </div>
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-black uppercase truncate" style={{ maxWidth: '280px', color: 'var(--text-primary)' }}>{bill.description}</h4>
+                      <div className="flex items-center gap-1.5 text-[8px] font-bold uppercase tracking-widest mt-0.5">
+                        <span style={{ color: 'var(--text-muted)' }}>{bill.category}</span>
+                        {isOverdue && (
+                          <>
+                            <span style={{ color: '#FF4757' }}>•</span>
+                            <span style={{ color: '#FF4757' }} className="animate-pulse">ATRASADO</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
-  <div className="p-5 bg-black border border-white/5 rounded-2xl">
-  <label className="text-[9px] font-black uppercase text-slate-500 mb-2 block">Quanto você pagou no total?</label>
-  <div className="relative">
-  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-sm">R$</span>
-  <input 
-  type="text" 
-  autoFocus
-  value={totalPaid} 
-  onChange={(e) => setTotalPaid(e.target.value)} 
-  placeholder="0,00" 
-  className="w-full bg-transparent p-4 pl-12 text-xl font-black text-white outline-none" 
-  />
-  </div>
-  </div>
-  
-  <p className="text-[8px] text-slate-500 font-bold uppercase italic text-center">
-  * O histórico será registrado com o valor de {formatCurrency(currentTotalPaid)}
-  </p>
-  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-black" style={{ color: activeTab === 'expense' ? '#FF4757' : '#00D4AA' }}>{formatCurrency(bill.amount)}</span>
+                    <button onClick={() => handleOpenPayment(bill)} 
+                      className="p-2 rounded-lg transition-all"
+                      style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)' }}>
+                      <CheckCircle2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+       </div>
+     </div>
+   </div>
 
-  <button disabled={isProcessing} onClick={handleConfirmPayment} className="w-full py-4 bg-emerald-500 text-black font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-emerald-400 transition-all active:scale-95 flex items-center justify-center gap-2">
-  {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-  {isProcessing ? 'PROCESSANDO...' : 'CONFIRMAR PAGAMENTO'}
-  </button>
+   {/* Modal de Pagamento */}
+   {isPaymentModalOpen && selectedBill && (
+     <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+       <div className="w-full max-w-sm bg-[#10111A] border border-white/10 rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-300">
+         <div className="flex justify-between items-center mb-6">
+           <h4 className="text-[#00D4AA] font-black uppercase tracking-widest text-[9px]">Confirmar Pagamento</h4>
+           <button onClick={() => setIsPaymentModalOpen(false)} className="text-slate-500 hover:text-white"><X size={16} /></button>
+         </div>
+
+         <div className="space-y-4 mb-6">
+           <div className="flex justify-between gap-3">
+             <div className="flex-1 p-3 rounded-2xl border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}>
+               <p className="text-[8px] font-black uppercase text-slate-500 mb-1">Original</p>
+               <p className="text-xs font-black text-white">{formatCurrency(selectedBill.amount)}</p>
+             </div>
+             {interestAmount > 0 && (
+               <div className="flex-1 p-3 rounded-2xl border bg-rose-500/10 border-rose-500/20 animate-in slide-in-from-right-4 duration-300">
+                 <p className="text-[8px] font-black uppercase text-[#FF4757] mb-1 flex items-center gap-1"><TrendingUp size={10}/> Juros (+{interestPercent.toFixed(1)}%)</p>
+                 <p className="text-xs font-black text-[#FF4757]">+{formatCurrency(interestAmount)}</p>
+               </div>
+             )}
+           </div>
+
+           <div className="p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)' }}>
+             <label className="text-[9px] font-black uppercase text-slate-500 mb-1.5 block">Valor Total Pago</label>
+             <div className="relative flex items-center">
+               <span className="text-slate-500 font-bold text-sm absolute left-1">R$</span>
+               <input 
+                 type="text" 
+                 autoFocus
+                 value={totalPaid} 
+                 onChange={(e) => setTotalPaid(e.target.value)} 
+                 placeholder="0,00" 
+                 className="w-full bg-transparent py-2 pl-7 text-lg font-black text-white outline-none" 
+               />
+             </div>
+           </div>
+           
+           <p className="text-[7px] text-slate-500 font-bold uppercase italic text-center">
+             * A transação será consolidada com o valor de {formatCurrency(currentTotalPaid)}
+           </p>
+         </div>
+
+         <button disabled={isProcessing} onClick={handleConfirmPayment} 
+           className="w-full py-3.5 text-black font-black uppercase text-[9px] tracking-widest rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2"
+           style={{ background: 'linear-gradient(135deg, #6C63FF, #00D4AA)' }}>
+           {isProcessing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+           {isProcessing ? 'PROCESSANDO...' : 'CONFIRMAR PAGAMENTO'}
+         </button>
+       </div>
+     </div>
+   )}
   </div>
-  </div>
-  )}
- </div>
  );
 }

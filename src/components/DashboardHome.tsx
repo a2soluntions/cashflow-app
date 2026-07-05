@@ -55,11 +55,11 @@ const ModernSlider = ({ value, label, color }: { value: number, label: string, c
 };
 
 export const DONUT_GRADIENTS = [
-  { id: 'grad0', from: '#FF5722', to: '#FF8A00', css: 'linear-gradient(to right, #FF5722, #FF8A00)' },
-  { id: 'grad1', from: '#00E676', to: '#10B981', css: 'linear-gradient(to right, #00E676, #10B981)' },
-  { id: 'grad2', from: '#D500F9', to: '#9C27B0', css: 'linear-gradient(to right, #D500F9, #9C27B0)' },
-  { id: 'grad3', from: '#FF5722', to: '#D500F9', css: 'linear-gradient(to right, #FF5722, #D500F9)' },
-  { id: 'grad4', from: '#00E676', to: '#D500F9', css: 'linear-gradient(to right, #00E676, #D500F9)' },
+  { id: 'grad0', from: '#6C63FF', to: '#8B84FF', css: 'linear-gradient(to right, #6C63FF, #8B84FF)' },  // violeta premium
+  { id: 'grad1', from: '#00D4AA', to: '#00EDBC', css: 'linear-gradient(to right, #00D4AA, #00EDBC)' },  // verde-água
+  { id: 'grad2', from: '#FFD60A', to: '#FF9F43', css: 'linear-gradient(to right, #FFD60A, #FF9F43)' },  // âmbar
+  { id: 'grad3', from: '#FF4757', to: '#C0392B', css: 'linear-gradient(to right, #FF4757, #C0392B)' },  // danger
+  { id: 'grad4', from: '#6C63FF', to: '#00D4AA', css: 'linear-gradient(to right, #6C63FF, #00D4AA)' },  // grad principal
 ];
 
 const DonutChart = ({ data, color, size = 100, centerValue, centerLabel }: { data: any[], color: string, size?: number, centerValue?: string | number, centerLabel?: string }) => {
@@ -267,270 +267,332 @@ export default function DashboardHome({ transactions, categories = [] }: Dashboa
  };
 
  return (
-  <div className="w-full h-auto flex flex-col gap-1 font-sans bg-transparent px-3 py-1">
- <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
- 
- <CustomAlert 
-   isOpen={overdueAlert.isOpen}
-   onClose={() => setOverdueAlert(prev => ({ ...prev, isOpen: false }))}
-   title="Atenção: Contas Atrasadas"
-   message={`Você possui ${overdueAlert.count} conta(s) que já venceram. Recomendamos regularizar para evitar juros.`}
-   type="warning"
-   confirmText="Revisar Agora"
- />
+  <div className="w-full flex flex-col gap-4 font-sans px-2 py-2 animate-in fade-in duration-500">
+    <style>{`.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}`}</style>
 
-  {/* HEADER & TOGGLE */}
-  <div className="flex justify-between items-center shrink-0 mb-1">
-  <h1 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2 italic text-slate-900 dark:text-white">
-  <Activity size={20} className="text-emerald-500" /> Cockpit
-  </h1>
-  <div className="flex bg-[#09090b] p-0.5 rounded-lg border border-slate-200 dark:border-white/5 items-center">
-  {viewMode === 'monthly' && (
-    <>
-      <select 
-        value={selectedMonth} 
-        onChange={(e) => setSelectedMonth(Number(e.target.value))}
-        className="pl-3 pr-2 py-1.5 text-[10px] font-black uppercase tracking-widest bg-transparent text-emerald-500 outline-none cursor-pointer hover:text-emerald-400"
-      >
-        {['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'].map((m, i) => (
-          <option key={i} value={i + 1} className="bg-[#09090b] text-slate-900 dark:text-white">{m}</option>
-        ))}
-      </select>
-      <div className="w-[1px] h-4 bg-white/10 mx-0.5"></div>
-    </>
-  )}
-  <button onClick={() => setViewMode('monthly')} className={`px-5 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all rounded-md ${viewMode === 'monthly' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-slate-900 dark:text-white'}`}>Mensal</button>
-  <button onClick={() => setViewMode('yearly')} className={`px-5 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all rounded-md ${viewMode === 'yearly' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-slate-900 dark:text-white'}`}>Anual</button>
-  </div>
-  </div>
+    <CustomAlert
+      isOpen={overdueAlert.isOpen}
+      onClose={() => setOverdueAlert(prev => ({ ...prev, isOpen: false }))}
+      title="Atenção: Contas Atrasadas"
+      message={`Você possui ${overdueAlert.count} conta(s) que já venceram. Recomendamos regularizar para evitar juros.`}
+      type="warning"
+      confirmText="Revisar Agora"
+    />
 
-  {/* METAS HORIZONTAIS */}
-  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0 mb-1 bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none p-1 rounded-xl border border-slate-200 dark:border-white/5">
-  <div className="flex flex-col shrink-0 border-r border-white/10 pr-4 mr-2">
-  <div className="flex items-center gap-1.5 text-slate-400">
-  <Target size={14} className="text-emerald-500"/><span className="text-[10px] font-black uppercase tracking-widest">Metas</span>
-  </div>
-  <p className="text-[9px] font-bold text-slate-500 uppercase">Teto</p>
-  </div>
-  <div className="flex gap-2 min-w-0">
-  {financialData.budgetStatus.length === 0 ? (
-  <div className="flex items-center gap-2 opacity-40">
-  <CheckCircle2 size={12} className="text-slate-400" />
-  <p className="text-[9px] uppercase font-black text-slate-400">Nenhum Teto</p>
-  </div>
-  ) : financialData.budgetStatus.map((budget, i) => (
-  <div key={i} className={`px-4 py-2 rounded-lg flex items-center gap-4 shrink-0 transition-all border border-slate-200 dark:border-white/5 relative overflow-hidden ${budget.isOver ? 'bg-rose-500/10' : 'bg-emerald-500/10'}`}>
-  <div className="absolute inset-0 opacity-10" style={{width: `${Math.min(budget.percent, 100)}%`, backgroundColor: budget.isOver ? '#f43f5e' : '#10b981'}} />
-  <span className="text-[10px] font-black uppercase text-slate-900 dark:text-white truncate max-w-[90px] z-10">{budget.category}</span>
-  <span className={`text-[12px] font-black z-10 ${budget.isOver ? 'text-rose-500' : 'text-emerald-500'}`}>{budget.percent.toFixed(0)}%</span>
-  </div>
-  ))}
-  </div>
- </div>
-
-  {/* M É T R I C A S   S U P E R I O R E S */}
-  <div className="grid grid-cols-12 gap-2 mb-1 shrink-0">
-    {/* DISTRIBUIÇÃO */}
-    <div className="col-span-12 lg:col-span-3 p-3 bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none border border-slate-200 dark:border-white/5 rounded-xl flex flex-col min-h-[220px]">
-      <div className="flex-1 flex flex-col items-center justify-center p-1">
-        <div className="flex items-center gap-1.5 text-brand-purple mb-2"><Percent size={16} /><span className="text-[10px] font-black uppercase tracking-widest">Distribuição</span></div>
-        <DonutChart data={financialData.categoryImpact} color="#D500F9" size={130} />
+    {/* ── HEADER ─────────────────────────────────── */}
+    <div className="flex justify-between items-center">
+      <div>
+        <h1 className="text-xl font-black tracking-tight flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+          <Activity size={18} style={{ color: '#00D4AA' }} /> Cockpit Financeiro
+        </h1>
+        <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Visão geral das suas finanças</p>
       </div>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 p-2 border-t border-slate-200 dark:border-white/5 mt-1 shrink-0 overflow-y-auto no-scrollbar max-h-[60px]">
-        {financialData.categoryImpact.map((item, i) => {
-          const bg = DONUT_GRADIENTS[i % DONUT_GRADIENTS.length].css;
-          return (
-            <div key={i} className="flex justify-between items-center text-[9px] font-black uppercase">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{backgroundImage: bg}} />
-                <span className="truncate">{item.category}</span>
-              </div>
-              <span className="text-slate-900 dark:text-white opacity-40 ml-1">{item.percent.toFixed(0)}%</span>
-            </div>
-          );
-        })}
+      <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}>
+        {viewMode === 'monthly' && (
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            className="pl-2 pr-1 py-1 text-[10px] font-black uppercase tracking-widest bg-transparent outline-none cursor-pointer"
+            style={{ color: '#00D4AA' }}
+          >
+            {['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'].map((m, i) => (
+              <option key={i} value={i + 1} style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)' }}>{m}</option>
+            ))}
+          </select>
+        )}
+        {['monthly','yearly'].map(m => (
+          <button key={m} onClick={() => setViewMode(m as any)}
+            className="px-3 py-1 text-[9px] font-black uppercase tracking-widest transition-all rounded-lg"
+            style={{
+              background: viewMode === m ? 'linear-gradient(135deg,#6C63FF,#00D4AA)' : 'transparent',
+              color: viewMode === m ? '#fff' : 'var(--text-muted)',
+            }}>
+            {m === 'monthly' ? 'Mensal' : 'Anual'}
+          </button>
+        ))}
       </div>
     </div>
 
-    {/* PROGRESS SLIDERS E SAÚDE (CENTRAL) */}
-    <div className="col-span-12 lg:col-span-6 flex flex-col gap-2">
-      <div className="flex justify-around items-center flex-1 bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none border border-slate-200 dark:border-white/5 rounded-xl p-2 min-h-[220px] overflow-x-auto no-scrollbar">
-        {[
-          { value: financialData.healthScore, label: 'Saúde', color: '#00E676', icon: Activity },
-          { value: financialData.expenseRatio, label: 'Uso Renda', color: '#FF5722', icon: Wallet },
-          { value: financialData.debtRatio, label: 'Dívida', color: '#FF8A00', icon: Skull },
-          { value: financialData.savingsRate, label: 'Retenção', color: '#D500F9', icon: Target },
-        ].map((metric, i) => (
-          <div key={i} className="flex flex-col items-center justify-center shrink-0 min-w-[90px]">
-            <div className="flex items-center gap-1 text-slate-900 dark:text-slate-600 dark:text-white/70 mb-2">
-              <metric.icon size={12} style={{color: metric.color}} />
-              <span className="text-[9px] font-black uppercase tracking-widest">{metric.label}</span>
+    {/* ── LINHA 1: SALDO + MÉTRICAS ─────────────── */}
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+      {/* Card Saldo Principal */}
+      <div className="relative p-6 overflow-hidden xl:col-span-1"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '24px', boxShadow: 'var(--shadow-card)' }}>
+        <div className="absolute -top-16 -right-16 w-48 h-48 pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${financialData.balance >= 0 ? 'rgba(0,212,170,0.15)' : 'rgba(255,71,87,0.15)'} 0%, transparent 70%)` }} />
+        <div className="flex items-center justify-between mb-6 relative z-10">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 flex items-center justify-center rounded-xl" style={{ background: 'rgba(108,99,255,0.12)' }}>
+              <Wallet size={18} style={{ color: '#6C63FF' }} />
             </div>
-            <DonutChart 
-              data={[{ percent: metric.value }]} 
-              color={metric.color} 
-              size={110} 
-              centerValue={metric.value.toFixed(0)} 
-              centerLabel="%" 
-            />
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Saldo Atual</p>
+              <p className="text-[8px]" style={{ color: 'var(--text-subtle)' }}>Todas as contas</p>
+            </div>
+          </div>
+          <span className="text-xs font-black px-2 py-1 rounded-md"
+            style={{
+              background: financialData.balance >= 0 ? 'rgba(0,212,170,0.1)' : 'rgba(255,71,87,0.1)',
+              color: financialData.balance >= 0 ? '#00D4AA' : '#FF4757',
+              border: `1px solid ${financialData.balance >= 0 ? 'rgba(0,212,170,0.2)' : 'rgba(255,71,87,0.2)'}`,
+            }}>
+            {financialData.balance >= 0 ? '▲' : '▼'} {viewMode === 'monthly' ? 'Mês' : 'Ano'}
+          </span>
+        </div>
+        <h2 className="text-4xl font-black tracking-tighter relative z-10"
+          style={{ color: financialData.balance >= 0 ? 'var(--text-primary)' : '#FF4757' }}>
+          {formatCurrency(financialData.balance)}
+        </h2>
+        <div className="mt-4 pt-4 relative z-10" style={{ borderTop: '1px solid var(--bg-border)' }}>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>Entradas</p>
+              <p className="text-sm font-black" style={{ color: '#00D4AA' }}>{formatCurrency(financialData.income)}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>Saídas</p>
+              <p className="text-sm font-black" style={{ color: '#FF4757' }}>{formatCurrency(financialData.expense)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cards de Métricas (4 donuts) */}
+      <div className="xl:col-span-2 relative p-5 overflow-hidden"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '24px', boxShadow: 'var(--shadow-card)' }}>
+        <div className="absolute -top-16 -left-16 w-48 h-48 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(108,99,255,0.08) 0%, transparent 70%)' }} />
+        <p className="text-[10px] font-black uppercase tracking-widest mb-4 relative z-10" style={{ color: 'var(--text-muted)' }}>Indicadores Financeiros</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 relative z-10">
+          {[
+            { value: financialData.healthScore,  label: 'Saúde',     color: '#00D4AA', icon: Activity   },
+            { value: financialData.expenseRatio, label: 'Uso Renda', color: '#FF4757', icon: Wallet     },
+            { value: financialData.debtRatio,    label: 'Dívida',    color: '#FFD60A', icon: Skull      },
+            { value: financialData.savingsRate,  label: 'Retenção',  color: '#6C63FF', icon: Target     },
+          ].map((m, i) => (
+            <div key={i} className="flex flex-col items-center p-3"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px' }}>
+              <div className="flex items-center gap-1 mb-2">
+                <m.icon size={11} style={{ color: m.color }} />
+                <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>{m.label}</span>
+              </div>
+              <DonutChart data={[{ percent: m.value }]} color={m.color} size={90} centerValue={m.value.toFixed(0)} centerLabel="%" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    {/* ── LINHA 2: FLUXO + STATS ────────────────── */}
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+      {/* Gráfico de Fluxo */}
+      <div className="relative p-5 overflow-hidden"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '24px', boxShadow: 'var(--shadow-card)', minHeight: 200 }}>
+        <div className="absolute -bottom-10 -right-10 w-40 h-40 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(0,212,170,0.08) 0%, transparent 70%)' }} />
+        <div className="flex items-center justify-between mb-3 relative z-10">
+          <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+            <Activity size={13} style={{ color: '#00D4AA' }} />
+            {viewMode === 'monthly' ? 'Fluxo Diário' : 'Fluxo Mensal'}
+          </span>
+          <div className="flex gap-3 text-[8px] font-bold" style={{ color: 'var(--text-muted)' }}>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 inline-block" style={{ background: '#00D4AA', borderRadius: '50%' }} />Entrada</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 inline-block" style={{ background: '#FF4757', borderRadius: '50%' }} />Saída</span>
+          </div>
+        </div>
+        <div className="relative z-10" style={{ height: 130 }}>
+          <svg viewBox="0 0 100 30" className="w-full h-full overflow-visible" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad-in-new" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#00D4AA" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="#00D4AA" stopOpacity="0.02" />
+              </linearGradient>
+              <linearGradient id="grad-out-new" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#FF4757" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="#FF4757" stopOpacity="0.02" />
+              </linearGradient>
+            </defs>
+            <path d={getAreaPath(financialData.chartData, 'in')} fill="url(#grad-in-new)" />
+            <path d={getAreaPath(financialData.chartData, 'out')} fill="url(#grad-out-new)" />
+            <path d={getLinePath(financialData.chartData, 'in')} fill="none" stroke="#00D4AA" strokeWidth="0.5" strokeLinejoin="round" />
+            <path d={getLinePath(financialData.chartData, 'out')} fill="none" stroke="#FF4757" strokeWidth="0.5" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div className="flex justify-between mt-1 relative z-10">
+          {financialData.chartData.filter((_, i) => i % Math.ceil(financialData.chartData.length / 6) === 0 || i === financialData.chartData.length - 1).map((d, i) => (
+            <span key={i} className="text-[7px] font-bold uppercase" style={{ color: 'var(--text-subtle)' }}>{d.label}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* Grid de stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {[
+          { label: 'Saldo',    val: financialData.balance,                icon: Wallet,      color: '#6C63FF' },
+          { label: 'Fluxo',   val: financialData.cashFlow,               icon: ArrowUpRight, color: '#00D4AA' },
+          { label: 'Entradas',val: financialData.income,                  icon: TrendingUp,  color: '#00D4AA' },
+          { label: 'Saídas',  val: financialData.expense,                 icon: TrendingDown, color: '#FF4757' },
+          { label: 'Retenção',val: `${financialData.savingsRate.toFixed(1)}%`, icon: Percent, color: '#6C63FF' },
+          { label: 'Juros',   val: financialData.totalInterest,           icon: Flame,       color: '#FFD60A' },
+        ].map((card, i) => (
+          <div key={i} className="flex flex-col justify-center p-4 transition-all hover:-translate-y-0.5"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '18px', boxShadow: 'var(--shadow-card)' }}>
+            <div className="flex items-center gap-1.5 mb-2">
+              <card.icon size={12} style={{ color: card.color }} />
+              <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>{card.label}</p>
+            </div>
+            <h3 className="text-sm font-black" style={{ color: card.color }}>
+              {typeof card.val === 'number' ? formatCurrency(card.val) : card.val}
+            </h3>
           </div>
         ))}
       </div>
     </div>
 
-    {/* VILÕES */}
-    <div className="col-span-12 lg:col-span-3 p-3 bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none border border-slate-200 dark:border-white/5 rounded-xl flex flex-col min-h-[220px]">
-      <div className="flex-1 flex flex-col items-center justify-center p-1">
-        <div className="flex items-center gap-1.5 text-brand-orange mb-2"><Skull size={16} /><span className="text-[10px] font-black uppercase tracking-widest">Vilões</span></div>
-        <DonutChart data={financialData.villains} color="#FF5722" size={130} />
-      </div>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 p-2 border-t border-slate-200 dark:border-white/5 mt-1 shrink-0 overflow-y-auto no-scrollbar max-h-[60px]">
-        {financialData.villains.map((v, i) => {
-          const bg = DONUT_GRADIENTS[i % DONUT_GRADIENTS.length].css;
-          return (
-            <div key={i} className="flex justify-between items-center text-[9px] font-black uppercase">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{backgroundImage: bg}} />
-                <span className="truncate">{v.category}</span>
+    {/* ── LINHA 3: DISTRIBUIÇÃO + VILÕES + VENCIMENTOS ── */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+      {/* Distribuição */}
+      <div className="relative p-5 overflow-hidden"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '24px', boxShadow: 'var(--shadow-card)' }}>
+        <div className="absolute -top-12 -left-12 w-40 h-40 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(108,99,255,0.1) 0%, transparent 70%)' }} />
+        <div className="flex items-center gap-1.5 mb-3 relative z-10">
+          <Percent size={13} style={{ color: '#6C63FF' }} />
+          <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Distribuição</span>
+        </div>
+        <div className="flex justify-center mb-3 relative z-10">
+          <DonutChart data={financialData.categoryImpact} color="#6C63FF" size={120} />
+        </div>
+        <div className="space-y-1.5 relative z-10">
+          {financialData.categoryImpact.slice(0, 4).map((item, i) => (
+            <div key={i} className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5" style={{ background: DONUT_GRADIENTS[i % DONUT_GRADIENTS.length].from, borderRadius: '50%' }} />
+                <span className="text-[9px] font-bold truncate max-w-[100px]" style={{ color: 'var(--text-muted)' }}>{item.category}</span>
               </div>
-              <span className="text-slate-900 dark:text-white opacity-40 ml-1">{v.amount > 999 ? (v.amount/1000).toFixed(1)+'k' : v.amount.toFixed(0)}</span>
+              <span className="text-[9px] font-black" style={{ color: 'var(--text-primary)' }}>{item.percent.toFixed(0)}%</span>
             </div>
-          );
-        })}
-      </div>
-    </div>
-  </div>
-
-  {/* FLUXO E STATS (LINHA DO MEIO) */}
-  <div className="grid grid-cols-12 gap-2 mb-1 shrink-0">
-    {/* FLUXO (50%) */}
-    <div className="col-span-12 lg:col-span-6 p-3 bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none border border-slate-200 dark:border-white/5 rounded-xl flex flex-col relative min-h-[160px]">
-      <div className="flex justify-between items-center mb-1.5 text-[8px] font-black uppercase tracking-widest text-slate-400 shrink-0 z-10">
-        <span className="flex items-center gap-1.5"><Activity size={14} className="text-[#00E676]" /> {viewMode === 'monthly' ? 'Fluxo Diário' : 'Fluxo Mensal'}</span>
-        <div className="flex gap-3 text-[7px]"><div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full border border-[#00E676] bg-transparent"/> In</div><div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full border border-[#FF5722] bg-transparent"/> Out</div></div>
-      </div>
-      
-      <div className="flex-1 relative w-full mt-1 min-h-0 flex flex-col">
-        <svg viewBox="0 0 100 30" className="w-full flex-1 overflow-visible" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="gradient-in" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00E676" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#00E676" stopOpacity="0.1" />
-            </linearGradient>
-            <linearGradient id="gradient-out" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FF5722" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#FF5722" stopOpacity="0.1" />
-            </linearGradient>
-          </defs>
-
-          {/* AXES */}
-          <polyline points="0,0 0,30 100,30" fill="none" stroke="#00E676" strokeWidth="0.4" opacity="0.8" />
-
-          <path d={getAreaPath(financialData.chartData, 'in')} fill="url(#gradient-in)" />
-          <path d={getAreaPath(financialData.chartData, 'out')} fill="url(#gradient-out)" />
-          <path d={getLinePath(financialData.chartData, 'in')} fill="none" stroke="#00E676" strokeWidth="0.4" strokeLinejoin="round" />
-          <path d={getLinePath(financialData.chartData, 'out')} fill="none" stroke="#FF5722" strokeWidth="0.4" strokeLinejoin="round" />
-        </svg>
-        
-        {/* LABELS DO EIXO X */}
-        <div className="flex justify-between w-full text-[6px] font-bold text-slate-900 dark:text-white/30 uppercase mt-1.5 px-0.5">
-          {financialData.chartData.map((_, i) => {
-             let label = '';
-             let visible = true;
-             if (viewMode === 'monthly') {
-               label = (i + 1).toString();
-               visible = i === 0 || i === financialData.chartData.length - 1 || (i + 1) % 5 === 0;
-             } else {
-               const m = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-               label = m[i % 12];
-             }
-             return <span key={i} className={visible ? '' : 'opacity-0'}>{label}</span>;
-          })}
+          ))}
         </div>
       </div>
-    </div>
 
-    {/* STATS (50%) */}
-    <div className="col-span-12 lg:col-span-6 grid grid-cols-3 gap-2 bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none border border-slate-200 dark:border-white/5 rounded-xl p-3 min-h-[160px]">
-      {[
-        { label: 'Saldo', val: financialData.balance, icon: Wallet, color: 'text-slate-900 dark:text-white' },
-        { label: 'Fluxo', val: financialData.cashFlow, icon: ArrowUpRight, color: 'text-[#00E676]' },
-        { label: 'Entradas', val: financialData.income, icon: TrendingUp, color: 'text-[#00E676]' },
-        { label: 'Saídas', val: financialData.expense, icon: TrendingDown, color: 'text-[#FF5722]' },
-        { label: 'Retenção', val: (financialData.savingsRate).toFixed(1)+'%', icon: Percent, color: 'text-[#D500F9]' },
-        { label: 'Juros', val: 0, icon: Flame, color: 'text-[#FF8A00]' },
-      ].map((card, i) => (
-        <div key={i} className="flex flex-col justify-center items-center bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none rounded-lg border border-slate-200 dark:border-white/5 p-2 transition-all hover:bg-white/10">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5 mb-1.5">
-            <card.icon size={12}/> {card.label}
-          </p>
-          <h3 className={`text-[13px] font-black ${card.color}`}>
-            {typeof card.val === 'number' ? formatCurrency(card.val) : card.val}
-          </h3>
+      {/* Vilões */}
+      <div className="relative p-5 overflow-hidden"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '24px', boxShadow: 'var(--shadow-card)' }}>
+        <div className="absolute -top-12 -right-12 w-40 h-40 pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(255,71,87,0.1) 0%, transparent 70%)' }} />
+        <div className="flex items-center gap-1.5 mb-3 relative z-10">
+          <Skull size={13} style={{ color: '#FF4757' }} />
+          <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Maiores Gastos</span>
         </div>
-      ))}
-    </div>
-  </div>
-
-  {/* RODAPÉ (SAÚDE, VENCIMENTOS, INSIGHT) */}
-  <div className="grid grid-cols-1 md:grid-cols-12 gap-2 shrink-0">
-    {/* SAÚDE */}
-    <div className={`md:col-span-4 p-3 bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none border ${financialData.healthStatus === 'good' ? 'border-emerald-500/20' : financialData.healthStatus === 'danger' ? 'border-rose-500/20' : 'border-slate-200 dark:border-white/5'} rounded-xl flex flex-col justify-between min-h-[90px]`}>
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1.5">
-          <BrainCircuit size={14} className={financialData.healthStatus === 'good' ? 'text-emerald-500' : financialData.healthStatus === 'danger' ? 'text-rose-500' : 'text-slate-400'}/> 
-          Saúde
-        </span>
-        <span className={`text-base font-black ${financialData.healthStatus === 'good' ? 'text-emerald-500' : financialData.healthStatus === 'danger' ? 'text-rose-500' : 'text-slate-400'}`}>
-          {financialData.healthScore}%
-        </span>
+        <div className="flex justify-center mb-3 relative z-10">
+          <DonutChart data={financialData.villains} color="#FF4757" size={120} />
+        </div>
+        <div className="space-y-1.5 relative z-10">
+          {financialData.villains.slice(0, 4).map((v, i) => (
+            <div key={i} className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5" style={{ background: DONUT_GRADIENTS[i % DONUT_GRADIENTS.length].from, borderRadius: '50%' }} />
+                <span className="text-[9px] font-bold truncate max-w-[100px]" style={{ color: 'var(--text-muted)' }}>{v.category}</span>
+              </div>
+              <span className="text-[9px] font-black" style={{ color: '#FF4757' }}>{formatCurrency(v.amount)}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <p className={`text-[9px] font-black leading-tight mb-2 ${financialData.healthStatus === 'good' ? 'text-emerald-400' : financialData.healthStatus === 'danger' ? 'text-rose-400' : 'text-slate-300'}`}>
-        {financialData.diagnostico}
-      </p>
-      <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-        {financialData.proximosPassos.map((step, i) => (
-          <div key={i} className={`px-2 py-1 bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none border ${financialData.healthStatus === 'good' ? 'border-emerald-500/20' : financialData.healthStatus === 'danger' ? 'border-rose-500/20' : 'border-slate-200 dark:border-white/5'} rounded whitespace-nowrap`}>
-            <span className={`text-[9px] font-bold uppercase ${financialData.healthStatus === 'good' ? 'text-emerald-500/70' : financialData.healthStatus === 'danger' ? 'text-rose-500/70' : 'text-slate-400'}`}>
-              {step}
+
+      {/* Saúde + Vencimentos + Insight */}
+      <div className="flex flex-col gap-3">
+
+        {/* Saúde */}
+        <div className="relative p-4 overflow-hidden"
+          style={{
+            background: 'var(--bg-card)',
+            border: `1px solid ${financialData.healthStatus === 'good' ? 'rgba(0,212,170,0.25)' : financialData.healthStatus === 'danger' ? 'rgba(255,71,87,0.25)' : 'var(--bg-border)'}`,
+            borderRadius: '20px',
+          }}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5"
+              style={{ color: financialData.healthStatus === 'good' ? '#00D4AA' : financialData.healthStatus === 'danger' ? '#FF4757' : 'var(--text-muted)' }}>
+              <BrainCircuit size={12} /> Saúde
+            </span>
+            <span className="text-base font-black"
+              style={{ color: financialData.healthStatus === 'good' ? '#00D4AA' : financialData.healthStatus === 'danger' ? '#FF4757' : 'var(--text-muted)' }}>
+              {financialData.healthScore}%
             </span>
           </div>
-        ))}
-      </div>
-    </div>
+          <p className="text-[9px] leading-tight" style={{ color: 'var(--text-muted)' }}>{financialData.diagnostico}</p>
+        </div>
 
-    {/* VENCIMENTOS */}
-    <div className="md:col-span-4 p-3 bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none border border-slate-200 dark:border-white/5 rounded-xl flex flex-col min-h-[90px]">
-      <div className="flex items-center gap-1.5 mb-1.5 text-blue-400 shrink-0"><Clock size={16} /><span className="text-[10px] font-black uppercase">Vencimentos</span></div>
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
-        {financialData.upcomingBills.length === 0 ? (
-           <p className="text-[9px] font-black text-slate-500 uppercase">Nenhum pendente</p>
-        ) : financialData.upcomingBills.map((bill, i) => (
-          <div key={i} className="p-2 bg-white shadow-xl border-slate-200 dark:bg-white/5 dark:shadow-none border border-slate-200 dark:border-white/5 rounded-lg flex flex-col min-w-[110px] shrink-0">
-            <p className="text-[9px] font-black uppercase truncate text-slate-900 dark:text-white mb-0.5">{bill.description}</p>
-            <div className="flex justify-between items-center">
-              <span className="text-[8px] font-bold text-slate-500 uppercase">{new Date(bill.date).toLocaleDateString('pt-BR')}</span>
-              <span className="text-[10px] font-black text-rose-500">{formatCurrency(bill.amount)}</span>
-            </div>
+        {/* Vencimentos */}
+        <div className="relative p-4 overflow-hidden flex-1"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '20px' }}>
+          <div className="flex items-center gap-1.5 mb-2">
+            <Clock size={12} style={{ color: '#6C63FF' }} />
+            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Vencimentos</span>
           </div>
-        ))}
+          <div className="flex flex-col gap-1.5 overflow-y-auto no-scrollbar" style={{ maxHeight: 90 }}>
+            {financialData.upcomingBills.length === 0
+              ? <p className="text-[9px]" style={{ color: 'var(--text-subtle)' }}>Nenhuma conta pendente</p>
+              : financialData.upcomingBills.map((bill, i) => (
+                <div key={i} className="flex justify-between items-center py-1" style={{ borderBottom: '1px solid var(--bg-border)' }}>
+                  <div>
+                    <p className="text-[9px] font-bold" style={{ color: 'var(--text-primary)' }}>{bill.description}</p>
+                    <p className="text-[8px]" style={{ color: 'var(--text-subtle)' }}>{new Date(bill.date).toLocaleDateString('pt-BR')}</p>
+                  </div>
+                  <span className="text-[10px] font-black" style={{ color: '#FF4757' }}>{formatCurrency(bill.amount)}</span>
+                </div>
+              ))}
+          </div>
+        </div>
+
+        {/* AI Insight */}
+        <div className="relative p-4 overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(108,99,255,0.12), rgba(0,212,170,0.06))',
+            border: '1px solid rgba(108,99,255,0.2)',
+            borderRadius: '20px',
+          }}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <BrainCircuit size={12} style={{ color: '#6C63FF' }} />
+            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#6C63FF' }}>A2 Insight</span>
+          </div>
+          <p className="text-[10px] font-medium leading-tight" style={{ color: 'var(--text-primary)' }}>
+            {financialData.expense > financialData.income
+              ? 'Gastos superam a receita. Reavalie suas saídas e corte despesas não essenciais.'
+              : 'Saúde financeira em dia! Ótimo momento para novos aportes e investimentos.'}
+          </p>
+        </div>
       </div>
     </div>
 
-    {/* AI INSIGHT */}
-    <div className={`md:col-span-4 p-3 bg-gradient-to-br ${financialData.healthStatus === 'good' ? 'from-emerald-500/10 to-blue-500/10 border-emerald-500/20' : financialData.healthStatus === 'danger' ? 'from-rose-500/10 to-orange-500/10 border-rose-500/20' : 'from-white/5 to-white/5 border-slate-200 dark:border-white/5'} border rounded-xl flex flex-col relative overflow-hidden min-h-[90px]`}>
-      <div className="absolute top-0 right-0 p-2 opacity-10">
-        <Lightbulb size={24} className={financialData.healthStatus === 'good' ? 'text-emerald-500' : financialData.healthStatus === 'danger' ? 'text-rose-500' : 'text-slate-400'} />
+    {/* ── LINHA 4: METAS DE ORÇAMENTO ──────────── */}
+    {financialData.budgetStatus.length > 0 && (
+      <div className="relative p-5 overflow-hidden"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '24px', boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex items-center gap-2 mb-3">
+          <Target size={13} style={{ color: '#00D4AA' }} />
+          <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Controle de Teto por Categoria</span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          {financialData.budgetStatus.map((budget, i) => (
+            <div key={i} className="relative flex items-center gap-3 px-4 py-2 shrink-0 overflow-hidden"
+              style={{
+                background: budget.isOver ? 'rgba(255,71,87,0.08)' : 'rgba(0,212,170,0.08)',
+                border: `1px solid ${budget.isOver ? 'rgba(255,71,87,0.2)' : 'rgba(0,212,170,0.2)'}`,
+                borderRadius: '12px',
+              }}>
+              <div className="absolute inset-0 opacity-20" style={{ width: `${Math.min(budget.percent, 100)}%`, background: budget.isOver ? '#FF4757' : '#00D4AA' }} />
+              <span className="text-[10px] font-black uppercase z-10" style={{ color: 'var(--text-primary)' }}>{budget.category}</span>
+              <span className="text-xs font-black z-10" style={{ color: budget.isOver ? '#FF4757' : '#00D4AA' }}>{budget.percent.toFixed(0)}%</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className={`flex items-center gap-2 mb-1.5 shrink-0 ${financialData.healthStatus === 'good' ? 'text-emerald-500' : financialData.healthStatus === 'danger' ? 'text-rose-500' : 'text-slate-400'}`}>
-        <BrainCircuit size={16} />
-        <span className="text-[10px] font-black uppercase">AI Insight</span>
-      </div>
-      <p className="text-[11px] font-bold italic leading-tight z-10 text-zinc-100 mt-auto">
-        {financialData.expense > financialData.income ? "Atenção: Gastos superam a receita. Reavalie suas saídas imediatamente." : "Excelente! Sua saúde financeira está em dia. Ótimo momento para novos aportes."}
-      </p>
-    </div>
-  </div>
+    )}
   </div>
  );
 }

@@ -32,21 +32,21 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
 
  // Mapeamento dos módulos (11 itens na órbita)
  const GRADIENT_COLORS = [
-  { from: '#f43f5e', to: '#fb923c' },
-  { from: '#fb923c', to: '#fbbf24' },
-  { from: '#fbbf24', to: '#fde047' },
-  { from: '#fde047', to: '#a3e635' },
-  { from: '#a3e635', to: '#4ade80' },
-  { from: '#4ade80', to: '#10b981' },
-  { from: '#10b981', to: '#2dd4bf' },
-  { from: '#2dd4bf', to: '#22d3ee' },
-  { from: '#22d3ee', to: '#3b82f6' },
-  { from: '#3b82f6', to: '#6366f1' },
-  { from: '#6366f1', to: '#8b5cf6' },
-  { from: '#8b5cf6', to: '#a855f7' },
-  { from: '#a855f7', to: '#d946ef' },
-  { from: '#d946ef', to: '#ec4899' },
-  { from: '#ec4899', to: '#f43f5e' }
+  { from: '#6C63FF', to: '#8B84FF' },   // violeta premium
+  { from: '#00D4AA', to: '#00EDBC' },   // verde-água
+  { from: '#6C63FF', to: '#00D4AA' },   // violeta → verde-água
+  { from: '#FFD60A', to: '#FF9F43' },   // âmbar → laranja
+  { from: '#00D4AA', to: '#6C63FF' },   // verde-água → violeta
+  { from: '#8B84FF', to: '#6C63FF' },   // lilás premium
+  { from: '#FF9F43', to: '#FFD60A' },   // laranja → âmbar
+  { from: '#6C63FF', to: '#9D95FF' },   // violeta claro
+  { from: '#00EDBC', to: '#00D4AA' },   // turquesa
+  { from: '#FFD60A', to: '#6C63FF' },   // dourado → violeta
+  { from: '#9D95FF', to: '#00D4AA' },   // lilás → verde-água
+  { from: '#6C63FF', to: '#FFD60A' },   // violeta → dourado
+  { from: '#00D4AA', to: '#FFD60A' },   // verde-água → dourado
+  { from: '#FF9F43', to: '#6C63FF' },   // laranja → violeta
+  { from: '#8B84FF', to: '#00EDBC' },   // lilás → turquesa
  ];
 
  const rawMenuItems = [
@@ -69,8 +69,8 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
  ];
 
  const menuItems = rawMenuItems.map((item, index) => {
-   if (item.isExit) return { ...item, grad: { from: '#334155', to: '#0f172a' } };
-   if (isOrange) return { ...item, grad: { from: '#f97316', to: '#ea580c' } };
+   if (item.isExit) return { ...item, grad: { from: '#FF4757', to: '#C0392B' } };
+   if (isOrange) return { ...item, grad: { from: '#FF9F43', to: '#6C63FF' } };
    return { ...item, grad: GRADIENT_COLORS[index % GRADIENT_COLORS.length] };
  });
 
@@ -115,11 +115,14 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
   <div key={item.id} className="absolute z-40 flex flex-col items-center group transition-all duration-700" style={{ transform: `translate(${x}px, ${y}px)` }}>
   <button 
     onClick={item.action} 
-    className="p-5 text-white transition-all duration-300 hover:scale-125 hover:rotate-[360deg] active:scale-95 shadow-lg group-hover:shadow-[0_0_40px_rgba(255,255,255,0.2)]" 
+    className="p-5 text-white transition-all duration-300 hover:scale-125 hover:rotate-[360deg] active:scale-95" 
     style={{ 
       background: `linear-gradient(135deg, ${item.grad.from}, ${item.grad.to})`, 
-      boxShadow: `0 10px 30px ${item.grad.from}66` 
+      boxShadow: `0 8px 24px ${item.grad.from}55`,
+      transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s'
     }}
+    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = `0 0 32px ${item.grad.from}99, 0 8px 24px ${item.grad.from}55`; }}
+    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 24px ${item.grad.from}55`; }}
   >
   {item.icon}
   </button>
@@ -207,17 +210,18 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
 
  {/* FOOTER */}
  <footer className="mt-12 w-full flex flex-col items-center gap-2 select-none pointer-events-none pb-8 shrink-0">
- <div className="flex items-center gap-4">
- <div className={`h-[1px] w-12 ${isLight ? 'bg-slate-300' : 'bg-white/10'}`} />
- <Fingerprint size={14} className={isLight ? 'text-indigo-600 opacity-60' : 'text-indigo-400 opacity-40'} />
- <div className={`h-[1px] w-12 ${isLight ? 'bg-slate-300' : 'bg-white/10'}`} />
- </div>
- <div className="flex flex-col items-center gap-0.5">
- <p className={`text-[9px] font-black uppercase tracking-[0.6em] ${isLight ? 'text-slate-900' : 'text-white'}`}>A2 Mentor</p>
- <p className={`text-[7px] font-bold uppercase tracking-[0.4em] ${isLight ? 'text-slate-400' : isOrange ? 'text-orange-200 opacity-30' : 'text-indigo-200 opacity-30'}`}>
- Desenvolvido por <span className={isLight ? (isOrange ? 'text-orange-600 font-black' : 'text-indigo-600 font-black') : (isOrange ? 'text-orange-400' : 'text-indigo-400')}>A2Solutions</span>
- </p>
- </div>
+  <div className="flex items-center gap-4">
+   <div className="h-px w-16" style={{ background: 'linear-gradient(90deg, transparent, rgba(108,99,255,0.3))' }} />
+   <Fingerprint size={12} style={{ color: '#6C63FF', opacity: 0.6 }} />
+   <div className="h-px w-16" style={{ background: 'linear-gradient(90deg, rgba(108,99,255,0.3), transparent)' }} />
+  </div>
+  <div className="flex flex-col items-center gap-1">
+   <p className="text-[9px] font-black uppercase tracking-[0.6em]" style={{ color: isLight ? '#141527' : '#F0F0FF' }}>A2 Mentor</p>
+   <p className="text-[7px] font-medium uppercase tracking-[0.4em]" style={{ color: '#7B7FA3' }}>
+    Desenvolvido por{' '}
+    <span style={{ background: 'linear-gradient(90deg, #6C63FF, #00D4AA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 900 }}>A2Solutions</span>
+   </p>
+  </div>
  </footer>
  </div>
  );

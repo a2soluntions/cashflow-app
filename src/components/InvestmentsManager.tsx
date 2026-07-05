@@ -385,46 +385,48 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
      <div className="flex flex-col xl:flex-row gap-4 shrink-0">
        
        {/* Bloco 1: Patrimônio Total (Esquerda) */}
-       <div className="relative p-5 rounded-3xl bg-[#0F172A] dark:bg-[#12141A] border border-slate-800 dark:border-white/5 shadow-2xl overflow-hidden xl:w-[35%] flex flex-col justify-between">
-         <div className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[80px] pointer-events-none opacity-20 ${isTotalPositive ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
-         
-         <div className="flex items-center justify-between mb-8 relative z-10">
-           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-2xl bg-brand-orange/20 text-brand-orange flex items-center justify-center">
-               <Wallet size={20} />
-             </div>
-             <div>
-               <h3 className="text-white font-black uppercase text-sm tracking-widest">Patrimônio Total</h3>
-               <p className="text-slate-400 text-[10px] uppercase font-bold tracking-widest">Sua Carteira</p>
-             </div>
-           </div>
-           <div className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-black ${isTotalPositive ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}`}>
-             {isTotalPositive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-             {isTotalPositive ? '+' : ''}{totalPercent}%
-           </div>
-         </div>
-         
-         <div className="relative z-10">
-           <h2 className="text-4xl font-black text-white tracking-tighter">{formatCurrency(totalCurrent)}</h2>
-           <div className="flex items-center gap-2 mt-2">
-             <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Investido:</span>
-             <span className="text-slate-300 text-xs font-black">{formatCurrency(totalInvested)}</span>
-           </div>
+        <div className="relative p-5 rounded-3xl overflow-hidden xl:w-[35%] flex flex-col justify-between"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', boxShadow: 'var(--shadow-card)' }}>
+          <div className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[80px] pointer-events-none opacity-15 ${isTotalPositive ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+          
+          <div className="flex items-center justify-between mb-8 relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-brand-orange/20 text-brand-orange flex items-center justify-center">
+                <Wallet size={20} />
+              </div>
+              <div>
+                <h3 className="font-black uppercase text-sm tracking-widest" style={{ color: 'var(--text-primary)' }}>Patrimônio Total</h3>
+                <p className="text-[10px] uppercase font-bold tracking-widest" style={{ color: 'var(--text-muted)' }}>Sua Carteira</p>
+              </div>
+            </div>
+            <div className={`px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-black ${isTotalPositive ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}`}>
+              {isTotalPositive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+              {isTotalPositive ? '+' : ''}{totalPercent}%
+            </div>
+          </div>
+          
+          <div className="relative z-10">
+            <h2 className="text-4xl font-black tracking-tighter" style={{ color: 'var(--text-primary)' }}>{formatCurrency(totalCurrent)}</h2>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Investido:</span>
+              <span className="text-xs font-black" style={{ color: 'var(--text-primary)' }}>{formatCurrency(totalInvested)}</span>
+            </div>
 
-           <div className="mt-6 pt-4 border-t border-slate-800 dark:border-white/5 flex justify-between items-center">
-              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Lucro / Prejuízo</p>
-              <p className={`text-lg font-black ${isTotalPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
-                {isTotalPositive ? '+' : ''}{formatCurrency(totalProfit)}
-              </p>
-           </div>
-         </div>
-       </div>
+            <div className="mt-6 pt-4 flex justify-between items-center" style={{ borderTop: '1px solid var(--bg-border)' }}>
+               <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>Lucro / Prejuízo</p>
+               <p className={`text-lg font-black ${isTotalPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                 {isTotalPositive ? '+' : ''}{formatCurrency(totalProfit)}
+               </p>
+            </div>
+          </div>
+        </div>
 
        {/* Bloco 2 & 3: Gráficos (Centro e Direita) */}
         {investments.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
             {/* Gráfico de Rosca (Real vs. Ideal) */}
-            <div className="relative bg-white dark:bg-[#12141A] border border-slate-100 dark:border-white/5 rounded-3xl p-4 shadow-xl flex flex-col justify-between min-h-[300px] xl:h-auto">
+            <div className="relative border rounded-3xl p-4 shadow-xl flex flex-col justify-between min-h-[300px] xl:h-auto"
+              style={{ background: 'var(--bg-card)', borderColor: 'var(--bg-border)', boxShadow: 'var(--shadow-card)' }}>
               <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
                 <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-[80px] opacity-20 bg-blue-500"></div>
               </div>
@@ -433,7 +435,8 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Composição da Carteira (Real vs. Ideal)</h3>
                 <button 
                   onClick={() => setShowBalanceInfo(true)}
-                  className="w-5 h-5 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-500 hover:bg-brand-orange hover:text-white transition-all shadow-sm cursor-pointer ml-auto shrink-0"
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-slate-500 hover:bg-brand-orange hover:text-white transition-all shadow-sm cursor-pointer ml-auto shrink-0"
+                  style={{ background: 'var(--bg-surface)' }}
                   title="O que é uma carteira equilibrada?"
                 >
                   <Info size={12} />
@@ -455,7 +458,7 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Real</span>
-                    <span className="text-[10px] font-black text-slate-800 dark:text-white mt-0.5 truncate max-w-[90px]">
+                    <span className="text-[10px] font-black mt-0.5 truncate max-w-[90px]" style={{ color: 'var(--text-primary)' }}>
                       {totalCurrent >= 1000000 ? `${(totalCurrent/1000000).toFixed(1)}M` : totalCurrent >= 1000 ? `${(totalCurrent/1000).toFixed(0)}k` : totalCurrent.toFixed(0)}
                     </span>
                   </div>
@@ -481,7 +484,7 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
               </div>
 
               {/* Legenda dos Investimentos por Categoria */}
-              <div className="border-t border-slate-100 dark:border-white/5 pt-4 space-y-3">
+              <div className="pt-4 space-y-3" style={{ borderTop: '1px solid var(--bg-border)' }}>
                 {Object.entries(CATEGORY_IDEALS).map(([cat, idealPct]) => {
                   const realVal = categoryRealValues[cat] || 0;
                   const realPct = totalCurrent > 0 ? (realVal / totalCurrent) * 100 : 0;
@@ -506,12 +509,12 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }}></span>
-                          <span className="font-black text-slate-700 dark:text-slate-300">{cat}</span>
+                          <span className="font-black" style={{ color: 'var(--text-primary)' }}>{cat}</span>
                         </div>
-                        <div className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-slate-400 text-[10px]">
-                          <span>Real: <strong className="text-slate-800 dark:text-slate-200">{realPct.toFixed(1)}%</strong></span>
+                        <div className="flex items-center gap-1.5 font-bold text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                          <span>Real: <strong style={{ color: 'var(--text-primary)' }}>{realPct.toFixed(1)}%</strong></span>
                           <span>/</span>
-                          <span>Ideal: <strong className="text-slate-800 dark:text-slate-200">{idealPct}%</strong></span>
+                          <span>Ideal: <strong style={{ color: 'var(--text-primary)' }}>{idealPct}%</strong></span>
                           <span className={`px-1 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${statusColorClass} ml-1`}>
                             {statusText}
                           </span>
@@ -520,7 +523,7 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
                       
                       {/* Lista de Ativos sob a categoria */}
                       {catInvestments.length > 0 ? (
-                        <div className="pl-4 text-[9px] text-slate-400 dark:text-slate-500 font-medium">
+                        <div className="pl-4 text-[9px] font-medium" style={{ color: 'var(--text-muted)' }}>
                           Ativos: {catInvestments.map(inv => {
                             const invVal = inv.category === 'Criptomoedas' ? inv.invested_amount : inv.current_amount;
                             const invPct = totalCurrent > 0 ? (invVal / totalCurrent) * 100 : 0;
@@ -528,7 +531,7 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
                           }).join(', ')}
                         </div>
                       ) : (
-                        <div className="pl-4 text-[9px] text-slate-400/40 dark:text-slate-600 font-medium italic">
+                        <div className="pl-4 text-[9px] font-medium italic" style={{ color: 'var(--text-subtle)' }}>
                           Nenhum ativo cadastrado
                         </div>
                       )}
@@ -539,7 +542,8 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
             </div>
 
            {/* Gráfico de Linha */}
-           <div className="relative bg-white dark:bg-[#12141A] border border-slate-100 dark:border-white/5 rounded-3xl p-4 shadow-xl flex flex-col justify-between h-[220px] xl:h-auto">
+           <div className="relative border rounded-3xl p-4 shadow-xl flex flex-col justify-between h-[220px] xl:h-auto"
+             style={{ background: 'var(--bg-card)', borderColor: 'var(--bg-border)', boxShadow: 'var(--shadow-card)' }}>
              <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
                <div className="absolute -bottom-20 -right-20 w-64 h-64 rounded-full blur-[80px] opacity-20 bg-brand-orange"></div>
              </div>
@@ -552,21 +556,23 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b' }} dy={10} />
                    <YAxis hide domain={['dataMin - 100', 'dataMax + 100']} />
                    <RechartsTooltip formatter={(val: any) => formatCurrency(val as number)} contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff', fontSize: '10px', fontWeight: 'bold' }} />
-                   <Line type="monotone" dataKey="Patrimônio" stroke="#f97316" strokeWidth={3} dot={{ r: 4, fill: '#12141A', stroke: '#f97316', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#f97316' }} />
+                   <Line type="monotone" dataKey="Patrimônio" stroke="#f97316" strokeWidth={3} dot={{ r: 4, fill: 'var(--bg-card)', stroke: '#f97316', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#f97316' }} />
                  </LineChart>
                </ResponsiveContainer>
              </div>
            </div>
          </div>
        ) : (
-         <div className="flex-1 bg-white/50 dark:bg-[#12141A]/50 border border-slate-100 border-dashed dark:border-white/5 rounded-3xl p-5 shadow-inner flex items-center justify-center">
+         <div className="flex-1 border border-dashed rounded-3xl p-5 shadow-inner flex items-center justify-center"
+           style={{ background: 'var(--bg-card)', borderColor: 'var(--bg-border)' }}>
             <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Adicione ativos para visualizar a composição</p>
          </div>
        )}
      </div>
 
      {/* FORMULÁRIO */}
-    <div className="bg-white dark:bg-[#12141A] p-3 rounded-[1.25rem] border border-slate-100 dark:border-white/5 shadow-xl shrink-0">
+    <div className="p-3 rounded-[1.25rem] border shadow-xl shrink-0"
+       style={{ background: 'var(--bg-card)', borderColor: 'var(--bg-border)' }}>
        <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row items-center gap-2">
          
          <div className="relative">
@@ -774,15 +780,15 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
             const isPositive = profit >= 0;
             const percent = inv.invested_amount > 0 ? ((profit / inv.invested_amount) * 100).toFixed(2) : 0;
             const earnedDividends = calculateEarnedDividends(inv);
-            
-            const displayName = (inv as any).name || (inv as any).description || (inv as any).title || "ATIVO";
+            const displayName = inv.name || (inv as any).description || (inv as any).title || "ATIVO";
             const initial = displayName.substring(0, 2).toUpperCase();
-
+            
             return (
-              <div 
-                key={inv.id} 
+              <div
+                key={inv.id}
                 onClick={() => setSelectedAssetDetails(inv)}
-                className="bg-white dark:bg-[#12141A] border border-slate-100 dark:border-white/5 rounded-2xl p-3 flex flex-col justify-between group hover:border-brand-orange/50 transition-all cursor-pointer relative overflow-hidden shadow-sm hover:shadow-xl min-h-[150px]"
+                className="border rounded-2xl p-3 flex flex-col justify-between group hover:border-brand-orange/50 transition-all cursor-pointer relative overflow-hidden shadow-sm hover:shadow-xl min-h-[150px]"
+                style={{ background: 'var(--bg-card)', borderColor: 'var(--bg-border)' }}
               >
                 <div className="flex justify-between items-start relative z-10">
                   <div className={`w-10 h-10 rounded-xl flex shrink-0 items-center justify-center text-xs font-black shadow-inner ${isPositive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
@@ -790,15 +796,16 @@ const InvestmentsManager: React.FC<Props> = ({ investments, onAdd, onDelete }) =
                   </div>
                   <button 
                     onClick={(e) => { e.stopPropagation(); onDelete(inv.id); }}
-                    className="p-1.5 bg-slate-50 dark:bg-white/5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
+                    style={{ background: 'var(--bg-surface)' }}
                   >
                     <Trash2 size={14} />
                   </button>
                 </div>
-
+ 
                 <div className="mt-3 relative z-10">
-                  <h4 className="font-black text-base text-slate-900 dark:text-white uppercase tracking-tight line-clamp-1">{displayName}</h4>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{inv.category}</p>
+                  <h4 className="font-black text-base uppercase tracking-tight line-clamp-1" style={{ color: 'var(--text-primary)' }}>{displayName}</h4>
+                  <p className="text-[9px] font-bold uppercase tracking-widest mt-0.5" style={{ color: 'var(--text-muted)' }}>{inv.category}</p>
                 </div>
 
                 <div className="mt-auto pt-3 space-y-1.5 relative z-10">

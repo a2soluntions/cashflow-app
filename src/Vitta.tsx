@@ -14,7 +14,8 @@ import ProfileSettings from './components/ProfileSettings';
 import HorizonsManager from './components/HorizonsManager'; 
 import Reports from './components/Reports'; 
 import { Transaction, Category, Goal, Investment } from './types'; 
-import { User, Bell, Eye, EyeOff, ShieldCheck, Zap, LayoutGrid, Home, X, ArrowLeft } from 'lucide-react'; 
+import { Eye, EyeOff, X, ArrowLeft, Plus, LayoutGrid, Calendar, CheckCircle2, Brain, Settings } from 'lucide-react';
+import { AppSidebar } from './components/AppSidebar';
 import InvestmentsManager from './components/InvestmentsManager';
 import DebtFreedom from './components/DebtFreedom';
 import SubscriptionWall from './components/SubscriptionWall';
@@ -35,11 +36,14 @@ export default function Vitta() {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
 
-  const [theme, setTheme] = useState<'blue' | 'black' | 'white' | 'black-orange' | 'white-orange'>('blue');
+  const [theme, setTheme] = useState<'blue' | 'black' | 'white' | 'black-orange' | 'white-orange'>(
+    (localStorage.getItem('a2mentor_theme') as any) || 'blue'
+  );
   
   useEffect(() => {
     document.documentElement.classList.remove('theme-blue', 'theme-black', 'theme-white', 'theme-black-orange', 'theme-white-orange', 'dark');
     document.documentElement.classList.add(`theme-${theme}`);
+    localStorage.setItem('a2mentor_theme', theme);
     
     if (theme === 'blue' || theme === 'black' || theme === 'black-orange') {
       document.documentElement.classList.add('dark');
@@ -174,50 +178,7 @@ export default function Vitta() {
     }).length;
   }, [transactions]);
 
-  const NavigationHeader = () => {
-    const tab = new URLSearchParams(location.search).get('tab') || 'hub';
-    if (location.pathname === '/' || location.pathname === '/vendas' || location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal') || tab === 'hub' || tab === 'sales') return null;
-
-    return (
-      <header className="fixed top-0 left-0 w-full z-[1001] bg-indigo-950/40 backdrop-blur-md border-b border-white/5 h-14 flex items-center justify-between px-4 animate-in slide-in-from-top duration-500">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => navigate('/app')}
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all group ${theme === 'white' || theme === 'white-orange' ? 'bg-white text-slate-900' : 'bg-white/5 text-white/80'}`}
-          >
-            <Home size={18} />
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <img src="/icon.png" alt="A2 Mentor" className="h-6 w-6 object-cover opacity-50 rounded-full" />
-        </div>
-
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => navigate('/app?tab=bills')} 
-            className={`relative transition-all ${overdueCount > 0 ? 'text-rose-500 animate-pulse' : 'text-slate-400'}`}
-          >
-            <Bell size={20} />
-            {overdueCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-600 text-white text-[8px] font-black flex items-center justify-center rounded-full">
-                {overdueCount}
-              </span>
-            )}
-          </button>
-          
-          <button onClick={() => navigate('/app?tab=settings')} className="w-8 h-8 rounded-full overflow-hidden border border-emerald-500/30">
-            {userAvatar ? 
-              <img src={userAvatar} className="w-full h-full object-cover" alt="User" /> : 
-              <div className="w-full h-full flex items-center justify-center text-emerald-500 font-black text-[10px] bg-[#1a237e]">
-                {userName.substring(0, 2).toUpperCase()}
-              </div>
-            }
-          </button>
-        </div>
-      </header>
-    );
-  };
+  // NavigationHeader removido — substituído pelo AppSidebar lateral
 
   const handleLogout = async () => {
     // Limpa dados de perfil do localStorage para não vazar para outro usuário
@@ -234,159 +195,188 @@ export default function Vitta() {
   };
 
   return (
-    <div className={`w-full font-sans relative text-slate-900 dark:text-white ${location.pathname === '/' || location.pathname === '/vendas' || location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal') ? 'min-h-screen overflow-y-auto scroll-smooth custom-scrollbar' : 'h-screen overflow-hidden'}`}>
-      
-      {location.pathname !== '/' && location.pathname !== '/vendas' && location.pathname !== '/login' && <NavigationHeader />}
-
-      {/* SubscriptionWall agora só aparece se o usuário tentar acessar algo bloqueado ou se você quiser manter um banner */}
-      {/* {!subscriptionActive && trialDaysLeft <= 0 && isAuthenticated && (
-        <SubscriptionWall userEmail={session?.user?.email || ''} userId={session?.user?.id || ''} trialDaysLeft={trialDaysLeft} onSuccess={loadAllData} />
-      )} */}
+    <div className={`w-full font-sans relative text-slate-900 dark:text-white ${
+      location.pathname === '/' || location.pathname === '/vendas' ||
+      location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal')
+        ? 'min-h-screen overflow-y-auto scroll-smooth custom-scrollbar'
+        : 'h-screen overflow-hidden'
+    }`}>
 
       <Routes>
-        {/* ROTA INICIAL: REDIRECIONA PARA APP OU LOGIN */}
+        {/* ROTA INICIAL */}
         <Route path="/" element={<Navigate to={isAuthenticated ? "/app" : "/login"} />} />
 
-        {/* ROTA DE VENDAS (ACESSO POR LINK) */}
+        {/* VENDAS */}
         <Route path="/vendas" element={<SalesPage onSelectPlan={(plan) => {
-            if (plan === 'free' || plan === 'start') {
-                navigate('/login');
-            } else {
-                // TODO: Substitua pelos seus links reais de checkout (Kiwify, Hotmart, Stripe, etc)
-                const checkouts: Record<string, string> = {
-                    'basic': 'https://pay.kiwify.com.br/Ud7Lefh',
-                    'premium': 'https://pay.kiwify.com.br/l7H6T2P',
-                    'desktop': 'https://pay.kiwify.com.br/1Dx2Uvq'
-                };
-                window.location.href = checkouts[plan] || '#';
+            if (plan === 'free' || plan === 'start') { navigate('/login'); }
+            else {
+              const checkouts: Record<string, string> = {
+                'basic': 'https://pay.kiwify.com.br/Ud7Lefh',
+                'premium': 'https://pay.kiwify.com.br/l7H6T2P',
+                'desktop': 'https://pay.kiwify.com.br/1Dx2Uvq'
+              };
+              window.location.href = checkouts[plan] || '#';
             }
         }} />} />
-        
-        {/* ROTAS LEGAIS */}
+
+        {/* LEGAL */}
         <Route path="/legal/:type" element={<LegalPage />} />
-        
-        {/* ROTA DE NOTÍCIAS */}
+
+        {/* NOTÍCIAS */}
         <Route path="/noticias" element={<VittaNews />} />
         <Route path="/noticias/:id" element={<NewsArticle />} />
-        
-        {/* ROTA DE LOGIN */}
+
+        {/* LOGIN */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : (
-            <LoginPage 
-                isSignUp={isSignUp} 
-                setIsSignUp={setIsSignUp} 
-                onAuth={handleAuth} 
-                authLoading={authLoading} 
-                authError={authError} 
+            <LoginPage
+              isSignUp={isSignUp} setIsSignUp={setIsSignUp}
+              onAuth={handleAuth} authLoading={authLoading} authError={authError}
             />
         )} />
 
-        {/* ROTA DO APP (PROTEGIDA) */}
+        {/* APP — layout com sidebar */}
         <Route path="/app" element={
-            !isAuthenticated ? <Navigate to="/login" /> : (() => {
-                const tab = new URLSearchParams(location.search).get('tab') || 'hub';
-                return (
-                    <>
-                        {showInstallBanner && (
-                        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[2000] w-[90%] max-w-sm animate-in slide-in-from-bottom-8 duration-500">
-                            <div className="bg-indigo-600 p-4 shadow-2xl flex items-center justify-between gap-4 border border-white/10">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-white/10 flex items-center justify-center rounded-lg">
-                                        <img src="/pwa-192x192.png" className="w-8 h-8 object-contain" alt="Icon" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-white text-xs font-black uppercase tracking-widest">Instalar A2 Mentor</span>
-                                        <span className="text-white/60 text-[8px] font-bold uppercase">Acesse mais rápido pelo menu</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button onClick={() => setShowInstallBanner(false)} className="p-2 text-white/50 hover:text-white transition-colors">
-                                        <X size={16} />
-                                    </button>
-                                    <button 
-                                        onClick={handleInstallClick}
-                                        className="bg-white text-indigo-600 px-4 py-2 text-[9px] font-black uppercase tracking-widest hover:bg-emerald-50 transition-all"
-                                    >
-                                        Instalar
-                                    </button>
-                                </div>
-                            </div>
+          !isAuthenticated ? <Navigate to="/login" /> : (() => {
+            const tab = new URLSearchParams(location.search).get('tab') || 'dashboard';
+
+            const isTrial = trialDaysLeft > 0;
+            const isPremiumUser = subscriptionPlan === 'premium' || session?.user?.email === ADMIN_EMAIL;
+            const isSubscribed = subscriptionActive;
+            const freeTabs = ['dashboard', 'history', 'categories', 'contas', 'bills', 'target', 'settings', 'sales'];
+            let isAllowed = freeTabs.includes(tab) || isTrial || isPremiumUser
+              || (isSubscribed && !['advisor','freedom'].includes(tab));
+
+            return (
+              <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-app)' }}>
+
+                {/* ── Sidebar (desktop) ── */}
+                <div className="hidden md:flex">
+                  <AppSidebar
+                    onNavigate={(t) => navigate(`/app?tab=${t}`)}
+                    onNewTransaction={() => setIsModalOpen(true)}
+                    currentTab={tab}
+                    currentTheme={theme}
+                    onToggleTheme={(newTheme) => setTheme(newTheme)}
+                    isAdmin={session?.user?.email === ADMIN_EMAIL}
+                    onLogout={handleLogout}
+                    userAvatar={userAvatar}
+                    userName={userName}
+                    overdueCount={overdueCount}
+                  />
+                </div>
+
+                {/* ── Conteúdo Principal ── */}
+                <main className={`flex-1 overflow-y-auto custom-scrollbar ${
+                  ['advisor','admin'].includes(tab) ? 'overflow-hidden' : ''
+                }`}>
+
+                  {/* Banner instalar PWA */}
+                  {showInstallBanner && (
+                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[2000] w-[90%] max-w-sm">
+                      <div className="p-4 shadow-2xl flex items-center justify-between gap-4"
+                        style={{ background: '#6C63FF', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div className="flex items-center gap-3">
+                          <img src="/pwa-192x192.png" className="w-8 h-8 object-contain" alt="Icon" />
+                          <div>
+                            <p className="text-white text-xs font-black uppercase tracking-widest">Instalar A2 Mentor</p>
+                            <p className="text-white/60 text-[8px] font-bold uppercase">Acesse mais rápido</p>
+                          </div>
                         </div>
-                    )}
-                    <div className={`h-full w-full pt-16 md:pt-24 px-2 md:px-8 pb-12 ${['advisor', 'admin'].includes(tab) ? 'overflow-hidden' : 'overflow-y-auto'} custom-scrollbar`}>
-                        {(() => {
-                            const isTrial = trialDaysLeft > 0;
-                            const isPremiumUser = subscriptionPlan === 'premium' || session?.user?.email === ADMIN_EMAIL;
-                            const isSubscribed = subscriptionActive;
-                            
-                            // Abas liberadas para todos (essenciais)
-                            const freeTabs = ['hub', 'dashboard', 'history', 'categories', 'contas', 'bills', 'target', 'settings', 'sales'];
-                            
-                            // 1. CHECAGEM DE ACESSO
-                            let isAllowed = false;
-                            
-                            if (freeTabs.includes(tab)) {
-                                isAllowed = true;
-                            } else if (isTrial || isPremiumUser) {
-                                // Trial ativo ou Premium libera tudo
-                                isAllowed = true;
-                            } else if (isSubscribed) {
-                                // Plano Básico ou outro plano pago
-                                // BLOQUEIA: Inteligência (advisor) e Dívidas (freedom)
-                                const premiumOnlyTabs = ['advisor', 'freedom'];
-                                isAllowed = !premiumOnlyTabs.includes(tab);
-                            }
-
-                            if (!isAllowed) {
-                                return (
-                                    <div className="h-full flex flex-col items-center justify-center text-center p-6 animate-in zoom-in-95">
-                                        <Lock size={64} className="text-emerald-500 mb-6 opacity-20" />
-                                        <h2 className="text-3xl font-black uppercase italic tracking-tighter">
-                                            {isSubscribed ? 'Recurso Premium' : 'Período Expirado'}
-                                        </h2>
-                                        <p className="text-zinc-500 mt-2 mb-8 text-xs uppercase font-bold tracking-widest max-w-xs">
-                                            {isSubscribed 
-                                              ? 'Este módulo é exclusivo para assinantes do plano Premium.' 
-                                              : 'Seu período experimental terminou. Faça o upgrade para continuar usando ferramentas avançadas.'}
-                                        </p>
-                                        <button onClick={() => navigate('/app?tab=sales')} className="px-10 py-5 bg-emerald-500 text-black font-black uppercase text-[10px] tracking-widest hover:bg-emerald-400 transition-all shadow-xl shadow-emerald-500/10">
-                                            {isSubscribed ? 'Fazer Upgrade' : 'Ver Planos de Acesso'}
-                                        </button>
-                                    </div>
-                                );
-                            }
-
-                            if (tab === 'hub') return <HomeHub onNavigate={(t) => navigate(`/app?tab=${t}`)} onNewTransaction={() => setIsModalOpen(true)} currentTheme={theme} onToggleTheme={(newTheme) => setTheme(newTheme)} isAdmin={session?.user?.email === ADMIN_EMAIL} onLogout={handleLogout} userAvatar={userAvatar} />;
-                            if (tab === 'sales') return <SalesPage onSelectPlan={(plan) => {
-                                if (plan === 'free' || plan === 'start') {
-                                    navigate('/app?tab=settings');
-                                } else {
-                                    const checkouts: Record<string, string> = {
-                                        'basic': 'https://pay.kiwify.com.br/Ud7Lefh',
-                                        'premium': 'https://pay.kiwify.com.br/l7H6T2P',
-                                        'desktop': 'https://pay.kiwify.com.br/1Dx2Uvq'
-                                    };
-                                    window.location.href = checkouts[plan] || '#';
-                                }
-                            }} />;
-                            if (tab === 'dashboard') return <DashboardHome transactions={transactions as any} categories={categories} />;
-                            if (tab === 'history') return <TransactionTable />;
-                            if (tab === 'investments') return <InvestmentsManager investments={investments} onAdd={async(v) => { await appApi.addInvestment({...v, id: crypto.randomUUID(), user_id: session?.user?.id}); loadAllData(); }} onDelete={async(id) => { await appApi.deleteInvestment(id); loadAllData(); }} />;
-                            if (tab === 'freedom') return <DebtFreedom />;
-                            if (tab === 'settings') return <ProfileSettings onUpdate={loadAllData} onClose={() => navigate('/app')} subscriptionPlan={subscriptionPlan} onNavigate={(t) => navigate(`/app?tab=${t}`)} />;
-                            if (tab === 'admin') return session?.user?.email === ADMIN_EMAIL ? <AdminDashboard theme={theme} /> : <Navigate to="/app" />;
-                            if (tab === 'categories') return <CategoryManager categories={categories} onUpdate={loadAllData} currentUserId={session?.user?.id} />;
-                            if (tab === 'target') return <HorizonsManager goals={goals} onUpdate={loadAllData} currentUserId={session?.user?.id} />;
-                            if (tab === 'report') return <Reports transactions={transactions as any} />;
-                            if (tab === 'contas' || tab === 'bills') return <BillsManager mode={tab === 'bills' ? 'overdue' : 'normal'} />;
-                            if (tab === 'advisor') return <FinancialAdvisor currentBalance={0} transactions={transactions} categories={[]} theme={theme} />;
-                            return <div>Não encontrado</div>;
-                        })()}
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => setShowInstallBanner(false)} className="p-1 text-white/50 hover:text-white">
+                            <X size={14} />
+                          </button>
+                          <button onClick={handleInstallClick}
+                            className="bg-white text-indigo-600 px-3 py-1.5 text-[9px] font-black uppercase tracking-widest">
+                            Instalar
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    </>
-                );
-            })()} />
+                  )}
 
-        {/* REDIRECIONAMENTO DE SEGURANÇA */}
+                  {/* Conteúdo da aba */}
+                  <div className="h-full p-4 md:p-6">
+                    {!isAllowed ? (
+                      <div className="h-full flex flex-col items-center justify-center text-center p-6">
+                        <Lock size={48} className="mb-6 opacity-20" style={{ color: '#6C63FF' }} />
+                        <h2 className="text-2xl font-black uppercase tracking-tight"
+                          style={{ color: theme === 'white' || theme === 'white-orange' ? '#0f172a' : '#F0F0FF' }}>
+                          {isSubscribed ? 'Recurso Premium' : 'Período Expirado'}
+                        </h2>
+                        <p className="mt-2 mb-8 text-xs font-medium max-w-xs" style={{ color: '#7B7FA3' }}>
+                          {isSubscribed
+                            ? 'Este módulo é exclusivo para assinantes Premium.'
+                            : 'Seu período experimental terminou. Faça o upgrade.'}
+                        </p>
+                        <button onClick={() => navigate('/app?tab=sales')}
+                          className="btn-primary px-8 py-3 text-xs">
+                          {isSubscribed ? 'Fazer Upgrade' : 'Ver Planos'}
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        {tab === 'dashboard' && <DashboardHome transactions={transactions as any} categories={categories} />}
+                        {tab === 'history' && <TransactionTable />}
+                        {tab === 'investments' && <InvestmentsManager investments={investments} onAdd={async(v) => { await appApi.addInvestment({...v, id: crypto.randomUUID(), user_id: session?.user?.id}); loadAllData(); }} onDelete={async(id) => { await appApi.deleteInvestment(id); loadAllData(); }} />}
+                        {tab === 'freedom' && <DebtFreedom />}
+                        {tab === 'settings' && <ProfileSettings onUpdate={loadAllData} onClose={() => navigate('/app')} subscriptionPlan={subscriptionPlan} onNavigate={(t) => navigate(`/app?tab=${t}`)} />}
+                        {tab === 'admin' && (session?.user?.email === ADMIN_EMAIL ? <AdminDashboard theme={theme} /> : <Navigate to="/app" />)}
+                        {tab === 'categories' && <CategoryManager categories={categories} onUpdate={loadAllData} currentUserId={session?.user?.id} />}
+                        {tab === 'target' && <HorizonsManager goals={goals} onUpdate={loadAllData} currentUserId={session?.user?.id} />}
+                        {tab === 'report' && <Reports transactions={transactions as any} />}
+                        {(tab === 'contas' || tab === 'bills') && <BillsManager mode={tab === 'bills' ? 'overdue' : 'normal'} />}
+                        {tab === 'advisor' && <FinancialAdvisor currentBalance={0} transactions={transactions} categories={[]} theme={theme} />}
+                        {tab === 'sales' && <SalesPage onSelectPlan={(plan) => {
+                          if (plan === 'free' || plan === 'start') { navigate('/app?tab=settings'); }
+                          else {
+                            const checkouts: Record<string, string> = {
+                              'basic': 'https://pay.kiwify.com.br/Ud7Lefh',
+                              'premium': 'https://pay.kiwify.com.br/l7H6T2P',
+                              'desktop': 'https://pay.kiwify.com.br/1Dx2Uvq'
+                            };
+                            window.location.href = checkouts[plan] || '#';
+                          }
+                        }} />}
+                      </>
+                    )}
+                  </div>
+                </main>
+
+                {/* ── Bottom Nav (mobile) ── */}
+                <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-2 py-2"
+                  style={{
+                    background: theme === 'white' || theme === 'white-orange'
+                      ? 'rgba(255,255,255,0.97)'
+                      : 'rgba(13,14,26,0.97)',
+                    borderTop: '1px solid rgba(108,99,255,0.12)',
+                    backdropFilter: 'blur(20px)',
+                  }}>
+                  {[
+                    { id: 'dashboard', icon: LayoutGrid },
+                    { id: 'history',   icon: Calendar },
+                    { id: 'contas',    icon: CheckCircle2 },
+                    { id: 'advisor',   icon: Brain },
+                    { id: 'settings',  icon: Settings },
+                  ].map(({ id, icon: Icon }) => (
+                    <button key={id} onClick={() => navigate(`/app?tab=${id}`)}
+                      className="flex flex-col items-center p-2 transition-colors"
+                      style={{ color: tab === id ? '#6C63FF' : '#7B7FA3' }}>
+                      <Icon size={20} />
+                    </button>
+                  ))}
+                  <button onClick={() => setIsModalOpen(true)}
+                    className="w-10 h-10 flex items-center justify-center text-white"
+                    style={{ background: 'linear-gradient(135deg,#6C63FF,#00D4AA)', boxShadow: '0 4px 16px rgba(108,99,255,0.4)', borderRadius: '50%' }}>
+                    <Plus size={18} />
+                  </button>
+                </nav>
+              </div>
+            );
+          })()
+        } />
+
+        {/* REDIRECT */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
 
@@ -442,80 +432,161 @@ const LoginPage = ({ isSignUp, setIsSignUp, onAuth, authLoading, authError }: an
     };
     
     return (
-        <div className="w-screen h-screen bg-[#000001] flex items-center justify-center p-6 animate-in fade-in duration-700 relative overflow-hidden">
-            <NetworkBackground />
+        <div className="w-screen h-screen flex items-center justify-center p-6 relative overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #0D0E1A 0%, #141527 60%, #0D0E1A 100%)' }}>
 
-            <form onSubmit={handleSubmit} className="w-full max-w-sm bg-transparent p-10 text-center relative z-10">
-                <button 
-                    type="button"
-                    onClick={() => navigate('/vendas')}
-                    className="absolute top-4 left-4 text-white/40 hover:text-white transition-colors"
-                    title="Ver Planos"
+          {/* Partículas de fundo */}
+          <NetworkBackground />
+
+          {/* Glow decorativo */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-5"
+              style={{ background: 'radial-gradient(circle, #6C63FF 0%, transparent 70%)' }} />
+            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full opacity-5"
+              style={{ background: 'radial-gradient(circle, #00D4AA 0%, transparent 70%)' }} />
+          </div>
+
+          <form onSubmit={handleSubmit}
+            className="w-full max-w-[380px] relative z-10 animate-fade-slide-up"
+            style={{
+              background: 'rgba(20, 21, 39, 0.85)',
+              border: '1px solid rgba(108, 99, 255, 0.2)',
+              backdropFilter: 'blur(24px)',
+              padding: '40px',
+            }}>
+
+            {/* Linha decorativa superior */}
+            <div className="absolute top-0 left-8 right-8 h-px"
+              style={{ background: 'linear-gradient(90deg, transparent, #6C63FF, #00D4AA, transparent)' }} />
+
+            {/* Botão voltar */}
+            <button
+              type="button"
+              onClick={() => navigate('/vendas')}
+              className="absolute top-4 left-4 transition-colors"
+              title="Ver Planos"
+              style={{ color: 'rgba(123,127,163,0.6)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#F0F0FF')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(123,127,163,0.6)')}
+            >
+              <ArrowLeft size={18} />
+            </button>
+
+            {/* Logo + Título */}
+            <div className="flex flex-col items-center mb-8">
+              <div className="relative mb-4">
+                <div className="absolute inset-0 rounded-full animate-glow-pulse"
+                  style={{ background: 'radial-gradient(circle, rgba(108,99,255,0.3), transparent)' }} />
+                <img src="/logo.png" alt="A2 Mentor"
+                  className="h-16 w-16 object-cover rounded-full relative z-10"
+                  style={{ boxShadow: '0 0 24px rgba(108,99,255,0.4)' }} />
+              </div>
+              <h2 className="text-white font-black uppercase tracking-[0.15em] text-lg">
+                {isSignUp ? 'Nova Conta' : 'A2 Mentor'}
+              </h2>
+              <p className="text-xs mt-1 font-medium"
+                style={{ color: '#7B7FA3' }}>
+                {isSignUp ? 'Crie sua conta gratuita' : 'Inteligência Financeira Pessoal'}
+              </p>
+            </div>
+
+            {/* Separador */}
+            <div className="mb-6 h-px" style={{ background: 'rgba(108,99,255,0.12)' }} />
+
+            {/* Campos */}
+            <div className="flex flex-col gap-3 mb-6">
+              <input
+                type="email"
+                placeholder="Seu e-mail"
+                value={localEmail}
+                onChange={e => setLocalEmail(e.target.value)}
+                className="input-premium w-full p-3.5 text-sm font-medium"
+                style={{ fontSize: '0.875rem' }}
+                required
+              />
+
+              <div className="relative">
+                <input
+                  type={showPass ? "text" : "password"}
+                  placeholder="Sua senha"
+                  value={localPassword}
+                  onChange={e => setLocalPassword(e.target.value)}
+                  className="input-premium w-full p-3.5 pr-12 text-sm font-medium"
+                  style={{ fontSize: '0.875rem' }}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: '#4A4D6B' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#6C63FF')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#4A4D6B')}
                 >
-                    <ArrowLeft size={20} />
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-                <img src="/logo.png" alt="A2 Mentor" className="h-20 w-20 object-cover mx-auto mb-4 mix-blend-screen rounded-full" />
-                <h2 className="text-2xl font-black text-white uppercase italic mb-8">{isSignUp ? 'Nova Conta' : 'Acesso A2 Mentor'}</h2>
-                
-                <div className="space-y-4 mb-8">
-                    <input 
-                        type="email" 
-                        placeholder="E-mail" 
-                        value={localEmail} 
-                        onChange={e => setLocalEmail(e.target.value)} 
-                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:bg-white/10 focus:border-indigo-500 transition-all font-bold" 
-                        required
+              </div>
+
+              {/* Barra de força da senha */}
+              {isSignUp && localPassword && (
+                <div className="px-0.5 animate-fade-slide-up">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-[9px] font-black uppercase tracking-widest"
+                      style={{ color: passwordStrength.score === 100 ? '#00D4AA' : passwordStrength.score >= 66 ? '#FFD60A' : '#FF4757' }}>
+                      Senha {passwordStrength.label}
+                    </span>
+                    <span className="text-[9px] font-bold" style={{ color: '#7B7FA3' }}>
+                      {passwordStrength.score}%
+                    </span>
+                  </div>
+                  <div className="h-1 w-full overflow-hidden" style={{ background: 'rgba(108,99,255,0.1)' }}>
+                    <div
+                      className="h-full transition-all duration-500"
+                      style={{
+                        width: `${passwordStrength.score}%`,
+                        background: passwordStrength.score === 100
+                          ? 'linear-gradient(90deg, #00D4AA, #6C63FF)'
+                          : passwordStrength.score >= 66
+                          ? 'linear-gradient(90deg, #FFD60A, #FF9F43)'
+                          : '#FF4757',
+                      }}
                     />
-                    
-                    <div className="relative">
-                        <input 
-                            type={showPass ? "text" : "password"} 
-                            placeholder="Senha" 
-                            value={localPassword} 
-                            onChange={e => setLocalPassword(e.target.value)} 
-                            className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:bg-white/10 focus:border-indigo-500 transition-all pr-12 font-bold" 
-                            required
-                        />
-                        <button 
-                            type="button"
-                            onClick={() => setShowPass(!showPass)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
-                        >
-                            {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </button>
-                    </div>
-
-                    {isSignUp && localPassword && (
-                        <div className="px-1 animate-in slide-in-from-top-2 duration-300">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className={`text-[9px] font-black uppercase tracking-widest ${passwordStrength.color.replace('bg-', 'text-')}`}>
-                                    Senha {passwordStrength.label}
-                                </span>
-                            </div>
-                            <div className="h-1 w-full bg-white/5 overflow-hidden">
-                                <div className={`h-full transition-all duration-500 ${passwordStrength.color}`} style={{ width: `${passwordStrength.score}%` }} />
-                            </div>
-                        </div>
-                    )}
+                  </div>
                 </div>
+              )}
+            </div>
 
-                <button className="w-full py-4 bg-emerald-500 rounded-xl text-black font-black uppercase text-xs tracking-widest hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
-                    {authLoading ? 'Verificando...' : (isSignUp ? 'Cadastrar' : 'Entrar')}
-                </button>
-                
-                <p 
-                    onClick={() => setIsSignUp(!isSignUp)} 
-                    className="mt-8 text-[10px] text-slate-500 uppercase font-black cursor-pointer hover:text-white transition-colors tracking-widest"
-                >
-                    {isSignUp ? 'Já possuo acesso' : 'Quero criar uma conta'}
-                </p>
-                
-                {authError && (
-                    <div className="mt-6 flex items-center justify-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl">
-                        <p className="text-rose-500 text-[10px] font-bold uppercase">{authError}</p>
-                    </div>
-                )}
-            </form>
+            {/* Botão principal */}
+            <button
+              type="submit"
+              className="btn-primary w-full py-3.5 text-xs font-black uppercase tracking-widest"
+              style={{ letterSpacing: '0.15em' }}>
+              {authLoading ? '⏳ Verificando...' : (isSignUp ? '✦ Criar Conta' : '✦ Entrar')}
+            </button>
+
+            {/* Alternância cadastro/login */}
+            <p
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="mt-5 text-center text-[10px] font-bold uppercase cursor-pointer transition-colors tracking-wider"
+              style={{ color: '#4A4D6B' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#6C63FF')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#4A4D6B')}
+            >
+              {isSignUp ? '← Já possuo acesso' : 'Criar nova conta →'}
+            </p>
+
+            {/* Mensagem de erro */}
+            {authError && (
+              <div className="mt-5 flex items-center gap-2 p-3 animate-fade-slide-up"
+                style={{ background: 'rgba(255,71,87,0.08)', border: '1px solid rgba(255,71,87,0.2)' }}>
+                <p className="text-[10px] font-bold uppercase" style={{ color: '#FF4757' }}>{authError}</p>
+              </div>
+            )}
+
+            {/* Linha decorativa inferior */}
+            <div className="absolute bottom-0 left-8 right-8 h-px"
+              style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,170,0.3), transparent)' }} />
+          </form>
         </div>
     );
 };

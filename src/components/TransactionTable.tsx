@@ -87,144 +87,152 @@ export default function TransactionTable() {
  };
 
  return (
- <div className="h-full w-full flex flex-col gap-4 overflow-hidden font-sans">
- 
- {/* 🔝 CABEÇALHO */}
- <div className="flex justify-between items-end shrink-0 px-2 h-[8%] min-h-[60px]">
- <div>
- <div className="flex items-center gap-2 mb-1">
- <div className="w-2 h-2 bg-cyan-500 animate-pulse"/>
- <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-white/60">
- Banco de Dados
- </span>
- </div>
- <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter flex items-center gap-2">
- Extrato Realizado <CheckCircle2 size={20} className="text-emerald-500" />
- </h2>
- </div>
+  <div className="h-full w-full flex flex-col gap-4 overflow-hidden font-sans p-2">
+  
+  {/* 🔝 CABEÇALHO */}
+  <div className="flex justify-between items-center shrink-0">
+  <div>
+    <h2 className="text-xl font-black tracking-tight flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+      Extrato Realizado <CheckCircle2 size={16} className="text-emerald-400" />
+    </h2>
+    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Listagem de transações finalizadas</p>
+  </div>
 
- {/* Seletor de Mês (TRANSPARENTE E MINIMALISTA) */}
- <div className="relative group">
- <CalendarDays size={16} className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-indigo-500 transition-colors pointer-events-none" />
- 
- <input 
- type="month" 
- value={selectedMonth}
- onChange={(e) => setSelectedMonth(e.target.value)}
- className="bg-transparent pl-6 pr-2 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 dark:text-white/60 dark:hover:text-white outline-none border-none cursor-pointer transition-colors dark:[color-scheme:dark]"
- />
- </div>
- </div>
+  {/* Seletor de Mês (ESTILIZADO PREMIUM) */}
+  <div className="relative flex items-center gap-2 p-1" style={{ background: 'var(--bg-surface)', border: '1px solid var(--bg-border)', borderRadius: '12px' }}>
+    <CalendarDays size={14} style={{ color: '#6C63FF' }} className="ml-2 pointer-events-none" />
+    <input 
+      type="month" 
+      value={selectedMonth}
+      onChange={(e) => setSelectedMonth(e.target.value)}
+      className="bg-transparent pl-1 pr-2 py-1 text-[10px] font-black uppercase tracking-widest text-[#00D4AA] outline-none border-none cursor-pointer [color-scheme:dark]"
+    />
+  </div>
+  </div>
 
- {/* ⚡ CONTEÚDO PRINCIPAL */}
- <div className="flex-1 min-h-0 grid grid-cols-12 gap-6 pb-4">
- 
- {/* ESQUERDA: Resumo */}
- <div className="col-span-12 md:col-span-4 flex flex-col gap-4 min-h-0">
- 
- {/* Card Saldo */}
- <div className="p-6 relative overflow-hidden transition-all shrink-0 bg-white/5 border border-white/5 backdrop-blur-xl">
- <div className="absolute top-0 right-0 p-24 bg-indigo-500/10 blur-3xl pointer-events-none" />
- <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-white/60 mb-2">Fluxo de Caixa (Mês)</p>
- <h1 className={`text-3xl font-black tracking-tighter ${balance >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
- {formatCurrency(balance)}
- </h1>
- </div>
+  {/* ⚡ CONTEÚDO PRINCIPAL */}
+  <div className="flex-1 min-h-0 grid grid-cols-12 gap-4 pb-2 overflow-hidden">
+  
+  {/* ESQUERDA: Resumo */}
+  <div className="col-span-12 md:col-span-4 flex flex-col gap-4 min-h-0 shrink-0">
+  
+    {/* Card Saldo */}
+    <div className="p-6 relative overflow-hidden shrink-0"
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '24px', boxShadow: 'var(--shadow-card)' }}>
+      <div className="absolute -top-16 -right-16 w-48 h-48 pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${balance >= 0 ? 'rgba(0,212,170,0.12)' : 'rgba(255,71,87,0.12)'} 0%, transparent 70%)` }} />
+      <p className="text-[10px] font-black uppercase tracking-widest mb-2 relative z-10" style={{ color: 'var(--text-muted)' }}>Resultado do Período</p>
+      <h1 className="text-3xl font-black tracking-tighter relative z-10" style={{ color: balance >= 0 ? '#00D4AA' : '#FF4757' }}>
+        {formatCurrency(balance)}
+      </h1>
+    </div>
 
- {/* Cards Entrada/Saída */}
- <div className="grid grid-cols-2 gap-4">
- <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10">
- <div className="flex items-center gap-2 mb-1">
- <ArrowUpCircle size={14} className="text-emerald-500"/>
- <span className="text-[8px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Entrou</span>
- </div>
- <p className="text-sm font-black text-emerald-700 dark:text-emerald-300">{formatCurrency(income)}</p>
- </div>
- <div className="p-4 bg-rose-50 dark:bg-rose-500/10">
- <div className="flex items-center gap-2 mb-1">
- <ArrowDownCircle size={14} className="text-rose-500"/>
- <span className="text-[8px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400">Saiu</span>
- </div>
- <p className="text-sm font-black text-rose-700 dark:text-rose-300">{formatCurrency(expense)}</p>
- </div>
- </div>
+    {/* Cards Entrada/Saída */}
+    <div className="grid grid-cols-2 gap-4 shrink-0">
+      <div className="p-4 flex flex-col justify-between"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '20px', boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <ArrowUpCircle size={12} style={{ color: '#00D4AA' }} />
+          <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Entradas</span>
+        </div>
+        <p className="text-sm font-black" style={{ color: '#00D4AA' }}>{formatCurrency(income)}</p>
+      </div>
 
- {/* Busca */}
- <div className="flex-1 p-6 flex flex-col gap-4 min-h-0 bg-white/5 border border-white/5 backdrop-blur-xl">
- <div className="relative group">
- <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
- <input 
- type="text" 
- value={searchTerm}
- onChange={(e) => setSearchTerm(e.target.value)}
- placeholder="Buscar..." 
- className="w-full pl-10 pr-4 py-3 text-xs font-bold uppercase outline-none transition-all bg-slate-50 text-slate-600 focus:ring-2 focus:ring-indigo-500/20 dark:bg-white/5 dark:text-white"
- />
- </div>
- </div>
- </div>
+      <div className="p-4 flex flex-col justify-between"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '20px', boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <ArrowDownCircle size={12} style={{ color: '#FF4757' }} />
+          <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Saídas</span>
+        </div>
+        <p className="text-sm font-black" style={{ color: '#FF4757' }}>{formatCurrency(expense)}</p>
+      </div>
+    </div>
 
- {/* DIREITA: Lista */}
- <div className="col-span-12 md:col-span-8 p-6 flex flex-col min-h-0 bg-white/5 border border-white/5 backdrop-blur-xl">
- <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
- {filteredTransactions.length === 0 ? (
- <div className="h-full flex flex-col items-center justify-center opacity-40">
- <CheckCircle2 size={40} className="mb-3 text-emerald-500/50" />
- <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white/40">
- Nenhum pagamento registrado neste mês
- </p>
- </div>
- ) : (
- filteredTransactions.map((t) => (
- <div key={t.id} className="group flex items-center justify-between p-3 transition-all hover:bg-slate-100 dark:hover:bg-white/5">
- <div className="flex items-center gap-4">
- <div className={`w-10 h-10 flex items-center justify-center ${t.type === 'income' 
- ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
- : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}>
- {t.type === 'income' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
- </div>
+    {/* Busca */}
+    <div className="p-4 flex flex-col justify-center"
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '20px', boxShadow: 'var(--shadow-card)' }}>
+      <div className="relative group">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+        <input 
+          type="text" 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="BUSCAR TRANSAÇÃO..." 
+          className="w-full pl-9 pr-3 py-2.5 text-[10px] font-black uppercase tracking-wider outline-none rounded-lg text-slate-900 dark:text-white"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}
+        />
+      </div>
+    </div>
+  </div>
 
- <div>
- <h4 className="text-xs font-black text-slate-700 dark:text-white uppercase flex items-center gap-2">
- {t.description || 'SEM DESCRIÇÃO'}
- </h4>
- <div className="flex items-center gap-2 text-[8px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-wider">
- <span>{formatDate(t.date)}</span>
- <span className="w-1 h-1 bg-slate-300 dark:bg-white/20" />
- <span>{t.category || 'GERAL'}</span>
- <span className="w-1 h-1 bg-slate-300 dark:bg-white/20" />
- <span className={t.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}>
- {t.type === 'income' ? 'REALIZADO' : 'PAGO'}
- </span>
- </div>
- </div>
- </div>
+  {/* DIREITA: Lista */}
+  <div className="col-span-12 md:col-span-8 p-5 flex flex-col min-h-0"
+    style={{ background: 'var(--bg-card)', border: '1px solid var(--bg-border)', borderRadius: '24px', boxShadow: 'var(--shadow-card)' }}>
+    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-2">
+      {filteredTransactions.length === 0 ? (
+        <div className="h-full flex flex-col items-center justify-center opacity-40">
+          <CheckCircle2 size={36} className="mb-3 text-slate-500" />
+          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+            Nenhuma transação no filtro atual
+          </p>
+        </div>
+      ) : (
+        filteredTransactions.map((t) => (
+          <div key={t.id} className="group flex items-center justify-between p-3 transition-all hover:bg-slate-100 dark:hover:bg-white/5"
+            style={{ borderBottom: '1px solid var(--bg-border)' }}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 flex items-center justify-center shrink-0" 
+                style={{ 
+                  background: t.type === 'income' ? 'rgba(0,212,170,0.1)' : 'rgba(255,71,87,0.1)', 
+                  borderRadius: '10px' 
+                }}>
+                {t.type === 'income' 
+                  ? <ArrowUpRight size={16} style={{ color: '#00D4AA' }} /> 
+                  : <ArrowDownRight size={16} style={{ color: '#FF4757' }} />
+                }
+              </div>
 
- <div className="flex items-center gap-4">
- <div className="text-right">
- <p className={`text-xs font-black ${t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
- {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
- </p>
- {t.installment && (
- <p className="text-[7px] font-bold text-slate-400 dark:text-white/30 uppercase tracking-tighter">
- Parcela {t.installment.current}/{t.installment.total}
- </p>
- )}
- </div>
- 
- <button 
- onClick={() => handleDelete(t.id)}
- className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:text-white/20 dark:hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"
- >
- <Trash2 size={16} />
- </button>
- </div>
- </div>
- ))
- )}
- </div>
- </div>
- </div>
- </div>
+              <div className="min-w-0">
+                <h4 className="text-xs font-black uppercase truncate" style={{ maxWidth: '280px', color: 'var(--text-primary)' }}>
+                  {t.description || 'SEM DESCRIÇÃO'}
+                </h4>
+                <div className="flex items-center gap-1.5 text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                  <span>{formatDate(t.date)}</span>
+                  <span>•</span>
+                  <span>{t.category || 'GERAL'}</span>
+                  <span>•</span>
+                  <span style={{ color: t.type === 'income' ? '#00D4AA' : '#FF4757' }}>
+                    {t.type === 'income' ? 'RECEBIDO' : 'PAGO'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-xs font-black" style={{ color: t.type === 'income' ? '#00D4AA' : '#FF4757' }}>
+                  {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
+                </p>
+                {t.installment && (
+                  <p className="text-[7px] font-bold text-slate-600 uppercase tracking-wider">
+                    Parcela {t.installment.current}/{t.installment.total}
+                  </p>
+                )}
+              </div>
+              
+              <button 
+                onClick={() => handleDelete(t.id)}
+                className="p-1.5 rounded-lg text-slate-600 hover:text-rose-500 hover:bg-rose-500/10 transition-all opacity-0 group-hover:opacity-100 shrink-0"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+  </div>
+  </div>
  );
 }
