@@ -24,6 +24,7 @@ import SalesPage from './components/SalesPage';
 import LegalPage from './components/LegalPage';
 import VittaNews from './components/VittaNews';
 import NewsArticle from './components/NewsArticle';
+import AdReservationPage from './components/AdReservationPage';
 import NetworkBackground from './components/NetworkBackground';
 
 export default function Vitta() {
@@ -224,6 +225,7 @@ export default function Vitta() {
 
         {/* NOTÍCIAS */}
         <Route path="/noticias" element={<VittaNews />} />
+        <Route path="/noticias/anunciar" element={<AdReservationPage />} />
         <Route path="/noticias/:id" element={<NewsArticle />} />
 
         {/* LOGIN */}

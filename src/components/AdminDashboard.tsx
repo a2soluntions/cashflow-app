@@ -1780,6 +1780,101 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                       })}
                     </div>
                   </div>
+
+                  {/* SESSÃO: RESERVAS E SOLICITAÇÕES PENDENTES */}
+                  <div className="mt-12 border-t pt-8 border-slate-200 dark:border-white/5">
+                    <h4 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500 mb-6 flex items-center gap-2">
+                      📢 Solicitações de Reserva Pendentes
+                    </h4>
+                    
+                    {siteContent.filter(c => c.content_type.startsWith('request_')).length === 0 ? (
+                      <div className="text-center py-8 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        Nenhuma solicitação de reserva pendente no momento.
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-4">
+                        {siteContent.filter(c => c.content_type.startsWith('request_')).map((req) => {
+                          const targetSlot = req.content_type.replace('request_', '');
+                          return (
+                            <div 
+                              key={req.id} 
+                              className={`p-5 rounded-2xl border ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 border-white/5'} flex flex-col md:flex-row md:items-center justify-between gap-6`}
+                            >
+                              <div className="flex items-start gap-4">
+                                <div className="w-24 aspect-video rounded-lg overflow-hidden bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex-shrink-0">
+                                  {req.image_url ? (
+                                    <img src={req.image_url} className="w-full h-full object-contain" alt="Solicitação" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-300">Sem Img</div>
+                                  )}
+                                </div>
+                                <div>
+                                  <span className="text-[8px] font-black uppercase bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full mb-1 inline-block">
+                                    Vaga: {targetSlot}
+                                  </span>
+                                  <h5 className="text-xs font-black uppercase text-slate-800 dark:text-slate-200">{req.meta_value?.client_name || req.title}</h5>
+                                  <p className="text-[9px] font-bold text-slate-400 mt-1">
+                                    📞 {req.meta_value?.client_phone || 'Sem fone'} | ✉️ {req.meta_value?.client_email || 'Sem e-mail'}
+                                  </p>
+                                  <p className="text-[9px] font-medium text-slate-500 mt-1 max-w-md">
+                                    Link Destino: <a href={req.meta_value?.external_url} target="_blank" rel="noreferrer" className="text-indigo-400 underline">{req.meta_value?.external_url || '#'}</a>
+                                  </p>
+                                  <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest mt-1">
+                                    Preço Ofertado: {req.meta_value?.price_quoted} | {req.meta_value?.duration_days} Dias
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 self-end md:self-center">
+                                <button
+                                  onClick={async () => {
+                                    setLoading(true);
+                                    // 1. Exclui o anúncio atual do slot se existir, para evitar duplicidades no mesmo slot
+                                    const existingAd = siteContent.find(c => c.content_type === targetSlot);
+                                    if (existingAd) {
+                                      await supabase.from('site_content').delete().eq('id', existingAd.id);
+                                    }
+
+                                    // 2. Transforma a solicitação em anúncio oficial ativo
+                                    const { error } = await supabase.from('site_content').update({
+                                      content_type: targetSlot,
+                                      is_active: true
+                                    }).eq('id', req.id);
+
+                                    setLoading(false);
+                                    if (error) {
+                                      showAlert("Erro ao aprovar", error.message, "error");
+                                    } else {
+                                      fetchData();
+                                      showAlert("Anúncio Aprovado!", `O banner de ${req.meta_value?.client_name} já está no ar no portal.`, "info");
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-colors"
+                                >
+                                  Aprovar e Ativar
+                                </button>
+                                
+                                <button
+                                  onClick={async () => {
+                                    if (!window.confirm("Deseja rejeitar e excluir esta solicitação de reserva?")) return;
+                                    setLoading(true);
+                                    await supabase.from('site_content').delete().eq('id', req.id);
+                                    setLoading(false);
+                                    fetchData();
+                                    showAlert("Rejeitado", "Solicitação excluída com sucesso.", "info");
+                                  }}
+                                  className="px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-rose-500 hover:text-white transition-all"
+                                >
+                                  Rejeitar
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
                 </div>
               </div>
             </div>
