@@ -1177,18 +1177,24 @@ export default function VittaNews() {
               <aside className="lg:col-span-4 space-y-12 relative">
                 
                 {/* SIDEBAR AD BANNER 1 (SQUARE) */}
-                <div 
-                  onClick={() => openLink(getAd('ad_sidebar_1')?.meta_value?.external_url)}
-                  className="w-full aspect-square bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative group overflow-hidden cursor-pointer"
-                >
-                  <span className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm">Publicidade</span>
-                  {getAd('ad_sidebar_1') ? (
-                    <img src={getAd('ad_sidebar_1')?.image_url} alt="Advertisement" className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <span className="bg-white/90 backdrop-blur-sm px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200 shadow-sm">Espaço Publicitário</span>
-                    </div>
-                  )}
+                <div className="space-y-1.5">
+                  <div 
+                    onClick={() => openLink(getAd('ad_sidebar_1')?.meta_value?.external_url || "https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Tenho interesse em anunciar nos espaços publicitários do portal.")}
+                    className="w-full aspect-square bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative group overflow-hidden cursor-pointer rounded-xl"
+                  >
+                    <span className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm">Publicidade</span>
+                    {getAd('ad_sidebar_1') ? (
+                      <img src={getAd('ad_sidebar_1')?.image_url} alt="Advertisement" className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                        <span className="bg-white/95 backdrop-blur-sm px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200 shadow-sm rounded-lg mb-2">Espaço Disponível</span>
+                        <span className="text-[10px] font-bold text-indigo-500">Clique para anunciar</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Tenho interesse em anunciar nos espaços publicitários do portal." target="_blank" rel="noreferrer" className="text-[8px] font-black uppercase tracking-wider text-indigo-500 hover:underline">📢 Anunciar neste Espaço</a>
+                  </div>
                 </div>
 
 
@@ -1197,18 +1203,24 @@ export default function VittaNews() {
                 </div>
 
                 {/* SIDEBAR AD BANNER 2 (SKYSCRAPER - STICKY) */}
-                <div 
-                  onClick={() => openLink(getAd('ad_sidebar_2')?.meta_value?.external_url)}
-                  className="w-full h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative group overflow-hidden sticky top-32 cursor-pointer hidden md:flex"
-                >
-                  <span className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm">Publicidade</span>
-                  {getAd('ad_sidebar_2') ? (
-                    <img src={getAd('ad_sidebar_2')?.image_url} alt="Advertisement" className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <span className="bg-white/90 backdrop-blur-sm px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200 shadow-sm">Anúncio Vertical</span>
-                    </div>
-                  )}
+                <div className="space-y-1.5 sticky top-32 hidden md:block">
+                  <div 
+                    onClick={() => openLink(getAd('ad_sidebar_2')?.meta_value?.external_url || "https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Tenho interesse em anunciar nos espaços publicitários do portal.")}
+                    className="w-full h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative group overflow-hidden cursor-pointer rounded-xl"
+                  >
+                    <span className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm">Publicidade</span>
+                    {getAd('ad_sidebar_2') ? (
+                      <img src={getAd('ad_sidebar_2')?.image_url} alt="Advertisement" className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                        <span className="bg-white/95 backdrop-blur-sm px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200 shadow-sm rounded-lg mb-2">Espaço Disponível</span>
+                        <span className="text-[10px] font-bold text-indigo-500">Clique para anunciar</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Tenho interesse em anunciar nos espaços publicitários do portal." target="_blank" rel="noreferrer" className="text-[8px] font-black uppercase tracking-wider text-indigo-500 hover:underline">📢 Anunciar neste Espaço</a>
+                  </div>
                 </div>
 
               </aside>
@@ -1247,6 +1259,7 @@ export default function VittaNews() {
               <li><Link to="/legal/privacy" className="hover:text-indigo-400 transition-colors">Privacidade</Link></li>
               <li><Link to="/legal/terms" className="hover:text-indigo-400 transition-colors">Termos de Uso</Link></li>
               <li><a href="/#pricing" className="hover:text-indigo-400 transition-colors">A2 Mentor App</a></li>
+              <li><a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Tenho interesse em anunciar nos espaços publicitários do portal." target="_blank" rel="noreferrer" className="text-amber-500 hover:text-amber-400 transition-colors flex items-center gap-1.5 font-bold">📢 Anuncie Conosco</a></li>
               <li>
                 <div className="flex flex-col gap-2 pt-2">
                   <a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Gostaria de falar com o suporte do Vitta Notícias." target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-bold">

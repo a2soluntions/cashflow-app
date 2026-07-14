@@ -356,6 +356,7 @@ export default function NewsArticle() {
               <li><Link to="/legal/privacy" className="hover:text-indigo-400 transition-colors">Privacidade</Link></li>
               <li><Link to="/legal/terms" className="hover:text-indigo-400 transition-colors">Termos de Uso</Link></li>
               <li><a href="/#pricing" className="hover:text-indigo-400 transition-colors">VittaConsultoria App</a></li>
+              <li><a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Tenho interesse em anunciar nos espaços publicitários do portal." target="_blank" rel="noreferrer" className="text-amber-500 hover:text-amber-400 transition-colors flex items-center gap-1.5 font-bold">📢 Anuncie Conosco</a></li>
               <li>
                 <div className="flex flex-col gap-2 pt-2">
                   <a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Gostaria de falar com o suporte do Vitta Notícias." target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-bold">
