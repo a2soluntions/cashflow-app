@@ -19,7 +19,11 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [licenses, setLicenses] = useState<any[]>([]);
   const [siteContent, setSiteContent] = useState<any[]>([]);
   const [adsPerPage, setAdsPerPage] = useState(10);
-  
+  const [selectedMapSlot, setSelectedMapSlot] = useState<string | null>(null);
+  const [adFormName, setAdFormName] = useState('');
+  const [adFormPhone, setAdFormPhone] = useState('');
+  const [adFormImage, setAdFormImage] = useState('');
+  const [adFormLink, setAdFormLink] = useState('');
   // FORMULÁRIO LICENÇAS
   const [clientName, setClientName] = useState('');
   const [saleValue, setSaleValue] = useState('');
