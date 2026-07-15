@@ -18,6 +18,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [activeTab, setActiveTab] = useState<'vendas' | 'dados' | 'a2noticias' | 'publicidade' | 'ads_mapa'>('vendas');
   const [licenses, setLicenses] = useState<any[]>([]);
   const [siteContent, setSiteContent] = useState<any[]>([]);
+  const [adsPerPage, setAdsPerPage] = useState(10);
   
   // FORMULÁRIO LICENÇAS
   const [clientName, setClientName] = useState('');
@@ -1321,17 +1322,33 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     </div>
 
                     <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'} mb-2`}>
-                      <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500 mb-6 flex items-center gap-2">
-                        📋 Controle Financeiro de Campanhas Ativas
-                      </h4>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-4 border-slate-200 dark:border-white/5">
+                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500 flex items-center gap-2">
+                          📋 Controle Financeiro de Campanhas Ativas
+                        </h4>
+                        
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-black uppercase text-slate-400">Exibir:</span>
+                          <select 
+                            value={adsPerPage} 
+                            onChange={(e) => setAdsPerPage(Number(e.target.value))}
+                            className="bg-white dark:bg-zinc-800 text-[10px] font-black text-indigo-500 uppercase border border-slate-200 dark:border-white/10 rounded px-2.5 py-1 outline-none"
+                          >
+                            <option value={10}>10 Itens</option>
+                            <option value={20}>20 Itens</option>
+                            <option value={50}>50 Itens</option>
+                          </select>
+                        </div>
+                      </div>
+
                       {activeAds.length === 0 ? (
                         <div className="text-center py-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                           Nenhum anúncio ativo rodando atualmente no portal.
                         </div>
                       ) : (
-                        <div className="overflow-x-auto">
+                        <div className="max-h-[380px] overflow-y-auto custom-scrollbar pr-2">
                           <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            <thead>
+                            <thead className="sticky top-0 bg-slate-50 dark:bg-zinc-900 z-10">
                               <tr className="border-b border-slate-200 dark:border-white/5 pb-2 text-[8px]">
                                 <th className="pb-3 text-zinc-500">Slot</th>
                                 <th className="pb-3 text-zinc-500">Cliente / Título</th>
@@ -1341,7 +1358,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                               </tr>
                             </thead>
                             <tbody>
-                              {activeAds.map(ad => {
+                              {activeAds.slice(0, adsPerPage).map(ad => {
                                 const expDate = ad.meta_value?.expires_at ? new Date(ad.meta_value.expires_at) : null;
                                 const daysLeft = expDate ? Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
                                 const statusPag = ad.meta_value?.payment_status || 'Pendente';
