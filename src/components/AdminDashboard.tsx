@@ -549,13 +549,13 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       { id: 'ad_internal_inline_3', label: 'Anúncio Interno 03', type: 'ad_internal_inline_3', price: 'R$ 150' }
     ];
 
-    const activeAds = siteContent.filter(c => adSlots.map(s => s.type).includes(c.content_type) && c.is_active);
-    const pendingRequests = siteContent.filter(c => c.content_type.startsWith('request_'));
+    const activeAds = (siteContent || []).filter(c => c && adSlots.map(s => s.type).includes(c.content_type || '') && c.is_active);
+    const pendingRequests = (siteContent || []).filter(c => c && (c.content_type || '').startsWith('request_'));
 
     const handleOpenAdModal = (slotType: string) => {
-      let ad = siteContent.find(c => c.content_type === slotType);
-      if (!ad && slotType === 'ad_skin_left_home') ad = siteContent.find(c => c.content_type === 'ad_skin_left');
-      if (!ad && slotType === 'ad_skin_right_home') ad = siteContent.find(c => c.content_type === 'ad_skin_right');
+      let ad = (siteContent || []).find(c => c && c.content_type === slotType);
+      if (!ad && slotType === 'ad_skin_left_home') ad = (siteContent || []).find(c => c && c.content_type === 'ad_skin_left');
+      if (!ad && slotType === 'ad_skin_right_home') ad = (siteContent || []).find(c => c && c.content_type === 'ad_skin_right');
 
       setSelectedMapSlot(slotType);
       setAdFormName(ad?.meta_value?.client_name || ad?.title || '');
@@ -568,9 +568,9 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       if (!selectedMapSlot) return;
       setLoading(true);
 
-      let existingAd = siteContent.find(c => c.content_type === selectedMapSlot);
-      if (!existingAd && selectedMapSlot === 'ad_skin_left_home') existingAd = siteContent.find(c => c.content_type === 'ad_skin_left');
-      if (!existingAd && selectedMapSlot === 'ad_skin_right_home') existingAd = siteContent.find(c => c.content_type === 'ad_skin_right');
+      let existingAd = (siteContent || []).find(c => c && c.content_type === selectedMapSlot);
+      if (!existingAd && selectedMapSlot === 'ad_skin_left_home') existingAd = (siteContent || []).find(c => c && c.content_type === 'ad_skin_left');
+      if (!existingAd && selectedMapSlot === 'ad_skin_right_home') existingAd = (siteContent || []).find(c => c && c.content_type === 'ad_skin_right');
 
       const adData = {
         id: existingAd?.id,
@@ -730,7 +730,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                         setPendingAdSlot(selectedMapSlot);
                         fileInputRef.current?.click();
                         const interval = setInterval(() => {
-                          const ad = siteContent.find(c => c.content_type === selectedMapSlot);
+                          const ad = (siteContent || []).find(c => c && c.content_type === selectedMapSlot);
                           if (ad?.image_url) {
                             setAdFormImage(ad.image_url);
                             clearInterval(interval);
