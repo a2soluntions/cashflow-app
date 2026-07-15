@@ -1278,6 +1278,356 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               </form>
             </div>
           )}
+          {activeTab === 'publicidade' && (() => {
+            const adSlots = ['ad_top', 'ad_vittacash_horizontal', 'ad_skin_left_home', 'ad_skin_right_home', 'ad_sidebar_1', 'ad_sidebar_2', 'ad_skin_left', 'ad_skin_right'];
+            const activeAds = siteContent.filter(c => adSlots.includes(c.content_type) && c.is_active);
+            const pendingRequests = siteContent.filter(c => c.content_type.startsWith('request_'));
+            
+            // Faturamento estimado e pagamentos pendentes
+            const parsePrice = (priceStr?: string) => {
+              if (!priceStr) return 0;
+              const clean = priceStr.replace(/[^\d,]/g, '').replace(',', '.');
+              return parseFloat(clean) || 0;
+            };
+
+            const estimatedRevenue = activeAds.reduce((acc, curr) => {
+              const price = parsePrice(curr.meta_value?.price_quoted || (curr.content_type.includes('top') ? 'R$ 450,00' : curr.content_type.includes('skin') ? 'R$ 380,00' : curr.content_type.includes('sidebar') ? 'R$ 280,00' : 'R$ 240,00'));
+              return acc + price;
+            }, 0);
+
+            const unpaidActiveAds = activeAds.filter(ad => ad.meta_value?.payment_status !== 'Pago');
+
+            return (
+              <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 pr-2 md:pr-6 overflow-y-auto custom-scrollbar pb-12">
+                
+                {/* METRICS STRIP FOR ADS */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: 'Anúncios Ativos', val: `${activeAds.length} / 6 slots`, sub: 'Campanhas no ar', color: 'text-indigo-500' },
+                    { label: 'Faturamento Mensal (Est.)', val: formatCurrency(estimatedRevenue), sub: 'Somando anúncios ativos', color: 'text-emerald-500' },
+                    { label: 'Pagamentos Pendentes', val: `${unpaidActiveAds.length} ativos`, sub: 'Aguardando PIX/Fatura', color: 'text-amber-500' },
+                    { label: 'Reservas Pendentes', val: `${pendingRequests.length} solicitações`, sub: 'Novas propostas de clientes', color: 'text-pink-500' },
+                  ].map((kpi, i) => (
+                    <div key={i} className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                      <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{kpi.label}</p>
+                      <h3 className={`text-xl font-black ${kpi.color}`}>{kpi.val}</h3>
+                      <p className="text-[9px] font-bold mt-1 text-slate-400">{kpi.sub}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                  <div className={`flex items-center gap-4 mb-8 border-b ${isLight ? 'border-slate-200' : 'border-white/5'} pb-4`}>
+                    <div className="p-3 bg-amber-500/10 rounded-2xl">
+                      <ImageIcon size={24} className="text-amber-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-black uppercase tracking-widest text-amber-500 text-lg">Central de Publicidade</h3>
+                      <p className={`${isLight ? 'text-slate-500' : 'text-slate-400'} text-[10px] font-bold uppercase tracking-widest mt-1`}>Controle e moderação de vendas, faturamento e expiração de anúncios</p>
+                    </div>
+                  </div>
+
+                  {/* TABELA DE CONTROLE DE CAMPANHAS ATIVAS */}
+                  <div className="mb-12">
+                    <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500 mb-6 flex items-center gap-2">
+                      📋 Controle Financeiro de Campanhas Ativas
+                    </h4>
+                    
+                    {activeAds.length === 0 ? (
+                      <div className="text-center py-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        Nenhum anúncio ativo rodando atualmente no portal.
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          <thead>
+                            <tr className="border-b border-slate-200 dark:border-white/5 pb-2 text-[8px]">
+                              <th className="pb-3 text-zinc-500">Slot</th>
+                              <th className="pb-3 text-zinc-500">Cliente / Título</th>
+                              <th className="pb-3 text-zinc-500">Pagamento</th>
+                              <th className="pb-3 text-zinc-500">Expiração</th>
+                              <th className="pb-3 text-zinc-500 text-right">Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {activeAds.map(ad => {
+                              const expDate = ad.meta_value?.expires_at ? new Date(ad.meta_value.expires_at) : null;
+                              const daysLeft = expDate ? Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+                              const statusPag = ad.meta_value?.payment_status || 'Pendente';
+                              
+                              return (
+                                <tr key={ad.id} className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
+                                  <td className="py-3 text-indigo-400 text-[9px]">{ad.content_type}</td>
+                                  <td className="py-3">
+                                    <div className="text-slate-800 dark:text-slate-200">{ad.meta_value?.client_name || ad.title}</div>
+                                    <div className="text-[8px] text-slate-400 font-medium normal-case">{ad.meta_value?.client_email || 'Email não cadastrado'}</div>
+                                  </td>
+                                  <td className="py-3">
+                                    <button 
+                                      onClick={async () => {
+                                        setLoading(true);
+                                        const newStatus = statusPag === 'Pago' ? 'Pendente' : 'Pago';
+                                        await supabase.from('site_content').update({
+                                          meta_value: { ...ad.meta_value, payment_status: newStatus }
+                                        }).eq('id', ad.id);
+                                        setLoading(false);
+                                        fetchData();
+                                      }}
+                                      className={`px-2.5 py-1 rounded-full text-[8px] font-black tracking-widest uppercase transition-all ${statusPag === 'Pago' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}
+                                    >
+                                      {statusPag}
+                                    </button>
+                                  </td>
+                                  <td className="py-3">
+                                    {daysLeft !== null ? (
+                                      <span className={daysLeft <= 3 ? 'text-rose-500 font-black' : daysLeft <= 7 ? 'text-amber-500 font-bold' : 'text-slate-400'}>
+                                        {daysLeft <= 0 ? 'Expirado ⚠️' : `${daysLeft} dias restantes`}
+                                      </span>
+                                    ) : (
+                                      <span className="text-slate-500">Sem limite</span>
+                                    )}
+                                  </td>
+                                  <td className="py-3 text-right space-x-2">
+                                    <button 
+                                      onClick={async () => {
+                                        setLoading(true);
+                                        const currentExp = ad.meta_value?.expires_at ? new Date(ad.meta_value.expires_at) : new Date();
+                                        const newExp = new Date(currentExp.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+                                        await supabase.from('site_content').update({
+                                          meta_value: { ...ad.meta_value, expires_at: newExp }
+                                        }).eq('id', ad.id);
+                                        setLoading(false);
+                                        fetchData();
+                                        showAlert("Prorrogado!", "Campanha estendida por mais 30 dias.", "info");
+                                      }}
+                                      className="px-2 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 rounded text-[8px]"
+                                    >
+                                      +30 Dias
+                                    </button>
+                                    <button 
+                                      onClick={async () => {
+                                        if (!window.confirm("Deseja desativar este anúncio e colocá-lo em pausa?")) return;
+                                        setLoading(true);
+                                        await supabase.from('site_content').update({ is_active: false }).eq('id', ad.id);
+                                        setLoading(false);
+                                        fetchData();
+                                      }}
+                                      className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded text-[8px]"
+                                    >
+                                      Desativar
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* SESSÃO: PÁGINA INICIAL */}
+                  <div className="mb-12">
+                    <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500 mb-6 flex items-center gap-2">
+                      <Monitor size={14} /> Página Inicial (Portal Principal - Estático)
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {[
+                        { id: 'ad_top', label: 'Banner Topo (970x250)', type: 'ad_top' },
+                        { id: 'ad_vittacash_horizontal', label: 'Banner VittaCash (Horizontal)', type: 'ad_vittacash_horizontal' },
+                        { id: 'ad_skin_left_home', label: 'Skin Esquerda (200x600)', type: 'ad_skin_left_home' },
+                        { id: 'ad_skin_right_home', label: 'Skin Direita (200x600)', type: 'ad_skin_right_home' },
+                        { id: 'ad_sidebar_1', label: 'Sidebar Quadrado (300x300)', type: 'ad_sidebar_1' },
+                        { id: 'ad_sidebar_2', label: 'Sidebar Vertical (300x600)', type: 'ad_sidebar_2' }
+                      ].map((slot) => {
+                        let currentAd = siteContent.find(c => c.content_type === slot.type);
+                        
+                        // Fallback para tipos legados se for skin
+                        if (!currentAd && slot.type === 'ad_skin_left_home') {
+                          currentAd = siteContent.find(c => c.content_type === 'ad_skin_left');
+                        }
+                        if (!currentAd && slot.type === 'ad_skin_right_home') {
+                          currentAd = siteContent.find(c => c.content_type === 'ad_skin_right');
+                        }
+                        
+                        return (
+                          <div key={slot.id} className={`${isLight ? 'bg-white' : 'bg-white/10'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4 group`}>
+                            <div className="flex justify-between items-center">
+                              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{slot.label}</h4>
+                              {currentAd?.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
+                            </div>
+                            
+                            <div className={`aspect-video ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-xl overflow-hidden relative border border-dashed border-slate-300 dark:border-white/10 group/img`}>
+                              {currentAd?.image_url ? (
+                                <img src={currentAd.image_url} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                  <ImageIcon size={24} className="opacity-20" />
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                <button 
+                                  onClick={() => {
+                                    setPendingAdSlot(currentAd ? `${slot.type}:${currentAd.id}` : slot.type);
+                                    fileInputRef.current?.click();
+                                  }}
+                                  className="px-4 py-2 bg-white text-black text-[9px] font-black uppercase tracking-widest rounded-lg shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+                                >
+                                  <Upload size={12} />
+                                  Trocar Imagem
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="space-y-3">
+                              {(slot.type === 'ad_featured_video') && (
+                                <>
+                                  <input 
+                                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                    placeholder="Título do Vídeo..."
+                                    defaultValue={currentAd?.title || ''}
+                                    onBlur={async (e) => {
+                                      if (e.target.value === (currentAd?.title || '')) return;
+                                      setLoading(true);
+                                      await supabase.from('site_content').upsert({
+                                        id: currentAd?.id,
+                                        content_type: slot.type,
+                                        title: e.target.value,
+                                        image_url: currentAd?.image_url || '',
+                                        description: currentAd?.description || '',
+                                        is_active: true,
+                                        meta_value: { ...currentAd?.meta_value, external_url: currentAd?.meta_value?.external_url || '#' }
+                                      });
+                                      setLoading(false);
+                                      fetchData();
+                                    }}
+                                  />
+                                  <textarea 
+                                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all resize-none h-20"
+                                    placeholder="Resumo/Descrição do Vídeo..."
+                                    defaultValue={currentAd?.description || ''}
+                                    onBlur={async (e) => {
+                                      if (e.target.value === (currentAd?.description || '')) return;
+                                      setLoading(true);
+                                      await supabase.from('site_content').upsert({
+                                        id: currentAd?.id,
+                                        content_type: slot.type,
+                                        title: currentAd?.title || slot.label,
+                                        image_url: currentAd?.image_url || '',
+                                        description: e.target.value,
+                                        is_active: true,
+                                        meta_value: { ...currentAd?.meta_value, external_url: currentAd?.meta_value?.external_url || '#' }
+                                      });
+                                      setLoading(false);
+                                      fetchData();
+                                    }}
+                                  />
+                                </>
+                              )}
+                              <input 
+                                className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                placeholder={slot.type === 'ad_featured_video' ? "Link do YouTube..." : "URL da Imagem..."}
+                                defaultValue={slot.type === 'ad_featured_video' ? (currentAd?.meta_value?.external_url || '') : (currentAd?.image_url || '')}
+                                onBlur={async (e) => {
+                                  const val = e.target.value;
+                                  if (slot.type === 'ad_featured_video') {
+                                    if (val === (currentAd?.meta_value?.external_url || '')) return;
+                                    setLoading(true);
+                                    await supabase.from('site_content').upsert({
+                                      id: currentAd?.id,
+                                      content_type: slot.type,
+                                      title: currentAd?.title || slot.label,
+                                      image_url: currentAd?.image_url || '',
+                                      description: currentAd?.description || '',
+                                      is_active: true,
+                                      meta_value: { ...currentAd?.meta_value, external_url: val }
+                                    });
+                                  } else {
+                                    if (val === (currentAd?.image_url || '')) return;
+                                    setLoading(true);
+                                    await supabase.from('site_content').upsert({
+                                      id: currentAd?.id,
+                                      content_type: slot.type,
+                                      title: slot.label,
+                                      image_url: val,
+                                      is_active: true,
+                                      meta_value: { ...currentAd?.meta_value, external_url: currentAd?.meta_value?.external_url || '#' }
+                                    });
+                                  }
+                                  setLoading(false);
+                                  fetchData();
+                                }}
+                              />
+                              {slot.type !== 'ad_featured_video' && (
+                                <input 
+                                  className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-all"
+                                  placeholder="Link do Anunciante (URL)..."
+                                  defaultValue={currentAd?.meta_value?.external_url || ''}
+                                  onBlur={async (e) => {
+                                    if (e.target.value === (currentAd?.meta_value?.external_url || '')) return;
+                                    setLoading(true);
+                                    const { error } = await supabase.from('site_content').upsert({
+                                      id: currentAd?.id,
+                                      content_type: slot.type,
+                                      title: slot.label,
+                                      image_url: currentAd?.image_url || '',
+                                      is_active: true,
+                                      meta_value: { ...currentAd?.meta_value, external_url: e.target.value }
+                                    });
+                                    setLoading(false);
+                                    if (error) {
+                                      showAlert("Erro ao Salvar", error.message, "error");
+                                    } else {
+                                      fetchData();
+                                      showAlert("Sucesso", "Link do anunciante atualizado!", "info");
+                                    }
+                                  }}
+                                />
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center justify-between pt-2">
+                               <button 
+                                onClick={async () => {
+                                  if (!currentAd) return;
+                                  setLoading(true);
+                                  await supabase.from('site_content').update({ is_active: !currentAd.is_active }).eq('id', currentAd.id);
+                                  setLoading(false);
+                                  fetchData();
+                                }}
+                                className={`text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full border transition-all ${currentAd?.is_active ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20'}`}
+                               >
+                                {currentAd?.is_active ? 'Ativo' : 'Inativo'}
+                               </button>
+                               {currentAd && (
+                                 <button onClick={() => handleDeleteContent(currentAd.id)} className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
+                               )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* SESSÃO: VITTACASH TV (VÍDEOS E HISTÓRICO) */}
+                  <div className="mb-12">
+                    <div className={`flex items-center justify-between mb-6 border-b ${isLight ? 'border-slate-200' : 'border-white/5'} pb-4`}>
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-indigo-500/10 rounded-2xl">
+                          <Monitor size={24} className="text-indigo-500" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500">
+                            VittaCash TV (Destaque & Histórico)
+                          </h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
           {activeTab === 'publicidade' && (
             <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 pr-2 md:pr-6 overflow-y-auto custom-scrollbar pb-12">
               <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
