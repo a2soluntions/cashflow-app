@@ -536,6 +536,403 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     );
   };
 
+  const renderAdsMapaTab = () => {
+    const adSlots = [
+      { id: 'ad_top', label: 'Banner Topo (970x250)', type: 'ad_top', price: 'R$ 450' },
+      { id: 'ad_vittacash_horizontal', label: 'Banner de Centro (728x90)', type: 'ad_vittacash_horizontal', price: 'R$ 240' },
+      { id: 'ad_skin_left_home', label: 'Skin Esquerda (200x600)', type: 'ad_skin_left_home', price: 'R$ 380' },
+      { id: 'ad_skin_right_home', label: 'Skin Direita (200x600)', type: 'ad_skin_right_home', price: 'R$ 380' },
+      { id: 'ad_sidebar_1', label: 'Sidebar 1 (300x300)', type: 'ad_sidebar_1', price: 'R$ 280' },
+      { id: 'ad_sidebar_2', label: 'Sidebar 2 (300x600)', type: 'ad_sidebar_2', price: 'R$ 320' },
+      { id: 'ad_internal_inline_1', label: 'Anúncio Interno 01', type: 'ad_internal_inline_1', price: 'R$ 150' },
+      { id: 'ad_internal_inline_2', label: 'Anúncio Interno 02', type: 'ad_internal_inline_2', price: 'R$ 150' },
+      { id: 'ad_internal_inline_3', label: 'Anúncio Interno 03', type: 'ad_internal_inline_3', price: 'R$ 150' }
+    ];
+
+    const activeAds = siteContent.filter(c => adSlots.map(s => s.type).includes(c.content_type) && c.is_active);
+    const pendingRequests = siteContent.filter(c => c.content_type.startsWith('request_'));
+
+    const handleOpenAdModal = (slotType: string) => {
+      let ad = siteContent.find(c => c.content_type === slotType);
+      if (!ad && slotType === 'ad_skin_left_home') ad = siteContent.find(c => c.content_type === 'ad_skin_left');
+      if (!ad && slotType === 'ad_skin_right_home') ad = siteContent.find(c => c.content_type === 'ad_skin_right');
+
+      setSelectedMapSlot(slotType);
+      setAdFormName(ad?.meta_value?.client_name || ad?.title || '');
+      setAdFormPhone(ad?.meta_value?.client_phone || '');
+      setAdFormImage(ad?.image_url || '');
+      setAdFormLink(ad?.meta_value?.external_url || ad?.meta_value?.link || ad?.description || '');
+    };
+
+    const handleSaveAdModal = async () => {
+      if (!selectedMapSlot) return;
+      setLoading(true);
+
+      let existingAd = siteContent.find(c => c.content_type === selectedMapSlot);
+      if (!existingAd && selectedMapSlot === 'ad_skin_left_home') existingAd = siteContent.find(c => c.content_type === 'ad_skin_left');
+      if (!existingAd && selectedMapSlot === 'ad_skin_right_home') existingAd = siteContent.find(c => c.content_type === 'ad_skin_right');
+
+      const adData = {
+        id: existingAd?.id,
+        content_type: selectedMapSlot,
+        title: adSlots.find(s => s.type === selectedMapSlot)?.label || selectedMapSlot,
+        image_url: adFormImage,
+        is_active: true,
+        meta_value: {
+          ...existingAd?.meta_value,
+          client_name: adFormName,
+          client_phone: adFormPhone,
+          external_url: adFormLink || '#',
+          price_quoted: adSlots.find(s => s.type === selectedMapSlot)?.price || 'R$ 240,00'
+        }
+      };
+
+      const { error } = await supabase.from('site_content').upsert(adData);
+      setLoading(false);
+      setSelectedMapSlot(null);
+      if (error) {
+        showAlert("Erro ao Salvar", error.message, "error");
+      } else {
+        fetchData();
+        showAlert("Anúncio Atualizado", "As informações do banner foram salvas com sucesso!", "info");
+      }
+    };
+
+    return (
+      <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-8 flex-1 pr-2 md:pr-6 overflow-y-auto custom-scrollbar pb-12">
+        
+        {/* MAPA INTERATIVO VISUAL DE BANNERS */}
+        <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+          <div className="flex items-center gap-3 mb-6">
+            <Monitor className="text-indigo-500" size={20} />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Mapa de Posicionamento de Banners (Clique no Slot para Editar)</h3>
+          </div>
+
+          <div className="flex flex-col gap-4 max-w-4xl mx-auto w-full">
+            {/* Banner do Topo */}
+            <button 
+              type="button"
+              onClick={() => handleOpenAdModal('ad_top')}
+              className="w-full py-6 rounded-2xl bg-indigo-500/10 border-2 border-indigo-500/30 hover:border-indigo-500 hover:bg-indigo-500/20 text-indigo-400 font-black text-xs uppercase tracking-widest transition-all cursor-pointer text-center"
+            >
+              Banner do Topo (970x250) - R$ 450
+            </button>
+
+            <div className="grid grid-cols-12 gap-4">
+              {/* Skin Esquerda */}
+              <button 
+                type="button"
+                onClick={() => handleOpenAdModal('ad_skin_left_home')}
+                className="col-span-3 py-24 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center [writing-mode:vertical-lr]"
+              >
+                Skin Esquerda (200x600) - R$ 380
+              </button>
+
+              {/* Conteúdo Central */}
+              <div className="col-span-6 flex flex-col gap-4">
+                <div className="flex-1 py-8 rounded-2xl bg-zinc-900/40 border border-zinc-800 text-zinc-500 font-medium text-[9px] uppercase tracking-widest flex items-center justify-center text-center">
+                  Feed de Matérias do Portal
+                </div>
+
+                {/* Banner de Centro */}
+                <button 
+                  type="button"
+                  onClick={() => handleOpenAdModal('ad_vittacash_horizontal')}
+                  className="w-full py-4 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer text-center"
+                >
+                  Banner de Centro (728x90) - R$ 240
+                </button>
+
+                <div className="flex-1 py-8 rounded-2xl bg-zinc-900/40 border border-zinc-800 text-zinc-500 font-medium text-[9px] uppercase tracking-widest flex items-center justify-center text-center">
+                  Simuladores de Dividendos
+                </div>
+              </div>
+
+              {/* Sidebar Coluna Direita */}
+              <div className="col-span-3 flex flex-col gap-4">
+                {/* Sidebar 1 */}
+                <button 
+                  type="button"
+                  onClick={() => handleOpenAdModal('ad_sidebar_1')}
+                  className="w-full py-8 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer text-center"
+                >
+                  Sidebar 1 (300x300) - R$ 280
+                </button>
+
+                {/* Sidebar 2 */}
+                <button 
+                  type="button"
+                  onClick={() => handleOpenAdModal('ad_sidebar_2')}
+                  className="w-full py-16 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center [writing-mode:vertical-lr]"
+                >
+                  Sidebar 2 (300x600) - R$ 320
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* MODAL POPUP PARA INSERÇÃO DE DADOS */}
+        {selectedMapSlot && (
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <div className={`${isLight ? 'bg-white text-slate-800' : 'bg-zinc-900 text-white'} w-full max-w-md p-6 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/10'} shadow-2xl animate-in zoom-in-95 duration-200`}>
+              
+              <div className="flex justify-between items-center mb-6 border-b pb-3 border-slate-200 dark:border-white/5">
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-500">Configurar Anúncio</h4>
+                  <p className="text-[9px] text-slate-400 uppercase font-bold mt-1">Slot: {adSlots.find(s => s.type === selectedMapSlot)?.label || selectedMapSlot}</p>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setSelectedMapSlot(null)}
+                  className="text-slate-400 hover:text-rose-500 font-bold text-xs uppercase"
+                >
+                  Fechar
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[9px] font-black uppercase text-slate-400 mb-1.5 block">Nome do Anunciante</label>
+                  <input 
+                    type="text"
+                    value={adFormName}
+                    onChange={(e) => setAdFormName(e.target.value)}
+                    placeholder="Ex: Banco Vitta"
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-xl font-bold text-xs outline-none focus:border-indigo-500 transition-all text-slate-800 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-black uppercase text-slate-400 mb-1.5 block">WhatsApp / Contato</label>
+                  <input 
+                    type="text"
+                    value={adFormPhone}
+                    onChange={(e) => setAdFormPhone(e.target.value)}
+                    placeholder="Ex: (34) 99999-9999"
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-xl font-bold text-xs outline-none focus:border-indigo-500 transition-all text-slate-800 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-black uppercase text-slate-400 mb-1.5 block">Imagem do Banner (URL ou Upload)</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text"
+                      value={adFormImage}
+                      onChange={(e) => setAdFormImage(e.target.value)}
+                      placeholder="URL da imagem ou faça upload..."
+                      className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-xl font-bold text-xs outline-none focus:border-indigo-500 transition-all text-slate-800 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPendingAdSlot(selectedMapSlot);
+                        fileInputRef.current?.click();
+                        const interval = setInterval(() => {
+                          const ad = siteContent.find(c => c.content_type === selectedMapSlot);
+                          if (ad?.image_url) {
+                            setAdFormImage(ad.image_url);
+                            clearInterval(interval);
+                          }
+                        }, 1000);
+                        setTimeout(() => clearInterval(interval), 15000);
+                      }}
+                      className="px-3 bg-indigo-500 text-black font-black uppercase tracking-widest text-[9px] rounded-xl hover:bg-indigo-400 transition-colors flex items-center gap-1"
+                    >
+                      <Upload size={14} /> Upload
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-black uppercase text-slate-400 mb-1.5 block">Link do Anunciante (URL)</label>
+                  <input 
+                    type="text"
+                    value={adFormLink}
+                    onChange={(e) => setAdFormLink(e.target.value)}
+                    placeholder="Ex: https://vittacash.com"
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-xl font-bold text-xs outline-none focus:border-indigo-500 transition-all text-slate-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedMapSlot(null)}
+                  className="flex-1 py-3 bg-slate-100 dark:bg-white/5 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveAdModal}
+                  className="flex-1 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-500 transition-colors"
+                >
+                  Salvar Dados
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* LISTAGEM DE BANNERS ATIVOS (Com ícone de Editar e Excluir) */}
+        <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+          <div className="flex items-center gap-3 mb-6 border-b pb-4 border-slate-200 dark:border-white/5">
+            <ImageIcon size={20} className="text-amber-500" />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Listagem de Anúncios Ativos</h3>
+          </div>
+
+          {activeAds.length === 0 ? (
+            <div className="text-center py-8 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              Nenhum anúncio ativo cadastrado no momento. Use o Mapa para cadastrar.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-white/5 pb-2 text-[8px]">
+                    <th className="pb-3 text-zinc-500">Preview</th>
+                    <th className="pb-3 text-zinc-500">Slot / Posição</th>
+                    <th className="pb-3 text-zinc-500">Anunciante</th>
+                    <th className="pb-3 text-zinc-500">Contato</th>
+                    <th className="pb-3 text-zinc-500">Link Destino</th>
+                    <th className="pb-3 text-zinc-500 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeAds.map(ad => {
+                    const isSlotInfo = adSlots.find(s => s.type === ad.content_type);
+                    return (
+                      <tr key={ad.id} className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
+                        <td className="py-3">
+                          <div className="w-12 aspect-video bg-zinc-800 rounded-lg overflow-hidden border border-white/5">
+                            {ad.image_url ? (
+                              <img src={ad.image_url} className="w-full h-full object-cover" alt="Preview" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-[7px] text-zinc-600">Sem Img</div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 text-indigo-400 text-[9px]">{isSlotInfo?.label || ad.content_type}</td>
+                        <td className="py-3 text-slate-800 dark:text-slate-200">{ad.meta_value?.client_name || ad.title}</td>
+                        <td className="py-3 text-zinc-400">{ad.meta_value?.client_phone || 'Sem contato'}</td>
+                        <td className="py-3 text-[9px] text-slate-400 lowercase font-medium normal-case max-w-xs truncate">
+                          <a href={ad.meta_value?.external_url} target="_blank" rel="noreferrer" className="underline hover:text-indigo-400">{ad.meta_value?.external_url || '#'}</a>
+                        </td>
+                        <td className="py-3 text-right space-x-2">
+                          <button 
+                            type="button"
+                            onClick={() => handleOpenAdModal(ad.content_type)}
+                            className="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500 hover:text-black text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded transition-all"
+                            title="Editar Anúncio"
+                          >
+                            Editar
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={async () => {
+                              if (!window.confirm("Deseja mesmo desativar e excluir este anúncio da listagem?")) return;
+                              setLoading(true);
+                              await supabase.from('site_content').delete().eq('id', ad.id);
+                              setLoading(false);
+                              fetchData();
+                            }}
+                            className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-500 text-[8px] font-black uppercase tracking-widest rounded transition-all"
+                            title="Excluir Anúncio"
+                          >
+                            Excluir
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* SOLICITAÇÕES DE RESERVA PENDENTES */}
+        {pendingRequests.length > 0 && (
+          <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500 mb-6 flex items-center gap-2">
+              📢 Solicitações de Reserva Pendentes
+            </h4>
+            <div className="flex flex-col gap-4">
+              {pendingRequests.map((req) => {
+                const targetSlot = req.content_type.replace('request_', '');
+                return (
+                  <div key={req.id} className={`p-5 rounded-2xl border ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 border-white/5'} flex flex-col md:flex-row md:items-center justify-between gap-6`}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-24 aspect-video rounded-lg overflow-hidden bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex-shrink-0">
+                        {req.image_url ? (
+                          <img src={req.image_url} className="w-full h-full object-contain" alt="Solicitação" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-300">Sem Img</div>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-[8px] font-black uppercase bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full mb-1 inline-block">
+                          Vaga: {targetSlot}
+                        </span>
+                        <h5 className="text-xs font-black uppercase text-slate-800 dark:text-slate-200">{req.meta_value?.client_name || req.title}</h5>
+                        <p className="text-[9px] font-bold text-slate-400 mt-1">
+                          📞 {req.meta_value?.client_phone || 'Sem fone'} | ✉️ {req.meta_value?.client_email || 'Sem e-mail'}
+                        </p>
+                        <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest mt-1">
+                          Preço Ofertado: {req.meta_value?.price_quoted} | {req.meta_value?.duration_days} Dias
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setLoading(true);
+                          const existingAd = siteContent.find(c => c.content_type === targetSlot);
+                          if (existingAd) {
+                            await supabase.from('site_content').delete().eq('id', existingAd.id);
+                          }
+                          await supabase.from('site_content').update({
+                            content_type: targetSlot,
+                            is_active: true
+                          }).eq('id', req.id);
+                          setLoading(false);
+                          fetchData();
+                          showAlert("Aprovado!", "Anúncio ativado no portal.", "info");
+                        }}
+                        className="px-4 py-2 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400"
+                      >
+                        Aprovar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!window.confirm("Deseja rejeitar?")) return;
+                          setLoading(true);
+                          await supabase.from('site_content').delete().eq('id', req.id);
+                          setLoading(false);
+                          fetchData();
+                        }}
+                        className="px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-rose-500 hover:text-white"
+                      >
+                        Rejeitar
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+      </div>
+    );
+  };
+
   const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
   return (
