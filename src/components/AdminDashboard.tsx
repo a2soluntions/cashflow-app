@@ -595,7 +595,11 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       setLoading(false);
       setSelectedMapSlot(null);
       if (error) {
-        showAlert("Erro ao Salvar", error.message, "error");
+        let msg = error.message;
+        if (msg.includes("row-level security policy")) {
+          msg = "Ação não permitida pelas políticas de segurança do banco de dados (RLS). Verifique se você está autenticado corretamente.";
+        }
+        showAlert("Erro ao Salvar", msg, "error");
       } else {
         fetchData();
         showAlert("Anúncio Atualizado", "As informações do banner foram salvas com sucesso!", "info");
