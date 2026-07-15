@@ -15,7 +15,7 @@ const CORES_FUNIL = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-orange' | 'white-orange' }> = ({ theme }) => {
   const isLight = theme === 'white' || theme === 'white-orange';
-  const [activeTab, setActiveTab] = useState<'vendas' | 'dados' | 'a2noticias' | 'publicidade'>('vendas');
+  const [activeTab, setActiveTab] = useState<'vendas' | 'dados' | 'a2noticias' | 'publicidade' | 'ads_mapa'>('vendas');
   const [licenses, setLicenses] = useState<any[]>([]);
   const [siteContent, setSiteContent] = useState<any[]>([]);
   
@@ -595,6 +595,9 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 </button>
                 <button onClick={() => setActiveTab('publicidade')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'publicidade' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-slate-500 hover:text-amber-500')}>
                   Ads
+                </button>
+                <button onClick={() => setActiveTab('ads_mapa')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'ads_mapa' ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'text-slate-500 hover:text-amber-500')}>
+                  Mapa Ads
                 </button>
               </div>
             </div>
@@ -1419,6 +1422,102 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   </>
                 );
               })()}
+            </div>
+          )}
+
+          {activeTab === 'ads_mapa' && (
+            <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-8 flex-1 pr-2 md:pr-6 overflow-y-auto custom-scrollbar pb-12">
+              
+              {/* MAPA INTERATIVO VISUAL DE BANNERS */}
+              <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                <div className="flex items-center gap-3 mb-6">
+                  <Monitor className="text-indigo-500" size={20} />
+                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Mapa de Posicionamento de Banners</h3>
+                </div>
+
+                <div className="flex flex-col gap-4 max-w-4xl mx-auto w-full">
+                  {/* Banner do Topo */}
+                  <button 
+                    onClick={() => {
+                      const el = document.getElementById('card_ad_top');
+                      el?.scrollIntoView({ behavior: 'smooth' });
+                      el?.classList.add('ring-2', 'ring-indigo-500');
+                      setTimeout(() => el?.classList.remove('ring-2', 'ring-indigo-500'), 2000);
+                    }}
+                    className="w-full py-6 rounded-2xl bg-indigo-500/10 border-2 border-indigo-500/30 hover:border-indigo-500 hover:bg-indigo-500/20 text-indigo-400 font-black text-xs uppercase tracking-widest transition-all cursor-pointer text-center"
+                  >
+                    Banner do Topo (970x250) - R$ 450
+                  </button>
+
+                  <div className="grid grid-cols-12 gap-4">
+                    {/* Skin Esquerda */}
+                    <button 
+                      onClick={() => {
+                        const el = document.getElementById('card_ad_skin_left_home') || document.getElementById('card_ad_skin_left');
+                        el?.scrollIntoView({ behavior: 'smooth' });
+                        el?.classList.add('ring-2', 'ring-indigo-500');
+                        setTimeout(() => el?.classList.remove('ring-2', 'ring-indigo-500'), 2000);
+                      }}
+                      className="col-span-3 py-24 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center [writing-mode:vertical-lr]"
+                    >
+                      Skin Esquerda (200x600) - R$ 380
+                    </button>
+
+                    {/* Conteúdo Central */}
+                    <div className="col-span-6 flex flex-col gap-4">
+                      <div className="flex-1 py-8 rounded-2xl bg-zinc-900/40 border border-zinc-800 text-zinc-500 font-medium text-[9px] uppercase tracking-widest flex items-center justify-center text-center">
+                        Feed de Matérias do Portal
+                      </div>
+
+                      {/* Banner de Centro */}
+                      <button 
+                        onClick={() => {
+                          const el = document.getElementById('card_ad_vittacash_horizontal');
+                          el?.scrollIntoView({ behavior: 'smooth' });
+                          el?.classList.add('ring-2', 'ring-indigo-500');
+                          setTimeout(() => el?.classList.remove('ring-2', 'ring-indigo-500'), 2000);
+                        }}
+                        className="w-full py-4 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer text-center"
+                      >
+                        Banner de Centro (728x90) - R$ 240
+                      </button>
+
+                      <div className="flex-1 py-8 rounded-2xl bg-zinc-900/40 border border-zinc-800 text-zinc-500 font-medium text-[9px] uppercase tracking-widest flex items-center justify-center text-center">
+                        Simuladores de Dividendos
+                      </div>
+                    </div>
+
+                    {/* Sidebar Coluna Direita */}
+                    <div className="col-span-3 flex flex-col gap-4">
+                      {/* Sidebar 1 */}
+                      <button 
+                        onClick={() => {
+                          const el = document.getElementById('card_ad_sidebar_1');
+                          el?.scrollIntoView({ behavior: 'smooth' });
+                          el?.classList.add('ring-2', 'ring-indigo-500');
+                          setTimeout(() => el?.classList.remove('ring-2', 'ring-indigo-500'), 2000);
+                        }}
+                        className="w-full py-8 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer text-center"
+                      >
+                        Sidebar 1 (300x300) - R$ 280
+                      </button>
+
+                      {/* Sidebar 2 */}
+                      <button 
+                        onClick={() => {
+                          const el = document.getElementById('card_ad_sidebar_2');
+                          el?.scrollIntoView({ behavior: 'smooth' });
+                          el?.classList.add('ring-2', 'ring-indigo-500');
+                          setTimeout(() => el?.classList.remove('ring-2', 'ring-indigo-500'), 2000);
+                        }}
+                        className="w-full py-16 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center [writing-mode:vertical-lr]"
+                      >
+                        Sidebar 2 (300x600) - R$ 320
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                 <div className={`flex items-center gap-4 mb-8 border-b ${isLight ? 'border-slate-200' : 'border-white/5'} pb-4`}>
@@ -1456,7 +1555,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                       }
                       
                       return (
-                        <div key={slot.id} className={`${isLight ? 'bg-white' : 'bg-white/10'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4 group`}>
+                        <div key={slot.id} id={`card_${slot.type}`} className={`${isLight ? 'bg-white' : 'bg-white/10'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4 group transition-all duration-500`}>
                           <div className="flex justify-between items-center">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{slot.label}</h4>
                             {currentAd?.is_active && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
