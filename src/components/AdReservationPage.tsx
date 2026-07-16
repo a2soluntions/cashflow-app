@@ -321,7 +321,23 @@ export default function AdReservationPage() {
                         required
                         placeholder="(34) 99999-9999"
                         value={clientPhone}
-                        onChange={(e) => setClientPhone(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const numbers = val.replace(/\D/g, '').slice(0, 11);
+                          let formatted = '';
+                          if (numbers.length > 0) {
+                            if (numbers.length <= 2) {
+                              formatted = `(${numbers}`;
+                            } else if (numbers.length <= 6) {
+                              formatted = `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+                            } else if (numbers.length <= 10) {
+                              formatted = `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
+                            } else {
+                              formatted = `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
+                            }
+                          }
+                          setClientPhone(formatted);
+                        }}
                         className="w-full bg-zinc-950/60 border border-white/5 px-4 py-3 rounded-xl outline-none text-xs font-bold text-white focus:border-indigo-500 transition-all placeholder:text-zinc-700"
                       />
                     </div>
