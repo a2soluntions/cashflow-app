@@ -123,6 +123,16 @@ export default function AdReservationPage() {
     if (!file) return;
 
     setUploading(true);
+    
+    // 1. Fornece feedback visual instantâneo convertendo a imagem original para Base64 imediatamente
+    const instantReader = new FileReader();
+    instantReader.onloadend = () => {
+      if (instantReader.result) {
+        setAdImageUrl(instantReader.result as string);
+      }
+    };
+    instantReader.readAsDataURL(file);
+
     try {
       const sizeMap: Record<string, { w: number, h: number, label: string }> = {
         'ad_top': { w: 970, h: 250, label: 'Banner Topo' },
@@ -144,9 +154,19 @@ export default function AdReservationPage() {
           img.src = URL.createObjectURL(file);
         });
 
-        if (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h) {
-          showAlert("Ajustando Imagem", `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. O sistema fará o recorte e ajuste proporcional automático.`, "info");
+        // Se for diferente das dimensões alvo, fazemos o ajuste e recorte
+        if (imgDimensions.w > 0 && (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h)) {
+          showAlert("Ajustando Imagem", `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte automático.`, "info");
           finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
+          
+          // Atualiza o Base64 com a versão já recortada e leve
+          const croppedReader = new FileReader();
+          croppedReader.onloadend = () => {
+            if (croppedReader.result) {
+              setAdImageUrl(croppedReader.result as string);
+            }
+          };
+          croppedReader.readAsDataURL(finalFile);
         }
       }
 
@@ -165,21 +185,16 @@ export default function AdReservationPage() {
           .from('vitta-assets')
           .getPublicUrl(filePath);
 
+        // Se o upload no bucket público der certo, salva a URL final (mais otimizado que Base64 no banco)
         setAdImageUrl(data.publicUrl);
-        showAlert("Imagem Carregada", "Seu banner foi processado, redimensionado e enviado com sucesso!", "success");
+        showAlert("Imagem Carregada", "Seu banner foi enviado e configurado com sucesso!", "success");
       } catch (storageErr) {
-        // FALLBACK: Converte o blob ajustado para Base64 DataURL
-        console.warn("Storage upload failed, fallback to Base64:", storageErr);
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64data = reader.result as string;
-          setAdImageUrl(base64data);
-          showAlert("Imagem Carregada (Ajuste)", "Seu banner foi processado e anexado localmente com sucesso!", "success");
-        };
-        reader.readAsDataURL(finalFile);
+        console.warn("Storage upload failed, keeping local Base64 backup:", storageErr);
+        showAlert("Imagem Carregada (Offline)", "O arquivo foi processado e anexado localmente com sucesso!", "success");
       }
     } catch (err: any) {
-      showAlert("Erro no Processamento", err.message, "error");
+      console.error(err);
+      showAlert("Erro no Processamento", err.message || "Não foi possível carregar a imagem.", "error");
     } finally {
       setUploading(false);
     }
