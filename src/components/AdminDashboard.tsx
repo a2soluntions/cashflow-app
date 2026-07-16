@@ -229,6 +229,52 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     } catch (err: any) { showAlert("Erro ao criar", err.message, "error"); } finally { setLoading(false); }
   };
 
+  const cropAndResizeImage = (file: File, targetWidth: number, targetHeight: number): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error("Could not get canvas context"));
+            return;
+          }
+
+          // Cálculo de recorte proporcional centralizado (aspect ratio cover)
+          const imgRatio = img.width / img.height;
+          const targetRatio = targetWidth / targetHeight;
+          let sourceX = 0, sourceY = 0, sourceWidth = img.width, sourceHeight = img.height;
+
+          if (imgRatio > targetRatio) {
+            sourceWidth = img.height * targetRatio;
+            sourceX = (img.width - sourceWidth) / 2;
+          } else {
+            sourceHeight = img.width / targetRatio;
+            sourceY = (img.height - sourceHeight) / 2;
+          }
+
+          ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetWidth, targetHeight);
+          
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error("Canvas conversion failed"));
+            }
+          }, file.type || 'image/jpeg', 0.95);
+        };
+        img.onerror = () => reject(new Error("Falha ao ler imagem"));
+        img.src = event.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error("Falha ao ler arquivo"));
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -241,7 +287,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
       const { error: uploadError } = await supabase.storage
         .from('vitta-assets')
-        .upload(filePath, file);
+        .upload(filePath, finalFile, { contentType: file.type });
 
       if (uploadError) {
         if (uploadError.message === 'Bucket not found') {
