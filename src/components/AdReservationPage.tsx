@@ -145,7 +145,7 @@ export default function AdReservationPage() {
         });
 
         if (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h) {
-          alert(`Ajustando imagem: Proporção original ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte proporcional automático.`);
+          showAlert("Ajustando Imagem", `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. O sistema fará o recorte e ajuste proporcional automático.`, "info");
           finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
         }
       }
@@ -165,9 +165,9 @@ export default function AdReservationPage() {
         .getPublicUrl(filePath);
 
       setAdImageUrl(data.publicUrl);
-      alert("Sucesso! Imagem carregada e ajustada.");
+      showAlert("Imagem Carregada", "Seu banner foi processado, redimensionado e enviado com sucesso!", "success");
     } catch (err: any) {
-      alert("Erro no upload: " + err.message);
+      showAlert("Erro no Upload", err.message, "error");
     } finally {
       setUploading(false);
     }
