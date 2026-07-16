@@ -155,8 +155,7 @@ export default function AdReservationPage() {
                 Banner do Topo (970x250) - R$ 450
               </div>
 
-              {/* Feed layout simulation */}
-              <div className="grid grid-cols-12 gap-4">
+              <div className="grid grid-cols-12 gap-3 md:gap-4">
                 
                 {/* Skin Left simulation */}
                 <div 
@@ -168,7 +167,7 @@ export default function AdReservationPage() {
                 </div>
 
                 {/* News feed column simulation */}
-                <div className="col-span-8 space-y-4">
+                <div className="col-span-6 space-y-4">
                   <div className="h-24 bg-zinc-800/10 border border-white/5 rounded-xl flex items-center justify-center text-[10px] font-bold text-zinc-600 uppercase">
                     Feed de Matérias do Portal
                   </div>
@@ -205,8 +204,16 @@ export default function AdReservationPage() {
                   </div>
                 </div>
 
-              </div>
+                {/* Skin Right simulation */}
+                <div 
+                  onClick={() => setSelectedSlot('ad_skin_right_home')}
+                  className={`col-span-2 py-24 rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center justify-center cursor-pointer transition-all ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                  style={{ writingMode: 'vertical-rl' }}
+                >
+                  Skin Direita (200x600) - R$ 380
+                </div>
 
+              </div>
             </div>
           </div>
 

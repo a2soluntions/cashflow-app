@@ -630,12 +630,12 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               Banner do Topo (970x250) - R$ 450
             </button>
 
-            <div className="grid grid-cols-12 gap-4">
-              {/* Skin Esquerda */}
+            <div className="grid grid-cols-12 gap-3 md:gap-4">
+              {/* Skin Esquerda (Lateral Extrema) */}
               <button 
                 type="button"
                 onClick={() => handleOpenAdModal('ad_skin_left_home')}
-                className="col-span-3 py-24 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center [writing-mode:vertical-lr]"
+                className="col-span-2 py-24 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center [writing-mode:vertical-lr]"
               >
                 Skin Esquerda (200x600) - R$ 380
               </button>
@@ -650,7 +650,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 <button 
                   type="button"
                   onClick={() => handleOpenAdModal('ad_vittacash_horizontal')}
-                  className="w-full py-4 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[10px] uppercase tracking-wider transition-all cursor-pointer text-center"
+                  className="w-full py-4 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer text-center"
                 >
                   Banner de Centro (728x90) - R$ 240
                 </button>
@@ -661,12 +661,12 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               </div>
 
               {/* Sidebar Coluna Direita */}
-              <div className="col-span-3 flex flex-col gap-4">
+              <div className="col-span-2 flex flex-col gap-4">
                 {/* Sidebar 1 */}
                 <button 
                   type="button"
                   onClick={() => handleOpenAdModal('ad_sidebar_1')}
-                  className="w-full py-8 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer text-center"
+                  className="w-full py-8 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[8px] uppercase tracking-wider transition-all cursor-pointer text-center"
                 >
                   Sidebar 1 (300x300) - R$ 280
                 </button>
@@ -675,11 +675,20 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 <button 
                   type="button"
                   onClick={() => handleOpenAdModal('ad_sidebar_2')}
-                  className="w-full py-16 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center [writing-mode:vertical-lr]"
+                  className="w-full py-16 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[8px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center [writing-mode:vertical-lr]"
                 >
                   Sidebar 2 (300x600) - R$ 320
                 </button>
               </div>
+
+              {/* Skin Direita (Lateral Extrema) */}
+              <button 
+                type="button"
+                onClick={() => handleOpenAdModal('ad_skin_right_home')}
+                className="col-span-2 py-24 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[9px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center [writing-mode:vertical-lr]"
+              >
+                Skin Direita (200x600) - R$ 380
+              </button>
             </div>
           </div>
         </div>
