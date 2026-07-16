@@ -124,7 +124,7 @@ export default function AdReservationPage() {
 
     setUploading(true);
     
-    // 1. Fornece feedback visual instantâneo convertendo a imagem original para Base64 imediatamente
+    // 1. Gera feedback visual imediato
     const instantReader = new FileReader();
     instantReader.onloadend = () => {
       if (instantReader.result) {
@@ -154,44 +154,22 @@ export default function AdReservationPage() {
           img.src = URL.createObjectURL(file);
         });
 
-        // Se for diferente das dimensões alvo, fazemos o ajuste e recorte
+        // Se for diferente das dimensões do slot, faz o recorte via Canvas
         if (imgDimensions.w > 0 && (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h)) {
           showAlert("Ajustando Imagem", `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte automático.`, "info");
           finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
-          
-          // Atualiza o Base64 com a versão já recortada e leve
-          const croppedReader = new FileReader();
-          croppedReader.onloadend = () => {
-            if (croppedReader.result) {
-              setAdImageUrl(croppedReader.result as string);
-            }
-          };
-          croppedReader.readAsDataURL(finalFile);
         }
       }
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = Math.random().toString() + "." + fileExt;
-      const filePath = "publicity-uploads/" + fileName;
+      // Convertemos o arquivo final (redimensionado ou original) para Base64 local definitivo
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        setAdImageUrl(base64data);
+        showAlert("Imagem Carregada", "Seu banner foi processado, redimensionado e anexado localmente com sucesso!", "success");
+      };
+      reader.readAsDataURL(finalFile);
 
-      try {
-        const { error: uploadError } = await supabase.storage
-          .from('vitta-assets')
-          .upload(filePath, finalFile, { contentType: file.type });
-
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage
-          .from('vitta-assets')
-          .getPublicUrl(filePath);
-
-        // Se o upload no bucket público der certo, salva a URL final (mais otimizado que Base64 no banco)
-        setAdImageUrl(data.publicUrl);
-        showAlert("Imagem Carregada", "Seu banner foi enviado e configurado com sucesso!", "success");
-      } catch (storageErr) {
-        console.warn("Storage upload failed, keeping local Base64 backup:", storageErr);
-        showAlert("Imagem Carregada (Offline)", "O arquivo foi processado e anexado localmente com sucesso!", "success");
-      }
     } catch (err: any) {
       console.error(err);
       showAlert("Erro no Processamento", err.message || "Não foi possível carregar a imagem.", "error");
