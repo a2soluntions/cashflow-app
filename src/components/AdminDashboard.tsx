@@ -1404,287 +1404,86 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
           {activeTab === 'a2noticias' && (
             <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 min-h-0 pb-4 pr-2 md:pr-6">
               
-              <form onSubmit={handleHqPublish} className="flex flex-col gap-6 h-full min-h-0">
-                {/* CARD QUARTEL GENERAL (FIXO) */}
-                <div className={`flex-shrink-0 flex flex-col ${isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#0a0a0c] lg:bg-white/5 lg:backdrop-blur-3xl border-white/5'} p-4 lg:p-6 rounded-2xl lg:rounded-3xl border shadow-lg`}>
-                  <div className={`flex-shrink-0 flex flex-row items-center justify-between gap-4 mb-4 border-b ${isLight ? 'border-slate-200' : 'border-white/5'} pb-4`}>
-                    <div className="flex items-center gap-3 md:gap-4">
-                      <div className="p-2.5 md:p-3 bg-indigo-500/10 rounded-xl md:rounded-2xl">
-                        <Newspaper size={20} className="text-indigo-500 md:w-6 md:h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-black uppercase tracking-widest text-indigo-500 text-base md:text-lg">
-                          <span className="md:hidden">HQ: Curadoria</span>
-                          <span className="hidden md:inline">Quartel General: Curadoria Manual</span>
-                        </h3>
-                        <p className={`${isLight ? 'text-slate-500' : 'text-slate-400'} text-[10px] font-bold uppercase tracking-widest mt-1 hidden md:block`}>Publique notícias estruturadas diretamente no portal</p>
-                      </div>
-                    </div>
-                    <button 
-                      type="button"
-                      onClick={handleCleanupNews}
-                      className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all whitespace-nowrap"
-                    >
-                      <Trash2 size={14} />
-                      <span className="hidden md:inline">Limpar Notícias Antigas (+7 Dias)</span>
-                      <span className="md:hidden">Limpar (+7d)</span>
-                    </button>
-                  </div>
-
-                  {/* CONTROLES FIXOS (NÃO ROLAM) */}
-                  <div className="flex flex-col gap-4">
-                    <div className="flex flex-wrap gap-2 md:gap-3">
-                      <button 
-                        type="button"
-                        onClick={() => handleAutoGenerate(false)}
-                        className="flex-1 bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[44px] md:min-w-[140px]"
-                        title="Resumo Automático"
-                      >
-                        <Zap size={16} />
-                        <span className="hidden md:inline">Resumo Automático</span>
-                      </button>
-                      
-                      <button 
-                        type="button"
-                        onClick={() => handleAutoGenerate(true)}
-                        className="flex-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-indigo-500/20 hover:bg-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[44px] md:min-w-[140px]"
-                        title="Novo Contexto"
-                      >
-                        <RefreshCw size={14} />
-                        <span className="hidden md:inline">Novo Contexto</span>
-                      </button>
-
-                      <button 
-                        type="button"
-                        onClick={handleGenerateMockImage}
-                        className="flex-1 bg-amber-500/10 text-amber-600 dark:text-amber-500 py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-amber-500/20 hover:bg-amber-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[44px] md:min-w-[140px]"
-                        title="Imagem IA"
-                      >
-                        <ImageIcon size={14}/>
-                        <span className="hidden md:inline">Imagem IA</span>
-                      </button>
-
-                      <button 
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                        className="flex-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-emerald-500/20 hover:bg-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[44px] md:min-w-[140px]"
-                        title="Upload Capa"
-                      >
-                        {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                        <span className="hidden md:inline">Upload Capa</span>
-                      </button>
-
-                      <button 
-                        type="button"
-                        onClick={handleClearHq}
-                        className="flex-1 bg-rose-500/10 text-rose-500 py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-rose-500/20 hover:bg-rose-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[44px] md:min-w-[140px]"
-                        title="Limpar Tudo"
-                      >
-                        <Trash2 size={14} />
-                        <span className="hidden md:inline">Limpar Tudo</span>
-                      </button>
-
-                      <button 
-                        type="submit"
-                        disabled={loading}
-                        className="flex-[2] bg-indigo-600 text-white py-3 md:py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[120px] md:min-w-[200px]"
-                      >
-                        {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={14} />}
-                        <span>Publicar Notícia</span>
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 pt-1">
-                      <div className={`w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-                        <label className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'} whitespace-nowrap md:pl-2`}>Fonte:</label>
-                        <input 
-                          className={`w-full ${isLight ? 'bg-white' : 'bg-white/10'} border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500`} 
-                          placeholder="Ex: InfoMoney" 
-                          value={hqSource}
-                          onChange={e => setHqSource(e.target.value)}
-                          required
-                        />
-                      </div>
-
-                      <div className={`w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-                         <label className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'} whitespace-nowrap md:pl-2`}>Cat:</label>
-                         <select 
-                           className={`w-full ${isLight ? 'bg-white' : 'bg-white/10'} border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500`}
-                           value={hqCategory}
-                           onChange={e => setHqCategory(e.target.value)}
-                         >
-                           <option value="Mercado">Mercado</option>
-                           <option value="Finanças">Finanças</option>
-                           <option value="Investimentos">Investimentos</option>
-                           <option value="Tecnologia">Tecnologia</option>
-                           <option value="Negócios">Negócios</option>
-                           <option value="VittaCash">VittaCash</option>
-                           <option value="Atualidades">Atualidades</option>
-                         </select>
-                      </div>
-
-                      <div className={`w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-                        <label className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'} whitespace-nowrap md:pl-2`}>Imagem:</label>
-                        <input
-                          className={`w-full ${isLight ? 'bg-white' : 'bg-white/10'} border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500`}
-                          placeholder="Ex: homem..."
-                          value={hqImagePrompt}
-                          onChange={e => setHqImagePrompt(e.target.value)}
-                        />
-                      </div>
-
-                       <div className={`w-full flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-                        <label className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'} whitespace-nowrap md:pl-2`}>Link:</label>
-                        <input
-                          className={`w-full ${isLight ? 'bg-white' : 'bg-white/10'} border border-slate-200 dark:border-white/10 p-1.5 md:p-2 rounded-lg font-bold text-[10px] outline-none transition-all focus:border-indigo-500`}
-                          placeholder="Link da Matéria Original..."
-                          value={hqExternalUrl}
-                          onChange={e => setHqExternalUrl(e.target.value)}
-                        />
-                      </div>
-
-                      <div className={`col-span-2 md:col-span-2 w-full flex items-center gap-3 ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'} px-4 h-[46px]`}>
-                        <label className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest ${isLight ? 'text-slate-500' : 'text-slate-400'} whitespace-nowrap flex gap-1`}>
-                          Resumo <span className="text-indigo-500 md:inline hidden">({summaryCharLimit})</span>
-                        </label>
-                        <input 
-                          type="range" min="100" max="1000" step="50" 
-                          value={summaryCharLimit} 
-                          onChange={(e) => setSummaryCharLimit(Number(e.target.value))} 
-                          className="w-full accent-indigo-500 h-1.5" 
-                        />
-                      </div>
-                      
-                      <div className={`col-span-2 md:col-span-2 flex items-center ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-2 md:p-2.5 rounded-xl border ${isLight ? 'border-slate-200' : 'border-white/5'} px-4 h-[46px]`}>
-                        <label className="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
-                          <div className={`w-3.5 h-3.5 md:w-4 md:h-4 rounded flex items-center justify-center border transition-colors ${includeVittaPov ? 'bg-indigo-500 border-indigo-500' : 'bg-transparent border-slate-400 dark:border-zinc-700'}`}>
-                            {includeVittaPov && <Zap size={10} className="text-white" />}
-                          </div>
-                          <input 
-                            type="checkbox" 
-                            checked={includeVittaPov} 
-                            onChange={(e) => setIncludeVittaPov(e.target.checked)} 
-                            className="hidden" 
-                          />
-                          <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-indigo-500 group-hover:text-indigo-400 transition-colors">
-                            Insights IA
-                          </span>
-                        </label>
-                      </div>
+              <div className={isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl' + ' p-6 md:p-8 rounded-3xl border ' + (isLight ? 'border-slate-200' : 'border-white/5') + ' flex flex-col gap-6'}>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-white/5">
+                  <div className="flex items-center gap-3">
+                    <Newspaper size={20} className="text-indigo-500" />
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Notícias Publicadas (Portal HQ)</h3>
+                      <p className="text-[9px] text-slate-400 uppercase font-bold mt-1">Gerencie as matérias e notícias ativas do feed do portal</p>
                     </div>
                   </div>
+                  <button 
+                    type="button"
+                    onClick={handleCleanupNews}
+                    className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-500 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all"
+                  >
+                    Otimizar Banco (Apagar Notícias &gt; 7 Dias)
+                  </button>
                 </div>
 
-                {/* ÁREA ROLÁVEL: TEXTO BRUTO E PREVIEW */}
-                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-12 pr-2">
-                      
-                      {/* COLUNA ESQUERDA: NOTÍCIA BRUTA INTEIRA (Ocupa 5 colunas no desktop) */}
-                      <div className="lg:col-span-5 flex flex-col gap-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2 flex-shrink-0">
-                          <Newspaper size={12} /> Texto Bruto / Fonte de Dados
-                        </label>
-                        <div className={`min-h-[300px] lg:flex-1 lg:min-h-0 overflow-hidden ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} p-4 flex flex-col`}>
-                          <textarea
-                            className={`min-h-[260px] lg:flex-1 w-full bg-transparent border-0 outline-none font-medium text-sm ${isLight ? 'text-slate-900' : 'text-white'} placeholder:text-slate-400 resize-none custom-scrollbar overflow-y-auto`}
-                            placeholder="Cole aqui o texto completo da notícia original..."
-                            value={hqRawText}
-                            onChange={e => setHqRawText(e.target.value)}
-                          />
-                          <div className={`mt-2 pt-2 border-t ${isLight ? 'border-slate-200' : 'border-white/5'} flex items-center justify-between`}>
-                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{hqRawText.length} caracteres</span>
-                             <button 
-                              type="button"
-                              onClick={() => setHqRawText('')}
-                              className="text-[8px] font-black text-rose-500 uppercase tracking-widest hover:underline"
-                             >Limpar Texto</button>
-                          </div>
-                        </div>
+                {(() => {
+                  const hqNewsList = (siteContent || []).filter(c => c && c.content_type === 'news');
+                  
+                  if (hqNewsList.length === 0) {
+                    return (
+                      <div className="text-center py-12 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        Nenhuma notícia publicada no portal até o momento. As notícias são trazidas automaticamente.
                       </div>
+                    );
+                  }
 
-                      {/* COLUNA DIREITA: LIVE PORTAL PREVIEW (Ocupa 7 colunas no desktop) */}
-                      <div className="lg:col-span-7 flex flex-col gap-4 min-h-[600px] lg:h-full lg:min-h-0">
-                        <div className="flex items-center justify-between mb-2 flex-shrink-0">
-                          <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 flex items-center gap-2">
-                            <Monitor size={12} /> Visualização Real no Portal
-                          </h4>
-                          <span className={`text-[8px] font-bold text-slate-400 uppercase tracking-widest px-2 py-1 ${isLight ? 'bg-slate-100' : 'bg-white/5'} rounded border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>Modo Destaque</span>
-                        </div>
-
-                        <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-2xl border border-slate-200 flex-1 min-h-0 flex flex-col gap-4 md:gap-6 custom-scrollbar overflow-y-auto">
-                          {/* Header do Preview (Falsificando o VittaNews) */}
-                          <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-2">
-                             <div className="flex flex-col leading-none">
-                              <span className="text-sm font-black italic tracking-tighter uppercase text-zinc-900">A2<span className="text-indigo-600">Finanças</span></span>
-                              <span className="text-[6px] font-bold uppercase tracking-[0.4em] text-zinc-400">Notícias</span>
-                            </div>
-                            <div className="flex gap-2">
-                              <div className="w-2 h-2 rounded-full bg-slate-100" />
-                              <div className="w-2 h-2 rounded-full bg-slate-100" />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 gap-6">
-                            {/* Capa */}
-                            <div className="aspect-video w-full overflow-hidden rounded-xl relative bg-zinc-50 border border-zinc-100">
-                              {newsImg ? (
-                                <img src={newsImg} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                              ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center text-zinc-300 gap-2">
-                                  <ImageIcon size={32} className="opacity-20" />
-                                  <span className="text-[8px] font-black uppercase">Aguardando Imagem</span>
-                                </div>
-                              )}
-                              <div className="absolute top-3 left-3">
-                                <span className="px-2 py-0.5 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest shadow-lg">{hqCategory}</span>
-                              </div>
-                            </div>
-
-                            {/* Texto */}
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2 text-zinc-400 text-[8px] font-bold uppercase tracking-widest mb-3">
-                                <Clock size={10} /> {new Date().toLocaleDateString()} • 5 min de leitura
-                              </div>
-                              
-                              <input
-                                className="w-full bg-transparent border-0 font-black text-zinc-900 uppercase tracking-tighter italic leading-none mb-4 outline-none focus:ring-1 focus:ring-indigo-500/20 rounded py-1 text-lg md:text-2xl placeholder:text-zinc-200"
-                                placeholder="Título da Matéria..."
-                                value={hqTitle}
-                                onChange={e => setHqTitle(e.target.value)}
-                              />
-                              
-                              <div className="text-zinc-600 text-xs font-medium leading-relaxed space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2 flex flex-col">
-                                <textarea
-                                  className="w-full bg-transparent border-0 outline-none resize-none min-h-[80px] placeholder:text-zinc-300"
-                                  placeholder="O resumo da notícia aparecerá aqui..."
-                                  value={hqResume}
-                                  onChange={e => setHqResume(e.target.value)}
-                                />
-
-                                {includeVittaPov && (
-                                  <div className="mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-r-lg">
-                                    <span className="text-[10px] font-black uppercase text-indigo-600 mb-2 block flex items-center gap-1"><Zap size={10}/> A2 Mentor Insights</span>
-                                    <textarea
-                                      className="w-full bg-transparent border-0 outline-none resize-none font-bold italic text-indigo-900/80 placeholder:text-indigo-200"
-                                      placeholder="Insights da IA..."
-                                      value={hqPov}
-                                      onChange={e => setHqPov(e.target.value)}
-                                    />
-                                    <p className="text-[10px] text-indigo-500 mt-2 font-black uppercase tracking-widest">Conheça nosso aplicativo gratuito.</p>
+                  return (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <thead>
+                          <tr className="border-b border-slate-200 dark:border-white/5 pb-2 text-[8px]">
+                            <th className="pb-3 text-zinc-500">Imagem</th>
+                            <th className="pb-3 text-zinc-500">Título</th>
+                            <th className="pb-3 text-zinc-500">Categoria</th>
+                            <th className="pb-3 text-zinc-500">Publicado Em</th>
+                            <th className="pb-3 text-zinc-500 text-right">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {hqNewsList.map(news => {
+                            const category = news.meta_value?.category || news.description || 'Geral';
+                            const pubDate = news.created_at ? new Date(news.created_at).toLocaleDateString('pt-BR') : 'N/A';
+                            return (
+                              <tr key={news.id} className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
+                                <td className="py-3">
+                                  <div className="w-12 aspect-video bg-zinc-800 rounded-lg overflow-hidden border border-white/5">
+                                    {news.image_url ? (
+                                      <img src={news.image_url} className="w-full h-full object-cover" alt="Capa" />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-[7px] text-zinc-600">Sem Capa</div>
+                                    )}
                                   </div>
-                                )}
-
-                                <p className="text-[10px] text-zinc-400 font-bold mt-4">Informações originais baseadas na reportagem de {hqSource || "..."}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
+                                </td>
+                                <td className="py-3 text-slate-800 dark:text-slate-200 font-bold max-w-sm truncate normal-case">{news.title}</td>
+                                <td className="py-3"><span className="px-2.5 py-0.5 bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded-full">{category}</span></td>
+                                <td className="py-3 text-zinc-400">{pubDate}</td>
+                                <td className="py-3 text-right">
+                                  <button 
+                                    type="button"
+                                    onClick={() => handleDeleteContent(news.id)}
+                                    className="px-3 py-1 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-500 text-[8px] font-black uppercase tracking-widest rounded transition-all"
+                                    title="Excluir Notícia"
+                                  >
+                                    Excluir
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
-                  </div>
-              </form>
+                  );
+                })()}
+
+              </div>
+
             </div>
           )}
           {activeTab === 'publicidade' && (
