@@ -104,6 +104,10 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [resumeOffset, setResumeOffset] = useState<number>(0);
   const [pendingAdSlot, setPendingAdSlot] = useState<string | null>(null);
 
+  // ESTADOS DE FILTRO E LIMITAÇÃO DA LISTA DE NOTÍCIAS HQ
+  const [hqFilterCategory, setHqFilterCategory] = useState<string>('Todas');
+  const [hqLimit, setHqLimit] = useState<number>(10);
+
   const fetchData = async () => {
     const { data: licData } = await supabase.from('licenses').select('*').order('created_at', { ascending: false });
     if (licData) setLicenses(licData);
@@ -1405,6 +1409,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
             <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 min-h-0 pb-4 pr-2 md:pr-6">
               
               <div className={isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl' + ' p-6 md:p-8 rounded-3xl border ' + (isLight ? 'border-slate-200' : 'border-white/5') + ' flex flex-col gap-6'}>
+                
+                {/* CABEÇALHO COM AÇÃO DE LIMPAR BANCO */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-white/5">
                   <div className="flex items-center gap-3">
                     <Newspaper size={20} className="text-indigo-500" />
@@ -1422,65 +1428,142 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   </button>
                 </div>
 
-                {(() => {
-                  const hqNewsList = (siteContent || []).filter(c => c && c.content_type === 'news');
+                {/* FILTROS E QUANTIDADE DE VISUALIZAÇÕES */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
                   
-                  if (hqNewsList.length === 0) {
-                    return (
-                      <div className="text-center py-12 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                        Nenhuma notícia publicada no portal até o momento. As notícias são trazidas automaticamente.
-                      </div>
-                    );
-                  }
+                  {/* FILTRO DE CATEGORIA */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Filtrar por Categoria
+                    </label>
+                    <select
+                      value={hqFilterCategory}
+                      onChange={(e) => setHqFilterCategory(e.target.value)}
+                      className={isLight 
+                        ? "w-full bg-white border border-slate-200 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-700 outline-none transition-all focus:border-indigo-500" 
+                        : "w-full bg-white/5 border border-white/10 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-300 outline-none transition-all focus:border-indigo-500"
+                      }
+                    >
+                      <option value="Todas">Todas as Categorias</option>
+                      <option value="Mercado">Mercado</option>
+                      <option value="Finanças">Finanças</option>
+                      <option value="Investimentos">Investimentos</option>
+                      <option value="Tecnologia">Tecnologia</option>
+                      <option value="Negócios">Negócios</option>
+                      <option value="VittaCash">VittaCash</option>
+                      <option value="Atualidades">Atualidades</option>
+                    </select>
+                  </div>
 
-                  return (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        <thead>
-                          <tr className="border-b border-slate-200 dark:border-white/5 pb-2 text-[8px]">
-                            <th className="pb-3 text-zinc-500">Imagem</th>
-                            <th className="pb-3 text-zinc-500">Título</th>
-                            <th className="pb-3 text-zinc-500">Categoria</th>
-                            <th className="pb-3 text-zinc-500">Publicado Em</th>
-                            <th className="pb-3 text-zinc-500 text-right">Ações</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {hqNewsList.map(news => {
-                            const category = news.meta_value?.category || news.description || 'Geral';
-                            const pubDate = news.created_at ? new Date(news.created_at).toLocaleDateString('pt-BR') : 'N/A';
-                            return (
-                              <tr key={news.id} className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
-                                <td className="py-3">
-                                  <div className="w-12 aspect-video bg-zinc-800 rounded-lg overflow-hidden border border-white/5">
-                                    {news.image_url ? (
-                                      <img src={news.image_url} className="w-full h-full object-cover" alt="Capa" />
-                                    ) : (
-                                      <div className="w-full h-full flex items-center justify-center text-[7px] text-zinc-600">Sem Capa</div>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="py-3 text-slate-800 dark:text-slate-200 font-bold max-w-sm truncate normal-case">{news.title}</td>
-                                <td className="py-3"><span className="px-2.5 py-0.5 bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded-full">{category}</span></td>
-                                <td className="py-3 text-zinc-400">{pubDate}</td>
-                                <td className="py-3 text-right">
-                                  <button 
-                                    type="button"
-                                    onClick={() => handleDeleteContent(news.id)}
-                                    className="px-3 py-1 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-500 text-[8px] font-black uppercase tracking-widest rounded transition-all"
-                                    title="Excluir Notícia"
-                                  >
-                                    Excluir
-                                  </button>
-                                </td>
+                  {/* FILTRO DE QUANTIDADE DE VISUALIZAÇÕES */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Visualizações na Tela
+                    </label>
+                    <select
+                      value={hqLimit}
+                      onChange={(e) => setHqLimit(Number(e.target.value))}
+                      className={isLight 
+                        ? "w-full bg-white border border-slate-200 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-700 outline-none transition-all focus:border-indigo-500" 
+                        : "w-full bg-white/5 border border-white/10 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-300 outline-none transition-all focus:border-indigo-500"
+                      }
+                    >
+                      <option value={10}>Mostrar 10 Notícias</option>
+                      <option value={25}>Mostrar 25 Notícias</option>
+                      <option value={50}>Mostrar 50 Notícias</option>
+                      <option value={100}>Mostrar 100 Notícias</option>
+                    </select>
+                  </div>
+
+                </div>
+
+                {/* CONTAINER COM TAMANHO FIXO E SCROLL VERTICAL */}
+                <div className="border border-slate-200 dark:border-white/5 rounded-2xl overflow-hidden">
+                  <div className="max-h-[450px] overflow-y-auto custom-scrollbar">
+                    {(() => {
+                      // 1. Filtrar tipo de conteudo
+                      let list = (siteContent || []).filter(c => c && c.content_type === 'news');
+                      
+                      // 2. Filtrar pela categoria selecionada
+                      if (hqFilterCategory !== 'Todas') {
+                        list = list.filter(news => {
+                          const category = news.meta_value?.category || news.description || 'Geral';
+                          return category.toLowerCase() === hqFilterCategory.toLowerCase();
+                        });
+                      }
+
+                      // 3. Limitar a quantidade conforme hqLimit
+                      const totalFilteredCount = list.length;
+                      list = list.slice(0, hqLimit);
+
+                      if (totalFilteredCount === 0) {
+                        return (
+                          <div className="text-center py-12 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                            Nenhuma notícia correspondente encontrada.
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <thead className="sticky top-0 bg-white dark:bg-[#0f0f12] z-10 border-b border-slate-200 dark:border-white/5">
+                              <tr className="text-[8px]">
+                                <th className="p-3 text-zinc-500">Imagem</th>
+                                <th className="p-3 text-zinc-500">Título</th>
+                                <th className="p-3 text-zinc-500">Categoria</th>
+                                <th className="p-3 text-zinc-500">Publicado Em</th>
+                                <th className="p-3 text-zinc-500 text-right">Ações</th>
                               </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  );
-                })()}
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                              {list.map(news => {
+                                const category = news.meta_value?.category || news.description || 'Geral';
+                                const pubDate = news.created_at ? new Date(news.created_at).toLocaleDateString('pt-BR') : 'N/A';
+                                return (
+                                  <tr key={news.id} className="hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
+                                    <td className="p-3">
+                                      <div className="w-12 aspect-video bg-zinc-800 rounded-lg overflow-hidden border border-white/5">
+                                        {news.image_url ? (
+                                          <img src={news.image_url} className="w-full h-full object-cover" alt="Capa" />
+                                        ) : (
+                                          <div className="w-full h-full flex items-center justify-center text-[7px] text-zinc-600">Sem Capa</div>
+                                        )}
+                                      </div>
+                                    </td>
+                                    <td className="p-3 text-slate-800 dark:text-slate-200 font-bold max-w-sm truncate normal-case">{news.title}</td>
+                                    <td className="p-3">
+                                      <span className="px-2.5 py-0.5 bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded-full">
+                                        {category}
+                                      </span>
+                                    </td>
+                                    <td className="p-3 text-zinc-400">{pubDate}</td>
+                                    <td className="p-3 text-right">
+                                      <button 
+                                        type="button"
+                                        onClick={() => handleDeleteContent(news.id)}
+                                        className="px-3 py-1 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-500 text-[8px] font-black uppercase tracking-widest rounded transition-all"
+                                        title="Excluir Notícia"
+                                      >
+                                        Excluir
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                          
+                          {totalFilteredCount > hqLimit && (
+                            <div className="p-3 border-t border-slate-200 dark:border-white/5 text-center text-[8px] font-black tracking-widest text-slate-400 uppercase">
+                              Mostrando {hqLimit} de {totalFilteredCount} notícias filtradas
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
 
               </div>
 
