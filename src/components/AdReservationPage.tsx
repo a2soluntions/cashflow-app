@@ -154,20 +154,32 @@ export default function AdReservationPage() {
       const fileName = Math.random().toString() + "." + fileExt;
       const filePath = "publicity-uploads/" + fileName;
 
-      const { error: uploadError } = await supabase.storage
-        .from('vitta-assets')
-        .upload(filePath, finalFile, { contentType: file.type });
+      try {
+        const { error: uploadError } = await supabase.storage
+          .from('vitta-assets')
+          .upload(filePath, finalFile, { contentType: file.type });
 
-      if (uploadError) throw uploadError;
+        if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
-        .from('vitta-assets')
-        .getPublicUrl(filePath);
+        const { data } = supabase.storage
+          .from('vitta-assets')
+          .getPublicUrl(filePath);
 
-      setAdImageUrl(data.publicUrl);
-      showAlert("Imagem Carregada", "Seu banner foi processado, redimensionado e enviado com sucesso!", "success");
+        setAdImageUrl(data.publicUrl);
+        showAlert("Imagem Carregada", "Seu banner foi processado, redimensionado e enviado com sucesso!", "success");
+      } catch (storageErr) {
+        // FALLBACK: Converte o blob ajustado para Base64 DataURL
+        console.warn("Storage upload failed, fallback to Base64:", storageErr);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          setAdImageUrl(base64data);
+          showAlert("Imagem Carregada (Ajuste)", "Seu banner foi processado e anexado localmente com sucesso!", "success");
+        };
+        reader.readAsDataURL(finalFile);
+      }
     } catch (err: any) {
-      showAlert("Erro no Upload", err.message, "error");
+      showAlert("Erro no Processamento", err.message, "error");
     } finally {
       setUploading(false);
     }
