@@ -456,17 +456,40 @@ export default function AdReservationPage() {
                   </div>
 
                   <div>
-                    <label className="text-[9px] font-black uppercase tracking-widest ml-1 mb-1.5 block text-zinc-500">URL da Imagem do Banner *</label>
-                    <input 
-                      type="url"
-                      required
-                      placeholder="https://imgur.com/sua-imagem.png"
-                      value={adImageUrl}
-                      onChange={(e) => setAdImageUrl(e.target.value)}
-                      className="w-full bg-zinc-950/60 border border-white/5 px-4 py-3 rounded-xl outline-none text-xs font-bold text-white focus:border-indigo-500 transition-all placeholder:text-zinc-700"
-                    />
-                    <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-1 block leading-relaxed">
-                      Insira o link direto da imagem hospedada (Ex: Imgur, Postimages, ou seu próprio servidor).
+                    <label className="text-[9px] font-black uppercase tracking-widest ml-1 mb-1.5 block text-zinc-500">Imagem do Banner (URL ou Upload) *</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text"
+                        required
+                        placeholder="Cole a URL ou faça upload..."
+                        value={adImageUrl}
+                        onChange={(e) => setAdImageUrl(e.target.value)}
+                        className="flex-1 bg-zinc-950/60 border border-white/5 px-4 py-3 rounded-xl outline-none text-xs font-bold text-white focus:border-indigo-500 transition-all placeholder:text-zinc-700"
+                      />
+                      <input 
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        disabled={uploading}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest text-[9px] rounded-xl transition-all flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {uploading ? (
+                          'Carregando...'
+                        ) : (
+                          <>
+                            <Upload size={14} /> Upload
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-1.5 block leading-relaxed">
+                      Selecione um arquivo de imagem. O sistema fará o recorte e ajuste automático para a dimensão correta.
                     </span>
                   </div>
 
