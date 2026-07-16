@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowLeft, Megaphone, Send, Landmark, Calendar, MessageSquare, 
-  HelpCircle, Monitor, Layout, AlertCircle, CheckCircle2 
+  HelpCircle, Monitor, Layout, AlertCircle, CheckCircle2, Upload
 } from 'lucide-react';
 import { supabase } from '../supabase';
 
@@ -69,6 +69,8 @@ export default function AdReservationPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const cropAndResizeImage = (file: File, targetWidth: number, targetHeight: number): Promise<Blob> => {
     return new Promise((resolve, reject) => {
