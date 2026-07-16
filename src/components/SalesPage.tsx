@@ -97,13 +97,13 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
       // 2. Banners — busca direta do Supabase (sem depender de serverless /api/banners)
       try {
         const bannerData = await fetchFromSupabase(
-          'content_type=in.(home_banner_left,home_banner_right)&is_active=eq.true&select=id,content_type,image_url,title,meta_value&order=created_at.desc'
+          'content_type=in.(ad_skin_left_home,ad_skin_right_home,ad_skin_left,ad_skin_right)&is_active=eq.true&select=id,content_type,image_url,title,meta_value&order=created_at.desc'
         );
         console.log('[SalesPage] Banners recebidos:', bannerData?.length, bannerData);
 
         if (bannerData && Array.isArray(bannerData) && bannerData.length > 0) {
-          const left = bannerData.filter((b: any) => b.content_type === 'home_banner_left');
-          const right = bannerData.filter((b: any) => b.content_type === 'home_banner_right');
+          const left = bannerData.filter((b: any) => b.content_type === 'ad_skin_left_home' || b.content_type === 'ad_skin_left');
+          const right = bannerData.filter((b: any) => b.content_type === 'ad_skin_right_home' || b.content_type === 'ad_skin_right');
           console.log('[SalesPage] Left banners:', left.length, '| Right banners:', right.length);
           if (left.length > 0) setLeftBanners(left);
           if (right.length > 0) setRightBanners(right);
