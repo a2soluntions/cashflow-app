@@ -70,6 +70,107 @@ export default function AdReservationPage() {
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const cropAndResizeImage = (file: File, targetWidth: number, targetHeight: number): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error("Could not get canvas context"));
+            return;
+          }
+
+          // Recorte proporcional centralizado
+          const imgRatio = img.width / img.height;
+          const targetRatio = targetWidth / targetHeight;
+          let sourceX = 0, sourceY = 0, sourceWidth = img.width, sourceHeight = img.height;
+
+          if (imgRatio > targetRatio) {
+            sourceWidth = img.height * targetRatio;
+            sourceX = (img.width - sourceWidth) / 2;
+          } else {
+            sourceHeight = img.width / targetRatio;
+            sourceY = (img.height - sourceHeight) / 2;
+          }
+
+          ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetWidth, targetHeight);
+          
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error("Canvas conversion failed"));
+            }
+          }, file.type || 'image/jpeg', 0.95);
+        };
+        img.onerror = () => reject(new Error("Falha ao ler imagem"));
+        img.src = event.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error("Falha ao ler arquivo"));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const sizeMap: Record<string, { w: number, h: number, label: string }> = {
+        'ad_top': { w: 970, h: 250, label: 'Banner Topo' },
+        'ad_vittacash_horizontal': { w: 728, h: 90, label: 'Banner de Centro' },
+        'ad_skin_left_home': { w: 200, h: 600, label: 'Skin Esquerda' },
+        'ad_skin_right_home': { w: 200, h: 600, label: 'Skin Direita' },
+        'ad_sidebar_1': { w: 300, h: 300, label: 'Sidebar 1' },
+        'ad_sidebar_2': { w: 300, h: 600, label: 'Sidebar 2' }
+      };
+
+      let finalFile: File | Blob = file;
+      const targetDimensions = sizeMap[selectedSlot];
+
+      if (targetDimensions) {
+        const imgDimensions = await new Promise<{ w: number, h: number }>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve({ w: img.width, h: img.height });
+          img.onerror = () => resolve({ w: 0, h: 0 });
+          img.src = URL.createObjectURL(file);
+        });
+
+        if (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h) {
+          alert(`Ajustando imagem: Proporção original ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte proporcional automático.`);
+          finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
+        }
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = Math.random().toString() + "." + fileExt;
+      const filePath = "publicity-uploads/" + fileName;
+
+      const { error: uploadError } = await supabase.storage
+        .from('vitta-assets')
+        .upload(filePath, finalFile, { contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('vitta-assets')
+        .getPublicUrl(filePath);
+
+      setAdImageUrl(data.publicUrl);
+      alert("Sucesso! Imagem carregada e ajustada.");
+    } catch (err: any) {
+      alert("Erro no upload: " + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleReserve = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientName || !clientEmail || !clientPhone || !adImageUrl) {

@@ -721,9 +721,9 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 <button 
                   type="button"
                   onClick={() => handleOpenAdModal('ad_sidebar_2')}
-                  className="w-full py-16 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[8px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center [writing-mode:vertical-lr]"
+                  className="w-full py-20 rounded-2xl bg-zinc-800/20 border-2 border-zinc-700/30 hover:border-indigo-500 hover:bg-indigo-500/10 text-zinc-400 font-bold text-[8px] uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center text-center"
                 >
-                  Sidebar 2 (300x600) - R$ 320
+                  Sidebar 2 <br/> (300x600) <br/> R$ 320
                 </button>
               </div>
 
