@@ -333,7 +333,10 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
         .from('vitta-assets')
         .getPublicUrl(filePath);
 
-      if (pendingAdSlot) {
+      if (selectedMapSlot) {
+        setAdFormImage(data.publicUrl);
+        showAlert("Imagem Carregada", "A imagem do banner foi enviada e preenchida com sucesso!", "info");
+      } else if (pendingAdSlot) {
         setLoading(true);
         // Se pendingAdSlot contém um ID após o tipo (ex: "home_banner_left:id"), é um update
         const [type, id] = pendingAdSlot.split(':');
