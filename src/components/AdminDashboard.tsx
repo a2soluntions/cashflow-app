@@ -281,6 +281,39 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
     setUploading(true);
     try {
+      const sizeMap: Record<string, { w: number, h: number, label: string }> = {
+        'ad_top': { w: 970, h: 250, label: 'Banner Topo' },
+        'ad_vittacash_horizontal': { w: 728, h: 90, label: 'Banner de Centro' },
+        'ad_skin_left_home': { w: 200, h: 600, label: 'Skin Esquerda' },
+        'ad_skin_left': { w: 200, h: 600, label: 'Skin Esquerda' },
+        'ad_skin_right_home': { w: 200, h: 600, label: 'Skin Direita' },
+        'ad_skin_right': { w: 200, h: 600, label: 'Skin Direita' },
+        'ad_sidebar_1': { w: 300, h: 300, label: 'Sidebar 1' },
+        'ad_sidebar_2': { w: 300, h: 600, label: 'Sidebar 2' }
+      };
+
+      let finalFile: File | Blob = file;
+      const cleanSlotType = pendingAdSlot ? pendingAdSlot.split(':')[0] : '';
+      const targetDimensions = sizeMap[cleanSlotType];
+
+      if (targetDimensions) {
+        const imgDimensions = await new Promise<{ w: number, h: number }>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve({ w: img.width, h: img.height });
+          img.onerror = () => resolve({ w: 0, h: 0 });
+          img.src = URL.createObjectURL(file);
+        });
+
+        if (imgDimensions.w > 0 && (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h)) {
+          showAlert(
+            "Ajustando Imagem",
+            `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte proporcional automático.`,
+            "info"
+          );
+          finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
+        }
+      }
+
       const fileExt = file.name.split('.').pop();
       const fileName = Math.random().toString() + "." + fileExt;
       const filePath = "news-images/" + fileName;
