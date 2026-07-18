@@ -644,37 +644,75 @@ export default function VittaNews() {
 
       {/* SKIN ADS (LATERAIS EXTREMAS - ESQUERDA E DIREITA) */}
       <div className="hidden 2xl:flex fixed top-48 left-0 w-[calc(50vw-40rem)] h-[600px] z-[10] justify-end pr-4 pointer-events-none">
-        <div 
-          onClick={() => openLink(getAd('ad_skin_left_home')?.meta_value?.external_url)}
-          className="w-[160px] xl:w-[200px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm rounded-2xl"
-        >
-          <span className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm">Publicidade</span>
-          {getAd('ad_skin_left_home') ? (
-            <img src={getAd('ad_skin_left_home')?.image_url} alt="Ad Left" className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-              <span className="bg-white/95 backdrop-blur-sm px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200 shadow-sm rounded-lg mb-4">Espaço Disponível</span>
-              <span className="text-sm font-black text-indigo-500 group-hover:scale-105 transition-transform duration-300">Anuncie Aqui</span>
+        {(() => {
+          const ad = news.find(item => item.content_type === 'ad_skin_left_home' && item.is_active);
+          let slides = ad?.meta_value?.slides || [];
+          if (slides.length === 0 && ad?.image_url) {
+            slides = [{
+              id: ad.id,
+              image_url: ad.image_url,
+              external_url: ad.meta_value?.external_url || '#',
+              client_name: ad.meta_value?.client_name || ad.title
+            }];
+          }
+          const hasSlides = slides.length > 0;
+          const currentSlide = hasSlides ? slides[leftAdIndex % slides.length] : null;
+
+          return (
+            <div 
+              onClick={() => openLink(currentSlide ? currentSlide.external_url : ad?.meta_value?.external_url)}
+              className="w-[160px] xl:w-[300px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm rounded-2xl"
+            >
+              <span className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm">
+                Publicidade {slides.length > 1 && `(${(leftAdIndex % slides.length) + 1}/${slides.length})`}
+              </span>
+              {currentSlide ? (
+                <img src={currentSlide.image_url} alt="Ad Left" className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                  <span className="bg-white/95 backdrop-blur-sm px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200 shadow-sm rounded-lg mb-4">Espaço Disponível</span>
+                  <span className="text-sm font-black text-indigo-500 group-hover:scale-105 transition-transform duration-300">Anuncie Aqui</span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          );
+        })()}
       </div>
 
       <div className="hidden 2xl:flex fixed top-48 right-0 w-[calc(50vw-40rem)] h-[600px] z-[10] justify-start pl-4 pointer-events-none">
-        <div 
-          onClick={() => openLink(getAd('ad_skin_right_home')?.meta_value?.external_url)}
-          className="w-[160px] xl:w-[200px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm rounded-2xl"
-        >
-          <span className="absolute top-2 left-2 text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm">Publicidade</span>
-          {getAd('ad_skin_right_home') ? (
-            <img src={getAd('ad_skin_right_home')?.image_url} alt="Ad Right" className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-              <span className="bg-white/95 backdrop-blur-sm px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200 shadow-sm rounded-lg mb-4">Espaço Disponível</span>
-              <span className="text-sm font-black text-indigo-500 group-hover:scale-105 transition-transform duration-300">Anuncie Aqui</span>
+        {(() => {
+          const ad = news.find(item => item.content_type === 'ad_skin_right_home' && item.is_active);
+          let slides = ad?.meta_value?.slides || [];
+          if (slides.length === 0 && ad?.image_url) {
+            slides = [{
+              id: ad.id,
+              image_url: ad.image_url,
+              external_url: ad.meta_value?.external_url || '#',
+              client_name: ad.meta_value?.client_name || ad.title
+            }];
+          }
+          const hasSlides = slides.length > 0;
+          const currentSlide = hasSlides ? slides[rightAdIndex % slides.length] : null;
+
+          return (
+            <div 
+              onClick={() => openLink(currentSlide ? currentSlide.external_url : ad?.meta_value?.external_url)}
+              className="w-[160px] xl:w-[300px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm rounded-2xl"
+            >
+              <span className="absolute top-2 left-2 text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm">
+                Publicidade {slides.length > 1 && `(${(rightAdIndex % slides.length) + 1}/${slides.length})`}
+              </span>
+              {currentSlide ? (
+                <img src={currentSlide.image_url} alt="Ad Right" className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                  <span className="bg-white/95 backdrop-blur-sm px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 border border-zinc-200 shadow-sm rounded-lg mb-4">Espaço Disponível</span>
+                  <span className="text-sm font-black text-indigo-500 group-hover:scale-105 transition-transform duration-300">Anuncie Aqui</span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          );
+        })()}
       </div>
 
       {/* TOP AD BANNER */}

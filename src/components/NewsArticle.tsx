@@ -67,7 +67,16 @@ export default function NewsArticle() {
     
     // Se encontrarmos um registro único de carrossel de slides no meta_value
     const mainAd = slotAds[0];
-    const adSlides = mainAd?.meta_value?.slides || [];
+    let adSlides = mainAd?.meta_value?.slides || [];
+    if (adSlides.length === 0 && mainAd?.image_url) {
+      adSlides = [{
+        id: mainAd.id,
+        image_url: mainAd.image_url,
+        external_url: mainAd.meta_value?.external_url || '#',
+        client_name: mainAd.meta_value?.client_name || mainAd.title,
+        client_phone: mainAd.meta_value?.client_phone || ''
+      }];
+    }
 
     const [currentIndex, setCurrentIndex] = useState(0);
 
