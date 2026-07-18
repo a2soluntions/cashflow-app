@@ -4,7 +4,8 @@ import { supabase } from '../supabase';
   Lock, Plus, Copy, RefreshCw, Trash2, ShieldCheck, 
   TrendingUp, DollarSign, Users, Calendar, Filter, Monitor,
   Newspaper, Save, Image as ImageIcon, Upload, Loader2, Brain, Zap, Clock,
-  MessageCircle, AlertTriangle, CheckCircle2, Globe, ChevronDown, ChevronUp
+  MessageCircle, AlertTriangle, CheckCircle2, Globe, ChevronDown, ChevronUp,
+  Check, X, HelpCircle, AlertCircle
  } from 'lucide-react';
 import { 
  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
