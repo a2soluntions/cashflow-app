@@ -408,10 +408,10 @@ export default function AdReservationPage() {
                   
                   {/* Skin Esquerda (Lateral Extrema) */}
                   <div 
-                    onClick={() => { setSelectedSlot('ad_skin_left_home'); setIsFormOpen(true); }}
-                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                    onClick={() => { setSelectedSlot('ad_skin_left'); setIsFormOpen(true); }}
+                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_left' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                   >
-                    {selectedSlot === 'ad_skin_left_home' && adImageUrl ? (
+                    {selectedSlot === 'ad_skin_left' && adImageUrl ? (
                       <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Left" />
                     ) : (
                       <>
@@ -499,10 +499,10 @@ export default function AdReservationPage() {
 
                   {/* Skin Direita (Lateral Extrema) */}
                   <div 
-                    onClick={() => { setSelectedSlot('ad_skin_right_home'); setIsFormOpen(true); }}
-                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                    onClick={() => { setSelectedSlot('ad_skin_right'); setIsFormOpen(true); }}
+                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_right' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                   >
-                    {selectedSlot === 'ad_skin_right_home' && adImageUrl ? (
+                    {selectedSlot === 'ad_skin_right' && adImageUrl ? (
                       <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Right" />
                     ) : (
                       <>

@@ -870,7 +870,14 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                             )}
                           </div>
                         </td>
-                        <td className="py-3 text-indigo-400 text-[9px]">{isSlotInfo?.label || ad.content_type}</td>
+                        <td className="py-3 text-indigo-400 text-[9px]">
+                          <div>{isSlotInfo?.label || ad.content_type}</div>
+                          {ad.content_type.includes('skin') && (
+                            <div className="text-[7px] text-zinc-500 font-bold uppercase mt-0.5">
+                              Carrossel: {ad.meta_value?.slides?.length || 0}/6 imagens salvas
+                            </div>
+                          )}
+                        </td>
                         <td className="py-3 text-slate-800 dark:text-slate-200">{ad.meta_value?.client_name || ad.title}</td>
                         <td className="py-3 text-zinc-400">{ad.meta_value?.client_phone || 'Sem contato'}</td>
                         <td className="py-3 text-[9px] text-slate-400 lowercase font-medium normal-case max-w-xs truncate">
