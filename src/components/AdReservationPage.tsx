@@ -511,6 +511,29 @@ export default function AdReservationPage() {
                         )}
                       </button>
                     </div>
+                    
+                    {/* CARD DE PREVIEW DO BANNER EM MINIATURA */}
+                    {adImageUrl && (
+                      <div className="mt-4 p-4 bg-zinc-950/40 border border-white/5 rounded-2xl flex flex-col items-center">
+                        <span className="text-[8px] text-zinc-600 font-black uppercase tracking-widest mb-3 block self-start">Pré-visualização do Banner</span>
+                        <div className="w-full flex items-center justify-center overflow-hidden bg-black/40 rounded-lg border border-white/10 p-2">
+                          <img 
+                            src={adImageUrl} 
+                            alt="Preview do Banner" 
+                            className="max-h-48 object-contain rounded transition-all duration-300"
+                          />
+                        </div>
+                        <span className="text-[8px] text-zinc-500 font-bold uppercase mt-2">
+                          Proporção do espaço: {
+                            selectedSlot === 'ad_top' ? '970x250 (Horizontal Longo)' :
+                            selectedSlot === 'ad_vittacash_horizontal' ? '728x90 (Horizontal)' :
+                            selectedSlot === 'ad_skin_left_home' || selectedSlot === 'ad_skin_right_home' ? '200x600 (Skin Vertical)' :
+                            selectedSlot === 'ad_sidebar_1' ? '300x300 (Quadrado)' : '300x600 (Vertical Largo)'
+                          }
+                        </span>
+                      </div>
+                    )}
+
                     <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-1.5 block leading-relaxed">
                       Selecione um arquivo de imagem. O sistema fará o recorte e ajuste automático para a dimensão correta.
                     </span>
