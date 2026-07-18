@@ -59,6 +59,10 @@ const AD_SLOTS_INFO = [
 
 export default function AdReservationPage() {
   const navigate = useNavigate();
+  
+  const showAlert = (title: string, message: string, type: 'info' | 'success' | 'error' = 'info') => {
+    alert(`${title.toUpperCase()}\n\n${message}`);
+  };
   const [selectedSlot, setSelectedSlot] = useState(AD_SLOTS_INFO[0].type);
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
