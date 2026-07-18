@@ -1134,7 +1134,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               </div>
             </div>
             
-            <div className="flex items-center gap-3 md:gap-4">
+            <div className="flex items-center gap-3 md:gap-4 flex-wrap">
               <button 
                 onClick={async () => {
                   setLoading(true);
@@ -1148,11 +1148,11 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   }
                 }}
                 disabled={loading}
-                className="p-2 md:px-4 md:py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-indigo-500/20 flex items-center gap-1.5 disabled:opacity-50"
+                className="p-2 px-3 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-indigo-500/20 flex items-center gap-1.5 disabled:opacity-50"
                 title="Atualizar Dados"
               >
                 <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-                <span className="hidden md:inline">{loading ? "Atualizando..." : "Atualizar Dados"}</span>
+                <span>{loading ? "..." : "Atualizar"}</span>
               </button>
 
               <button 
