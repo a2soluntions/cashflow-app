@@ -108,7 +108,7 @@ export default function AdReservationPage() {
             } else {
               reject(new Error("Canvas conversion failed"));
             }
-          }, file.type || 'image/jpeg', 0.95);
+          }, 'image/jpeg', 0.60);
         };
         img.onerror = () => reject(new Error("Falha ao ler imagem"));
         img.src = event.target?.result as string;

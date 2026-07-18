@@ -268,7 +268,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
             } else {
               reject(new Error("Canvas conversion failed"));
             }
-          }, file.type || 'image/jpeg', 0.95);
+          }, 'image/jpeg', 0.60);
         };
         img.onerror = () => reject(new Error("Falha ao ler imagem"));
         img.src = event.target?.result as string;
@@ -944,8 +944,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                       <tr key={ad.id} className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
                         <td className="py-3">
                           <div className="w-12 aspect-video bg-zinc-800 rounded-lg overflow-hidden border border-white/5">
-                            {ad.image_url ? (
-                              <img src={ad.image_url} className="w-full h-full object-cover" alt="Preview" />
+                            {(ad.meta_value?.slides?.[0]?.image_url || ad.image_url) ? (
+                              <img src={ad.meta_value?.slides?.[0]?.image_url || ad.image_url} className="w-full h-full object-cover" alt="Preview" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-[7px] text-zinc-600">Sem Img</div>
                             )}
