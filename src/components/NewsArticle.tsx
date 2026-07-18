@@ -94,16 +94,18 @@ export default function NewsArticle() {
         <div 
           onClick={() => openLink(currentSlide.external_url)}
           className="w-[160px] xl:w-[300px] h-[600px] flex flex-col items-center justify-center relative pointer-events-auto cursor-pointer group overflow-hidden"
+          style={{ background: 'transparent', border: 'none', boxShadow: 'none', borderRadius: '0px' }}
         >
           <span className={`absolute top-2 ${position === 'left' ? 'right-2' : 'left-2'} text-[7px] font-black uppercase tracking-widest text-zinc-500 z-10 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded backdrop-blur-sm`}>
             Publicidade {adSlides.length > 1 && `(${currentIndex + 1}/${adSlides.length})`}
           </span>
-          <div className="w-full h-full relative">
+          <div className="w-full h-full relative" style={{ background: 'transparent', border: 'none', boxShadow: 'none', borderRadius: '0px' }}>
             <img 
               src={currentSlide.image_url} 
               alt={currentSlide.client_name || "Ad Slide"} 
               className="absolute inset-0 w-full h-full object-contain opacity-95 group-hover:opacity-100 transition-all duration-300"
               referrerPolicy="no-referrer"
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none', borderRadius: '0px' }}
             />
           </div>
         </div>
@@ -116,11 +118,12 @@ export default function NewsArticle() {
       <div 
         onClick={() => openLink(currentAd.meta_value?.external_url)}
         className="w-[160px] xl:w-[300px] h-[600px] flex flex-col items-center justify-center relative pointer-events-auto cursor-pointer group overflow-hidden"
+        style={{ background: 'transparent', border: 'none', boxShadow: 'none', borderRadius: '0px' }}
       >
         <span className={`absolute top-2 ${position === 'left' ? 'right-2' : 'left-2'} text-[7px] font-black uppercase tracking-widest text-zinc-500 z-10 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded backdrop-blur-sm`}>
           Publicidade {slotAds.length > 1 && `(${currentIndex + 1}/${slotAds.length})`}
         </span>
-        <div className="w-full h-full relative">
+        <div className="w-full h-full relative" style={{ background: 'transparent', border: 'none', boxShadow: 'none', borderRadius: '0px' }}>
           {slotAds.map((ad, idx) => (
             <img 
               key={ad.id}
@@ -128,6 +131,7 @@ export default function NewsArticle() {
               alt={`Ad ${idx}`} 
               className={`absolute inset-0 w-full h-full object-contain transition-all duration-1000 ${idx === currentIndex ? 'opacity-95 scale-100' : 'opacity-0 scale-95'}`}
               referrerPolicy="no-referrer"
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none', borderRadius: '0px' }}
             />
           ))}
         </div>

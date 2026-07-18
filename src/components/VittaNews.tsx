@@ -687,12 +687,13 @@ export default function VittaNews() {
             <div 
               onClick={() => openLink(currentSlide ? currentSlide.external_url : ad?.meta_value?.external_url)}
               className="w-[160px] xl:w-[300px] h-[600px] flex flex-col items-center justify-center relative pointer-events-auto cursor-pointer group overflow-hidden"
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none', borderRadius: '0px' }}
             >
               <span className="absolute top-2 right-2 text-[7px] font-black uppercase tracking-widest text-zinc-500 z-10 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded backdrop-blur-sm">
                 Publicidade {slides.length > 1 && `(${(leftAdIndex % slides.length) + 1}/${slides.length})`}
               </span>
               {currentSlide ? (
-                <img src={currentSlide.image_url} alt="Ad Left" className="w-full h-full object-contain opacity-95 group-hover:opacity-100 transition-all duration-300" />
+                <img src={currentSlide.image_url} alt="Ad Left" className="w-full h-full object-contain opacity-95 group-hover:opacity-100 transition-all duration-300" style={{ background: 'transparent', border: 'none', boxShadow: 'none', borderRadius: '0px' }} />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center border border-dashed border-white/10 rounded-2xl bg-white/5">
                   <span className="bg-white/10 backdrop-blur-sm px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 rounded-lg mb-4">Espaço Disponível</span>
@@ -723,12 +724,13 @@ export default function VittaNews() {
             <div 
               onClick={() => openLink(currentSlide ? currentSlide.external_url : ad?.meta_value?.external_url)}
               className="w-[160px] xl:w-[300px] h-[600px] flex flex-col items-center justify-center relative pointer-events-auto cursor-pointer group overflow-hidden"
+              style={{ background: 'transparent', border: 'none', boxShadow: 'none', borderRadius: '0px' }}
             >
               <span className="absolute top-2 left-2 text-[7px] font-black uppercase tracking-widest text-zinc-500 z-10 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded backdrop-blur-sm">
                 Publicidade {slides.length > 1 && `(${(rightAdIndex % slides.length) + 1}/${slides.length})`}
               </span>
               {currentSlide ? (
-                <img src={currentSlide.image_url} alt="Ad Right" className="w-full h-full object-contain opacity-95 group-hover:opacity-100 transition-all duration-300" />
+                <img src={currentSlide.image_url} alt="Ad Right" className="w-full h-full object-contain opacity-95 group-hover:opacity-100 transition-all duration-300" style={{ background: 'transparent', border: 'none', boxShadow: 'none', borderRadius: '0px' }} />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center border border-dashed border-white/10 rounded-2xl bg-white/5">
                   <span className="bg-white/10 backdrop-blur-sm px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 rounded-lg mb-4">Espaço Disponível</span>
