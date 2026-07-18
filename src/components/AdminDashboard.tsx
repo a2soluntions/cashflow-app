@@ -1792,8 +1792,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               {/* NOVO: KPIs FINANCEIROS E METRICA DE ADS */}
               {(() => {
                 const adSlots = ['ad_top', 'ad_vittacash_horizontal', 'ad_skin_left_home', 'ad_skin_right_home', 'ad_sidebar_1', 'ad_sidebar_2', 'ad_skin_left', 'ad_skin_right', 'ad_internal_inline_1', 'ad_internal_inline_2', 'ad_internal_inline_3'];
-                const activeAds = siteContent.filter(c => adSlots.includes(c.content_type) && c.is_active);
-                const pendingRequests = siteContent.filter(c => c.content_type.startsWith('request_'));
+                const activeAds = (siteContent || []).filter(c => c && adSlots.includes(c.content_type) && c.is_active);
+                const pendingRequests = (siteContent || []).filter(c => c && (c.content_type || '').startsWith('request_'));
 
                 const parsePrice = (priceStr?: string) => {
                   if (!priceStr) return 0;
