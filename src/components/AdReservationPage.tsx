@@ -76,6 +76,11 @@ export default function AdReservationPage() {
   const [uploading, setUploading] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [activePage, setActivePage] = useState<'home' | 'internas'>('home');
+  // Estados para gerenciar slides de Skin Carrossel na reserva publica
+  const [adSlides, setAdSlides] = useState<{ id: string; image_url: string; external_url: string; client_name: string; client_phone: string }[]>(
+    Array.from({ length: 6 }, (_, i) => ({ id: `slide_${i}`, image_url: '', external_url: '', client_name: '', client_phone: '' }))
+  );
+  const [activeSlideIdx, setActiveSlideIdx] = useState<number>(0);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const cropAndResizeImage = (file: File, targetWidth: number, targetHeight: number): Promise<Blob> => {
@@ -177,6 +182,15 @@ export default function AdReservationPage() {
       reader.onloadend = () => {
         const base64data = reader.result as string;
         setAdImageUrl(base64data);
+        if (selectedSlot.includes('skin')) {
+          setAdSlides(prev => {
+            const updated = [...prev];
+            if (updated[activeSlideIdx]) {
+              updated[activeSlideIdx].image_url = base64data;
+            }
+            return updated;
+          });
+        }
         showAlert("Imagem Carregada", "Seu banner foi processado e anexado com sucesso!", "success");
       };
       reader.readAsDataURL(finalFile);
@@ -199,14 +213,35 @@ export default function AdReservationPage() {
     setLoading(true);
 
     const selectedInfo = AD_SLOTS_INFO.find(s => s.type === selectedSlot);
-    const leadText = `Olá! Gostaria de solicitar a reserva de um banner de publicidade no portal A2 Notícias.%0A%0A*Nome:* ${clientName}%0A*WhatsApp:* ${clientPhone}%0A*E-mail:* ${clientEmail}%0A*Formato:* ${selectedInfo?.label || selectedSlot}%0A*Período:* ${durationDays} dias%0A*Valor Cotado:* ${selectedInfo?.price || 'Sob Consulta'}%0A*Destino do Banner:* ${adTargetUrl || 'Não informado'}%0A*Link do Banner:* ${adImageUrl.startsWith('data:') ? 'Enviado em anexo' : adImageUrl}`;
+    let finalImageUrl = adImageUrl;
+    let finalSlides: any[] = [];
+
+    // Se for carrossel, atualiza o slide ativo com os dados finais inseridos pelo usuario
+    if (selectedSlot.includes('skin')) {
+      const updatedSlides = [...adSlides];
+      updatedSlides[activeSlideIdx] = {
+        id: updatedSlides[activeSlideIdx]?.id || `slide_${activeSlideIdx}`,
+        image_url: adImageUrl,
+        external_url: adTargetUrl || '#',
+        client_name: clientName,
+        client_phone: clientPhone
+      };
+
+      const validSlides = updatedSlides.filter(s => s.image_url && s.image_url.trim() !== '');
+      finalSlides = validSlides;
+      
+      if (validSlides.length > 0) {
+        finalImageUrl = validSlides[0].image_url;
+      }
+    }
+
+    const leadText = `Olá! Gostaria de solicitar a reserva de um banner de publicidade no portal A2 Notícias.%0A%0A*Nome:* ${clientName}%0A*WhatsApp:* ${clientPhone}%0A*E-mail:* ${clientEmail}%0A*Formato:* ${selectedInfo?.label || selectedSlot}%0A*Período:* ${durationDays} dias%0A*Valor Cotado:* ${selectedInfo?.price || 'Sob Consulta'}%0A*Destino do Banner:* ${adTargetUrl || 'Não informado'}%0A*Link do Banner:* ${finalImageUrl.startsWith('data:') ? 'Enviado em anexo' : finalImageUrl}`;
 
     try {
       const { error } = await supabase.from('site_content').insert({
-        id: crypto.randomUUID(),
         content_type: `request_${selectedSlot}`,
         title: `${selectedInfo?.label || 'Reserva'} - ${clientName}`,
-        image_url: adImageUrl,
+        image_url: finalImageUrl,
         description: `Duração: ${durationDays} dias. Solicitante: ${clientName} (${clientEmail} | ${clientPhone})`,
         is_active: false,
         meta_value: {
@@ -218,18 +253,19 @@ export default function AdReservationPage() {
           slot_type: selectedSlot,
           price_quoted: selectedInfo?.price || 'Sob Consulta',
           requested_at: new Date().toISOString(),
-          base64_backup: adImageUrl.startsWith('data:') ? adImageUrl : undefined
+          base64_backup: finalImageUrl.startsWith('data:') ? finalImageUrl : undefined,
+          slides: finalSlides.length > 0 ? finalSlides : undefined
         }
       });
 
+      if (error) throw error;
+
       setSuccess(true);
-      // Abre o WhatsApp para formalizar de imediato
       setTimeout(() => {
         window.open(`https://api.whatsapp.com/send?phone=5534998408962&text=${leadText}`, '_blank');
       }, 500);
     } catch (err: any) {
-      console.warn("RLS block active, opening direct WhatsApp contact...", err);
-      // Se der erro de RLS, abrimos direto o WhatsApp do suporte, garantindo que o cliente complete a acao
+      console.warn("Database insert block active, opening direct WhatsApp contact...", err);
       setSuccess(true);
       setTimeout(() => {
         window.open(`https://api.whatsapp.com/send?phone=5534998408962&text=${leadText}`, '_blank');
@@ -614,6 +650,56 @@ export default function AdReservationPage() {
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500 text-[8px]">▼</div>
                     </div>
                   </div>
+
+                  {/* SELETOR DE SLIDES PARA SKINS (CARROSSEL) NO PORTAL DE RESERVAS PÚBLICO */}
+                  {selectedSlot.includes('skin') && (
+                    <div className="mb-4">
+                      <label className="text-[9px] font-black uppercase text-zinc-500 mb-2 block tracking-widest ml-1">
+                        Carrossel de Slides — Até 6 Imagens ({adSlides.filter(s => s.image_url && s.image_url.trim() !== '').length} adicionada(s))
+                      </label>
+                      <div className="grid grid-cols-6 gap-1 bg-zinc-950/60 p-1 border border-white/5 rounded-xl">
+                        {[0, 1, 2, 3, 4, 5].map(idx => {
+                          const hasImg = !!(adSlides[idx]?.image_url);
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                // Salva o estado atual no slide anterior antes de trocar
+                                const updated = [...adSlides];
+                                updated[activeSlideIdx] = {
+                                  id: updated[activeSlideIdx]?.id || `slide_${activeSlideIdx}`,
+                                  image_url: adImageUrl,
+                                  external_url: adTargetUrl || '#',
+                                  client_name: clientName,
+                                  client_phone: clientPhone
+                                };
+                                setAdSlides(updated);
+                                
+                                // Muda para o slide selecionado
+                                setActiveSlideIdx(idx);
+                                setAdImageUrl(updated[idx]?.image_url || '');
+                                setAdTargetUrl(updated[idx]?.external_url || '');
+                                // Mantém o Nome do Anunciante e WhatsApp do cliente no formulário, a não ser que o slide já possua outro anunciante específico
+                                if (updated[idx]?.client_name) {
+                                  setClientName(updated[idx].client_name);
+                                }
+                                if (updated[idx]?.client_phone) {
+                                  setClientPhone(updated[idx].client_phone);
+                                }
+                              }}
+                              className={`py-1.5 rounded-lg text-[9px] font-black tracking-widest uppercase transition-all ${activeSlideIdx === idx ? 'bg-indigo-600 text-white shadow-sm' : hasImg ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-500/20' : 'bg-transparent text-zinc-600 hover:text-zinc-400'}`}
+                            >
+                              {idx + 1}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider text-center mt-1.5">
+                        Adicionando Arte para o Slide {activeSlideIdx + 1} — {adSlides[activeSlideIdx]?.image_url ? '✅ Com imagem' : '⬜ Vazio'}
+                      </div>
+                    </div>
+                  )}
 
                   <div>
                     <label className="text-[9px] font-black uppercase tracking-widest ml-1 mb-1.5 block text-zinc-500">Seu Nome / Nome Comercial *</label>
