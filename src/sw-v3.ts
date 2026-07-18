@@ -33,16 +33,6 @@ self.addEventListener('activate', (event) => {
       );
     }).then(() => {
       return self.clients.claim();
-    }).then(() => {
-      return self.clients.matchAll({ type: 'window' }).then((clients) => {
-        clients.forEach((client) => {
-          try {
-            client.navigate(client.url);
-          } catch (e) {
-            console.error(e);
-          }
-        });
-      });
     })
   );
 });
