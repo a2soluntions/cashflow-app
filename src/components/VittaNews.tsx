@@ -114,8 +114,6 @@ const ALL_ASSETS = [
 const DividendCalculator = ({ initialAsset }: { initialAsset?: any }) => {
   const [goal, setGoal] = useState<number | ''>('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [leftAdIndex, setLeftAdIndex] = useState(0);
-  const [rightAdIndex, setRightAdIndex] = useState(0);
   const [selectedAsset, setSelectedAsset] = useState<any | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   
@@ -356,6 +354,8 @@ export default function VittaNews() {
   const [selectedMarketAsset, setSelectedMarketAsset] = useState<any | null>(null);
   const [marketTimeRange, setMarketTimeRange] = useState('1D');
   const [assetForSimulator, setAssetForSimulator] = useState<{ asset: any, ts: number } | null>(null);
+  const [leftAdIndex, setLeftAdIndex] = useState(0);
+  const [rightAdIndex, setRightAdIndex] = useState(0);
 
   const openLink = (url?: string) => {
     if (!url || url === '#' || url.trim() === '') {
