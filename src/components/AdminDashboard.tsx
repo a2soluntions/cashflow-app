@@ -134,6 +134,16 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
         setCorpPhone(corp.meta_value?.phone || '');
         setCorpAddress(corp.description || '');
       }
+
+      // Limpeza automática de registros legados (tipos antigos que não são mais usados)
+      const legacyTypes = ['ad_skin_left_carousel', 'ad_skin_right_carousel'];
+      const legacyRecords = contData.filter(c => legacyTypes.includes(c.content_type));
+      if (legacyRecords.length > 0) {
+        for (const rec of legacyRecords) {
+          await supabase.from('site_content').delete().eq('id', rec.id);
+        }
+        console.log(`[Admin] Limpeza: ${legacyRecords.length} registro(s) legado(s) removido(s) do banco.`);
+      }
     }
   };
 
