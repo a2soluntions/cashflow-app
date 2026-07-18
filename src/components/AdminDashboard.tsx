@@ -1136,6 +1136,26 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
             
             <div className="flex items-center gap-3 md:gap-4">
               <button 
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    await fetchData();
+                    showAlert("Atualizado", "Os dados do painel foram atualizados com sucesso!", "info");
+                  } catch (e: any) {
+                    showAlert("Erro ao Atualizar", e.message || "Falha ao recarregar dados.", "error");
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="p-2 md:px-4 md:py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-indigo-500/20 flex items-center gap-1.5 disabled:opacity-50"
+                title="Atualizar Dados"
+              >
+                <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+                <span className="hidden md:inline">{loading ? "Atualizando..." : "Atualizar Dados"}</span>
+              </button>
+
+              <button 
                 onClick={() => {
                   showAlert(
                     "Limpar Memória", 
@@ -1151,8 +1171,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 className="p-2 md:px-4 md:py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[8px] md:text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-rose-500/20"
                 title="Limpar Cache"
               >
-                <RefreshCw size={14} className="md:hidden" />
                 <span className="hidden md:inline">Limpar Cache</span>
+                <span className="md:hidden">Cache</span>
               </button>
               <div className={`flex ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-1 rounded-xl overflow-x-auto custom-scrollbar flex-1 md:flex-none`}>
                 <button onClick={() => setActiveTab('vendas')} className={"whitespace-nowrap px-3 md:px-6 py-2 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all " + (activeTab === 'vendas' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-emerald-500')}>
