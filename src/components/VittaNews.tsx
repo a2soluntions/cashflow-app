@@ -504,6 +504,28 @@ export default function VittaNews() {
     loadData();
   }, []);
 
+  // Timer de rotação automática dos carrosséis das Skins Laterais (Home)
+  useEffect(() => {
+    const leftAd = news.find(item => item.content_type === 'ad_skin_left_home' && item.is_active);
+    const rightAd = news.find(item => item.content_type === 'ad_skin_right_home' && item.is_active);
+    
+    let leftSlides = leftAd?.meta_value?.slides || [];
+    if (leftSlides.length === 0 && leftAd?.image_url) leftSlides = [{ image_url: leftAd.image_url }];
+    
+    let rightSlides = rightAd?.meta_value?.slides || [];
+    if (rightSlides.length === 0 && rightAd?.image_url) rightSlides = [{ image_url: rightAd.image_url }];
+    
+    const maxSlides = Math.max(leftSlides.length, rightSlides.length);
+    if (maxSlides <= 1) return;
+
+    const interval = setInterval(() => {
+      if (leftSlides.length > 1) setLeftAdIndex(prev => (prev + 1) % leftSlides.length);
+      if (rightSlides.length > 1) setRightAdIndex(prev => (prev + 1) % rightSlides.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [news]);
+
   const handleShare = (item: NewsItem) => {
     if (navigator.share) {
       navigator.share({ title: item.title, text: 'Confira no A2 Notícias: ' + item.title, url: item.meta_value?.external_url || window.location.href }).catch(console.error);

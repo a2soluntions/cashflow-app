@@ -54,16 +54,8 @@ export default function NewsArticle() {
 
 
   const SideAdCarousel = ({ type, position }: { type: string, position: 'left' | 'right' }) => {
-    // Tenta encontrar anúncios do tipo específico (carousel) no array correto
+    // Busca anúncios do tipo exato (ad_skin_left ou ad_skin_right)
     let slotAds = carouselAds.filter(item => item.content_type === type && item.is_active);
-    
-    // Se não houver nenhum do tipo específico, tenta o tipo legado para manter a compatibilidade
-    if (slotAds.length === 0) {
-      const legacyType = type.includes('left') ? 'ad_skin_left' : 'ad_skin_right';
-      // Ajusta para buscar também a versão home da skin
-      const homeType = type.includes('left') ? 'ad_skin_left_home' : 'ad_skin_right_home';
-      slotAds = carouselAds.filter(item => (item.content_type === legacyType || item.content_type === homeType) && item.is_active);
-    }
     
     // Se encontrarmos um registro único de carrossel de slides no meta_value
     const mainAd = slotAds[0];
@@ -158,7 +150,7 @@ export default function NewsArticle() {
         const { data: adsData } = await supabase
           .from('site_content')
           .select('*')
-          .in('content_type', ['ad_internal_inline_1', 'ad_internal_inline_2', 'ad_internal_inline_3', 'ad_skin_left_carousel', 'ad_skin_right_carousel', 'ad_skin_left', 'ad_skin_right'])
+          .in('content_type', ['ad_internal_inline_1', 'ad_internal_inline_2', 'ad_internal_inline_3', 'ad_skin_left', 'ad_skin_right'])
           .eq('is_active', true);
         
         if (adsData) {
