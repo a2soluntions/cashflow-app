@@ -76,8 +76,10 @@ const AD_SLOTS_INFO = [
 export default function AdReservationPage() {
   const navigate = useNavigate();
   
+  const [customAlert, setCustomAlert] = useState<{ title: string; message: string; type: 'info' | 'success' | 'error' } | null>(null);
+  
   const showAlert = (title: string, message: string, type: 'info' | 'success' | 'error' = 'info') => {
-    alert(`${title.toUpperCase()}\n\n${message}`);
+    setCustomAlert({ title, message, type });
   };
   const [selectedSlot, setSelectedSlot] = useState(AD_SLOTS_INFO[0].type);
   const [clientName, setClientName] = useState('');
@@ -876,6 +878,36 @@ export default function AdReservationPage() {
               </form>
             )}
 
+            </div>
+          </div>
+        )}
+
+        {/* MODAL DE ALERTA VISUAL CUSTOMIZADO E PREMIUM */}
+        {customAlert && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
+            <div className="w-full max-w-sm bg-zinc-900 border border-white/10 p-6 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 text-center space-y-4">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto ${
+                customAlert.type === 'success' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                customAlert.type === 'error' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
+                'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+              }`}>
+                {customAlert.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
+              </div>
+              <div>
+                <h4 className="text-sm font-black uppercase tracking-[0.15em] text-white">{customAlert.title}</h4>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-2 leading-relaxed">
+                  {customAlert.message}
+                </p>
+              </div>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setCustomAlert(null)}
+                  className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                >
+                  Confirmar
+                </button>
+              </div>
             </div>
           </div>
         )}
