@@ -34,7 +34,7 @@ export default defineConfig({
   plugins: [
     react(),
       VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw-v3.ts',
