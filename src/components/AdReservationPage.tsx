@@ -305,17 +305,18 @@ export default function AdReservationPage() {
                   {/* Skyscraper sidebar */}
                   <div 
                     onClick={() => setSelectedSlot('ad_sidebar_2')}
-                    className={`py-16 rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center justify-center cursor-pointer transition-all ${selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
-                    style={{ writingMode: 'vertical-rl' }}
+                    className={`py-20 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center ${selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                   >
-                    Sidebar 2 (300x600) - R$ 320
+                    <span>Sidebar 2</span>
+                    <span>(300x600)</span>
+                    <span>R$ 320</span>
                   </div>
                 </div>
 
                 {/* Skin Right simulation */}
                 <div 
                   onClick={() => setSelectedSlot('ad_skin_right_home')}
-                  className={`col-span-2 py-24 rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center justify-center cursor-pointer transition-all ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                  className={`col-span-2 py-24 rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center justify-center cursor-pointer transition-all text-center ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                   style={{ writingMode: 'vertical-rl' }}
                 >
                   Skin Direita (200x600) - R$ 380
