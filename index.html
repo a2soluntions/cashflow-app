@@ -19,6 +19,30 @@
     <meta name="twitter:image" content="/pwa-512x512.png" />
     
     <title>A2 Mentor</title>
+    <script>
+      // Tratamento de segurança para cache antigo em produção
+      window.onerror = function(message, source, lineno, colno, error) {
+        const msg = String(message || '');
+        if (msg.includes('leftAdIndex') || msg.includes('ReferenceError') || msg.includes('Loading chunk')) {
+          console.warn('[Cache Buster] Erro crítico de cache antigo detectado, limpando e recarregando...');
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs) {
+              regs.forEach(function(r) { r.unregister(); });
+            });
+          }
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              names.forEach(function(n) { caches.delete(n); });
+            });
+          }
+          setTimeout(function() {
+            window.location.href = window.location.origin + window.location.pathname + '?cb=' + Date.now();
+          }, 300);
+          return true;
+        }
+        return false;
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>
