@@ -246,18 +246,18 @@ export default function AdReservationPage() {
           <ArrowLeft size={16} /> Voltar para o Portal
         </button>
         <span className="text-xl font-black italic tracking-tighter uppercase">
-          Vitta <span className="text-indigo-500">Publicidade</span>
+          A2mentor <span className="text-indigo-500">Publicidades</span>
         </span>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 mt-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <main className="max-w-7xl mx-auto px-6 mt-16 flex flex-col gap-12">
         
         {/* LADO ESQUERDO: Posicionamento dos Campos & Tabela de Preços */}
-        <div className="lg:col-span-7 space-y-12">
+        <div className="w-full space-y-12">
           
           <div>
             <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-4">
-              Anuncie no Maior Portal de <span className="text-indigo-500">Notícias Financeiras</span>
+              Anuncie no Maior Portal de <span className="text-indigo-500">Notícias</span>
             </h1>
             <p className="text-zinc-400 text-sm font-medium leading-relaxed max-w-xl">
               Exiba sua marca para milhares de investidores, empreendedores e tomadores de decisão todos os dias. Selecione os espaços abaixo e reserve seu espaço em minutos.
@@ -374,9 +374,18 @@ export default function AdReservationPage() {
 
         </div>
 
-        {/* LADO DIREITO: Formulário de Reserva */}
-        <div className="lg:col-span-5">
-          <div className="border border-white/5 bg-zinc-900/30 backdrop-blur-md rounded-3xl p-6 md:p-8 space-y-6 sticky top-24">
+        {/* MODAL POPUP PARA SOLICITAÇÃO DE RESERVA */}
+        {isFormOpen && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
+            <div className="w-full max-w-xl bg-zinc-900 border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
+              
+              <button 
+                type="button" 
+                onClick={() => setIsFormOpen(false)}
+                className="absolute top-6 right-6 text-zinc-400 hover:text-rose-500 font-black uppercase text-[10px] tracking-widest bg-zinc-800/40 hover:bg-zinc-800 px-3 py-1.5 rounded-lg border border-white/5 transition-all"
+              >
+                Fechar [X]
+              </button>
             
             {success ? (
               <div className="text-center py-10 space-y-4 animate-in zoom-in-95 duration-500">
@@ -587,8 +596,9 @@ export default function AdReservationPage() {
               </form>
             )}
 
+            </div>
           </div>
-        </div>
+        )}
 
       </main>
 
