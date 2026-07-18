@@ -147,17 +147,22 @@ export default function AdReservationPage() {
       const targetDimensions = sizeMap[selectedSlot];
 
       if (targetDimensions) {
-        const imgDimensions = await new Promise<{ w: number, h: number }>((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve({ w: img.width, h: img.height });
-          img.onerror = () => resolve({ w: 0, h: 0 });
-          img.src = URL.createObjectURL(file);
-        });
+        try {
+          const imgDimensions = await new Promise<{ w: number, h: number }>((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve({ w: img.width, h: img.height });
+            img.onerror = () => resolve({ w: 0, h: 0 });
+            img.src = URL.createObjectURL(file);
+          });
 
-        // Se for diferente das dimensões do slot, faz o recorte via Canvas
-        if (imgDimensions.w > 0 && (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h)) {
-          showAlert("Ajustando Imagem", `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte automático.`, "info");
-          finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
+          // Se for diferente das dimensões do slot, faz o recorte via Canvas
+          if (imgDimensions.w > 0 && (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h)) {
+            showAlert("Ajustando Imagem", `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte automático.`, "info");
+            finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
+          }
+        } catch (canvasErr) {
+          console.warn("Canvas crop failed, falling back to original file:", canvasErr);
+          finalFile = file; // Fallback para a imagem original
         }
       }
 
@@ -166,7 +171,7 @@ export default function AdReservationPage() {
       reader.onloadend = () => {
         const base64data = reader.result as string;
         setAdImageUrl(base64data);
-        showAlert("Imagem Carregada", "Seu banner foi processado, redimensionado e anexado localmente com sucesso!", "success");
+        showAlert("Imagem Carregada", "Seu banner foi processado e anexado com sucesso!", "success");
       };
       reader.readAsDataURL(finalFile);
 
