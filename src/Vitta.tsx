@@ -93,7 +93,7 @@ export default function Vitta() {
       setInvestments(dbInvestments);
 
       // Usando dados locais e de sessão para evitar o erro 406 da tabela profiles
-      setSubscriptionPlan('pro');
+      setSubscriptionPlan('premium');
       setSubscriptionActive(true);
       setTrialDaysLeft(30);
 

@@ -17,6 +17,9 @@ interface NewsItem {
     external_url?: string;
     category?: string;
     author?: string;
+    slides?: any[];
+    client_name?: string;
+    client_phone?: string;
   };
   is_active: boolean;
 }
