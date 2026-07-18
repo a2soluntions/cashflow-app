@@ -70,6 +70,7 @@ export default function AdReservationPage() {
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const cropAndResizeImage = (file: File, targetWidth: number, targetHeight: number): Promise<Blob> => {
@@ -272,7 +273,7 @@ export default function AdReservationPage() {
             <div className="space-y-4 text-center">
               {/* Top Banner simulation */}
               <div 
-                onClick={() => setSelectedSlot('ad_top')}
+                onClick={() => { setSelectedSlot('ad_top'); setIsFormOpen(true); }}
                 className={`py-6 rounded-xl border text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all ${selectedSlot === 'ad_top' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
               >
                 Banner do Topo (970x250) - R$ 450
@@ -282,7 +283,7 @@ export default function AdReservationPage() {
                 
                 {/* Skin Left simulation */}
                 <div 
-                  onClick={() => setSelectedSlot('ad_skin_left_home')}
+                  onClick={() => { setSelectedSlot('ad_skin_left_home'); setIsFormOpen(true); }}
                   className={`col-span-3 py-24 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 ${selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                 >
                   <span>Skin Esquerda</span>
@@ -298,7 +299,7 @@ export default function AdReservationPage() {
                   
                   {/* Feed Horizontal Ad simulation */}
                   <div 
-                    onClick={() => setSelectedSlot('ad_vittacash_horizontal')}
+                    onClick={() => { setSelectedSlot('ad_vittacash_horizontal'); setIsFormOpen(true); }}
                     className={`py-4 rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all ${selectedSlot === 'ad_vittacash_horizontal' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                   >
                     Banner de Centro (728x90) - R$ 240
@@ -313,14 +314,14 @@ export default function AdReservationPage() {
                 <div className="col-span-2 space-y-4">
                   {/* Square sidebar */}
                   <div 
-                    onClick={() => setSelectedSlot('ad_sidebar_1')}
+                    onClick={() => { setSelectedSlot('ad_sidebar_1'); setIsFormOpen(true); }}
                     className={`py-8 rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center justify-center cursor-pointer transition-all ${selectedSlot === 'ad_sidebar_1' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                   >
                     Sidebar 1 (300x300) - R$ 280
                   </div>
                   {/* Skyscraper sidebar */}
                   <div 
-                    onClick={() => setSelectedSlot('ad_sidebar_2')}
+                    onClick={() => { setSelectedSlot('ad_sidebar_2'); setIsFormOpen(true); }}
                     className={`py-20 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center ${selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                   >
                     <span>Sidebar 2</span>
@@ -331,7 +332,7 @@ export default function AdReservationPage() {
 
                 {/* Skin Right simulation */}
                 <div 
-                  onClick={() => setSelectedSlot('ad_skin_right_home')}
+                  onClick={() => { setSelectedSlot('ad_skin_right_home'); setIsFormOpen(true); }}
                   className={`col-span-3 py-24 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                 >
                   <span>Skin Direita</span>
