@@ -71,6 +71,7 @@ export default function AdReservationPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [uploading, setUploading] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [activePage, setActivePage] = useState<'home' | 'internas'>('home');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const cropAndResizeImage = (file: File, targetWidth: number, targetHeight: number): Promise<Blob> => {
@@ -264,83 +265,256 @@ export default function AdReservationPage() {
             </p>
           </div>
 
+          {/* SELETOR DE PÁGINAS DO MAPA */}
+          <div className="flex gap-2 p-1 bg-zinc-900/80 border border-white/5 rounded-2xl max-w-sm mb-4">
+            <button
+              type="button"
+              onClick={() => setActivePage('home')}
+              className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activePage === 'home' ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
+            >
+              🖥️ Página 1: Página Inicial
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePage('internas')}
+              className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activePage === 'internas' ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
+            >
+              📄 Página 2: Páginas Internas
+            </button>
+          </div>
+
           {/* MOCKUP INTERATIVO DOS CAMPOS */}
           <div className="border border-white/5 bg-zinc-900/40 rounded-3xl p-6 relative space-y-6">
             <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-              <Monitor size={14} className="text-indigo-500" /> Mapa de Posicionamento de Banners
+              <Monitor size={14} className="text-indigo-500" />
+              {activePage === 'home' ? 'Mapa de Posicionamento - Página Inicial (Home)' : 'Mapa de Posicionamento - Páginas Internas (Matérias)'}
             </h3>
             
             <div className="space-y-4 text-center">
-              {/* Top Banner simulation */}
-              <div 
-                onClick={() => { setSelectedSlot('ad_top'); setIsFormOpen(true); }}
-                className={`py-6 rounded-xl border text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all ${selectedSlot === 'ad_top' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
-              >
-                Banner do Topo (970x250) - R$ 450
-              </div>
-
-              <div className="grid grid-cols-14 gap-3 md:gap-4">
-                
-                {/* Skin Left simulation */}
-                <div 
-                  onClick={() => { setSelectedSlot('ad_skin_left_home'); setIsFormOpen(true); }}
-                  className={`col-span-3 py-24 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 ${selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
-                >
-                  <span>Skin Esquerda</span>
-                  <span>(300x600)</span>
-                  <span>R$ 380</span>
-                </div>
-
-                {/* News feed column simulation */}
-                <div className="col-span-6 space-y-4">
-                  <div className="h-24 bg-zinc-800/10 border border-white/5 rounded-xl flex items-center justify-center text-[10px] font-bold text-zinc-600 uppercase">
-                    Feed de Matérias do Portal
-                  </div>
+              {activePage === 'home' ? (
+                /* LAYOUT PÁGINA 1: HOME (IMAGEM 2) */
+                <div className="grid grid-cols-14 gap-4 items-stretch">
                   
-                  {/* Feed Horizontal Ad simulation */}
+                  {/* Skin Esquerda (Lateral Extrema) */}
                   <div 
-                    onClick={() => { setSelectedSlot('ad_vittacash_horizontal'); setIsFormOpen(true); }}
-                    className={`py-4 rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all ${selectedSlot === 'ad_vittacash_horizontal' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                    onClick={() => { setSelectedSlot('ad_skin_left_home'); setIsFormOpen(true); }}
+                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                   >
-                    Banner de Centro (728x90) - R$ 240
+                    {selectedSlot === 'ad_skin_left_home' && adImageUrl ? (
+                      <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Left" />
+                    ) : (
+                      <>
+                        <span>Skin Esquerda</span>
+                        <span>(300x600)</span>
+                        <span>R$ 380</span>
+                      </>
+                    )}
                   </div>
 
-                  <div className="h-24 bg-zinc-800/10 border border-white/5 rounded-xl flex items-center justify-center text-[10px] font-bold text-zinc-600 uppercase">
-                    Simuladores de Dividendos
-                  </div>
-                </div>
+                  {/* Bloco Central (Contém Banner Topo, Feed e Banner Centro) */}
+                  <div className="col-span-8 flex flex-col gap-4">
+                    {/* Banner do Topo */}
+                    <div 
+                      onClick={() => { setSelectedSlot('ad_top'); setIsFormOpen(true); }}
+                      className={`rounded-xl border text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[100px] flex items-center justify-center relative overflow-hidden ${selectedSlot === 'ad_top' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                    >
+                      {selectedSlot === 'ad_top' && adImageUrl ? (
+                        <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Topo" />
+                      ) : (
+                        <span>Banner do Topo (970x250) - R$ 450</span>
+                      )}
+                    </div>
 
-                {/* Sidebar Ads simulation */}
-                <div className="col-span-2 space-y-4">
-                  {/* Square sidebar */}
+                    {/* Grid interna: Feed de Matérias e Sidebars */}
+                    <div className="grid grid-cols-8 gap-4 flex-1">
+                      
+                      {/* Feed de Matérias */}
+                      <div className="col-span-6 space-y-4 flex flex-col justify-stretch">
+                        <div className="flex-1 min-h-[140px] bg-zinc-800/10 border border-white/5 rounded-xl flex items-center justify-center text-[10px] font-bold text-zinc-600 uppercase">
+                          Feed de Matérias do Portal
+                        </div>
+                        
+                        {/* Banner do Centro */}
+                        <div 
+                          onClick={() => { setSelectedSlot('ad_vittacash_horizontal'); setIsFormOpen(true); }}
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex items-center justify-center relative overflow-hidden ${selectedSlot === 'ad_vittacash_horizontal' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                        >
+                          {selectedSlot === 'ad_vittacash_horizontal' && adImageUrl ? (
+                            <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Centro" />
+                          ) : (
+                            <span>Banner de Centro (728x90) - R$ 240</span>
+                          )}
+                        </div>
+
+                        <div className="min-h-[120px] bg-zinc-800/10 border border-white/5 rounded-xl flex items-center justify-center text-[10px] font-bold text-zinc-600 uppercase">
+                          Simuladores de Dividendos
+                        </div>
+                      </div>
+
+                      {/* Column Sidebar Ads */}
+                      <div className="col-span-2 flex flex-col gap-4">
+                        {/* Sidebar 1 */}
+                        <div 
+                          onClick={() => { setSelectedSlot('ad_sidebar_1'); setIsFormOpen(true); }}
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center justify-center cursor-pointer transition-all min-h-[100px] text-center relative overflow-hidden ${selectedSlot === 'ad_sidebar_1' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                        >
+                          {selectedSlot === 'ad_sidebar_1' && adImageUrl ? (
+                            <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Sidebar 1" />
+                          ) : (
+                            <span>Sidebar 1 (300x300) - R$ 280</span>
+                          )}
+                        </div>
+                        
+                        {/* Sidebar 2 */}
+                        <div 
+                          onClick={() => { setSelectedSlot('ad_sidebar_2'); setIsFormOpen(true); }}
+                          className={`rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center relative overflow-hidden flex-1 min-h-[200px] justify-center ${selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                        >
+                          {selectedSlot === 'ad_sidebar_2' && adImageUrl ? (
+                            <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Sidebar 2" />
+                          ) : (
+                            <>
+                              <span>Sidebar 2</span>
+                              <span>(300x600)</span>
+                              <span>R$ 320</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Skin Direita (Lateral Extrema) */}
                   <div 
-                    onClick={() => { setSelectedSlot('ad_sidebar_1'); setIsFormOpen(true); }}
-                    className={`py-8 rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center justify-center cursor-pointer transition-all ${selectedSlot === 'ad_sidebar_1' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                    onClick={() => { setSelectedSlot('ad_skin_right_home'); setIsFormOpen(true); }}
+                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                   >
-                    Sidebar 1 (300x300) - R$ 280
+                    {selectedSlot === 'ad_skin_right_home' && adImageUrl ? (
+                      <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Right" />
+                    ) : (
+                      <>
+                        <span>Skin Direita</span>
+                        <span>(300x600)</span>
+                        <span>R$ 380</span>
+                      </>
+                    )}
                   </div>
-                  {/* Skyscraper sidebar */}
+
+                </div>
+              ) : (
+                /* LAYOUT PÁGINA 2: PÁGINAS INTERNAS (MATÉRIAS) */
+                <div className="grid grid-cols-14 gap-4 items-stretch">
+                  
+                  {/* Skin Esquerda (Lateral Extrema) */}
                   <div 
-                    onClick={() => { setSelectedSlot('ad_sidebar_2'); setIsFormOpen(true); }}
-                    className={`py-20 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center ${selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                    onClick={() => { setSelectedSlot('ad_skin_left_home'); setIsFormOpen(true); }}
+                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                   >
-                    <span>Sidebar 2</span>
-                    <span>(300x600)</span>
-                    <span>R$ 320</span>
+                    {selectedSlot === 'ad_skin_left_home' && adImageUrl ? (
+                      <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Left" />
+                    ) : (
+                      <>
+                        <span>Skin Esquerda</span>
+                        <span>(300x600)</span>
+                        <span>R$ 380</span>
+                      </>
+                    )}
                   </div>
-                </div>
 
-                {/* Skin Right simulation */}
-                <div 
-                  onClick={() => { setSelectedSlot('ad_skin_right_home'); setIsFormOpen(true); }}
-                  className={`col-span-3 py-24 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
-                >
-                  <span>Skin Direita</span>
-                  <span>(300x600)</span>
-                  <span>R$ 380</span>
-                </div>
+                  {/* Área Central: Título, Conteúdo da Notícia, Banners Internos e Sidebar */}
+                  <div className="col-span-8 flex flex-col gap-4">
+                    <div className="grid grid-cols-8 gap-4 flex-1">
+                      
+                      {/* Conteúdo da Notícia & Anúncios Internos */}
+                      <div className="col-span-6 space-y-4 flex flex-col justify-between">
+                        <div className="p-4 bg-zinc-800/10 border border-white/5 rounded-xl text-left space-y-2">
+                          <div className="h-4 w-1/3 bg-indigo-500/20 rounded-full" />
+                          <div className="h-6 w-full bg-zinc-800/30 rounded-xl" />
+                          <div className="h-3 w-5/6 bg-zinc-800/20 rounded-full" />
+                        </div>
 
-              </div>
+                        {/* Anúncio Interno 01 */}
+                        <div 
+                          onClick={() => { setSelectedSlot('ad_internal_inline_1'); setIsFormOpen(true); }}
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex items-center justify-center relative overflow-hidden ${selectedSlot === 'ad_internal_inline_1' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                        >
+                          {selectedSlot === 'ad_internal_inline_1' && adImageUrl ? (
+                            <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Interno 1" />
+                          ) : (
+                            <span>Anúncio Interno 01 (728x90) - R$ 150</span>
+                          )}
+                        </div>
+
+                        <div className="p-4 bg-zinc-800/10 border border-white/5 rounded-xl text-left space-y-2">
+                          <div className="h-3 w-full bg-zinc-800/20 rounded-full" />
+                          <div className="h-3 w-4/5 bg-zinc-800/20 rounded-full" />
+                        </div>
+
+                        {/* Anúncio Interno 02 */}
+                        <div 
+                          onClick={() => { setSelectedSlot('ad_internal_inline_2'); setIsFormOpen(true); }}
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex items-center justify-center relative overflow-hidden ${selectedSlot === 'ad_internal_inline_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                        >
+                          {selectedSlot === 'ad_internal_inline_2' && adImageUrl ? (
+                            <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Interno 2" />
+                          ) : (
+                            <span>Anúncio Interno 02 (728x90) - R$ 150</span>
+                          )}
+                        </div>
+
+                        {/* Anúncio Interno 03 */}
+                        <div 
+                          onClick={() => { setSelectedSlot('ad_internal_inline_3'); setIsFormOpen(true); }}
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex items-center justify-center relative overflow-hidden ${selectedSlot === 'ad_internal_inline_3' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                        >
+                          {selectedSlot === 'ad_internal_inline_3' && adImageUrl ? (
+                            <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Interno 3" />
+                          ) : (
+                            <span>Anúncio Interno 03 (728x90) - R$ 150</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Sidebar 2 */}
+                      <div className="col-span-2 flex flex-col justify-stretch">
+                        <div 
+                          onClick={() => { setSelectedSlot('ad_sidebar_2'); setIsFormOpen(true); }}
+                          className={`rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center relative overflow-hidden flex-1 min-h-[300px] justify-center ${selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                        >
+                          {selectedSlot === 'ad_sidebar_2' && adImageUrl ? (
+                            <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Sidebar 2" />
+                          ) : (
+                            <>
+                              <span>Sidebar 2</span>
+                              <span>(300x600)</span>
+                              <span>R$ 320</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Skin Direita (Lateral Extrema) */}
+                  <div 
+                    onClick={() => { setSelectedSlot('ad_skin_right_home'); setIsFormOpen(true); }}
+                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                  >
+                    {selectedSlot === 'ad_skin_right_home' && adImageUrl ? (
+                      <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Right" />
+                    ) : (
+                      <>
+                        <span>Skin Direita</span>
+                        <span>(300x600)</span>
+                        <span>R$ 380</span>
+                      </>
+                    )}
+                  </div>
+
+                </div>
+              )}
             </div>
           </div>
 

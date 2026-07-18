@@ -114,6 +114,8 @@ const ALL_ASSETS = [
 const DividendCalculator = ({ initialAsset }: { initialAsset?: any }) => {
   const [goal, setGoal] = useState<number | ''>('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [leftAdIndex, setLeftAdIndex] = useState(0);
+  const [rightAdIndex, setRightAdIndex] = useState(0);
   const [selectedAsset, setSelectedAsset] = useState<any | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   
