@@ -633,8 +633,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     const adSlots = [
       { id: 'ad_top', label: 'Banner Topo (970x250)', type: 'ad_top', price: 'R$ 450' },
       { id: 'ad_vittacash_horizontal', label: 'Banner de Centro (728x90)', type: 'ad_vittacash_horizontal', price: 'R$ 240' },
-      { id: 'ad_skin_left_home', label: 'Skin Esquerda (400x600)', type: 'ad_skin_left_home', price: 'R$ 380' },
-      { id: 'ad_skin_right_home', label: 'Skin Direita (400x600)', type: 'ad_skin_right_home', price: 'R$ 380' },
+      { id: 'ad_skin_left_home', label: 'Skin Esquerda (300x600)', type: 'ad_skin_left_home', price: 'R$ 380' },
+      { id: 'ad_skin_right_home', label: 'Skin Direita (300x600)', type: 'ad_skin_right_home', price: 'R$ 380' },
       { id: 'ad_sidebar_1', label: 'Sidebar 1 (300x300)', type: 'ad_sidebar_1', price: 'R$ 280' },
       { id: 'ad_sidebar_2', label: 'Sidebar 2 (300x600)', type: 'ad_sidebar_2', price: 'R$ 320' },
       { id: 'ad_internal_inline_1', label: 'Anúncio Interno 01', type: 'ad_internal_inline_1', price: 'R$ 150' },

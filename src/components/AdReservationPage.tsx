@@ -18,7 +18,7 @@ const AD_SLOTS_INFO = [
   { 
     type: 'ad_skin_left_home', 
     label: 'Lateral Esquerda (Skin)', 
-    size: '400x600 px', 
+    size: '300x600 px', 
     price: 'R$ 380,00', 
     period: 'por 30 dias',
     desc: 'Exclusivo para desktops. Acompanha o scroll do leitor à esquerda.' 
@@ -26,7 +26,7 @@ const AD_SLOTS_INFO = [
   { 
     type: 'ad_skin_right_home', 
     label: 'Lateral Direita (Skin)', 
-    size: '400x600 px', 
+    size: '300x600 px', 
     price: 'R$ 380,00', 
     period: 'por 30 dias',
     desc: 'Exclusivo para desktops. Acompanha o scroll do leitor à direita.' 
@@ -201,7 +201,7 @@ export default function AdReservationPage() {
         id: crypto.randomUUID(),
         content_type: `request_${selectedSlot}`,
         title: `${selectedInfo?.label || 'Reserva'} - ${clientName}`,
-        image_url: adImageUrl.length > 2000 ? adImageUrl.substring(0, 100) + '...[Base64 Image]' : adImageUrl,
+        image_url: adImageUrl,
         description: `Duração: ${durationDays} dias. Solicitante: ${clientName} (${clientEmail} | ${clientPhone})`,
         is_active: false,
         meta_value: {
@@ -287,7 +287,7 @@ export default function AdReservationPage() {
                   className={`col-span-3 py-24 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 ${selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                 >
                   <span>Skin Esquerda</span>
-                  <span>(400x600)</span>
+                  <span>(300x600)</span>
                   <span>R$ 380</span>
                 </div>
 
@@ -336,7 +336,7 @@ export default function AdReservationPage() {
                   className={`col-span-3 py-24 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                 >
                   <span>Skin Direita</span>
-                  <span>(400x600)</span>
+                  <span>(300x600)</span>
                   <span>R$ 380</span>
                 </div>
 
@@ -539,7 +539,7 @@ export default function AdReservationPage() {
                           Proporção do espaço: {
                             selectedSlot === 'ad_top' ? '970x250 (Horizontal Longo)' :
                             selectedSlot === 'ad_vittacash_horizontal' ? '728x90 (Horizontal)' :
-                            selectedSlot === 'ad_skin_left_home' || selectedSlot === 'ad_skin_right_home' ? '400x600 (Skin Vertical)' :
+                            selectedSlot === 'ad_skin_left_home' || selectedSlot === 'ad_skin_right_home' ? '300x600 (Skin Vertical)' :
                             selectedSlot === 'ad_sidebar_1' ? '300x300 (Quadrado)' : '300x600 (Vertical Largo)'
                           }
                         </span>

@@ -89,7 +89,7 @@ export default function NewsArticle() {
       return (
         <div 
           onClick={() => openLink(currentSlide.external_url)}
-          className="w-[160px] xl:w-[400px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm"
+          className="w-[160px] xl:w-[300px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm"
         >
           <span className={`absolute top-2 ${position === 'left' ? 'right-2' : 'left-2'} text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm`}>
             Publicidade {adSlides.length > 1 && `(${currentIndex + 1}/${adSlides.length})`}
@@ -111,7 +111,7 @@ export default function NewsArticle() {
     return (
       <div 
         onClick={() => openLink(currentAd.meta_value?.external_url)}
-        className="w-[160px] xl:w-[400px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm"
+        className="w-[160px] xl:w-[300px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm"
       >
         <span className={`absolute top-2 ${position === 'left' ? 'right-2' : 'left-2'} text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm`}>
           Publicidade {slotAds.length > 1 && `(${currentIndex + 1}/${slotAds.length})`}
