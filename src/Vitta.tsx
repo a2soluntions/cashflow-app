@@ -92,27 +92,37 @@ export default function Vitta() {
       const dbInvestments = await appApi.getInvestments(session.user.id);
       setInvestments(dbInvestments);
 
-      const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-      if (profile) {
-        const now = new Date();
-        setSubscriptionPlan((profile.subscription_tier || 'free') as any);
-        const isSubActive = profile.subscription_status === 'active' && (!profile.subscription_expires_at || new Date(profile.subscription_expires_at) > now);
-        
-        const trialEnd = profile.trial_expires_at ? new Date(profile.trial_expires_at) : new Date(0);
-        const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        
-        setSubscriptionActive(isSubActive || session.user.email === ADMIN_EMAIL);
-        setTrialDaysLeft(daysLeft);
+      try {
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        if (profile) {
+          const now = new Date();
+          setSubscriptionPlan((profile.subscription_tier || 'free') as any);
+          const isSubActive = profile.subscription_status === 'active' && (!profile.subscription_expires_at || new Date(profile.subscription_expires_at) > now);
+          
+          const trialEnd = profile.trial_expires_at ? new Date(profile.trial_expires_at) : new Date(0);
+          const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          
+          setSubscriptionActive(isSubActive || session.user.email === ADMIN_EMAIL);
+          setTrialDaysLeft(daysLeft);
 
-        if (profile.avatar_url) {
-          setUserAvatar(profile.avatar_url);
-          localStorage.setItem('a2mentor_user_avatar', profile.avatar_url);
+          if (profile.avatar_url) {
+            setUserAvatar(profile.avatar_url);
+            localStorage.setItem('a2mentor_user_avatar', profile.avatar_url);
+          }
+          if (profile.name) {
+            setUserName(profile.name);
+            localStorage.setItem('a2mentor_user_name', profile.name);
+          }
+        } else {
+          setSubscriptionActive(session.user.email === ADMIN_EMAIL);
+          const savedAvatar = localStorage.getItem('a2mentor_user_avatar');
+          const savedName = localStorage.getItem('a2mentor_user_name');
+          if (savedAvatar) setUserAvatar(savedAvatar);
+          if (savedName) setUserName(savedName);
         }
-        if (profile.name) {
-          setUserName(profile.name);
-          localStorage.setItem('a2mentor_user_name', profile.name);
-        }
-      } else {
+      } catch (profileErr) {
+        console.warn("Failed to fetch profile (likely RLS error 406):", profileErr);
+        setSubscriptionActive(session.user.email === ADMIN_EMAIL);
         const savedAvatar = localStorage.getItem('a2mentor_user_avatar');
         const savedName = localStorage.getItem('a2mentor_user_name');
         if (savedAvatar) setUserAvatar(savedAvatar);
