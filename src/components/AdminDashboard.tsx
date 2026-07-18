@@ -798,6 +798,48 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 </button>
               </div>
 
+              {/* SELETOR DE SLIDES PARA SKINS (CARROSSEL) */}
+              {selectedMapSlot?.includes('skin') && (
+                <div className="mb-4">
+                  <label className="text-[9px] font-black uppercase text-slate-400 mb-2 block">
+                    Carrossel de Slides — Até 6 Imagens ({adSlides.filter(s => s.image_url && s.image_url.trim() !== '').length} salva(s))
+                  </label>
+                  <div className="grid grid-cols-6 gap-1 bg-zinc-800/40 p-1 border border-white/5 rounded-xl">
+                    {[0, 1, 2, 3, 4, 5].map(idx => {
+                      const hasImg = !!(adSlides[idx]?.image_url);
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            const updated = [...adSlides];
+                            updated[activeSlideIdx] = {
+                              id: updated[activeSlideIdx]?.id || `slide_${activeSlideIdx}`,
+                              image_url: adFormImage,
+                              external_url: adFormLink,
+                              client_name: adFormName,
+                              client_phone: adFormPhone
+                            };
+                            setAdSlides(updated);
+                            setActiveSlideIdx(idx);
+                            setAdFormName(updated[idx]?.client_name || '');
+                            setAdFormPhone(updated[idx]?.client_phone || '');
+                            setAdFormImage(updated[idx]?.image_url || '');
+                            setAdFormLink(updated[idx]?.external_url || '');
+                          }}
+                          className={`py-1.5 rounded-lg text-[9px] font-black tracking-widest uppercase transition-all ${activeSlideIdx === idx ? 'bg-indigo-600 text-white shadow-sm' : hasImg ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-500/30' : 'bg-transparent text-zinc-600 hover:text-zinc-400'}`}
+                        >
+                          {idx + 1}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider text-center mt-1.5">
+                    Editando Slide {activeSlideIdx + 1} — {adSlides[activeSlideIdx]?.image_url ? '✅ Com imagem' : '⬜ Vazio'}
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-4">
                 <div>
                   <label className="text-[9px] font-black uppercase text-slate-400 mb-1.5 block">Nome do Anunciante</label>
