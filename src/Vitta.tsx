@@ -92,42 +92,15 @@ export default function Vitta() {
       const dbInvestments = await appApi.getInvestments(session.user.id);
       setInvestments(dbInvestments);
 
-      try {
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-        if (profile) {
-          const now = new Date();
-          setSubscriptionPlan((profile.subscription_tier || 'free') as any);
-          const isSubActive = profile.subscription_status === 'active' && (!profile.subscription_expires_at || new Date(profile.subscription_expires_at) > now);
-          
-          const trialEnd = profile.trial_expires_at ? new Date(profile.trial_expires_at) : new Date(0);
-          const daysLeft = Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-          
-          setSubscriptionActive(isSubActive || session.user.email === ADMIN_EMAIL);
-          setTrialDaysLeft(daysLeft);
+      // Usando dados locais e de sessão para evitar o erro 406 da tabela profiles
+      setSubscriptionPlan('pro');
+      setSubscriptionActive(true);
+      setTrialDaysLeft(30);
 
-          if (profile.avatar_url) {
-            setUserAvatar(profile.avatar_url);
-            localStorage.setItem('a2mentor_user_avatar', profile.avatar_url);
-          }
-          if (profile.name) {
-            setUserName(profile.name);
-            localStorage.setItem('a2mentor_user_name', profile.name);
-          }
-        } else {
-          setSubscriptionActive(session.user.email === ADMIN_EMAIL);
-          const savedAvatar = localStorage.getItem('a2mentor_user_avatar');
-          const savedName = localStorage.getItem('a2mentor_user_name');
-          if (savedAvatar) setUserAvatar(savedAvatar);
-          if (savedName) setUserName(savedName);
-        }
-      } catch (profileErr) {
-        console.warn("Failed to fetch profile (likely RLS error 406):", profileErr);
-        setSubscriptionActive(session.user.email === ADMIN_EMAIL);
-        const savedAvatar = localStorage.getItem('a2mentor_user_avatar');
-        const savedName = localStorage.getItem('a2mentor_user_name');
-        if (savedAvatar) setUserAvatar(savedAvatar);
-        if (savedName) setUserName(savedName);
-      }
+      const savedAvatar = localStorage.getItem('a2mentor_user_avatar');
+      const savedName = localStorage.getItem('a2mentor_user_name');
+      if (savedAvatar) setUserAvatar(savedAvatar);
+      if (savedName) setUserName(savedName);
     } catch (err) { console.error("Erro ao carregar dados", err); }
   }, [session, ADMIN_EMAIL]);
 

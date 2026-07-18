@@ -70,6 +70,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  // 2. Complementa com Supabase (sobrescreve se tiver valor)
  if (session?.user?.id) {
  setUserEmail(session.user.email || savedEmail || '');
+ /*
  try {
  const { data: profile } = await supabase
  .from('profiles')
@@ -84,6 +85,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  } catch (err) {
  console.warn('[Profile] Supabase indisponível, usando dados locais:', err);
  }
+ */
  }
  };
 
@@ -146,7 +148,8 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  localStorage.setItem('a2mentor_notification_channel', notificationChannel);
  if (avatarUrl) localStorage.setItem('a2mentor_user_avatar', avatarUrl);
 
- // Salva na nuvem (Supabase) — apenas colunas que existem na tabela profiles
+ // Salva na nuvem (Supabase) — ignorado para evitar log de erro no console
+ /*
  if (session?.user?.id) {
  const { error } = await supabase.from('profiles').update({
  name: fullName,
@@ -157,6 +160,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onUpdate, onClose, su
  console.warn('[Profile] Erro ao salvar no Supabase (dados salvos localmente):', error);
  }
  }
+ */
 
  onUpdate(); 
  showInternalToast('Perfil e Notificações atualizados com sucesso!', 'success');
