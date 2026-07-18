@@ -46,16 +46,33 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const CustomAlert = () => {
     if (!alertConfig?.show) return null;
     return (
-      <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-        <div className={`w-full max-w-sm ${isLight ? 'bg-white' : 'bg-white/5 backdrop-blur-3xl'} border border-white/10 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-300`}>
-          <h4 className={"font-black uppercase tracking-widest text-[10px] mb-2 " + (alertConfig.type === 'error' ? 'text-rose-500' : 'text-emerald-500')}>{alertConfig.title}</h4>
-          <p className="text-white/70 text-sm font-medium mb-8 leading-relaxed">{alertConfig.message}</p>
-          
-          <div className="flex gap-3">
+      <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+        <div className={`w-full max-w-sm ${isLight ? 'bg-white border-slate-200/60 shadow-xl' : 'bg-gradient-to-b from-zinc-900 to-black border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)]'} border rounded-3xl p-6 md:p-8 animate-in zoom-in-95 duration-300 text-center space-y-5 relative overflow-hidden`}>
+          {/* Circulo do Icone */}
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto border ${
+            alertConfig.type === 'error' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
+            alertConfig.type === 'confirm' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+            'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+          }`}>
+            {alertConfig.type === 'error' ? <AlertCircle size={26} /> :
+             alertConfig.type === 'confirm' ? <HelpCircle size={26} /> :
+             <CheckCircle2 size={26} />}
+          </div>
+
+          <div>
+            <h4 className={`text-xs font-black uppercase tracking-[0.2em] ${isLight ? 'text-slate-800' : 'text-white'}`}>{alertConfig.title}</h4>
+            <p className={`text-[10px] font-bold uppercase tracking-wider mt-2.5 leading-relaxed ${isLight ? 'text-slate-500' : 'text-zinc-400'}`}>
+              {alertConfig.message}
+            </p>
+          </div>
+
+          <div className="flex gap-3 pt-2">
             {alertConfig.type === 'confirm' && (
               <button 
                 onClick={() => setAlertConfig(null)}
-                className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+                className={`flex-1 py-3 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all border ${
+                  isLight ? 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-600' : 'bg-zinc-800/40 hover:bg-zinc-800 border-white/5 text-white'
+                }`}
               >
                 Cancelar
               </button>
@@ -65,9 +82,11 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 if (alertConfig.onConfirm) alertConfig.onConfirm();
                 setAlertConfig(null);
               }}
-              className={"flex-1 py-3 text-black text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg " +
-                (alertConfig.type === 'error' ? 'bg-rose-500 shadow-rose-500/20' : 'bg-emerald-500 shadow-emerald-500/20')
-              }
+              className={`flex-1 py-3 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg ${
+                alertConfig.type === 'error' ? 'bg-rose-600 text-white shadow-rose-600/20 hover:bg-rose-500' :
+                alertConfig.type === 'confirm' ? 'bg-amber-500 text-black shadow-amber-500/20 hover:bg-amber-400' :
+                'bg-emerald-500 text-black shadow-emerald-500/20 hover:bg-emerald-400'
+              }`}
             >
               {alertConfig.type === 'confirm' ? 'Confirmar' : 'Entendido'}
             </button>

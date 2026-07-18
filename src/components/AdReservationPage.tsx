@@ -884,18 +884,18 @@ export default function AdReservationPage() {
 
         {/* MODAL DE ALERTA VISUAL CUSTOMIZADO E PREMIUM */}
         {customAlert && (
-          <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
-            <div className="w-full max-w-sm bg-zinc-900 border border-white/10 p-6 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 text-center space-y-4">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto ${
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
+            <div className="w-full max-w-sm bg-gradient-to-b from-zinc-900 to-black border border-white/10 p-6 md:p-8 rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-200 text-center space-y-5 relative overflow-hidden">
+              <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto border ${
                 customAlert.type === 'success' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
                 customAlert.type === 'error' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
                 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
               }`}>
-                {customAlert.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
+                {customAlert.type === 'success' ? <CheckCircle2 size={26} /> : <AlertCircle size={26} />}
               </div>
               <div>
-                <h4 className="text-sm font-black uppercase tracking-[0.15em] text-white">{customAlert.title}</h4>
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-2 leading-relaxed">
+                <h4 className="text-xs font-black uppercase tracking-[0.2em] text-white">{customAlert.title}</h4>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-2.5 leading-relaxed">
                   {customAlert.message}
                 </p>
               </div>
@@ -903,7 +903,11 @@ export default function AdReservationPage() {
                 <button
                   type="button"
                   onClick={() => setCustomAlert(null)}
-                  className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                  className={`w-full py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-lg ${
+                    customAlert.type === 'success' ? 'bg-emerald-500 text-black shadow-emerald-500/20 hover:bg-emerald-400' :
+                    customAlert.type === 'error' ? 'bg-rose-600 text-white shadow-rose-600/20 hover:bg-rose-500' :
+                    'bg-indigo-600 text-white shadow-indigo-600/20 hover:bg-indigo-500'
+                  }`}
                 >
                   Confirmar
                 </button>
