@@ -17,19 +17,35 @@ const AD_SLOTS_INFO = [
   },
   { 
     type: 'ad_skin_left_home', 
-    label: 'Lateral Esquerda (Skin)', 
+    label: 'Lateral Esquerda - Home (Skin)', 
     size: '300x600 px', 
     price: 'R$ 380,00', 
     period: 'por 30 dias',
-    desc: 'Exclusivo para desktops. Acompanha o scroll do leitor à esquerda.' 
+    desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à esquerda.' 
   },
   { 
     type: 'ad_skin_right_home', 
-    label: 'Lateral Direita (Skin)', 
+    label: 'Lateral Direita - Home (Skin)', 
     size: '300x600 px', 
     price: 'R$ 380,00', 
     period: 'por 30 dias',
-    desc: 'Exclusivo para desktops. Acompanha o scroll do leitor à direita.' 
+    desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à direita.' 
+  },
+  { 
+    type: 'ad_skin_left', 
+    label: 'Lateral Esquerda - Internas (Skin)', 
+    size: '300x600 px', 
+    price: 'R$ 380,00', 
+    period: 'por 30 dias',
+    desc: 'Exclusivo para desktops nas páginas internas. Scroll à esquerda.' 
+  },
+  { 
+    type: 'ad_skin_right', 
+    label: 'Lateral Direita - Internas (Skin)', 
+    size: '300x600 px', 
+    price: 'R$ 380,00', 
+    period: 'por 30 dias',
+    desc: 'Exclusivo para desktops nas páginas internas. Scroll à direita.' 
   },
   { 
     type: 'ad_sidebar_1', 
