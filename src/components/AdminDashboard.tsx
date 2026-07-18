@@ -110,6 +110,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   // ESTADOS DE FILTRO E LIMITAÇÃO DA LISTA DE NOTÍCIAS HQ
   const [hqFilterCategory, setHqFilterCategory] = useState<string>('Todas');
   const [hqLimit, setHqLimit] = useState<number>(10);
+  const [adsLimit, setAdsLimit] = useState<number>(10);
 
   const fetchData = async () => {
     const { data: licData } = await supabase.from('licenses').select('*').order('created_at', { ascending: false });
@@ -944,11 +945,99 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
           </div>
         )}
 
-        {/* LISTAGEM DE BANNERS ATIVOS (Com ícone de Editar e Excluir) */}
+        {/* SEÇÃO DE APROVAÇÕES PENDENTES NO TOPO */}
+        {pendingRequests.length > 0 && (
+          <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 mb-4 flex items-center gap-1.5">
+              📢 Solicitações de Reserva Pendentes ({pendingRequests.length})
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {pendingRequests.map((req) => {
+                const targetSlot = req.content_type.replace('request_', '');
+                const isSlotInfo = adSlots.find(s => s.type === targetSlot);
+                return (
+                  <div key={req.id} className={`p-4 rounded-2xl border ${isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-zinc-900 border-white/5'} flex items-center justify-between gap-4`}>
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="w-14 aspect-video rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-white/5 flex-shrink-0">
+                        {req.image_url ? (
+                          <img src={req.image_url} className="w-full h-full object-cover" alt="Solicitação" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[8px] text-slate-400">Sem Img</div>
+                        )}
+                      </div>
+                      <div className="truncate">
+                        <span className="text-[7px] font-black uppercase bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded-full inline-block truncate max-w-full">
+                          {isSlotInfo?.label || targetSlot}
+                        </span>
+                        <h5 className="text-[10px] font-black uppercase text-slate-800 dark:text-slate-200 truncate mt-1">{req.meta_value?.client_name || req.title}</h5>
+                        <p className="text-[8px] text-zinc-500 font-bold mt-0.5 truncate">{req.meta_value?.client_phone || 'Sem contato'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setLoading(true);
+                          const existingAd = siteContent.find(c => c.content_type === targetSlot);
+                          if (existingAd) {
+                            await supabase.from('site_content').delete().eq('id', existingAd.id);
+                          }
+                          await supabase.from('site_content').update({
+                            content_type: targetSlot,
+                            is_active: true
+                          }).eq('id', req.id);
+                          setLoading(false);
+                          fetchData();
+                          showAlert("Aprovado!", "Anúncio ativado no portal.", "info");
+                        }}
+                        className="w-8 h-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center transition-colors shadow-sm"
+                        title="Aprovar Anúncio"
+                      >
+                        <Check size={14} className="stroke-[3]" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!window.confirm("Deseja mesmo rejeitar e excluir esta solicitação?")) return;
+                          setLoading(true);
+                          await supabase.from('site_content').delete().eq('id', req.id);
+                          setLoading(false);
+                          fetchData();
+                        }}
+                        className="w-8 h-8 rounded-full bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center border border-rose-500/20 transition-all shadow-sm"
+                        title="Recusar Anúncio"
+                      >
+                        <X size={14} className="stroke-[3]" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* LISTAGEM DE BANNERS ATIVOS (Com tamanho fixo, rolagem e limite de linhas) */}
         <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-          <div className="flex items-center gap-3 mb-6 border-b pb-4 border-slate-200 dark:border-white/5">
-            <ImageIcon size={20} className="text-amber-500" />
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Listagem de Anúncios Ativos</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-4 border-slate-200 dark:border-white/5">
+            <div className="flex items-center gap-3">
+              <ImageIcon size={20} className="text-amber-500" />
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Listagem de Anúncios Ativos</h3>
+            </div>
+            
+            {/* SELETOR DE LIMITE DE LINHAS */}
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] font-black uppercase text-slate-500 tracking-wider">Linhas:</span>
+              <select
+                value={adsLimit}
+                onChange={(e) => setAdsLimit(Number(e.target.value))}
+                className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-2 py-1 rounded-lg text-[9px] font-black uppercase text-slate-800 dark:text-white outline-none focus:border-indigo-500"
+              >
+                {[5, 10, 20, 50].map((opt) => (
+                  <option key={opt} value={opt} className="bg-zinc-900 text-white">{opt}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {activeAds.length === 0 ? (
@@ -956,24 +1045,25 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               Nenhum anúncio ativo cadastrado no momento. Use o Mapa para cadastrar.
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            /* CONTAINER COM TAMANHO MAXIMO FIXO E BARRA DE ROLAGEM */
+            <div className="max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
               <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                <thead>
+                <thead className="sticky top-0 bg-slate-50 dark:bg-zinc-950 z-10">
                   <tr className="border-b border-slate-200 dark:border-white/5 pb-2 text-[8px]">
-                    <th className="pb-3 text-zinc-500">Preview</th>
-                    <th className="pb-3 text-zinc-500">Slot / Posição</th>
-                    <th className="pb-3 text-zinc-500">Anunciante</th>
-                    <th className="pb-3 text-zinc-500">Contato</th>
-                    <th className="pb-3 text-zinc-500">Link Destino</th>
-                    <th className="pb-3 text-zinc-500 text-right">Ações</th>
+                    <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Preview</th>
+                    <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Slot / Posição</th>
+                    <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Anunciante</th>
+                    <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Contato</th>
+                    <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Link Destino</th>
+                    <th className="pb-3 text-zinc-500 text-right bg-slate-50 dark:bg-zinc-900 px-2">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {activeAds.map(ad => {
+                  {activeAds.slice(0, adsLimit).map(ad => {
                     const isSlotInfo = adSlots.find(s => s.type === ad.content_type);
                     return (
                       <tr key={ad.id} className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
-                        <td className="py-3">
+                        <td className="py-3 px-2">
                           <div className="w-12 aspect-video bg-zinc-800 rounded-lg overflow-hidden border border-white/5">
                             {(ad.meta_value?.slides?.[0]?.image_url || ad.image_url) ? (
                               <img src={ad.meta_value?.slides?.[0]?.image_url || ad.image_url} className="w-full h-full object-cover" alt="Preview" />
@@ -982,7 +1072,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                             )}
                           </div>
                         </td>
-                        <td className="py-3 text-indigo-400 text-[9px]">
+                        <td className="py-3 px-2 text-indigo-400 text-[9px]">
                           <div>{isSlotInfo?.label || ad.content_type}</div>
                           {ad.content_type.includes('skin') && (
                             <div className="text-[7px] text-zinc-500 font-bold uppercase mt-0.5">
@@ -990,12 +1080,12 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                             </div>
                           )}
                         </td>
-                        <td className="py-3 text-slate-800 dark:text-slate-200">{ad.meta_value?.client_name || ad.title}</td>
-                        <td className="py-3 text-zinc-400">{ad.meta_value?.client_phone || 'Sem contato'}</td>
-                        <td className="py-3 text-[9px] text-slate-400 lowercase font-medium normal-case max-w-xs truncate">
+                        <td className="py-3 px-2 text-slate-800 dark:text-slate-200">{ad.meta_value?.client_name || ad.title}</td>
+                        <td className="py-3 px-2 text-zinc-400">{ad.meta_value?.client_phone || 'Sem contato'}</td>
+                        <td className="py-3 px-2 text-[9px] text-slate-400 lowercase font-medium normal-case max-w-xs truncate">
                           <a href={ad.meta_value?.external_url} target="_blank" rel="noreferrer" className="underline hover:text-indigo-400">{ad.meta_value?.external_url || '#'}</a>
                         </td>
-                        <td className="py-3 text-right space-x-2">
+                        <td className="py-3 px-2 text-right space-x-2">
                           <button 
                             type="button"
                             onClick={() => handleOpenAdModal(ad.content_type)}
@@ -1027,80 +1117,6 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
             </div>
           )}
         </div>
-
-        {/* SOLICITAÇÕES DE RESERVA PENDENTES */}
-        {pendingRequests.length > 0 && (
-          <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 md:p-8 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-            <h4 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500 mb-6 flex items-center gap-2">
-              📢 Solicitações de Reserva Pendentes
-            </h4>
-            <div className="flex flex-col gap-4">
-              {pendingRequests.map((req) => {
-                const targetSlot = req.content_type.replace('request_', '');
-                return (
-                  <div key={req.id} className={`p-5 rounded-2xl border ${isLight ? 'bg-white border-slate-200' : 'bg-white/5 border-white/5'} flex flex-col md:flex-row md:items-center justify-between gap-6`}>
-                    <div className="flex items-start gap-4">
-                      <div className="w-24 aspect-video rounded-lg overflow-hidden bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex-shrink-0">
-                        {req.image_url ? (
-                          <img src={req.image_url} className="w-full h-full object-contain" alt="Solicitação" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-300">Sem Img</div>
-                        )}
-                      </div>
-                      <div>
-                        <span className="text-[8px] font-black uppercase bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full mb-1 inline-block">
-                          Vaga: {targetSlot}
-                        </span>
-                        <h5 className="text-xs font-black uppercase text-slate-800 dark:text-slate-200">{req.meta_value?.client_name || req.title}</h5>
-                        <p className="text-[9px] font-bold text-slate-400 mt-1">
-                          📞 {req.meta_value?.client_phone || 'Sem fone'} | ✉️ {req.meta_value?.client_email || 'Sem e-mail'}
-                        </p>
-                        <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest mt-1">
-                          Preço Ofertado: {req.meta_value?.price_quoted} | {req.meta_value?.duration_days} Dias
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          setLoading(true);
-                          const existingAd = siteContent.find(c => c.content_type === targetSlot);
-                          if (existingAd) {
-                            await supabase.from('site_content').delete().eq('id', existingAd.id);
-                          }
-                          await supabase.from('site_content').update({
-                            content_type: targetSlot,
-                            is_active: true
-                          }).eq('id', req.id);
-                          setLoading(false);
-                          fetchData();
-                          showAlert("Aprovado!", "Anúncio ativado no portal.", "info");
-                        }}
-                        className="px-4 py-2 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400"
-                      >
-                        Aprovar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          if (!window.confirm("Deseja rejeitar?")) return;
-                          setLoading(true);
-                          await supabase.from('site_content').delete().eq('id', req.id);
-                          setLoading(false);
-                          fetchData();
-                        }}
-                        className="px-4 py-2 bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-rose-500 hover:text-white"
-                      >
-                        Rejeitar
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
       </div>
     );
