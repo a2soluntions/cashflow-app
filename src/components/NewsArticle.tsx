@@ -53,7 +53,6 @@ export default function NewsArticle() {
   };
 
 
-
   const SideAdCarousel = ({ type, position }: { type: string, position: 'left' | 'right' }) => {
     // Tenta encontrar anúncios do tipo específico (carousel) no array correto
     let slotAds = carouselAds.filter(item => item.content_type === type && item.is_active);
@@ -61,26 +60,58 @@ export default function NewsArticle() {
     // Se não houver nenhum do tipo específico, tenta o tipo legado para manter a compatibilidade
     if (slotAds.length === 0) {
       const legacyType = type.includes('left') ? 'ad_skin_left' : 'ad_skin_right';
-      slotAds = carouselAds.filter(item => item.content_type === legacyType && item.is_active);
+      // Ajusta para buscar também a versão home da skin
+      const homeType = type.includes('left') ? 'ad_skin_left_home' : 'ad_skin_right_home';
+      slotAds = carouselAds.filter(item => (item.content_type === legacyType || item.content_type === homeType) && item.is_active);
     }
     
+    // Se encontrarmos um registro único de carrossel de slides no meta_value
+    const mainAd = slotAds[0];
+    const adSlides = mainAd?.meta_value?.slides || [];
+
     const [currentIndex, setCurrentIndex] = useState(0);
 
+    const totalSlides = adSlides.length > 0 ? adSlides.length : slotAds.length;
+
     useEffect(() => {
-      if (slotAds.length <= 1) return;
+      if (totalSlides <= 1) return;
       const interval = setInterval(() => {
-        setCurrentIndex(prev => (prev + 1) % slotAds.length);
+        setCurrentIndex(prev => (prev + 1) % totalSlides);
       }, 5000);
       return () => clearInterval(interval);
-    }, [slotAds.length]);
+    }, [totalSlides]);
 
-    if (slotAds.length === 0) return null;
+    if (totalSlides === 0) return null;
+
+    // Se usa a estrutura nova de slides array
+    if (adSlides.length > 0) {
+      const currentSlide = adSlides[currentIndex];
+      return (
+        <div 
+          onClick={() => openLink(currentSlide.external_url)}
+          className="w-[160px] xl:w-[400px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm"
+        >
+          <span className={`absolute top-2 ${position === 'left' ? 'right-2' : 'left-2'} text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm`}>
+            Publicidade {adSlides.length > 1 && `(${currentIndex + 1}/${adSlides.length})`}
+          </span>
+          <div className="w-full h-full relative">
+            <img 
+              src={currentSlide.image_url} 
+              alt={currentSlide.client_name || "Ad Slide"} 
+              className="absolute inset-0 w-full h-full object-contain transition-all duration-1000"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        </div>
+      );
+    }
+
     const currentAd = slotAds[currentIndex];
 
     return (
       <div 
         onClick={() => openLink(currentAd.meta_value?.external_url)}
-        className="w-[160px] xl:w-[200px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm"
+        className="w-[160px] xl:w-[400px] h-[600px] bg-zinc-100 flex flex-col items-center justify-center border border-zinc-200 relative pointer-events-auto cursor-pointer group overflow-hidden shadow-sm"
       >
         <span className={`absolute top-2 ${position === 'left' ? 'right-2' : 'left-2'} text-[8px] font-black uppercase tracking-widest text-zinc-400 z-10 bg-white/80 px-2 py-0.5 backdrop-blur-sm`}>
           Publicidade {slotAds.length > 1 && `(${currentIndex + 1}/${slotAds.length})`}

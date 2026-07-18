@@ -24,6 +24,9 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [adFormPhone, setAdFormPhone] = useState('');
   const [adFormImage, setAdFormImage] = useState('');
   const [adFormLink, setAdFormLink] = useState('');
+  // Estados para gerenciar slides de Skin Carrossel
+  const [adSlides, setAdSlides] = useState<{ id: string; image_url: string; external_url: string; client_name: string; client_phone: string }[]>([]);
+  const [activeSlideIdx, setActiveSlideIdx] = useState<number>(0);
   // FORMULÁRIO LICENÇAS
   const [clientName, setClientName] = useState('');
   const [saleValue, setSaleValue] = useState('');
@@ -813,7 +816,16 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   <input 
                     type="text"
                     value={adFormPhone}
-                    onChange={(e) => setAdFormPhone(e.target.value)}
+                    onChange={(e) => {
+                      setAdFormPhone(e.target.value);
+                      if (selectedMapSlot?.includes('skin')) {
+                        setAdSlides(prev => {
+                          const updated = [...prev];
+                          if (updated[activeSlideIdx]) updated[activeSlideIdx].client_phone = e.target.value;
+                          return updated;
+                        });
+                      }
+                    }}
                     placeholder="Ex: (34) 99999-9999"
                     className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-xl font-bold text-xs outline-none focus:border-indigo-500 transition-all text-slate-800 dark:text-white"
                   />
@@ -825,7 +837,16 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     <input 
                       type="text"
                       value={adFormImage}
-                      onChange={(e) => setAdFormImage(e.target.value)}
+                      onChange={(e) => {
+                        setAdFormImage(e.target.value);
+                        if (selectedMapSlot?.includes('skin')) {
+                          setAdSlides(prev => {
+                            const updated = [...prev];
+                            if (updated[activeSlideIdx]) updated[activeSlideIdx].image_url = e.target.value;
+                            return updated;
+                          });
+                        }
+                      }}
                       placeholder="URL da imagem ou faça upload..."
                       className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-xl font-bold text-xs outline-none focus:border-indigo-500 transition-all text-slate-800 dark:text-white"
                     />
@@ -855,7 +876,16 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   <input 
                     type="text"
                     value={adFormLink}
-                    onChange={(e) => setAdFormLink(e.target.value)}
+                    onChange={(e) => {
+                      setAdFormLink(e.target.value);
+                      if (selectedMapSlot?.includes('skin')) {
+                        setAdSlides(prev => {
+                          const updated = [...prev];
+                          if (updated[activeSlideIdx]) updated[activeSlideIdx].external_url = e.target.value;
+                          return updated;
+                        });
+                      }
+                    }}
                     placeholder="Ex: https://vittacash.com"
                     className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-xl font-bold text-xs outline-none focus:border-indigo-500 transition-all text-slate-800 dark:text-white"
                   />

@@ -527,7 +527,7 @@ export default function AdReservationPage() {
                           Proporção do espaço: {
                             selectedSlot === 'ad_top' ? '970x250 (Horizontal Longo)' :
                             selectedSlot === 'ad_vittacash_horizontal' ? '728x90 (Horizontal)' :
-                            selectedSlot === 'ad_skin_left_home' || selectedSlot === 'ad_skin_right_home' ? '200x600 (Skin Vertical)' :
+                            selectedSlot === 'ad_skin_left_home' || selectedSlot === 'ad_skin_right_home' ? '400x600 (Skin Vertical)' :
                             selectedSlot === 'ad_sidebar_1' ? '300x300 (Quadrado)' : '300x600 (Vertical Largo)'
                           }
                         </span>
