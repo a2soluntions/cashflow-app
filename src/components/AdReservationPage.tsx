@@ -18,7 +18,7 @@ const AD_SLOTS_INFO = [
   { 
     type: 'ad_skin_left_home', 
     label: 'Lateral Esquerda (Skin)', 
-    size: '200x600 px', 
+    size: '400x600 px', 
     price: 'R$ 380,00', 
     period: 'por 30 dias',
     desc: 'Exclusivo para desktops. Acompanha o scroll do leitor à esquerda.' 
@@ -26,7 +26,7 @@ const AD_SLOTS_INFO = [
   { 
     type: 'ad_skin_right_home', 
     label: 'Lateral Direita (Skin)', 
-    size: '200x600 px', 
+    size: '400x600 px', 
     price: 'R$ 380,00', 
     period: 'por 30 dias',
     desc: 'Exclusivo para desktops. Acompanha o scroll do leitor à direita.' 
@@ -278,15 +278,16 @@ export default function AdReservationPage() {
                 Banner do Topo (970x250) - R$ 450
               </div>
 
-              <div className="grid grid-cols-12 gap-3 md:gap-4">
+              <div className="grid grid-cols-14 gap-3 md:gap-4">
                 
                 {/* Skin Left simulation */}
                 <div 
                   onClick={() => setSelectedSlot('ad_skin_left_home')}
-                  className={`col-span-2 py-24 rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center justify-center cursor-pointer transition-all ${selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
-                  style={{ writingMode: 'vertical-rl' }}
+                  className={`col-span-3 py-24 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 ${selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                 >
-                  Skin Esquerda (200x600) - R$ 380
+                  <span>Skin Esquerda</span>
+                  <span>(400x600)</span>
+                  <span>R$ 380</span>
                 </div>
 
                 {/* News feed column simulation */}
@@ -331,10 +332,11 @@ export default function AdReservationPage() {
                 {/* Skin Right simulation */}
                 <div 
                   onClick={() => setSelectedSlot('ad_skin_right_home')}
-                  className={`col-span-2 py-24 rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center justify-center cursor-pointer transition-all text-center ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
-                  style={{ writingMode: 'vertical-rl' }}
+                  className={`col-span-3 py-24 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
                 >
-                  Skin Direita (200x600) - R$ 380
+                  <span>Skin Direita</span>
+                  <span>(400x600)</span>
+                  <span>R$ 380</span>
                 </div>
 
               </div>
