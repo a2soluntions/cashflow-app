@@ -338,6 +338,13 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
       if (selectedMapSlot) {
         setAdFormImage(data.publicUrl);
+        if (selectedMapSlot.includes('skin')) {
+          setAdSlides(prev => {
+            const updated = [...prev];
+            if (updated[activeSlideIdx]) updated[activeSlideIdx].image_url = data.publicUrl;
+            return updated;
+          });
+        }
         showAlert("Imagem Carregada", "A imagem do banner foi enviada e preenchida com sucesso!", "info");
       } else if (pendingAdSlot) {
         setLoading(true);
@@ -633,8 +640,10 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     const adSlots = [
       { id: 'ad_top', label: 'Banner Topo (970x250)', type: 'ad_top', price: 'R$ 450' },
       { id: 'ad_vittacash_horizontal', label: 'Banner de Centro (728x90)', type: 'ad_vittacash_horizontal', price: 'R$ 240' },
-      { id: 'ad_skin_left_home', label: 'Skin Esquerda (300x600)', type: 'ad_skin_left_home', price: 'R$ 380' },
-      { id: 'ad_skin_right_home', label: 'Skin Direita (300x600)', type: 'ad_skin_right_home', price: 'R$ 380' },
+      { id: 'ad_skin_left_home', label: 'Skin Esquerda - Home (300x600)', type: 'ad_skin_left_home', price: 'R$ 380' },
+      { id: 'ad_skin_right_home', label: 'Skin Direita - Home (300x600)', type: 'ad_skin_right_home', price: 'R$ 380' },
+      { id: 'ad_skin_left', label: 'Skin Esquerda - Internas (300x600)', type: 'ad_skin_left', price: 'R$ 380' },
+      { id: 'ad_skin_right', label: 'Skin Direita - Internas (300x600)', type: 'ad_skin_right', price: 'R$ 380' },
       { id: 'ad_sidebar_1', label: 'Sidebar 1 (300x300)', type: 'ad_sidebar_1', price: 'R$ 280' },
       { id: 'ad_sidebar_2', label: 'Sidebar 2 (300x600)', type: 'ad_sidebar_2', price: 'R$ 320' },
       { id: 'ad_internal_inline_1', label: 'Anúncio Interno 01', type: 'ad_internal_inline_1', price: 'R$ 150' },
@@ -647,14 +656,53 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
     const handleOpenAdModal = (slotType: string) => {
       let ad = (siteContent || []).find(c => c && c.content_type === slotType);
-      if (!ad && slotType === 'ad_skin_left_home') ad = (siteContent || []).find(c => c && c.content_type === 'ad_skin_left');
-      if (!ad && slotType === 'ad_skin_right_home') ad = (siteContent || []).find(c => c && c.content_type === 'ad_skin_right');
 
       setSelectedMapSlot(slotType);
       setAdFormName(ad?.meta_value?.client_name || ad?.title || '');
       setAdFormPhone(ad?.meta_value?.client_phone || '');
       setAdFormImage(ad?.image_url || '');
       setAdFormLink(ad?.meta_value?.external_url || ad?.meta_value?.link || ad?.description || '');
+
+      if (slotType.includes('skin')) {
+        const savedSlides = ad?.meta_value?.slides || [];
+        const initializedSlides = [];
+        for (let i = 0; i < 6; i++) {
+          if (savedSlides[i]) {
+            initializedSlides.push({
+              id: savedSlides[i].id || `slide_${i}`,
+              image_url: savedSlides[i].image_url || '',
+              external_url: savedSlides[i].external_url || '',
+              client_name: savedSlides[i].client_name || '',
+              client_phone: savedSlides[i].client_phone || ''
+            });
+          } else if (i === 0 && ad?.image_url) {
+            initializedSlides.push({
+              id: `slide_${i}`,
+              image_url: ad.image_url,
+              external_url: ad.meta_value?.external_url || '',
+              client_name: ad.meta_value?.client_name || '',
+              client_phone: ad.meta_value?.client_phone || ''
+            });
+          } else {
+            initializedSlides.push({
+              id: `slide_${i}`,
+              image_url: '',
+              external_url: '',
+              client_name: '',
+              client_phone: ''
+            });
+          }
+        }
+        setAdSlides(initializedSlides);
+        setActiveSlideIdx(0);
+        setAdFormName(initializedSlides[0].client_name);
+        setAdFormPhone(initializedSlides[0].client_phone);
+        setAdFormImage(initializedSlides[0].image_url);
+        setAdFormLink(initializedSlides[0].external_url);
+      } else {
+        setAdSlides([]);
+        setActiveSlideIdx(0);
+      }
     };
 
     const handleSaveAdModal = async () => {
@@ -662,33 +710,55 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       setLoading(true);
 
       let existingAd = (siteContent || []).find(c => c && c.content_type === selectedMapSlot);
-      if (!existingAd && selectedMapSlot === 'ad_skin_left_home') existingAd = (siteContent || []).find(c => c && c.content_type === 'ad_skin_left');
-      if (!existingAd && selectedMapSlot === 'ad_skin_right_home') existingAd = (siteContent || []).find(c => c && c.content_type === 'ad_skin_right');
+
+      let finalMetaValue: any = {
+        ...(existingAd?.meta_value || {}),
+        client_name: adFormName,
+        client_phone: adFormPhone,
+        external_url: adFormLink || '#',
+        price_quoted: adSlots.find(s => s.type === selectedMapSlot)?.price || 'R$ 240,00'
+      };
+
+      let finalImageUrl = adFormImage;
+
+      if (selectedMapSlot.includes('skin')) {
+        const updatedSlides = [...adSlides];
+        updatedSlides[activeSlideIdx] = {
+          id: updatedSlides[activeSlideIdx]?.id || `slide_${activeSlideIdx}`,
+          image_url: adFormImage,
+          external_url: adFormLink || '#',
+          client_name: adFormName,
+          client_phone: adFormPhone
+        };
+        
+        // Filtra slides validos
+        const validSlides = updatedSlides.filter(s => s.image_url && s.image_url.trim() !== '');
+        finalMetaValue.slides = validSlides;
+        
+        if (validSlides.length > 0) {
+          finalImageUrl = validSlides[0].image_url;
+          finalMetaValue.client_name = validSlides[0].client_name;
+          finalMetaValue.client_phone = validSlides[0].client_phone;
+          finalMetaValue.external_url = validSlides[0].external_url;
+        } else {
+          finalImageUrl = '';
+        }
+      }
 
       const adData = {
         id: existingAd?.id,
         content_type: selectedMapSlot,
         title: adSlots.find(s => s.type === selectedMapSlot)?.label || selectedMapSlot,
-        image_url: adFormImage,
+        image_url: finalImageUrl,
         is_active: true,
-        meta_value: {
-          ...existingAd?.meta_value,
-          client_name: adFormName,
-          client_phone: adFormPhone,
-          external_url: adFormLink || '#',
-          price_quoted: adSlots.find(s => s.type === selectedMapSlot)?.price || 'R$ 240,00'
-        }
+        meta_value: finalMetaValue
       };
 
       const { error } = await supabase.from('site_content').upsert(adData);
       setLoading(false);
       setSelectedMapSlot(null);
       if (error) {
-        let msg = error.message;
-        if (msg.includes("row-level security policy")) {
-          msg = "Ação não permitida pelas políticas de segurança do banco de dados (RLS). Verifique se você está autenticado corretamente.";
-        }
-        showAlert("Erro ao Salvar", msg, "error");
+        showAlert("Erro ao Salvar", error.message, "error");
       } else {
         fetchData();
         showAlert("Anúncio Atualizado", "As informações do banner foram salvas com sucesso!", "info");

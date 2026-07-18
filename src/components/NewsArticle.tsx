@@ -270,11 +270,11 @@ export default function NewsArticle() {
       
       {/* SKIN ADS CAROUSEL (LATERAIS EXTREMAS) */}
       <div className="hidden 2xl:flex fixed top-48 left-0 w-[calc(50vw-45rem)] h-[600px] z-[10] justify-end pr-4 pointer-events-none">
-        <SideAdCarousel type="ad_skin_left_carousel" position="left" />
+        <SideAdCarousel type="ad_skin_left" position="left" />
       </div>
 
       <div className="hidden 2xl:flex fixed top-48 right-0 w-[calc(50vw-45rem)] h-[600px] z-[10] justify-start pl-4 pointer-events-none">
-        <SideAdCarousel type="ad_skin_right_carousel" position="right" />
+        <SideAdCarousel type="ad_skin_right" position="right" />
       </div>
 
       {/* 🏛️ TOP NAVIGATION COMPACTA */}
