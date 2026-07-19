@@ -127,9 +127,12 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [resumeOffset, setResumeOffset] = useState<number>(0);
   const [pendingAdSlot, setPendingAdSlot] = useState<string | null>(null);
 
-  // ESTADOS DE FILTRO E LIMITAÇÃO DA LISTA DE NOTÍCIAS HQ
+  // ESTADOS DE FILTRO, PAGINAÇÃO E SELEÇÃO DA LISTA DE NOTÍCIAS HQ
   const [hqFilterCategory, setHqFilterCategory] = useState<string>('Todas');
   const [hqLimit, setHqLimit] = useState<number>(10);
+  const [hqPage, setHqPage] = useState<number>(0);
+  const [selectedNewsIds, setSelectedNewsIds] = useState<Set<string>>(new Set());
+  const [isDeletingSelected, setIsDeletingSelected] = useState<boolean>(false);
   const [adsLimit, setAdsLimit] = useState<number>(10);
 
   const fetchData = async () => {
@@ -653,6 +656,27 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       async () => {
         await supabase.from('site_content').delete().eq('id', id);
         fetchData();
+      }
+    );
+  };
+
+  const handleDeleteSelectedNews = async () => {
+    if (selectedNewsIds.size === 0) return;
+    showAlert(
+      'Excluir Selecionadas',
+      `Tem certeza que deseja excluir ${selectedNewsIds.size} notícia(s) selecionada(s)? Esta ação não pode ser desfeita.`,
+      'confirm',
+      async () => {
+        setIsDeletingSelected(true);
+        try {
+          const ids = Array.from(selectedNewsIds);
+          await supabase.from('site_content').delete().in('id', ids);
+          setSelectedNewsIds(new Set());
+          setHqPage(0);
+          fetchData();
+        } finally {
+          setIsDeletingSelected(false);
+        }
       }
     );
   };
@@ -1625,7 +1649,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
           {activeTab === 'a2noticias' && (
             <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-6 flex-1 min-h-0 pb-4 pr-2 md:pr-6">
               
-              <div className={isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl' + ' p-6 md:p-8 rounded-3xl border ' + (isLight ? 'border-slate-200' : 'border-white/5') + ' flex flex-col gap-6'}>
+              <div className={`${isLight ? 'bg-slate-50 border-slate-200' : 'bg-white/5 backdrop-blur-3xl border-white/5'} p-6 md:p-8 rounded-3xl border flex flex-col gap-6`}>
                 
                 {/* CABEÇALHO COM AÇÃO DE LIMPAR BANCO */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-white/5">
@@ -1647,19 +1671,15 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
                 {/* FILTROS E QUANTIDADE DE VISUALIZAÇÕES */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2">
-                  
                   {/* FILTRO DE CATEGORIA */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">
-                      Filtrar por Categoria
-                    </label>
+                    <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">Filtrar por Categoria</label>
                     <select
                       value={hqFilterCategory}
-                      onChange={(e) => setHqFilterCategory(e.target.value)}
+                      onChange={(e) => { setHqFilterCategory(e.target.value); setHqPage(0); setSelectedNewsIds(new Set()); }}
                       className={isLight 
                         ? "w-full bg-white border border-slate-200 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-700 outline-none transition-all focus:border-indigo-500" 
-                        : "w-full bg-white/5 border border-white/10 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-300 outline-none transition-all focus:border-indigo-500"
-                      }
+                        : "w-full bg-white/5 border border-white/10 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-300 outline-none transition-all focus:border-indigo-500"}
                     >
                       <option value="Todas">Todas as Categorias</option>
                       <option value="Mercado">Mercado</option>
@@ -1672,115 +1692,186 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     </select>
                   </div>
 
-                  {/* FILTRO DE QUANTIDADE DE VISUALIZAÇÕES */}
+                  {/* LINHAS POR PÁGINA */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">
-                      Visualizações na Tela
-                    </label>
+                    <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">Linhas por Página</label>
                     <select
                       value={hqLimit}
-                      onChange={(e) => setHqLimit(Number(e.target.value))}
+                      onChange={(e) => { setHqLimit(Number(e.target.value)); setHqPage(0); setSelectedNewsIds(new Set()); }}
                       className={isLight 
                         ? "w-full bg-white border border-slate-200 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-700 outline-none transition-all focus:border-indigo-500" 
-                        : "w-full bg-white/5 border border-white/10 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-300 outline-none transition-all focus:border-indigo-500"
-                      }
+                        : "w-full bg-white/5 border border-white/10 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-300 outline-none transition-all focus:border-indigo-500"}
                     >
-                      <option value={10}>Mostrar 10 Notícias</option>
-                      <option value={25}>Mostrar 25 Notícias</option>
-                      <option value={50}>Mostrar 50 Notícias</option>
-                      <option value={100}>Mostrar 100 Notícias</option>
+                      <option value={10}>10 por página</option>
+                      <option value={25}>25 por página</option>
+                      <option value={50}>50 por página</option>
+                      <option value={100}>100 por página</option>
                     </select>
                   </div>
-
                 </div>
 
-                {/* CONTAINER COM TAMANHO FIXO E SCROLL VERTICAL */}
-                <div className="border border-slate-200 dark:border-white/5 rounded-2xl overflow-hidden">
-                  <div className="max-h-[450px] overflow-y-auto custom-scrollbar">
-                    {(() => {
-                      // 1. Filtrar tipo de conteudo
-                      let list = (siteContent || []).filter(c => c && c.content_type === 'news');
-                      
-                      // 2. Filtrar pela categoria selecionada
-                      if (hqFilterCategory !== 'Todas') {
-                        list = list.filter(news => {
-                          const category = news.meta_value?.category || news.description || 'Geral';
-                          return category.toLowerCase() === hqFilterCategory.toLowerCase();
-                        });
-                      }
+                {/* TABELA COM SELEÇÃO MÚLTIPLA, PAGINAÇÃO E EXCLUSÃO EM LOTE */}
+                {(() => {
+                  // 1. Filtrar tipo de conteudo
+                  let fullList = (siteContent || []).filter(c => c && c.content_type === 'news');
+                  // 2. Filtrar pela categoria selecionada
+                  if (hqFilterCategory !== 'Todas') {
+                    fullList = fullList.filter(news => {
+                      const category = news.meta_value?.category || news.description || 'Geral';
+                      return category.toLowerCase() === hqFilterCategory.toLowerCase();
+                    });
+                  }
+                  const totalCount = fullList.length;
+                  const totalPages = Math.max(1, Math.ceil(totalCount / hqLimit));
+                  const safePage = Math.min(hqPage, totalPages - 1);
+                  const pageList = fullList.slice(safePage * hqLimit, (safePage + 1) * hqLimit);
+                  const pageIds = pageList.map(n => n.id);
+                  const allPageSelected = pageIds.length > 0 && pageIds.every(id => selectedNewsIds.has(id));
 
-                      // 3. Limitar a quantidade conforme hqLimit
-                      const totalFilteredCount = list.length;
-                      list = list.slice(0, hqLimit);
+                  const toggleSelectAll = () => {
+                    setSelectedNewsIds(prev => {
+                      const next = new Set(prev);
+                      if (allPageSelected) { pageIds.forEach(id => next.delete(id)); }
+                      else { pageIds.forEach(id => next.add(id)); }
+                      return next;
+                    });
+                  };
 
-                      if (totalFilteredCount === 0) {
-                        return (
-                          <div className="text-center py-12 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                            Nenhuma notícia correspondente encontrada.
-                          </div>
-                        );
-                      }
+                  const toggleSelectOne = (id: string) => {
+                    setSelectedNewsIds(prev => {
+                      const next = new Set(prev);
+                      if (next.has(id)) next.delete(id); else next.add(id);
+                      return next;
+                    });
+                  };
 
-                      return (
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            <thead className="sticky top-0 bg-white dark:bg-[#0f0f12] z-10 border-b border-slate-200 dark:border-white/5">
-                              <tr className="text-[8px]">
-                                <th className="p-3 text-zinc-500">Imagem</th>
-                                <th className="p-3 text-zinc-500">Título</th>
-                                <th className="p-3 text-zinc-500">Categoria</th>
-                                <th className="p-3 text-zinc-500">Publicado Em</th>
-                                <th className="p-3 text-zinc-500 text-right">Ações</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                              {list.map(news => {
-                                const category = news.meta_value?.category || news.description || 'Geral';
-                                const pubDate = news.created_at ? new Date(news.created_at).toLocaleDateString('pt-BR') : 'N/A';
-                                return (
-                                  <tr key={news.id} className="hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
-                                    <td className="p-3">
-                                      <div className="w-12 aspect-video bg-zinc-800 rounded-lg overflow-hidden border border-white/5">
-                                        {news.image_url ? (
-                                          <img src={news.image_url} className="w-full h-full object-cover" alt="Capa" />
-                                        ) : (
-                                          <div className="w-full h-full flex items-center justify-center text-[7px] text-zinc-600">Sem Capa</div>
-                                        )}
-                                      </div>
-                                    </td>
-                                    <td className="p-3 text-slate-800 dark:text-slate-200 font-bold max-w-sm truncate normal-case">{news.title}</td>
-                                    <td className="p-3">
-                                      <span className="px-2.5 py-0.5 bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded-full">
-                                        {category}
-                                      </span>
-                                    </td>
-                                    <td className="p-3 text-zinc-400">{pubDate}</td>
-                                    <td className="p-3 text-right">
-                                      <button 
-                                        type="button"
-                                        onClick={() => handleDeleteContent(news.id)}
-                                        className="px-3 py-1 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-500 text-[8px] font-black uppercase tracking-widest rounded transition-all"
-                                        title="Excluir Notícia"
-                                      >
-                                        Excluir
-                                      </button>
-                                    </td>
+                  return (
+                    <div className="flex flex-col gap-3">
+                      {/* BARRA DE EXCLUSÃO EM LOTE */}
+                      {selectedNewsIds.size > 0 && (
+                        <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-rose-400">
+                            {selectedNewsIds.size} notícia(s) selecionada(s)
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleDeleteSelectedNews}
+                            disabled={isDeletingSelected}
+                            className="flex items-center gap-1.5 px-4 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-all disabled:opacity-50"
+                          >
+                            {isDeletingSelected ? 'Excluindo...' : `Excluir ${selectedNewsIds.size} selecionada(s)`}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* CONTAINER DA TABELA */}
+                      <div className="border border-slate-200 dark:border-white/5 rounded-2xl overflow-hidden">
+                        <div className="max-h-[450px] overflow-y-auto custom-scrollbar">
+                          {totalCount === 0 ? (
+                            <div className="text-center py-12 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                              Nenhuma notícia correspondente encontrada.
+                            </div>
+                          ) : (
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                <thead className="sticky top-0 bg-white dark:bg-[#0f0f12] z-10 border-b border-slate-200 dark:border-white/5">
+                                  <tr className="text-[8px]">
+                                    <th className="p-3 w-8">
+                                      <input
+                                        type="checkbox"
+                                        checked={allPageSelected}
+                                        onChange={toggleSelectAll}
+                                        className="w-3.5 h-3.5 accent-indigo-500 cursor-pointer"
+                                        title="Selecionar todos desta página"
+                                      />
+                                    </th>
+                                    <th className="p-3 text-zinc-500">Imagem</th>
+                                    <th className="p-3 text-zinc-500">Título</th>
+                                    <th className="p-3 text-zinc-500">Categoria</th>
+                                    <th className="p-3 text-zinc-500">Publicado Em</th>
+                                    <th className="p-3 text-zinc-500 text-right">Ações</th>
                                   </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                          
-                          {totalFilteredCount > hqLimit && (
-                            <div className="p-3 border-t border-slate-200 dark:border-white/5 text-center text-[8px] font-black tracking-widest text-slate-400 uppercase">
-                              Mostrando {hqLimit} de {totalFilteredCount} notícias filtradas
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                  {pageList.map(news => {
+                                    const category = news.meta_value?.category || news.description || 'Geral';
+                                    const pubDate = news.created_at ? new Date(news.created_at).toLocaleDateString('pt-BR') : 'N/A';
+                                    const isSelected = selectedNewsIds.has(news.id);
+                                    return (
+                                      <tr key={news.id} className={`transition-colors ${isSelected ? 'bg-indigo-500/5 dark:bg-indigo-500/10' : 'hover:bg-slate-100/50 dark:hover:bg-white/5'}`}>
+                                        <td className="p-3">
+                                          <input
+                                            type="checkbox"
+                                            checked={isSelected}
+                                            onChange={() => toggleSelectOne(news.id)}
+                                            className="w-3.5 h-3.5 accent-indigo-500 cursor-pointer"
+                                          />
+                                        </td>
+                                        <td className="p-3">
+                                          <div className="w-12 aspect-video bg-zinc-800 rounded-lg overflow-hidden border border-white/5">
+                                            {news.image_url ? (
+                                              <img src={news.image_url} className="w-full h-full object-cover" alt="Capa" />
+                                            ) : (
+                                              <div className="w-full h-full flex items-center justify-center text-[7px] text-zinc-600">Sem Capa</div>
+                                            )}
+                                          </div>
+                                        </td>
+                                        <td className="p-3 text-slate-800 dark:text-slate-200 font-bold max-w-sm truncate normal-case">{news.title}</td>
+                                        <td className="p-3">
+                                          <span className="px-2.5 py-0.5 bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded-full">
+                                            {category}
+                                          </span>
+                                        </td>
+                                        <td className="p-3 text-zinc-400">{pubDate}</td>
+                                        <td className="p-3 text-right">
+                                          <button 
+                                            type="button"
+                                            onClick={() => handleDeleteContent(news.id)}
+                                            className="px-3 py-1 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-500 text-[8px] font-black uppercase tracking-widest rounded transition-all"
+                                            title="Excluir Notícia"
+                                          >
+                                            Excluir
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
                             </div>
                           )}
                         </div>
-                      );
-                    })()}
-                  </div>
-                </div>
+                      </div>
+
+                      {/* PAGINAÇÃO */}
+                      {totalCount > 0 && (
+                        <div className="flex items-center justify-between gap-3 px-1">
+                          <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                            Página {safePage + 1} de {totalPages} &nbsp;·&nbsp; {totalCount} notícias
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => { setHqPage(p => Math.max(0, p - 1)); setSelectedNewsIds(new Set()); }}
+                              disabled={safePage === 0}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-400 text-slate-400 border border-white/10 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                              ← Voltar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setHqPage(p => Math.min(totalPages - 1, p + 1)); setSelectedNewsIds(new Set()); }}
+                              disabled={safePage >= totalPages - 1}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-400 text-slate-400 border border-white/10 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                              Avançar →
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
               </div>
 
