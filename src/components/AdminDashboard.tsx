@@ -135,6 +135,9 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [isDeletingSelected, setIsDeletingSelected] = useState<boolean>(false);
   const [adsLimit, setAdsLimit] = useState<number>(10);
   const [adsPage, setAdsPage] = useState<number>(0);
+  const [priceEditSlot, setPriceEditSlot] = useState<string>('ad_top');
+  const [priceEditValue, setPriceEditValue] = useState<string>('');
+  const [priceEditDesc, setPriceEditDesc] = useState<string>('');
 
   const fetchData = async () => {
     const { data: licData } = await supabase.from('licenses').select('*').order('created_at', { ascending: false });
@@ -2076,6 +2079,112 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                           </table>
                         </div>
                       )}
+                    </div>
+
+                    {/* CONFIGURAÇÃO DE PREÇOS DOS ANÚNCIOS */}
+                    <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'} mt-4`}>
+                      <h4 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500 flex items-center gap-2 mb-4">
+                        💰 Configurar Preços e Descrições dos Banners
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div>
+                          <label className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Selecionar Espaço</label>
+                          <select 
+                            value={priceEditSlot} 
+                            onChange={(e) => {
+                              const slot = e.target.value;
+                              setPriceEditSlot(slot);
+                              // Auto-preenche com valor atual no banco (se houver) ou do padrão local
+                              const existing = (siteContent || []).find(c => c && c.content_type === `ad_slot_price_${slot}`);
+                              const localDefault = [
+                                { type: 'ad_top', price: 'R$ 450,00', desc: 'Visibilidade máxima no topo de todas as páginas do portal.' },
+                                { type: 'ad_skin_left_home', price: 'R$ 380,00', desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à esquerda.' },
+                                { type: 'ad_skin_right_home', price: 'R$ 380,00', desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à direita.' },
+                                { type: 'ad_skin_left', price: 'R$ 380,00', desc: 'Exclusivo para desktops nas páginas internas. Scroll à esquerda.' },
+                                { type: 'ad_skin_right', price: 'R$ 380,00', desc: 'Exclusivo para desktops nas páginas internas. Scroll à direita.' },
+                                { type: 'ad_sidebar_1', price: 'R$ 280,00', desc: 'Posicionado no início do painel lateral ao lado das notícias mais lidas.' },
+                                { type: 'ad_sidebar_2', price: 'R$ 320,00', desc: 'Skyscraper vertical posicionado na lateral das páginas de leitura.' },
+                                { type: 'ad_vittacash_horizontal', price: 'R$ 240,00', desc: 'Banner de destaque inserido dinamicamente no meio do fluxo de notícias.' },
+                                { type: 'ad_internal_inline_1', price: 'R$ 150,00', desc: 'Anúncio inserido após os primeiros parágrafos da notícia.' },
+                                { type: 'ad_internal_inline_2', price: 'R$ 150,00', desc: 'Anúncio inserido no meio do corpo da notícia.' },
+                                { type: 'ad_internal_inline_3', price: 'R$ 150,00', desc: 'Anúncio inserido nos parágrafos finais da notícia.' }
+                              ].find(d => d.type === slot);
+                              setPriceEditValue(existing?.image_url || localDefault?.price || '');
+                              setPriceEditDesc(existing?.description || localDefault?.desc || '');
+                            }}
+                            className="w-full bg-white dark:bg-zinc-800 text-[10px] font-black text-indigo-500 uppercase border border-slate-200 dark:border-white/10 rounded px-2.5 py-2 outline-none"
+                          >
+                            <option value="ad_top">Banner do Topo (970x250)</option>
+                            <option value="ad_skin_left_home">Skin Esquerda - Home (300x600)</option>
+                            <option value="ad_skin_right_home">Skin Direita - Home (300x600)</option>
+                            <option value="ad_skin_left">Skin Esquerda - Internas (300x600)</option>
+                            <option value="ad_skin_right">Skin Direita - Internas (300x600)</option>
+                            <option value="ad_sidebar_1">Sidebar Quadrado (300x300)</option>
+                            <option value="ad_sidebar_2">Sidebar Vertical (300x600)</option>
+                            <option value="ad_vittacash_horizontal">Banner do Feed (728x90)</option>
+                            <option value="ad_internal_inline_1">Interno 1 (728x90)</option>
+                            <option value="ad_internal_inline_2">Interno 2 (728x90)</option>
+                            <option value="ad_internal_inline_3">Interno 3 (728x90)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Preço / Valor</label>
+                          <input 
+                            type="text" 
+                            placeholder="Ex: R$ 450,00"
+                            value={priceEditValue}
+                            onChange={(e) => setPriceEditValue(e.target.value)}
+                            className="w-full bg-white dark:bg-zinc-800 text-[10px] font-bold text-slate-800 dark:text-white border border-slate-200 dark:border-white/10 rounded px-2.5 py-2 outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Descrição</label>
+                          <input 
+                            type="text" 
+                            placeholder="Descrição informativa do espaço"
+                            value={priceEditDesc}
+                            onChange={(e) => setPriceEditDesc(e.target.value)}
+                            className="w-full bg-white dark:bg-zinc-800 text-[10px] font-bold text-slate-800 dark:text-white border border-slate-200 dark:border-white/10 rounded px-2.5 py-2 outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-4 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setLoading(true);
+                            try {
+                              const cType = `ad_slot_price_${priceEditSlot}`;
+                              // Verifica se ja existe
+                              const existing = (siteContent || []).find(c => c && c.content_type === cType);
+                              
+                              if (existing) {
+                                await supabase.from('site_content').update({
+                                  image_url: priceEditValue,
+                                  description: priceEditDesc
+                                }).eq('id', existing.id);
+                              } else {
+                                await supabase.from('site_content').insert({
+                                  content_type: cType,
+                                  title: priceEditSlot,
+                                  image_url: priceEditValue,
+                                  description: priceEditDesc,
+                                  is_active: true
+                                });
+                              }
+                              showAlert("Sucesso!", "Preço e descrição atualizados com sucesso!", "info");
+                              fetchData();
+                            } catch (err: any) {
+                              showAlert("Erro", err.message || "Falha ao salvar configuração.", "error");
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-black text-[9px] font-black uppercase tracking-widest rounded-lg transition-all shadow"
+                        >
+                          Salvar Configuração
+                        </button>
+                      </div>
                     </div>
                   </>
                 );

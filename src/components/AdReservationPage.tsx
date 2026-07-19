@@ -81,6 +81,7 @@ export default function AdReservationPage() {
   const showAlert = (title: string, message: string, type: 'info' | 'success' | 'error' = 'info') => {
     setCustomAlert({ title, message, type });
   };
+  const [adSlotsInfo, setAdSlotsInfo] = useState(AD_SLOTS_INFO);
   const [selectedSlot, setSelectedSlot] = useState(AD_SLOTS_INFO[0].type);
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
@@ -155,6 +156,28 @@ export default function AdReservationPage() {
       });
 
       setOccupiedSlots(counts);
+
+      // Busca preços dinâmicos
+      const { data: priceData } = await supabase
+        .from('site_content')
+        .select('content_type, image_url, description')
+        .like('content_type', 'ad_slot_price_%');
+
+      if (priceData && priceData.length > 0) {
+        setAdSlotsInfo(prev => {
+          return prev.map(slot => {
+            const match = priceData.find(p => p.content_type === `ad_slot_price_${slot.type}`);
+            if (match) {
+              return {
+                ...slot,
+                price: match.image_url || slot.price,
+                desc: match.description || slot.desc
+              };
+            }
+            return slot;
+          });
+        });
+      }
     };
 
     fetchOccupation();
@@ -329,7 +352,7 @@ export default function AdReservationPage() {
     setErrorMsg('');
     setLoading(true);
 
-    const selectedInfo = AD_SLOTS_INFO.find(s => s.type === selectedSlot);
+    const selectedInfo = adSlotsInfo.find(s => s.type === selectedSlot);
     let finalImageUrl = adImageUrl;
     let finalSlides: any[] = [];
 
@@ -706,7 +729,7 @@ export default function AdReservationPage() {
               <Layout size={14} className="text-indigo-500" /> Tabela de Valores & DimensÃµes
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {AD_SLOTS_INFO.map(slot => (
+              {adSlotsInfo.map(slot => (
                 <div 
                   key={slot.type}
                   onClick={() => setSelectedSlot(slot.type)}
@@ -780,7 +803,7 @@ export default function AdReservationPage() {
                   const HOME_SLOTS = ['ad_top', 'ad_vittacash_horizontal', 'ad_skin_left_home', 'ad_skin_right_home', 'ad_sidebar_1', 'ad_sidebar_2'];
                   const INTERNAL_SLOTS = ['ad_skin_left', 'ad_skin_right', 'ad_sidebar_2', 'ad_internal_inline_1', 'ad_internal_inline_2', 'ad_internal_inline_3'];
                   const allowedSlots = activePage === 'home' ? HOME_SLOTS : INTERNAL_SLOTS;
-                  const filteredSlots = AD_SLOTS_INFO.filter(s => allowedSlots.includes(s.type));
+                  const filteredSlots = adSlotsInfo.filter(s => allowedSlots.includes(s.type));
                   return (
                 <div className="space-y-4">
                   {/* Indicador da pÃ¡gina selecionada no formulÃ¡rio */}
