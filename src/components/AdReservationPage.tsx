@@ -13,7 +13,7 @@ const AD_SLOTS_INFO = [
     size: '970x250 px', 
     price: 'R$ 450,00', 
     period: 'por 30 dias',
-    desc: 'Visibilidade máxima no topo de todas as páginas do portal.' 
+    desc: 'Visibilidade mÃ¡xima no topo de todas as pÃ¡ginas do portal.' 
   },
   { 
     type: 'ad_skin_left_home', 
@@ -21,7 +21,7 @@ const AD_SLOTS_INFO = [
     size: '300x600 px', 
     price: 'R$ 380,00', 
     period: 'por 30 dias',
-    desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à esquerda.' 
+    desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor Ã  esquerda.' 
   },
   { 
     type: 'ad_skin_right_home', 
@@ -29,7 +29,7 @@ const AD_SLOTS_INFO = [
     size: '300x600 px', 
     price: 'R$ 380,00', 
     period: 'por 30 dias',
-    desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à direita.' 
+    desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor Ã  direita.' 
   },
   { 
     type: 'ad_skin_left', 
@@ -37,7 +37,7 @@ const AD_SLOTS_INFO = [
     size: '300x600 px', 
     price: 'R$ 380,00', 
     period: 'por 30 dias',
-    desc: 'Exclusivo para desktops nas páginas internas. Scroll à esquerda.' 
+    desc: 'Exclusivo para desktops nas pÃ¡ginas internas. Scroll Ã  esquerda.' 
   },
   { 
     type: 'ad_skin_right', 
@@ -45,7 +45,7 @@ const AD_SLOTS_INFO = [
     size: '300x600 px', 
     price: 'R$ 380,00', 
     period: 'por 30 dias',
-    desc: 'Exclusivo para desktops nas páginas internas. Scroll à direita.' 
+    desc: 'Exclusivo para desktops nas pÃ¡ginas internas. Scroll Ã  direita.' 
   },
   { 
     type: 'ad_sidebar_1', 
@@ -53,7 +53,7 @@ const AD_SLOTS_INFO = [
     size: '300x300 px', 
     price: 'R$ 280,00', 
     period: 'por 30 dias',
-    desc: 'Posicionado no início do painel lateral ao lado das notícias mais lidas.' 
+    desc: 'Posicionado no inÃ­cio do painel lateral ao lado das notÃ­cias mais lidas.' 
   },
   { 
     type: 'ad_sidebar_2', 
@@ -61,7 +61,7 @@ const AD_SLOTS_INFO = [
     size: '300x600 px', 
     price: 'R$ 320,00', 
     period: 'por 30 dias',
-    desc: 'Skyscraper vertical posicionado na lateral das páginas de leitura.' 
+    desc: 'Skyscraper vertical posicionado na lateral das pÃ¡ginas de leitura.' 
   },
   { 
     type: 'ad_vittacash_horizontal', 
@@ -69,7 +69,7 @@ const AD_SLOTS_INFO = [
     size: '728x90 px', 
     price: 'R$ 240,00', 
     period: 'por 30 dias',
-    desc: 'Banner de destaque inserido dinamicamente no meio do fluxo de notícias.' 
+    desc: 'Banner de destaque inserido dinamicamente no meio do fluxo de notÃ­cias.' 
   }
 ];
 
@@ -101,7 +101,7 @@ export default function AdReservationPage() {
   const [activeSlideIdx, setActiveSlideIdx] = useState<number>(0);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Cotas máximas por slot (skins suportam até 6 anunciantes em carrossel)
+  // Cotas mÃ¡ximas por slot (skins suportam atÃ© 6 anunciantes em carrossel)
   const SLOT_MAX_COTAS: Record<string, number> = {
     'ad_top': 1, 'ad_vittacash_horizontal': 1,
     'ad_skin_left_home': 6, 'ad_skin_right_home': 6,
@@ -110,7 +110,7 @@ export default function AdReservationPage() {
     'ad_internal_inline_1': 1, 'ad_internal_inline_2': 1, 'ad_internal_inline_3': 1,
   };
 
-  // Estado de ocupação dos slots (active + pending requests)
+  // Estado de ocupaÃ§Ã£o dos slots (active + pending requests)
   const [occupiedSlots, setOccupiedSlots] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export default function AdReservationPage() {
         .in('content_type', allTypes)
         .eq('is_active', true);
 
-      // Busca solicitações pendentes
+      // Busca solicitaÃ§Ãµes pendentes
       const { data: pendingData } = await supabase
         .from('site_content')
         .select('content_type, meta_value')
@@ -145,7 +145,7 @@ export default function AdReservationPage() {
         }
       });
 
-      // Soma solicitações pendentes (cada uma é ao menos 1 cota)
+      // Soma solicitaÃ§Ãµes pendentes (cada uma Ã© ao menos 1 cota)
       (pendingData || []).forEach((item: any) => {
         const t = item.content_type.replace('request_', '');
         const slidesCount = t.includes('skin')
@@ -174,18 +174,18 @@ export default function AdReservationPage() {
     if (isFull) {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[7px] font-black uppercase tracking-widest shadow">
-          🔴 Esgotado
+          ðŸ”´ Esgotado
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[7px] font-black uppercase tracking-widest shadow">
-        🟢 {free}/{max} {max > 1 ? 'slides' : 'vaga'}
+        ðŸŸ¢ {free}/{max} {max > 1 ? 'slides' : 'vaga'}
       </span>
     );
   };
 
-  // Conteúdo padrão para slot vazio no mapa
+  // ConteÃºdo padrÃ£o para slot vazio no mapa
   const SlotEmptyContent = ({ type }: { type: string }) => {
     const { isFull } = getSlotStatus(type);
     return (
@@ -283,9 +283,9 @@ export default function AdReservationPage() {
             img.src = URL.createObjectURL(file);
           });
 
-          // Se for diferente das dimensões do slot, faz o recorte via Canvas
+          // Se for diferente das dimensÃµes do slot, faz o recorte via Canvas
           if (imgDimensions.w > 0 && (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h)) {
-            showAlert("Ajustando Imagem", `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte automático.`, "info");
+            showAlert("Ajustando Imagem", `DimensÃµes: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaÃ§o Ã© ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte automÃ¡tico.`, "info");
             finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
           }
         } catch (canvasErr) {
@@ -314,7 +314,7 @@ export default function AdReservationPage() {
 
     } catch (err: any) {
       console.error(err);
-      showAlert("Erro no Processamento", err.message || "Não foi possível carregar a imagem.", "error");
+      showAlert("Erro no Processamento", err.message || "NÃ£o foi possÃ­vel carregar a imagem.", "error");
     } finally {
       setUploading(false);
     }
@@ -323,7 +323,7 @@ export default function AdReservationPage() {
   const handleReserve = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientName || !clientEmail || !clientPhone || !adImageUrl) {
-      setErrorMsg('Por favor, preencha todos os campos obrigatórios.');
+      setErrorMsg('Por favor, preencha todos os campos obrigatÃ³rios.');
       return;
     }
     setErrorMsg('');
@@ -352,14 +352,14 @@ export default function AdReservationPage() {
       }
     }
 
-    const leadText = `Olá! Gostaria de solicitar a reserva de um banner de publicidade no portal A2 Notícias.%0A%0A*Nome:* ${clientName}%0A*WhatsApp:* ${clientPhone}%0A*E-mail:* ${clientEmail}%0A*Formato:* ${selectedInfo?.label || selectedSlot}%0A*Período:* ${durationDays} dias%0A*Valor Cotado:* ${selectedInfo?.price || 'Sob Consulta'}%0A*Destino do Banner:* ${adTargetUrl || 'Não informado'}%0A*Link do Banner:* ${finalImageUrl.startsWith('data:') ? 'Enviado em anexo' : finalImageUrl}`;
+    const leadText = `OlÃ¡! Gostaria de solicitar a reserva de um banner de publicidade no portal A2 NotÃ­cias.%0A%0A*Nome:* ${clientName}%0A*WhatsApp:* ${clientPhone}%0A*E-mail:* ${clientEmail}%0A*Formato:* ${selectedInfo?.label || selectedSlot}%0A*PerÃ­odo:* ${durationDays} dias%0A*Valor Cotado:* ${selectedInfo?.price || 'Sob Consulta'}%0A*Destino do Banner:* ${adTargetUrl || 'NÃ£o informado'}%0A*Link do Banner:* ${finalImageUrl.startsWith('data:') ? 'Enviado em anexo' : finalImageUrl}`;
 
     try {
       const { error } = await supabase.from('site_content').insert({
         content_type: `request_${selectedSlot}`,
         title: `${selectedInfo?.label || 'Reserva'} - ${clientName}`,
         image_url: finalImageUrl,
-        description: `Duração: ${durationDays} dias. Solicitante: ${clientName} (${clientEmail} | ${clientPhone})`,
+        description: `DuraÃ§Ã£o: ${durationDays} dias. Solicitante: ${clientName} (${clientEmail} | ${clientPhone})`,
         is_active: false,
         meta_value: {
           client_name: clientName,
@@ -410,25 +410,26 @@ export default function AdReservationPage() {
 
       <main className="max-w-7xl mx-auto px-6 mt-16 flex flex-col gap-12">
         
-        {/* LADO ESQUERDO: Posicionamento dos Campos & Tabela de Preços */}
+        {/* LADO ESQUERDO: Posicionamento dos Campos & Tabela de PreÃ§os */}
         <div className="w-full space-y-12">
           
           <div>
             <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-4">
-              Anuncie no Maior Portal de <span className="text-indigo-500">Notícias</span>
+              Anuncie no Maior Portal de <span className="text-indigo-500">NotÃ­cias</span>
             </h1>
             <p className="text-zinc-400 text-sm font-medium leading-relaxed max-w-xl">
-              Exiba sua marca para milhares de investidores, empreendedores e tomadores de decisão todos os dias. Selecione os espaços abaixo e reserve seu espaço em minutos.
+              Exiba sua marca para milhares de investidores, empreendedores e tomadores de decisÃ£o todos os dias. Selecione os espaÃ§os abaixo e reserve seu espaÃ§o em minutos.
             </p>
           </div>
 
-          {/* SELETOR DE PÁGINAS DO MAPA */}
+          {/* SELETOR DE PÃGINAS DO MAPA */}
           <div className="flex gap-2 p-1 bg-zinc-900/80 border border-white/5 rounded-2xl max-w-sm mb-4">
             <button
               type="button"
               onClick={() => { setActivePage('home'); setSelectedSlot('ad_top'); setAdImageUrl(''); }}
               className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activePage === 'home' ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
             >
+              ðŸ–¥ï¸ PÃ¡gina 1: PÃ¡gina Inicial
               🖥️ Página 1: Página Inicial
             </button>
             <button
@@ -449,13 +450,13 @@ export default function AdReservationPage() {
             
             <div className="space-y-4 text-center">
               {activePage === 'home' ? (
-                /* LAYOUT PÁGINA 1: HOME (IMAGEM 2) */
-                <div className="grid grid-cols-14 gap-4 items-stretch">
+                /* LAYOUT PÁGINA 1: HOME REALISTA */
+                <div className="flex flex-col md:flex-row items-stretch justify-center gap-4 w-full relative">
                   
-                  {/* Skin Esquerda (Lateral Extrema) */}
+                  {/* Skin Esquerda (Lateral Extrema Esquerda) */}
                   <div 
                     onClick={() => { setSelectedSlot('ad_skin_left_home'); setIsFormOpen(true); }}
-                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${
+                    className={`w-28 shrink-0 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 self-stretch min-h-[400px] relative overflow-hidden ${
                       getSlotStatus('ad_skin_left_home').isFull
                         ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                         : selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -468,12 +469,13 @@ export default function AdReservationPage() {
                     )}
                   </div>
 
-                  {/* Bloco Central (Contém Banner Topo, Feed e Banner Centro) */}
-                  <div className="col-span-8 flex flex-col gap-4">
+                  {/* Bloco Central - Simulação do Site */}
+                  <div className="flex-1 max-w-2xl bg-black/60 border border-white/10 rounded-2xl p-4 flex flex-col gap-4">
+                    
                     {/* Banner do Topo */}
                     <div 
                       onClick={() => { setSelectedSlot('ad_top'); setIsFormOpen(true); }}
-                      className={`rounded-xl border text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[100px] flex flex-col items-center justify-center gap-1.5 relative overflow-hidden ${
+                      className={`rounded-xl border text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[80px] flex flex-col items-center justify-center gap-1.5 relative overflow-hidden ${
                         getSlotStatus('ad_top').isFull
                           ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                           : selectedSlot === 'ad_top' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -487,18 +489,18 @@ export default function AdReservationPage() {
                     </div>
 
                     {/* Grid interna: Feed de Matérias e Sidebars */}
-                    <div className="grid grid-cols-8 gap-4 flex-1">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       
                       {/* Feed de Matérias */}
-                      <div className="col-span-6 space-y-4 flex flex-col justify-stretch">
-                        <div className="flex-1 min-h-[140px] bg-zinc-800/10 border border-white/5 rounded-xl flex items-center justify-center text-[10px] font-bold text-zinc-600 uppercase">
+                      <div className="md:col-span-2 space-y-4 flex flex-col justify-stretch">
+                        <div className="h-28 bg-zinc-800/10 border border-white/5 rounded-xl flex items-center justify-center text-[10px] font-bold text-zinc-600 uppercase">
                           Feed de Matérias do Portal
                         </div>
                         
                         {/* Banner do Centro */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_vittacash_horizontal'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[50px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
                             getSlotStatus('ad_vittacash_horizontal').isFull
                               ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                               : selectedSlot === 'ad_vittacash_horizontal' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -511,17 +513,17 @@ export default function AdReservationPage() {
                           )}
                         </div>
 
-                        <div className="min-h-[120px] bg-zinc-800/10 border border-white/5 rounded-xl flex items-center justify-center text-[10px] font-bold text-zinc-600 uppercase">
+                        <div className="h-24 bg-zinc-800/10 border border-white/5 rounded-xl flex items-center justify-center text-[10px] font-bold text-zinc-600 uppercase">
                           Simuladores de Dividendos
                         </div>
                       </div>
 
                       {/* Column Sidebar Ads */}
-                      <div className="col-span-2 flex flex-col gap-4">
+                      <div className="md:col-span-1 flex flex-col gap-4">
                         {/* Sidebar 1 */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_sidebar_1'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all min-h-[100px] text-center gap-1 relative overflow-hidden ${
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all min-h-[90px] text-center gap-1 relative overflow-hidden ${
                             getSlotStatus('ad_sidebar_1').isFull
                               ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                               : selectedSlot === 'ad_sidebar_1' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -537,7 +539,7 @@ export default function AdReservationPage() {
                         {/* Sidebar 2 */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_sidebar_2'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 relative overflow-hidden flex-1 min-h-[200px] ${
+                          className={`rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 relative overflow-hidden min-h-[160px] ${
                             getSlotStatus('ad_sidebar_2').isFull
                               ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                               : selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -554,10 +556,10 @@ export default function AdReservationPage() {
                     </div>
                   </div>
 
-                  {/* Skin Direita (Lateral Extrema) - Home */}
+                  {/* Skin Direita (Lateral Extrema Direita) */}
                   <div 
                     onClick={() => { setSelectedSlot('ad_skin_right_home'); setIsFormOpen(true); }}
-                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${
+                    className={`w-28 shrink-0 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 self-stretch min-h-[400px] relative overflow-hidden ${
                       getSlotStatus('ad_skin_right_home').isFull
                         ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                         : selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -572,13 +574,13 @@ export default function AdReservationPage() {
 
                 </div>
               ) : (
-                /* LAYOUT PÁGINA 2: PÁGINAS INTERNAS (MATÉRIAS) */
-                <div className="grid grid-cols-14 gap-4 items-stretch">
+                /* LAYOUT PÁGINA 2: PÁGINAS INTERNAS REALISTA */
+                <div className="flex flex-col md:flex-row items-stretch justify-center gap-4 w-full relative">
                   
-                  {/* Skin Esquerda Internas (Lateral Extrema) */}
+                  {/* Skin Esquerda Internas (Lateral Extrema Esquerda) */}
                   <div 
                     onClick={() => { setSelectedSlot('ad_skin_left'); setIsFormOpen(true); }}
-                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${
+                    className={`w-28 shrink-0 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 self-stretch min-h-[400px] relative overflow-hidden ${
                       getSlotStatus('ad_skin_left').isFull
                         ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                         : selectedSlot === 'ad_skin_left' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -591,12 +593,12 @@ export default function AdReservationPage() {
                     )}
                   </div>
 
-                  {/* Área Central: Título, Conteúdo da Notícia, Banners Internos e Sidebar */}
-                  <div className="col-span-8 flex flex-col gap-4">
-                    <div className="grid grid-cols-8 gap-4 flex-1">
+                  {/* Bloco Central - Simulação do Site */}
+                  <div className="flex-1 max-w-2xl bg-black/60 border border-white/10 rounded-2xl p-4 flex flex-col gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       
                       {/* Conteúdo da Notícia & Anúncios Internos */}
-                      <div className="col-span-6 space-y-4 flex flex-col justify-between">
+                      <div className="md:col-span-2 space-y-4 flex flex-col justify-between">
                         <div className="p-4 bg-zinc-800/10 border border-white/5 rounded-xl text-left space-y-2">
                           <div className="h-4 w-1/3 bg-indigo-500/20 rounded-full" />
                           <div className="h-6 w-full bg-zinc-800/30 rounded-xl" />
@@ -606,7 +608,7 @@ export default function AdReservationPage() {
                         {/* Anúncio Interno 01 */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_internal_inline_1'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[50px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
                             getSlotStatus('ad_internal_inline_1').isFull
                               ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                               : selectedSlot === 'ad_internal_inline_1' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -627,7 +629,7 @@ export default function AdReservationPage() {
                         {/* Anúncio Interno 02 */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_internal_inline_2'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[50px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
                             getSlotStatus('ad_internal_inline_2').isFull
                               ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                               : selectedSlot === 'ad_internal_inline_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -643,7 +645,7 @@ export default function AdReservationPage() {
                         {/* Anúncio Interno 03 */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_internal_inline_3'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[50px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
                             getSlotStatus('ad_internal_inline_3').isFull
                               ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                               : selectedSlot === 'ad_internal_inline_3' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -658,7 +660,7 @@ export default function AdReservationPage() {
                       </div>
 
                       {/* Sidebar 2 - Internas */}
-                      <div className="col-span-2 flex flex-col justify-stretch">
+                      <div className="md:col-span-1 flex flex-col justify-stretch">
                         <div 
                           onClick={() => { setSelectedSlot('ad_sidebar_2'); setIsFormOpen(true); }}
                           className={`rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 relative overflow-hidden flex-1 min-h-[300px] ${
@@ -678,10 +680,10 @@ export default function AdReservationPage() {
                     </div>
                   </div>
 
-                  {/* Skin Direita Internas (Lateral Extrema) */}
+                  {/* Skin Direita Internas (Lateral Extrema Direita) */}
                   <div 
                     onClick={() => { setSelectedSlot('ad_skin_right'); setIsFormOpen(true); }}
-                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${
+                    className={`w-28 shrink-0 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 self-stretch min-h-[400px] relative overflow-hidden ${
                       getSlotStatus('ad_skin_right').isFull
                         ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
                         : selectedSlot === 'ad_skin_right' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
@@ -699,10 +701,10 @@ export default function AdReservationPage() {
             </div>
           </div>
 
-          {/* LISTA DE PREÇOS DETALHADA */}
+          {/* LISTA DE PREÃ‡OS DETALHADA */}
           <div className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-              <Layout size={14} className="text-indigo-500" /> Tabela de Valores & Dimensões
+              <Layout size={14} className="text-indigo-500" /> Tabela de Valores & DimensÃµes
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {AD_SLOTS_INFO.map(slot => (
@@ -729,7 +731,7 @@ export default function AdReservationPage() {
 
         </div>
 
-        {/* MODAL POPUP PARA SOLICITAÇÃO DE RESERVA */}
+        {/* MODAL POPUP PARA SOLICITAÃ‡ÃƒO DE RESERVA */}
         {isFormOpen && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
             <div className="w-full max-w-xl bg-zinc-900 border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
@@ -749,7 +751,7 @@ export default function AdReservationPage() {
                 </div>
                 <h3 className="text-xl font-black uppercase tracking-tight">Reserva Solicitada!</h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">
-                  Sua solicitação de anúncio foi enviada com sucesso para nossa moderação. Analisaremos sua imagem e informações e entraremos em contato via WhatsApp/E-mail para formalizar a ativação.
+                  Sua solicitaÃ§Ã£o de anÃºncio foi enviada com sucesso para nossa moderaÃ§Ã£o. Analisaremos sua imagem e informaÃ§Ãµes e entraremos em contato via WhatsApp/E-mail para formalizar a ativaÃ§Ã£o.
                 </p>
                 <div className="pt-6">
                   <button 
@@ -764,7 +766,7 @@ export default function AdReservationPage() {
               <form onSubmit={handleReserve} className="space-y-6">
                 <div>
                   <h3 className="text-lg font-black uppercase tracking-tight">Solicitar Reserva</h3>
-                  <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">Preencha os dados e anexe a arte do anúncio</p>
+                  <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">Preencha os dados e anexe a arte do anÃºncio</p>
                 </div>
 
                 {errorMsg && (
@@ -773,22 +775,22 @@ export default function AdReservationPage() {
                   </div>
                 )}
 
-                {/* Slots disponíveis por página */}
+                {/* Slots disponÃ­veis por pÃ¡gina */}
                 {(() => {
-                  // Slots exclusivos de cada página
+                  // Slots exclusivos de cada pÃ¡gina
                   const HOME_SLOTS = ['ad_top', 'ad_vittacash_horizontal', 'ad_skin_left_home', 'ad_skin_right_home', 'ad_sidebar_1', 'ad_sidebar_2'];
                   const INTERNAL_SLOTS = ['ad_skin_left', 'ad_skin_right', 'ad_sidebar_2', 'ad_internal_inline_1', 'ad_internal_inline_2', 'ad_internal_inline_3'];
                   const allowedSlots = activePage === 'home' ? HOME_SLOTS : INTERNAL_SLOTS;
                   const filteredSlots = AD_SLOTS_INFO.filter(s => allowedSlots.includes(s.type));
                   return (
                 <div className="space-y-4">
-                  {/* Indicador da página selecionada no formulário */}
+                  {/* Indicador da pÃ¡gina selecionada no formulÃ¡rio */}
                   <div className={`px-3 py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center gap-2 ${
                     activePage === 'home'
                       ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
                       : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
                   }`}>
-                    {activePage === 'home' ? '🖥️ Reservando slot na Página Inicial (Home)' : '📄 Reservando slot nas Páginas Internas (Matérias)'}
+                    {activePage === 'home' ? 'ðŸ–¥ï¸ Reservando slot na PÃ¡gina Inicial (Home)' : 'ðŸ“„ Reservando slot nas PÃ¡ginas Internas (MatÃ©rias)'}
                   </div>
 
                   <div>
@@ -805,15 +807,15 @@ export default function AdReservationPage() {
                           </option>
                         ))}
                       </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500 text-[8px]">▼</div>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500 text-[8px]">â–¼</div>
                     </div>
                   </div>
 
-                  {/* SELETOR DE SLIDES PARA SKINS (CARROSSEL) NO PORTAL DE RESERVAS PÚBLICO */}
+                  {/* SELETOR DE SLIDES PARA SKINS (CARROSSEL) NO PORTAL DE RESERVAS PÃšBLICO */}
                   {selectedSlot.includes('skin') && (
                     <div className="mb-4">
                       <label className="text-[9px] font-black uppercase text-zinc-500 mb-2 block tracking-widest ml-1">
-                        Carrossel de Slides — Até 6 Imagens ({adSlides.filter(s => s.image_url && s.image_url.trim() !== '').length} adicionada(s))
+                        Carrossel de Slides â€” AtÃ© 6 Imagens ({adSlides.filter(s => s.image_url && s.image_url.trim() !== '').length} adicionada(s))
                       </label>
                       <div className="grid grid-cols-6 gap-1 bg-zinc-950/60 p-1 border border-white/5 rounded-xl">
                         {[0, 1, 2, 3, 4, 5].map(idx => {
@@ -838,7 +840,7 @@ export default function AdReservationPage() {
                                 setActiveSlideIdx(idx);
                                 setAdImageUrl(updated[idx]?.image_url || '');
                                 setAdTargetUrl(updated[idx]?.external_url || '');
-                                // Mantém o Nome do Anunciante e WhatsApp do cliente no formulário, a não ser que o slide já possua outro anunciante específico
+                                // MantÃ©m o Nome do Anunciante e WhatsApp do cliente no formulÃ¡rio, a nÃ£o ser que o slide jÃ¡ possua outro anunciante especÃ­fico
                                 if (updated[idx]?.client_name) {
                                   setClientName(updated[idx].client_name);
                                 }
@@ -854,7 +856,7 @@ export default function AdReservationPage() {
                         })}
                       </div>
                       <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider text-center mt-1.5">
-                        Adicionando Arte para o Slide {activeSlideIdx + 1} — {adSlides[activeSlideIdx]?.image_url ? '✅ Com imagem' : '⬜ Vazio'}
+                        Adicionando Arte para o Slide {activeSlideIdx + 1} â€” {adSlides[activeSlideIdx]?.image_url ? 'âœ… Com imagem' : 'â¬œ Vazio'}
                       </div>
                     </div>
                   )}
@@ -864,7 +866,7 @@ export default function AdReservationPage() {
                     <input 
                       type="text"
                       required
-                      placeholder="EX: JOÃO SILVA / EMPRESA LTDA"
+                      placeholder="EX: JOÃƒO SILVA / EMPRESA LTDA"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
                       className="w-full bg-zinc-950/60 border border-white/5 px-4 py-3 rounded-xl outline-none text-xs font-bold text-white focus:border-indigo-500 transition-all placeholder:text-zinc-700 uppercase"
@@ -918,7 +920,7 @@ export default function AdReservationPage() {
                       <input 
                         type="text"
                         required
-                        placeholder="Cole a URL ou faça upload..."
+                        placeholder="Cole a URL ou faÃ§a upload..."
                         value={adImageUrl}
                         onChange={(e) => setAdImageUrl(e.target.value)}
                         className="flex-1 bg-zinc-950/60 border border-white/5 px-4 py-3 rounded-xl outline-none text-xs font-bold text-white focus:border-indigo-500 transition-all placeholder:text-zinc-700"
@@ -949,7 +951,7 @@ export default function AdReservationPage() {
                     {/* CARD DE PREVIEW DO BANNER EM MINIATURA */}
                     {adImageUrl && (
                       <div className="mt-4 p-4 bg-zinc-950/40 border border-white/5 rounded-2xl flex flex-col items-center">
-                        <span className="text-[8px] text-zinc-600 font-black uppercase tracking-widest mb-3 block self-start">Pré-visualização do Banner</span>
+                        <span className="text-[8px] text-zinc-600 font-black uppercase tracking-widest mb-3 block self-start">PrÃ©-visualizaÃ§Ã£o do Banner</span>
                         <div className="w-full flex items-center justify-center overflow-hidden bg-black/40 rounded-lg border border-white/10 p-2">
                           <img 
                             src={adImageUrl} 
@@ -958,7 +960,7 @@ export default function AdReservationPage() {
                           />
                         </div>
                         <span className="text-[8px] text-zinc-500 font-bold uppercase mt-2">
-                          Proporção do espaço: {
+                          ProporÃ§Ã£o do espaÃ§o: {
                             selectedSlot === 'ad_top' ? '970x250 (Horizontal Longo)' :
                             selectedSlot === 'ad_vittacash_horizontal' ? '728x90 (Horizontal)' :
                             selectedSlot === 'ad_skin_left_home' || selectedSlot === 'ad_skin_right_home' ? '300x600 (Skin Vertical)' :
@@ -969,7 +971,7 @@ export default function AdReservationPage() {
                     )}
 
                     <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-1.5 block leading-relaxed">
-                      Selecione um arquivo de imagem. O sistema fará o recorte e ajuste automático para a dimensão correta.
+                      Selecione um arquivo de imagem. O sistema farÃ¡ o recorte e ajuste automÃ¡tico para a dimensÃ£o correta.
                     </span>
                   </div>
 
@@ -985,7 +987,7 @@ export default function AdReservationPage() {
                   </div>
 
                   <div>
-                    <label className="text-[9px] font-black uppercase tracking-widest ml-1 mb-1.5 block text-zinc-500">Período de Exibição</label>
+                    <label className="text-[9px] font-black uppercase tracking-widest ml-1 mb-1.5 block text-zinc-500">PerÃ­odo de ExibiÃ§Ã£o</label>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       {['30', '60', '90'].map(days => (
                         <div 
