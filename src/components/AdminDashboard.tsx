@@ -31,7 +31,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   // FORMULÃRIO LICENÃ‡AS
   const [clientName, setClientName] = useState('');
   const [saleValue, setSaleValue] = useState('');
-  const [origin, setOrigin] = useState('IndicaÃ§Ã£o');
+  const [origin, setOrigin] = useState('Indicação');
   const [productType, setProductType] = useState('SaaS'); 
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -111,7 +111,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [corpAddress, setCorpAddress] = useState('');
   const [corpPhone, setCorpPhone] = useState('');
 
-  // FORMULÃRIO MANUAL HQ (A2 NotÃ­cias)
+  // FORMULÃRIO MANUAL HQ (A2 Notícias)
   const [hqTitle, setHqTitle] = useState('');
   const [hqResume, setHqResume] = useState('');
   const [hqPov, setHqPov] = useState('');
@@ -185,7 +185,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     const saasActive = activeClients.filter(l => l.product_type === 'SaaS');
     const mrr = saasActive.reduce((acc, curr) => acc + (curr.price || 0), 0);
 
-    // Receita de Publicidade (nÃ£o entra no MRR)
+    // Receita de Publicidade (não entra no MRR)
     const adSales = licenses.filter(l => l.product_type === 'Publicidade');
     const adRevenue = adSales.reduce((acc, curr) => acc + (curr.price || 0), 0);
     const adRevenueThisMonth = adSales
@@ -233,7 +233,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     if (mrrGrowth < 0) insights.push({ type: 'danger', title: `MRR caindo ${Math.abs(mrrGrowth).toFixed(1)}%`, action: 'Revisar precificaÃ§Ã£o. Ativar downgrade para BÃ¡sico como barreira de saÃ­da antes do churn total.' });
     if (plans.premium < Math.floor(plans.basico * 0.3) && plans.basico > 0) insights.push({ type: 'info', title: 'Baixa conversÃ£o BÃ¡sico â†’ Premium', action: 'Criar campanha de upsell focando em IA Advisor + Quita-DÃ­vidas. Oferecer trial de 7 dias do Premium para usuÃ¡rios BÃ¡sicos.' });
     if (atRisk.length > 2) insights.push({ type: 'warning', title: `${atRisk.length} clientes em risco de churn`, action: 'Contato direto via WhatsApp com script personalizado de recuperaÃ§Ã£o (ver scripts abaixo).' });
-    if (insights.length === 0) insights.push({ type: 'info', title: 'Base saudÃ¡vel', action: 'Continue monitorando. Foco em upsell: migrar usuÃ¡rios BÃ¡sicos para Premium.' });
+    if (insights.length === 0) insights.push({ type: 'info', title: 'Base saudável', action: 'Continue monitorando. Foco em upsell: migrar usuÃ¡rios BÃ¡sicos para Premium.' });
 
     return { totalRevenue, totalClients, averageTicket, revenueThisMonth, revenueLastMonth, mrr, mrrGrowth, churnRate, activeClients, inactiveClients, atRisk, plans, originData, timelineData, ltv, insights, adRevenue, adRevenueThisMonth };
   }, [licenses]);
@@ -338,7 +338,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
         if (imgDimensions.w > 0 && (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h)) {
           showAlert(
             "Ajustando Imagem",
-            `DimensÃµes: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaÃ§o Ã© ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte proporcional automÃ¡tico.`,
+            `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaÃ§o Ã© ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte proporcional automÃ¡tico.`,
             "info"
           );
           finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
@@ -355,7 +355,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
       if (uploadError) {
         if (uploadError.message === 'Bucket not found') {
-          throw new Error('O Bucket "vitta-assets" nÃ£o foi encontrado no seu Storage do Supabase. Por favor, crie-o e marque como "Public".');
+          throw new Error('O Bucket "vitta-assets" não foi encontrado no seu Storage do Supabase. Por favor, crie-o e marque como "Public".');
         }
         throw uploadError;
       }
@@ -438,7 +438,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       
       handleClearHq();
       fetchData();
-      showAlert("NotÃ­cia Publicada!", "A curadoria foi salva e jÃ¡ estÃ¡ no ar no A2 NotÃ­cias.", "info");
+      showAlert("Notícia Publicada!", "A curadoria foi salva e jÃ¡ estÃ¡ no ar no A2 Notícias.", "info");
       setActiveTab('a2noticias');
     } catch (err: any) { 
       showAlert("Erro ao salvar", err.message, "error"); 
@@ -478,7 +478,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const handleCleanupNews = async () => {
     showAlert(
       "AtenÃ§Ã£o: Limpeza de Banco", 
-      "Tem certeza que deseja apagar permanentemente todas as notÃ­cias e conteÃºdos com mais de 7 dias? Esta aÃ§Ã£o otimiza a performance e economiza espaÃ§o, mas nÃ£o pode ser desfeita.",
+      "Tem certeza que deseja apagar permanentemente todas as notÃ­cias e conteÃºdos com mais de 7 dias? Esta aÃ§Ã£o otimiza a performance e economiza espaÃ§o, mas não pode ser desfeita.",
       "confirm",
       async () => {
         setLoading(true);
@@ -495,7 +495,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
           if (error) throw error;
           
           fetchData();
-          showAlert("Limpeza ConcluÃ­da!", "O banco de dados foi limpo. NotÃ­cias antigas foram removidas com sucesso.", "info");
+          showAlert("Limpeza ConcluÃ­da!", "O banco de dados foi limpo. Notícias antigas foram removidas com sucesso.", "info");
         } catch (err: any) {
           showAlert("Erro na limpeza", err.message, "error");
         } finally {
@@ -523,7 +523,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       return;
     }
     
-    // LÃ³gica Extrativa: usamos parÃ¡grafos inteiros para nÃ£o quebrar a lÃ³gica do texto
+    // LÃ³gica Extrativa: usamos parÃ¡grafos inteiros para não quebrar a lÃ³gica do texto
     const startIdx = newOffset % paragraphs.length;
     let resume = "";
     let i = startIdx;
@@ -550,9 +550,9 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     setHqResume(resume);
 
     // InteligÃªncia Baseada em Regras (A2 Insights)
-    let generatedTitle = "Giro de NotÃ­cias: O que vocÃª precisa saber hoje";
+    let generatedTitle = "Giro de Notícias: O que vocÃª precisa saber hoje";
     const genericPOVs = [
-      "Esta notÃ­cia destaca um movimento importante no cenÃ¡rio econÃ´mico. Ã‰ essencial acompanhar essas tendÃªncias para entender como o mercado pode influenciar decisÃµes estratÃ©gicas e o planejamento financeiro no curto e mÃ©dio prazo.",
+      "Esta notÃ­cia destaca um movimento importante no cenÃ¡rio econÃ´mico. Ã‰ essencial acompanhar essas tendÃªncias para entender como o mercado pode influenciar decisões estratÃ©gicas e o planejamento financeiro no curto e mÃ©dio prazo.",
       "O contexto apresentado reflete mudanÃ§as estruturais relevantes. Manter-se informado sobre essas atualizaÃ§Ãµes permite uma visÃ£o mais clara do mercado e facilita a adaptaÃ§Ã£o a novas realidades.",
       "A situaÃ§Ã£o ilustra a dinamicidade da economia. Compreender esse cenÃ¡rio Ã© fundamental para quem busca se antecipar a possÃ­veis impactos e proteger seus investimentos de oscilaÃ§Ãµes inesperadas."
     ];
@@ -562,7 +562,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       const t = (hqRawText + " " + hqTitle).toLowerCase();
       if (t.includes('selic') || t.includes('juros') || t.includes('copom') || t.includes('taxa base')) {
         pov = "Esta mudanÃ§a na taxa de juros sinaliza um redirecionamento da polÃ­tica monetÃ¡ria. Isso geralmente impacta tanto o custo do crÃ©dito quanto a rentabilidade de investimentos em renda fixa, exigindo cautela.";
-        generatedTitle = "Nova Taxa Selic: Entenda os impactos da decisÃ£o";
+        generatedTitle = "Nova Taxa Selic: Entenda os impactos da decisão";
       } else if (t.includes('dÃ³lar') || t.includes('dolar') || t.includes('cÃ¢mbio') || t.includes('fed') || t.includes('moeda')) {
         pov = "A volatilidade do cÃ¢mbio reflete incertezas globais e locais. A oscilaÃ§Ã£o do dÃ³lar pode pressionar a inflaÃ§Ã£o interna e afetar custos de importaÃ§Ã£o, servindo de termÃ´metro para a economia.";
         generatedTitle = "OscilaÃ§Ã£o do DÃ³lar: O que estÃ¡ por trÃ¡s da movimentaÃ§Ã£o cambial";
@@ -655,7 +655,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const handleDeleteContent = async (id: string) => {
     showAlert(
       "Confirmar ExclusÃ£o", 
-      "Tem certeza que deseja remover este item do feed? Esta aÃ§Ã£o nÃ£o pode ser desfeita.", 
+      "Tem certeza que deseja remover este item do feed? Esta aÃ§Ã£o não pode ser desfeita.", 
       "confirm",
       async () => {
         await supabase.from('site_content').delete().eq('id', id);
@@ -668,7 +668,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     if (selectedNewsIds.size === 0) return;
     showAlert(
       'Excluir Selecionadas',
-      `Tem certeza que deseja excluir ${selectedNewsIds.size} notÃ­cia(s) selecionada(s)? Esta aÃ§Ã£o nÃ£o pode ser desfeita.`,
+      `Tem certeza que deseja excluir ${selectedNewsIds.size} notÃ­cia(s) selecionada(s)? Esta aÃ§Ã£o não pode ser desfeita.`,
       'confirm',
       async () => {
         setIsDeletingSelected(true);
@@ -695,9 +695,9 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       { id: 'ad_skin_right', label: 'Skin Direita - Internas (300x600)', type: 'ad_skin_right', price: 'R$ 380' },
       { id: 'ad_sidebar_1', label: 'Sidebar 1 (300x300)', type: 'ad_sidebar_1', price: 'R$ 280' },
       { id: 'ad_sidebar_2', label: 'Sidebar 2 (300x600)', type: 'ad_sidebar_2', price: 'R$ 320' },
-      { id: 'ad_internal_inline_1', label: 'AnÃºncio Interno 01', type: 'ad_internal_inline_1', price: 'R$ 150' },
-      { id: 'ad_internal_inline_2', label: 'AnÃºncio Interno 02', type: 'ad_internal_inline_2', price: 'R$ 150' },
-      { id: 'ad_internal_inline_3', label: 'AnÃºncio Interno 03', type: 'ad_internal_inline_3', price: 'R$ 150' }
+      { id: 'ad_internal_inline_1', label: 'Anúncio Interno 01', type: 'ad_internal_inline_1', price: 'R$ 150' },
+      { id: 'ad_internal_inline_2', label: 'Anúncio Interno 02', type: 'ad_internal_inline_2', price: 'R$ 150' },
+      { id: 'ad_internal_inline_3', label: 'Anúncio Interno 03', type: 'ad_internal_inline_3', price: 'R$ 150' }
     ];
 
     const activeAds = (siteContent || []).filter(c => c && adSlots.map(s => s.type).includes(c.content_type || '') && c.is_active);
@@ -810,7 +810,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
         showAlert("Erro ao Salvar", error.message, "error");
       } else {
         fetchData();
-        showAlert("AnÃºncio Atualizado", "As informaÃ§Ãµes do banner foram salvas com sucesso!", "info");
+        showAlert("Anúncio Atualizado", "As informaÃ§Ãµes do banner foram salvas com sucesso!", "info");
       }
     };
 
@@ -825,7 +825,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               
               <div className="flex justify-between items-center mb-6 border-b pb-3 border-slate-200 dark:border-white/5">
                 <div>
-                  <h4 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-500">Configurar AnÃºncio</h4>
+                  <h4 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-500">Configurar Anúncio</h4>
                   <p className="text-[9px] text-slate-400 uppercase font-bold mt-1">Slot: {adSlots.find(s => s.type === selectedMapSlot)?.label || selectedMapSlot}</p>
                 </div>
                 <button 
@@ -1036,24 +1036,24 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                           }).eq('id', req.id);
                           setLoading(false);
                           fetchData();
-                          showAlert("Aprovado!", "AnÃºncio ativado no portal.", "info");
+                          showAlert("Aprovado!", "Anúncio ativado no portal.", "info");
                         }}
                         className="w-8 h-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center transition-colors shadow-sm"
-                        title="Aprovar AnÃºncio"
+                        title="Aprovar Anúncio"
                       >
                         <Check size={14} className="stroke-[3]" />
                       </button>
                       <button
                         type="button"
                         onClick={async () => {
-                          if (!window.confirm("Deseja mesmo rejeitar e excluir esta solicitaÃ§Ã£o?")) return;
+                          if (!window.confirm("Deseja mesmo rejeitar e excluir esta solicitação?")) return;
                           setLoading(true);
                           await supabase.from('site_content').delete().eq('id', req.id);
                           setLoading(false);
                           fetchData();
                         }}
                         className="w-8 h-8 rounded-full bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center border border-rose-500/20 transition-all shadow-sm"
-                        title="Recusar AnÃºncio"
+                        title="Recusar Anúncio"
                       >
                         <X size={14} className="stroke-[3]" />
                       </button>
@@ -1070,7 +1070,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-4 border-slate-200 dark:border-white/5">
             <div className="flex items-center gap-3">
               <ImageIcon size={20} className="text-amber-500" />
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Listagem de AnÃºncios Ativos</h3>
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Listagem de Anúncios Ativos</h3>
             </div>
             
             {/* SELETOR DE LIMITE DE LINHAS */}
@@ -1090,7 +1090,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
           {activeAds.length === 0 ? (
             <div className="text-center py-8 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              Nenhum anÃºncio ativo cadastrado no momento. Use o Mapa para cadastrar.
+              Nenhum anúncio ativo cadastrado no momento. Use o Mapa para cadastrar.
             </div>
           ) : (
             <>
@@ -1104,7 +1104,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Anunciante</th>
                     <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Contato</th>
                     <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Link Destino</th>
-                    <th className="pb-3 text-zinc-500 text-right bg-slate-50 dark:bg-zinc-900 px-2">AÃ§Ãµes</th>
+                    <th className="pb-3 text-zinc-500 text-right bg-slate-50 dark:bg-zinc-900 px-2">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1149,14 +1149,14 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                             type="button"
                             onClick={() => handleOpenAdModal(ad.content_type)}
                             className="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500 hover:text-black text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded transition-all"
-                            title="Editar AnÃºncio"
+                            title="Editar Anúncio"
                           >
                             Editar
                           </button>
                           <button 
                             type="button"
                             onClick={async () => {
-                              if (!window.confirm("Deseja mesmo desativar e excluir este anÃºncio da listagem?")) return;
+                              if (!window.confirm("Deseja mesmo desativar e excluir este anúncio da listagem?")) return;
                               if (!window.confirm("Deseja mesmo desativar e excluir este anúncio da listagem?")) return;
                               setLoading(true);
                               await supabase.from('site_content').delete().eq('id', ad.id);
@@ -1329,7 +1329,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 {/* Insights â€” ocupa 2 colunas */}
                 <div className="lg:col-span-2 flex flex-col gap-3">
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-500 flex items-center gap-2">
-                    <Brain size={14} /> Plano de AÃ§Ã£o Inteligente â€” A2 Growth Engine
+                    <Brain size={14} /> Plano de Ação Inteligente â€” A2 Growth Engine
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 flex-1">
                     {stats.insights.map((ins, i) => (
@@ -1361,7 +1361,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                       <select className={`${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-xl font-bold text-sm outline-none text-slate-500 focus:text-slate-900 dark:focus:text-white`} value={origin} onChange={e => setOrigin(e.target.value)}>
                         <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>Instagram</option>
                         <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>A2 App</option>
-                        <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>IndicaÃ§Ã£o</option>
+                        <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>Indicação</option>
                         <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>Direto</option>
                         <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>WhatsApp</option>
                       </select>
@@ -1378,7 +1378,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                         ? 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20'
                         : 'bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/20'
                     }`}>
-                      {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : productType === 'Publicidade' ? 'Registrar AnÃºncio' : 'Salvar LicenÃ§a'}
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : productType === 'Publicidade' ? 'Registrar Anúncio' : 'Salvar LicenÃ§a'}
                     </button>
                   </form>
                 </div>
@@ -1407,13 +1407,13 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   {stats.atRisk.length === 0 ? (
                     <div className="flex items-center gap-3 p-4 bg-emerald-500/5 rounded-xl border border-emerald-500/20">
                       <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                      <p className="text-xs font-bold text-emerald-500">Nenhum cliente em risco detectado. Base saudÃ¡vel âœ“</p>
+                      <p className="text-xs font-bold text-emerald-500">Nenhum cliente em risco detectado. Base saudável âœ“</p>
                     </div>
                   ) : (
                     <div className="space-y-2 max-h-[260px] overflow-y-auto custom-scrollbar pr-1">
                       {stats.atRisk.map((client: any) => {
                         const days = Math.floor((Date.now() - new Date(client.created_at).getTime()) / 86400000);
-                        const msg = encodeURIComponent(`OlÃ¡ ${client.client_name}! Vi que vocÃª ainda nÃ£o aproveitou tudo que o A2 Mentor tem a oferecer. Posso te ajudar com algo? ðŸš€`);
+                        const msg = encodeURIComponent(`OlÃ¡ ${client.client_name}! Vi que vocÃª ainda não aproveitou tudo que o A2 Mentor tem a oferecer. Posso te ajudar com algo? ðŸš€`);
                         return (
                           <div key={client.id} className="flex items-center justify-between p-3 bg-rose-500/5 rounded-xl border border-rose-500/10">
                             <div>
@@ -1488,8 +1488,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-4 flex items-center gap-2"><MessageCircle size={14}/> Scripts de RecuperaÃ§Ã£o</h3>
                   <div className="space-y-3">
                     {[
-                      { label: 'VariaÃ§Ã£o A Â· Abandono de Checkout', color: 'rose', msg: 'OlÃ¡! Notei que vocÃª iniciou seu cadastro no A2 Mentor mas nÃ£o finalizou. Tivemos algum problema tÃ©cnico ou posso esclarecer alguma dÃºvida sobre os planos? ðŸ˜Š' },
-                      { label: 'VariaÃ§Ã£o B Â· Reengajamento Premium', color: 'indigo', msg: 'Oi! Faz alguns dias que nÃ£o te vejo por aqui. Sabia que o mÃ³dulo de IA Advisor pode identificar onde seu dinheiro estÃ¡ vazando? Vale 5 minutos ðŸš€' },
+                      { label: 'VariaÃ§Ã£o A Â· Abandono de Checkout', color: 'rose', msg: 'OlÃ¡! Notei que vocÃª iniciou seu cadastro no A2 Mentor mas não finalizou. Tivemos algum problema tÃ©cnico ou posso esclarecer alguma dÃºvida sobre os planos? ðŸ˜Š' },
+                      { label: 'VariaÃ§Ã£o B Â· Reengajamento Premium', color: 'indigo', msg: 'Oi! Faz alguns dias que não te vejo por aqui. Sabia que o mÃ³dulo de IA Advisor pode identificar onde seu dinheiro estÃ¡ vazando? Vale 5 minutos ðŸš€' },
                       { label: 'VariaÃ§Ã£o C Â· Upsell BÃ¡sico â†’ Premium', color: 'amber', msg: 'OlÃ¡! VocÃª estÃ¡ no plano BÃ¡sico e pode estar perdendo funcionalidades que fariam a diferenÃ§a. Posso te dar 7 dias grÃ¡tis no Premium para vocÃª testar?' },
                     ].map((script) => (
                       <a key={script.label} href={`https://wa.me/5534998408962?text=${encodeURIComponent(script.msg)}`}
@@ -1513,7 +1513,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   <table className="w-full text-xs">
                     <thead>
                       <tr className={`border-b ${isLight ? 'border-slate-200' : 'border-white/5'} ${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'}`}>
-                        {['Cliente', 'Produto', 'Origem', 'Valor', 'Status', 'Data', 'AÃ§Ã£o'].map(h => (
+                        {['Cliente', 'Produto', 'Origem', 'Valor', 'Status', 'Data', 'Ação'].map(h => (
                           <th key={h} className="text-left p-3 text-[9px] font-black uppercase tracking-widest text-slate-400">{h}</th>
                         ))}
                       </tr>
@@ -1555,7 +1555,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               <div>
                 <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-[#3b82f6] mb-6 text-xs"><TrendingUp size={16}/> Indexadores EconÃ´micos (Manual / Cache)</h3>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-                  {['SELIC', 'IPCA', 'INPC', 'DÃ“LAR', 'BITCOIN'].map(key => (
+                  {['SELIC', 'IPCA', 'INPC', 'DÓLAR', 'BITCOIN'].map(key => (
                     <div key={key} className="pb-3 group">
                       <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">{key}</label>
                       <div className="flex items-center gap-2">
@@ -1705,7 +1705,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   <div className="flex items-center gap-3">
                     <Newspaper size={20} className="text-indigo-500" />
                     <div>
-                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">NotÃ­cias Publicadas (Portal HQ)</h3>
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Notícias Publicadas (Portal HQ)</h3>
                       <p className="text-[9px] text-slate-400 uppercase font-bold mt-1">Gerencie as matÃ©rias e notÃ­cias ativas do feed do portal</p>
                     </div>
                   </div>
@@ -1714,7 +1714,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     onClick={handleCleanupNews}
                     className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-500 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all"
                   >
-                    Otimizar Banco (Apagar NotÃ­cias &gt; 7 Dias)
+                    Otimizar Banco (Apagar Notícias &gt; 7 Dias)
                   </button>
                 </div>
 
@@ -1743,7 +1743,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
                   {/* LINHAS POR PÃGINA */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">Linhas por PÃ¡gina</label>
+                    <label className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-400">Linhas por Página</label>
                     <select
                       value={hqLimit}
                       onChange={(e) => { setHqLimit(Number(e.target.value)); setHqPage(0); setSelectedNewsIds(new Set()); }}
@@ -1838,7 +1838,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                                     <th className="p-3 text-zinc-500">TÃ­tulo</th>
                                     <th className="p-3 text-zinc-500">Categoria</th>
                                     <th className="p-3 text-zinc-500">Publicado Em</th>
-                                    <th className="p-3 text-zinc-500 text-right">AÃ§Ãµes</th>
+                                    <th className="p-3 text-zinc-500 text-right">Ações</th>
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -1877,7 +1877,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                                             type="button"
                                             onClick={() => handleDeleteContent(news.id)}
                                             className="px-3 py-1 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-500 text-[8px] font-black uppercase tracking-widest rounded transition-all"
-                                            title="Excluir NotÃ­cia"
+                                            title="Excluir Notícia"
                                           >
                                             Excluir
                                           </button>
@@ -1896,7 +1896,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                       {totalCount > 0 && (
                         <div className="flex items-center justify-between gap-3 px-1">
                           <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                            PÃ¡gina {safePage + 1} de {totalPages} &nbsp;Â·&nbsp; {totalCount} notÃ­cias
+                            Página {safePage + 1} de {totalPages} &nbsp;Â·&nbsp; {totalCount} notÃ­cias
                           </span>
                           <div className="flex items-center gap-2">
                             <button
@@ -1952,10 +1952,10 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   <>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
                       {[
-                        { label: 'AnÃºncios Ativos', val: `${activeAds.length} slots`, sub: 'Campanhas no ar', color: 'text-indigo-500' },
-                        { label: 'Faturamento Mensal (Est.)', val: formatCurrency(estimatedRevenue), sub: 'Somando anÃºncios ativos', color: 'text-emerald-500' },
+                        { label: 'Anúncios Ativos', val: `${activeAds.length} slots`, sub: 'Campanhas no ar', color: 'text-indigo-500' },
+                        { label: 'Faturamento Mensal (Est.)', val: formatCurrency(estimatedRevenue), sub: 'Somando anúncios ativos', color: 'text-emerald-500' },
                         { label: 'Pagamentos Pendentes', val: `${unpaidActiveAds.length} ativos`, sub: 'Aguardando PIX/Fatura', color: 'text-amber-500' },
-                        { label: 'Reservas Pendentes', val: `${pendingRequests.length} solicitaÃ§Ãµes`, sub: 'Novas propostas de clientes', color: 'text-pink-500' },
+                        { label: 'Reservas Pendentes', val: `${pendingRequests.length} solicitações`, sub: 'Novas propostas de clientes', color: 'text-pink-500' },
                       ].map((kpi, i) => (
                         <div key={i} className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                           <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{kpi.label}</p>
@@ -1966,7 +1966,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     </div>
 
                                         {/* CONFIGURAÇÃO DE PREÇOS DOS ANÚNCIOS */}
-                    <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'} mt-4`}>
+                    <div className={`${isLight ? 'bg-transparent' : 'bg-transparent'} p-6 rounded-3xl border ${isLight ? 'border-slate-200/40' : 'border-white/5'} mt-4 mb-4 shadow-none`}>
                       <h4 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500 flex items-center gap-2 mb-4">
                         💰 Configurar Preços e Descrições dos Banners
                       </h4>
@@ -2071,10 +2071,10 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                       </div>
                    
 
-                    <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'} mb-2`}>
+                    <div className={`${isLight ? 'bg-transparent' : 'bg-transparent'} p-6 rounded-3xl border ${isLight ? 'border-slate-200/40' : 'border-white/5'} mb-2 shadow-none`}>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-4 border-slate-200 dark:border-white/5">
                         <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500 flex items-center gap-2">
-                          ðŸ“‹ Controle Financeiro de Campanhas Ativas
+                          📋 Controle Financeiro de Campanhas Ativas
                         </h4>
                         
                         <div className="flex items-center gap-2">
@@ -2093,7 +2093,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
                       {activeAds.length === 0 ? (
                         <div className="text-center py-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                          Nenhum anÃºncio ativo rodando atualmente no portal.
+                          Nenhum anúncio ativo rodando atualmente no portal.
                         </div>
                       ) : (
                         <div className="max-h-[380px] overflow-y-auto custom-scrollbar pr-2">
@@ -2103,8 +2103,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                                 <th className="pb-3 text-zinc-500">Slot</th>
                                 <th className="pb-3 text-zinc-500">Cliente / TÃ­tulo</th>
                                 <th className="pb-3 text-zinc-500">Pagamento</th>
-                                <th className="pb-3 text-zinc-500">ExpiraÃ§Ã£o</th>
-                                <th className="pb-3 text-zinc-500 text-right">AÃ§Ãµes</th>
+                                <th className="pb-3 text-zinc-500">Expiração</th>
+                                <th className="pb-3 text-zinc-500 text-right">Ações</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -2118,7 +2118,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                                     <td className="py-3 text-indigo-400 text-[9px]">{ad.content_type}</td>
                                     <td className="py-3">
                                       <div className="text-slate-800 dark:text-slate-200">{ad.meta_value?.client_name || ad.title}</div>
-                                      <div className="text-[8px] text-slate-400 font-medium normal-case">{ad.meta_value?.client_email || 'Email nÃ£o cadastrado'}</div>
+                                      <div className="text-[8px] text-slate-400 font-medium normal-case">{ad.meta_value?.client_email || 'Email não cadastrado'}</div>
                                     </td>
                                     <td className="py-3">
                                       <button 
@@ -2167,7 +2167,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                                       <button 
                                         type="button"
                                         onClick={async () => {
-                                          if (!window.confirm("Deseja desativar este anÃºncio?")) return;
+                                          if (!window.confirm("Deseja desativar este anúncio?")) return;
                                           setLoading(true);
                                           await supabase.from('site_content').update({ is_active: false }).eq('id', ad.id);
                                           setLoading(false);
