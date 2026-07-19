@@ -1118,9 +1118,15 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                         </td>
                         <td className="py-3 px-2 text-indigo-400 text-[9px]">
                           <div>{isSlotInfo?.label || ad.content_type}</div>
-                          {ad.content_type.includes('skin') && (
-                            <div className="text-[7px] text-zinc-500 font-bold uppercase mt-0.5">
-                              Carrossel: {ad.meta_value?.slides?.length || 0}/6 imagens salvas
+                          {ad.content_type.includes('skin') ? (
+                            <div className="text-[7px] text-zinc-500 font-bold uppercase mt-0.5 flex items-center gap-1">
+                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                              Vagas Ocupadas: {ad.meta_value?.slides?.filter((s: any) => s.image_url && s.image_url.trim() !== '').length || 1}/6
+                            </div>
+                          ) : (
+                            <div className="text-[7px] text-zinc-500 font-bold uppercase mt-0.5 flex items-center gap-1">
+                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              Vagas Ocupadas: 1/1
                             </div>
                           )}
                         </td>

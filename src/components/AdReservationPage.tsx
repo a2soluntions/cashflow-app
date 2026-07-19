@@ -185,6 +185,21 @@ export default function AdReservationPage() {
     );
   };
 
+  // Conteúdo padrão para slot vazio no mapa
+  const SlotEmptyContent = ({ type }: { type: string }) => {
+    const { isFull } = getSlotStatus(type);
+    return (
+      <div className="flex flex-col items-center gap-2">
+        {isFull ? (
+          <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Sem Vagas</span>
+        ) : (
+          <span className="text-[9px] font-black uppercase tracking-widest opacity-60">Anuncie Aqui</span>
+        )}
+        <SlotBadge type={type} />
+      </div>
+    );
+  };
+
   const cropAndResizeImage = (file: File, targetWidth: number, targetHeight: number): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -449,12 +464,7 @@ export default function AdReservationPage() {
                     {selectedSlot === 'ad_skin_left_home' && adImageUrl ? (
                       <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Left" />
                     ) : (
-                      <>
-                        <span>Skin Esquerda</span>
-                        <span>(300x600)</span>
-                        <span>R$ 380</span>
-                        <div className="mt-1"><SlotBadge type="ad_skin_left_home" /></div>
-                      </>
+                      <SlotEmptyContent type="ad_skin_left_home" />
                     )}
                   </div>
 
@@ -472,10 +482,7 @@ export default function AdReservationPage() {
                       {selectedSlot === 'ad_top' && adImageUrl ? (
                         <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Topo" />
                       ) : (
-                        <>
-                          <span>Banner do Topo (970x250) - R$ 450</span>
-                          <SlotBadge type="ad_top" />
-                        </>
+                        <SlotEmptyContent type="ad_top" />
                       )}
                     </div>
 
@@ -500,10 +507,7 @@ export default function AdReservationPage() {
                           {selectedSlot === 'ad_vittacash_horizontal' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Centro" />
                           ) : (
-                            <>
-                              <span>Banner de Centro (728x90) - R$ 240</span>
-                              <SlotBadge type="ad_vittacash_horizontal" />
-                            </>
+                            <SlotEmptyContent type="ad_vittacash_horizontal" />
                           )}
                         </div>
 
@@ -526,11 +530,7 @@ export default function AdReservationPage() {
                           {selectedSlot === 'ad_sidebar_1' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Sidebar 1" />
                           ) : (
-                            <>
-                              <span>Sidebar 1 (300x300)</span>
-                              <span>R$ 280</span>
-                              <SlotBadge type="ad_sidebar_1" />
-                            </>
+                            <SlotEmptyContent type="ad_sidebar_1" />
                           )}
                         </div>
                         
@@ -546,12 +546,7 @@ export default function AdReservationPage() {
                           {selectedSlot === 'ad_sidebar_2' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Sidebar 2" />
                           ) : (
-                            <>
-                              <span>Sidebar 2</span>
-                              <span>(300x600)</span>
-                              <span>R$ 320</span>
-                              <SlotBadge type="ad_sidebar_2" />
-                            </>
+                            <SlotEmptyContent type="ad_sidebar_2" />
                           )}
                         </div>
                       </div>
@@ -571,12 +566,7 @@ export default function AdReservationPage() {
                     {selectedSlot === 'ad_skin_right_home' && adImageUrl ? (
                       <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Right" />
                     ) : (
-                      <>
-                        <span>Skin Direita</span>
-                        <span>(300x600)</span>
-                        <span>R$ 380</span>
-                        <div className="mt-1"><SlotBadge type="ad_skin_right_home" /></div>
-                      </>
+                      <SlotEmptyContent type="ad_skin_right_home" />
                     )}
                   </div>
 
@@ -597,12 +587,7 @@ export default function AdReservationPage() {
                     {selectedSlot === 'ad_skin_left' && adImageUrl ? (
                       <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Left" />
                     ) : (
-                      <>
-                        <span>Skin Esquerda</span>
-                        <span>(300x600)</span>
-                        <span>R$ 380</span>
-                        <div className="mt-1"><SlotBadge type="ad_skin_left" /></div>
-                      </>
+                      <SlotEmptyContent type="ad_skin_left" />
                     )}
                   </div>
 
@@ -630,10 +615,7 @@ export default function AdReservationPage() {
                           {selectedSlot === 'ad_internal_inline_1' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Interno 1" />
                           ) : (
-                            <>
-                              <span>Anúncio Interno 01 (728x90) - R$ 150</span>
-                              <SlotBadge type="ad_internal_inline_1" />
-                            </>
+                            <SlotEmptyContent type="ad_internal_inline_1" />
                           )}
                         </div>
 
@@ -654,10 +636,7 @@ export default function AdReservationPage() {
                           {selectedSlot === 'ad_internal_inline_2' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Interno 2" />
                           ) : (
-                            <>
-                              <span>Anúncio Interno 02 (728x90) - R$ 150</span>
-                              <SlotBadge type="ad_internal_inline_2" />
-                            </>
+                            <SlotEmptyContent type="ad_internal_inline_2" />
                           )}
                         </div>
 
@@ -673,10 +652,7 @@ export default function AdReservationPage() {
                           {selectedSlot === 'ad_internal_inline_3' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Interno 3" />
                           ) : (
-                            <>
-                              <span>Anúncio Interno 03 (728x90) - R$ 150</span>
-                              <SlotBadge type="ad_internal_inline_3" />
-                            </>
+                            <SlotEmptyContent type="ad_internal_inline_3" />
                           )}
                         </div>
                       </div>
@@ -694,12 +670,7 @@ export default function AdReservationPage() {
                           {selectedSlot === 'ad_sidebar_2' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Sidebar 2" />
                           ) : (
-                            <>
-                              <span>Sidebar 2</span>
-                              <span>(300x600)</span>
-                              <span>R$ 320</span>
-                              <SlotBadge type="ad_sidebar_2" />
-                            </>
+                            <SlotEmptyContent type="ad_sidebar_2" />
                           )}
                         </div>
                       </div>
@@ -719,12 +690,7 @@ export default function AdReservationPage() {
                     {selectedSlot === 'ad_skin_right' && adImageUrl ? (
                       <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Right" />
                     ) : (
-                      <>
-                        <span>Skin Direita</span>
-                        <span>(300x600)</span>
-                        <span>R$ 380</span>
-                        <div className="mt-1"><SlotBadge type="ad_skin_right" /></div>
-                      </>
+                      <SlotEmptyContent type="ad_skin_right" />
                     )}
                   </div>
 
