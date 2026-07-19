@@ -134,6 +134,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [selectedNewsIds, setSelectedNewsIds] = useState<Set<string>>(new Set());
   const [isDeletingSelected, setIsDeletingSelected] = useState<boolean>(false);
   const [adsLimit, setAdsLimit] = useState<number>(10);
+  const [adsPage, setAdsPage] = useState<number>(0);
 
   const fetchData = async () => {
     const { data: licData } = await supabase.from('licenses').select('*').order('created_at', { ascending: false });
@@ -1089,6 +1090,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               Nenhum anúncio ativo cadastrado no momento. Use o Mapa para cadastrar.
             </div>
           ) : (
+            <>
             /* CONTAINER COM TAMANHO MAXIMO FIXO E BARRA DE ROLAGEM */
             <div className="max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
               <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -1103,7 +1105,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   </tr>
                 </thead>
                 <tbody>
-                  {activeAds.slice(0, adsLimit).map(ad => {
+                  {activeAds.slice(adsPage * adsLimit, (adsPage + 1) * adsLimit).map(ad => {
                     const isSlotInfo = adSlots.find(s => s.type === ad.content_type);
                     return (
                       <tr key={ad.id} className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
@@ -1118,15 +1120,19 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                         </td>
                         <td className="py-3 px-2 text-indigo-400 text-[9px]">
                           <div>{isSlotInfo?.label || ad.content_type}</div>
-                          {ad.content_type.includes('skin') ? (
+                          {ad.content_type.includes('skin') ? (() => {
+                            const count = ad.meta_value?.slides?.filter((s: any) => s.image_url && s.image_url.trim() !== '').length || 1;
+                            const isFull = count === 6;
+                            return (
+                              <div className="text-[7px] text-zinc-500 font-bold uppercase mt-0.5 flex items-center gap-1">
+                                <span className={`inline-block w-1.5 h-1.5 rounded-full ${isFull ? 'bg-rose-500 shadow shadow-rose-500/50' : 'bg-emerald-500 shadow shadow-emerald-500/50'}`}></span>
+                                Vagas Ocupadas: {count}/6
+                              </div>
+                            );
+                          })() : (
                             <div className="text-[7px] text-zinc-500 font-bold uppercase mt-0.5 flex items-center gap-1">
-                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                              Vagas Ocupadas: {ad.meta_value?.slides?.filter((s: any) => s.image_url && s.image_url.trim() !== '').length || 1}/6
-                            </div>
-                          ) : (
-                            <div className="text-[7px] text-zinc-500 font-bold uppercase mt-0.5 flex items-center gap-1">
-                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                              Vagas Ocupadas: 1/1
+                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-rose-500 shadow shadow-rose-500/50"></span>
+                              Vagas Ocupadas: 1/1 (Esgotado)
                             </div>
                           )}
                         </td>
@@ -1165,6 +1171,39 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 </tbody>
               </table>
             </div>
+             
+             {/* CONTROLES DE PAGINAÇÃO DE ANÚNCIOS */}
+             {(() => {
+               const totalCount = activeAds.length;
+               const totalPages = Math.max(1, Math.ceil(totalCount / adsLimit));
+               const safePage = Math.min(adsPage, totalPages - 1);
+               return (
+                 <div className="flex items-center justify-between border-t border-slate-200 dark:border-white/5 pt-4 mt-2">
+                   <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                     Página {safePage + 1} de {totalPages} ({totalCount} anúncios)
+                   </span>
+                   <div className="flex gap-2">
+                     <button
+                       type="button"
+                       disabled={safePage === 0}
+                       onClick={() => setAdsPage(p => Math.max(0, p - 1))}
+                       className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500 hover:text-white disabled:opacity-30 disabled:hover:bg-indigo-500/10 disabled:hover:text-indigo-400 text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded-lg transition-all border border-indigo-500/20"
+                     >
+                       Voltar
+                     </button>
+                     <button
+                       type="button"
+                       disabled={safePage >= totalPages - 1}
+                       onClick={() => setAdsPage(p => p + 1)}
+                       className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500 hover:text-white disabled:opacity-30 disabled:hover:bg-indigo-500/10 disabled:hover:text-indigo-400 text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded-lg transition-all border border-indigo-500/20"
+                     >
+                       Avançar
+                     </button>
+                   </div>
+                 </div>
+               );
+             })()}
+            </>
           )}
         </div>
 
