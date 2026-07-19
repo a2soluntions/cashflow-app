@@ -138,6 +138,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [priceEditSlot, setPriceEditSlot] = useState<string>('ad_top');
   const [priceEditValue, setPriceEditValue] = useState<string>('');
   const [priceEditDesc, setPriceEditDesc] = useState<string>('');
+  const [adsViewMode, setAdsViewMode] = useState<'financeiro' | 'valores'>('financeiro');
 
   const fetchData = async () => {
     const { data: licData } = await supabase.from('licenses').select('*').order('created_at', { ascending: false });
@@ -1950,244 +1951,348 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
                 return (
                   <>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
-                      {[
-                        { label: 'Anúncios Ativos', val: `${activeAds.length} slots`, sub: 'Campanhas no ar', color: 'text-indigo-500' },
-                        { label: 'Faturamento Mensal (Est.)', val: formatCurrency(estimatedRevenue), sub: 'Somando anúncios ativos', color: 'text-emerald-500' },
-                        { label: 'Pagamentos Pendentes', val: `${unpaidActiveAds.length} ativos`, sub: 'Aguardando PIX/Fatura', color: 'text-amber-500' },
-                        { label: 'Reservas Pendentes', val: `${pendingRequests.length} solicitações`, sub: 'Novas propostas de clientes', color: 'text-pink-500' },
-                      ].map((kpi, i) => (
-                        <div key={i} className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-                          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{kpi.label}</p>
-                          <h3 className={`text-xl font-black ${kpi.color}`}>{kpi.val}</h3>
-                          <p className="text-[9px] font-bold mt-1 text-slate-400">{kpi.sub}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                                        {/* CONFIGURAÇÃO DE PREÇOS DOS ANÚNCIOS */}
-                    <div className={`${isLight ? 'bg-transparent' : 'bg-transparent'} p-6 rounded-3xl border ${isLight ? 'border-slate-200/40' : 'border-white/5'} mt-4 mb-4 shadow-none`}>
-                      <h4 className="text-xs font-black uppercase tracking-[0.3em] text-amber-500 flex items-center gap-2 mb-4">
-                        💰 Configurar Preços e Descrições dos Banners
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    {/* CARD UNIFICADO DE CONFIGURAÇÃO E CONTROLE DE ADS */}
+                    <div className={"p-6 rounded-3xl border shadow-none mb-6 " + (isLight ? "border-slate-200/40" : "border-white/5")}>
+                      
+                      {/* SELETOR INTERNO DO CARD */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-6 border-slate-200 dark:border-white/5">
                         <div>
-                          <label className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Selecionar Espaço</label>
-                          <select 
-                            value={priceEditSlot} 
-                            onChange={(e) => {
-                              const slot = e.target.value;
-                              setPriceEditSlot(slot);
-                              // Auto-preenche com valor atual no banco (se houver) ou do padrão local
-                              const existing = (siteContent || []).find(c => c && c.content_type === `ad_slot_price_${slot}`);
-                              const localDefault = [
-                                { type: 'ad_top', price: 'R$ 450,00', desc: 'Visibilidade máxima no topo de todas as páginas do portal.' },
-                                { type: 'ad_skin_left_home', price: 'R$ 380,00', desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à esquerda.' },
-                                { type: 'ad_skin_right_home', price: 'R$ 380,00', desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à direita.' },
-                                { type: 'ad_skin_left', price: 'R$ 380,00', desc: 'Exclusivo para desktops nas páginas internas. Scroll à esquerda.' },
-                                { type: 'ad_skin_right', price: 'R$ 380,00', desc: 'Exclusivo para desktops nas páginas internas. Scroll à direita.' },
-                                { type: 'ad_sidebar_1', price: 'R$ 280,00', desc: 'Posicionado no início do painel lateral ao lado das notícias mais lidas.' },
-                                { type: 'ad_sidebar_2', price: 'R$ 320,00', desc: 'Skyscraper vertical posicionado na lateral das páginas de leitura.' },
-                                { type: 'ad_vittacash_horizontal', price: 'R$ 240,00', desc: 'Banner de destaque inserido dinamicamente no meio do fluxo de notícias.' },
-                                { type: 'ad_internal_inline_1', price: 'R$ 150,00', desc: 'Anúncio inserido após os primeiros parágrafos da notícia.' },
-                                { type: 'ad_internal_inline_2', price: 'R$ 150,00', desc: 'Anúncio inserido no meio do corpo da notícia.' },
-                                { type: 'ad_internal_inline_3', price: 'R$ 150,00', desc: 'Anúncio inserido nos parágrafos finais da notícia.' }
-                              ].find(d => d.type === slot);
-                              setPriceEditValue(existing?.image_url || localDefault?.price || '');
-                              setPriceEditDesc(existing?.description || localDefault?.desc || '');
-                            }}
-                            className="w-full bg-white dark:bg-zinc-800 text-[10px] font-black text-indigo-500 uppercase border border-slate-200 dark:border-white/10 rounded px-2.5 py-2 outline-none"
+                          <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500 flex items-center gap-2 mb-1">
+                            📢 Central de Controle de Publicidade
+                          </h4>
+                          <p className="text-[9px] font-bold text-slate-400">Configure preços e monitore as campanhas vigentes do portal</p>
+                        </div>
+                        <div className="flex gap-2 p-1 bg-zinc-900/80 border border-white/5 rounded-2xl max-w-sm">
+                          <button
+                            type="button"
+                            onClick={() => setAdsViewMode('financeiro')}
+                            className={"px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all " + (adsViewMode === 'financeiro' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white')}
                           >
-                            <option value="ad_top">Banner do Topo (970x250)</option>
-                            <option value="ad_skin_left_home">Skin Esquerda - Home (300x600)</option>
-                            <option value="ad_skin_right_home">Skin Direita - Home (300x600)</option>
-                            <option value="ad_skin_left">Skin Esquerda - Internas (300x600)</option>
-                            <option value="ad_skin_right">Skin Direita - Internas (300x600)</option>
-                            <option value="ad_sidebar_1">Sidebar Quadrado (300x300)</option>
-                            <option value="ad_sidebar_2">Sidebar Vertical (300x600)</option>
-                            <option value="ad_vittacash_horizontal">Banner do Feed (728x90)</option>
-                            <option value="ad_internal_inline_1">Interno 1 (728x90)</option>
-                            <option value="ad_internal_inline_2">Interno 2 (728x90)</option>
-                            <option value="ad_internal_inline_3">Interno 3 (728x90)</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Preço / Valor</label>
-                          <input 
-                            type="text" 
-                            placeholder="Ex: R$ 450,00"
-                            value={priceEditValue}
-                            onChange={(e) => setPriceEditValue(e.target.value)}
-                            className="w-full bg-white dark:bg-zinc-800 text-[10px] font-bold text-slate-800 dark:text-white border border-slate-200 dark:border-white/10 rounded px-2.5 py-2 outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Descrição</label>
-                          <input 
-                            type="text" 
-                            placeholder="Descrição informativa do espaço"
-                            value={priceEditDesc}
-                            onChange={(e) => setPriceEditDesc(e.target.value)}
-                            className="w-full bg-white dark:bg-zinc-800 text-[10px] font-bold text-slate-800 dark:text-white border border-slate-200 dark:border-white/10 rounded px-2.5 py-2 outline-none"
-                          />
+                            📋 Controle Financeiro
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAdsViewMode('valores')}
+                            className={"px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all " + (adsViewMode === 'valores' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white')}
+                          >
+                            💰 Tabela de Valores
+                          </button>
                         </div>
                       </div>
-                      <div className="mt-4 flex justify-end">
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            setLoading(true);
-                            try {
-                              const cType = `ad_slot_price_${priceEditSlot}`;
-                              // Verifica se ja existe
-                              const existing = (siteContent || []).find(c => c && c.content_type === cType);
+
+                      {/* CONTEÚDO DA ABA 1: CONTROLE FINANCEIRO */}
+                      {adsViewMode === 'financeiro' && (
+                        <div className="space-y-6">
+                          {/* KPIs FINANCEIROS */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+                            {[
+                              { label: 'Anúncios Ativos', val: `${activeAds.length} slots`, sub: 'Campanhas no ar', color: 'text-indigo-500' },
+                              { label: 'Faturamento Mensal (Est.)', val: formatCurrency(estimatedRevenue), sub: 'Somando anúncios ativos', color: 'text-emerald-500' },
+                              { label: 'Pagamentos Pendentes', val: `${unpaidActiveAds.length} ativos`, sub: 'Aguardando PIX/Fatura', color: 'text-amber-500' },
+                              { label: 'Reservas Pendentes', val: `${pendingRequests.length} solicitações`, sub: 'Novas propostas de clientes', color: 'text-pink-500' },
+                            ].map((kpi, i) => (
+                              <div key={i} className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{kpi.label}</p>
+                                <h3 className={`text-xl font-black ${kpi.color}`}>{kpi.val}</h3>
+                                <p className="text-[9px] font-bold mt-1 text-slate-400">{kpi.sub}</p>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* TABELA DE CONTROLE FINANCEIRO */}
+                          <div className="pt-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-4 border-slate-200 dark:border-white/5">
+                              <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-400 flex items-center gap-2">
+                                📋 Campanhas Ativas no Portal
+                              </h4>
                               
-                              if (existing) {
-                                await supabase.from('site_content').update({
-                                  image_url: priceEditValue,
-                                  description: priceEditDesc
-                                }).eq('id', existing.id);
-                              } else {
-                                await supabase.from('site_content').insert({
-                                  content_type: cType,
-                                  title: priceEditSlot,
-                                  image_url: priceEditValue,
-                                  description: priceEditDesc,
-                                  is_active: true
-                                });
-                              }
-                              showAlert("Sucesso!", "Preço e descrição atualizados com sucesso!", "info");
-                              fetchData();
-                            } catch (err: any) {
-                              showAlert("Erro", err.message || "Falha ao salvar configuração.", "error");
-                            } finally {
-                              setLoading(false);
-                            }
-                          }}
-                          className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-black text-[9px] font-black uppercase tracking-widest rounded-lg transition-all shadow"
-                        >
-                          Salvar Configuração
-                        </button>
-                      </div>
-                   
+                              <div className="flex items-center gap-2">
+                                <span className="text-[9px] font-black uppercase text-slate-400">Exibir:</span>
+                                <select 
+                                  value={adsPerPage} 
+                                  onChange={(e) => setAdsPerPage(Number(e.target.value))}
+                                  className="bg-white dark:bg-zinc-800 text-[10px] font-black text-indigo-500 uppercase border border-slate-200 dark:border-white/10 rounded px-2.5 py-1 outline-none"
+                                >
+                                  <option value={10}>10 Itens</option>
+                                  <option value={20}>20 Itens</option>
+                                  <option value={50}>50 Itens</option>
+                                </select>
+                              </div>
+                            </div>
 
-                    <div className={`${isLight ? 'bg-transparent' : 'bg-transparent'} p-6 rounded-3xl border ${isLight ? 'border-slate-200/40' : 'border-white/5'} mb-2 shadow-none`}>
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-4 border-slate-200 dark:border-white/5">
-                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-500 flex items-center gap-2">
-                          📋 Controle Financeiro de Campanhas Ativas
-                        </h4>
-                        
-                        <div className="flex items-center gap-2">
-                          <span className="text-[9px] font-black uppercase text-slate-400">Exibir:</span>
-                          <select 
-                            value={adsPerPage} 
-                            onChange={(e) => setAdsPerPage(Number(e.target.value))}
-                            className="bg-white dark:bg-zinc-800 text-[10px] font-black text-indigo-500 uppercase border border-slate-200 dark:border-white/10 rounded px-2.5 py-1 outline-none"
-                          >
-                            <option value={10}>10 Itens</option>
-                            <option value={20}>20 Itens</option>
-                            <option value={50}>50 Itens</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      {activeAds.length === 0 ? (
-                        <div className="text-center py-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                          Nenhum anúncio ativo rodando atualmente no portal.
-                        </div>
-                      ) : (
-                        <div className="max-h-[380px] overflow-y-auto custom-scrollbar pr-2">
-                          <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            <thead className="sticky top-0 bg-slate-50 dark:bg-zinc-900 z-10">
-                              <tr className="border-b border-slate-200 dark:border-white/5 pb-2 text-[8px]">
-                                <th className="pb-3 text-zinc-500">Slot</th>
-                                <th className="pb-3 text-zinc-500">Cliente / TÃ­tulo</th>
-                                <th className="pb-3 text-zinc-500">Pagamento</th>
-                                <th className="pb-3 text-zinc-500">Expiração</th>
-                                <th className="pb-3 text-zinc-500 text-right">Ações</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {activeAds.slice(0, adsPerPage).map(ad => {
-                                const expDate = ad.meta_value?.expires_at ? new Date(ad.meta_value.expires_at) : null;
-                                const daysLeft = expDate ? Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
-                                const statusPag = ad.meta_value?.payment_status || 'Pendente';
-                                
-                                return (
-                                  <tr key={ad.id} className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
-                                    <td className="py-3 text-indigo-400 text-[9px]">{ad.content_type}</td>
-                                    <td className="py-3">
-                                      <div className="text-slate-800 dark:text-slate-200">{ad.meta_value?.client_name || ad.title}</div>
-                                      <div className="text-[8px] text-slate-400 font-medium normal-case">{ad.meta_value?.client_email || 'Email não cadastrado'}</div>
-                                    </td>
-                                    <td className="py-3">
-                                      <button 
-                                        type="button"
-                                        onClick={async () => {
-                                          setLoading(true);
-                                          const newStatus = statusPag === 'Pago' ? 'Pendente' : 'Pago';
-                                          await supabase.from('site_content').update({
-                                            meta_value: { ...ad.meta_value, payment_status: newStatus }
-                                          }).eq('id', ad.id);
-                                          setLoading(false);
-                                          fetchData();
-                                        }}
-                                        className={`px-2.5 py-1 rounded-full text-[8px] font-black tracking-widest uppercase transition-all ${statusPag === 'Pago' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}
-                                      >
-                                        {statusPag}
-                                      </button>
-                                    </td>
-                                    <td className="py-3">
-                                      {daysLeft !== null ? (
-                                        <span className={daysLeft <= 3 ? 'text-rose-500 font-black' : daysLeft <= 7 ? 'text-amber-500 font-bold' : 'text-slate-400'}>
-                                          {daysLeft <= 0 ? 'Expirado âš ï¸' : `${daysLeft} dias restantes`}
-                                        </span>
-                                      ) : (
-                                        <span className="text-slate-500">Sem limite</span>
-                                      )}
-                                    </td>
-                                    <td className="py-3 text-right space-x-2">
-                                      <button 
-                                        type="button"
-                                        onClick={async () => {
-                                          setLoading(true);
-                                          const currentExp = ad.meta_value?.expires_at ? new Date(ad.meta_value.expires_at) : new Date();
-                                          const newExp = new Date(currentExp.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
-                                          await supabase.from('site_content').update({
-                                            meta_value: { ...ad.meta_value, expires_at: newExp }
-                                          }).eq('id', ad.id);
-                                          setLoading(false);
-                                          fetchData();
-                                          showAlert("Prorrogado!", "Campanha estendida por mais 30 dias.", "info");
-                                        }}
-                                        className="px-2 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 rounded text-[8px]"
-                                      >
-                                        +30 Dias
-                                      </button>
-                                      <button 
-                                        type="button"
-                                        onClick={async () => {
-                                          if (!window.confirm("Deseja desativar este anúncio?")) return;
-                                          setLoading(true);
-                                          await supabase.from('site_content').update({ is_active: false }).eq('id', ad.id);
-                                          setLoading(false);
-                                          fetchData();
-                                        }}
-                                        className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded text-[8px]"
-                                      >
-                                        Desativar
-                                      </button>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
+                            {activeAds.length === 0 ? (
+                              <div className="text-center py-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                Nenhum anúncio ativo rodando atualmente no portal.
+                              </div>
+                            ) : (
+                              <div className="max-h-[380px] overflow-y-auto custom-scrollbar pr-2">
+                                <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                  <thead className="sticky top-0 bg-slate-50 dark:bg-zinc-900 z-10">
+                                    <tr className="border-b border-slate-200 dark:border-white/5 pb-2 text-[8px] text-zinc-500">
+                                      <th className="pb-3">Slot</th>
+                                      <th className="pb-3">Cliente / Título</th>
+                                      <th className="pb-3">Pagamento</th>
+                                      <th className="pb-3">Expiração</th>
+                                      <th className="pb-3 text-right">Ações</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {activeAds.slice(0, adsPerPage).map(ad => {
+                                      const expDate = ad.meta_value?.expires_at ? new Date(ad.meta_value.expires_at) : null;
+                                      const daysLeft = expDate ? Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+                                      const statusPag = ad.meta_value?.payment_status || 'Pendente';
+                                      
+                                      return (
+                                        <tr key={ad.id} className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors">
+                                          <td className="py-3 text-indigo-400 text-[9px]">{ad.content_type}</td>
+                                          <td className="py-3">
+                                            <div className="text-slate-800 dark:text-slate-200">{ad.meta_value?.client_name || ad.title}</div>
+                                            <div className="text-[8px] text-slate-400 font-medium normal-case">{ad.meta_value?.client_email || 'Email não cadastrado'}</div>
+                                          </td>
+                                          <td className="py-3">
+                                            <button 
+                                              type="button"
+                                              onClick={async () => {
+                                                setLoading(true);
+                                                const newStatus = statusPag === 'Pago' ? 'Pendente' : 'Pago';
+                                                await supabase.from('site_content').update({
+                                                  meta_value: { ...ad.meta_value, payment_status: newStatus }
+                                                }).eq('id', ad.id);
+                                                setLoading(false);
+                                                fetchData();
+                                              }}
+                                              className={`px-2.5 py-1 rounded-full text-[8px] font-black tracking-widest uppercase transition-all ${statusPag === 'Pago' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}
+                                            >
+                                              {statusPag}
+                                            </button>
+                                          </td>
+                                          <td className="py-3">
+                                            {daysLeft !== null ? (
+                                              <span className={daysLeft <= 3 ? 'text-rose-500 font-black' : daysLeft <= 7 ? 'text-amber-500 font-bold' : 'text-slate-400'}>
+                                                {daysLeft <= 0 ? 'Expirado ⚠️' : `${daysLeft} dias restantes`}
+                                              </span>
+                                            ) : (
+                                              <span className="text-slate-500">Sem limite</span>
+                                            )}
+                                          </td>
+                                          <td className="py-3 text-right space-x-2">
+                                            <button 
+                                              type="button"
+                                              onClick={async () => {
+                                                setLoading(true);
+                                                const currentExp = ad.meta_value?.expires_at ? new Date(ad.meta_value.expires_at) : new Date();
+                                                const newExp = new Date(currentExp.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+                                                await supabase.from('site_content').update({
+                                                  meta_value: { ...ad.meta_value, expires_at: newExp }
+                                                }).eq('id', ad.id);
+                                                setLoading(false);
+                                                fetchData();
+                                                showAlert("Prorrogado!", "Campanha estendida por mais 30 dias.", "info");
+                                              }}
+                                              className="px-2 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 rounded text-[8px]"
+                                            >
+                                              +30 Dias
+                                            </button>
+                                            <button 
+                                              type="button"
+                                              onClick={async () => {
+                                                if (!window.confirm("Deseja desativar este anúncio?")) return;
+                                                setLoading(true);
+                                                await supabase.from('site_content').update({ is_active: false }).eq('id', ad.id);
+                                                setLoading(false);
+                                                fetchData();
+                                              }}
+                                              className="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded text-[8px]"
+                                            >
+                                              Desativar
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
-                    </div>
 
- </div>
+                      {/* CONTEÚDO DA ABA 2: CONFIGURAÇÃO DE PREÇOS & VALORES VIGENTES */}
+                      {adsViewMode === 'valores' && (
+                        <div className="space-y-8">
+                          {/* FORMULÁRIO DE ALTERAÇÃO */}
+                          <div className="p-5 rounded-2xl bg-zinc-900/40 border border-white/5">
+                            <h5 className="text-[10px] font-black uppercase tracking-wider text-amber-500 mb-4">
+                              💰 Atualizar Preço / Descrição do Espaço
+                            </h5>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                              <div>
+                                <label className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Selecionar Espaço</label>
+                                <select 
+                                  value={priceEditSlot} 
+                                  onChange={(e) => {
+                                    const slot = e.target.value;
+                                    setPriceEditSlot(slot);
+                                    const existing = (siteContent || []).find(c => c && c.content_type === `ad_slot_price_${slot}`);
+                                    const localDefault = [
+                                      { type: 'ad_top', price: 'R$ 450,00', desc: 'Visibilidade máxima no topo de todas as páginas do portal.' },
+                                      { type: 'ad_skin_left_home', price: 'R$ 380,00', desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à esquerda.' },
+                                      { type: 'ad_skin_right_home', price: 'R$ 380,00', desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à direita.' },
+                                      { type: 'ad_skin_left', price: 'R$ 380,00', desc: 'Exclusivo para desktops nas páginas internas. Scroll à esquerda.' },
+                                      { type: 'ad_skin_right', price: 'R$ 380,00', desc: 'Exclusivo para desktops nas páginas internas. Scroll à direita.' },
+                                      { type: 'ad_sidebar_1', price: 'R$ 280,00', desc: 'Posicionado no início do painel lateral ao lado das notícias mais lidas.' },
+                                      { type: 'ad_sidebar_2', price: 'R$ 320,00', desc: 'Skyscraper vertical posicionado na lateral das páginas de leitura.' },
+                                      { type: 'ad_vittacash_horizontal', price: 'R$ 240,00', desc: 'Banner de destaque inserido dinamicamente no meio do fluxo de notícias.' },
+                                      { type: 'ad_internal_inline_1', price: 'R$ 150,00', desc: 'Anúncio inserido após os primeiros parágrafos da notícia.' },
+                                      { type: 'ad_internal_inline_2', price: 'R$ 150,00', desc: 'Anúncio inserido no meio do corpo da notícia.' },
+                                      { type: 'ad_internal_inline_3', price: 'R$ 150,00', desc: 'Anúncio inserido nos parágrafos finais da notícia.' }
+                                    ].find(d => d.type === slot);
+                                    setPriceEditValue(existing?.image_url || localDefault?.price || '');
+                                    setPriceEditDesc(existing?.description || localDefault?.desc || '');
+                                  }}
+                                  className="w-full bg-white dark:bg-zinc-800 text-[10px] font-black text-indigo-500 uppercase border border-slate-200 dark:border-white/10 rounded px-2.5 py-2 outline-none"
+                                >
+                                  <option value="ad_top">Banner do Topo (970x250)</option>
+                                  <option value="ad_skin_left_home">Skin Esquerda - Home (300x600)</option>
+                                  <option value="ad_skin_right_home">Skin Direita - Home (300x600)</option>
+                                  <option value="ad_skin_left">Skin Esquerda - Internas (300x600)</option>
+                                  <option value="ad_skin_right">Skin Direita - Internas (300x600)</option>
+                                  <option value="ad_sidebar_1">Sidebar Quadrado (300x300)</option>
+                                  <option value="ad_sidebar_2">Sidebar Vertical (300x600)</option>
+                                  <option value="ad_vittacash_horizontal">Banner do Feed (728x90)</option>
+                                  <option value="ad_internal_inline_1">Interno 1 (728x90)</option>
+                                  <option value="ad_internal_inline_2">Interno 2 (728x90)</option>
+                                  <option value="ad_internal_inline_3">Interno 3 (728x90)</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Preço / Valor</label>
+                                <input 
+                                  type="text" 
+                                  placeholder="Ex: R$ 450,00"
+                                  value={priceEditValue}
+                                  onChange={(e) => setPriceEditValue(e.target.value)}
+                                  className="w-full bg-white dark:bg-zinc-800 text-[10px] font-bold text-slate-800 dark:text-white border border-slate-200 dark:border-white/10 rounded px-2.5 py-2 outline-none"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-1">Descrição</label>
+                                <input 
+                                  type="text" 
+                                  placeholder="Descrição informativa do espaço"
+                                  value={priceEditDesc}
+                                  onChange={(e) => setPriceEditDesc(e.target.value)}
+                                  className="w-full bg-white dark:bg-zinc-800 text-[10px] font-bold text-slate-800 dark:text-white border border-slate-200 dark:border-white/10 rounded px-2.5 py-2 outline-none"
+                                />
+                              </div>
+                            </div>
+                            <div className="mt-4 flex justify-end">
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  setLoading(true);
+                                  try {
+                                    const cType = `ad_slot_price_${priceEditSlot}`;
+                                    const existing = (siteContent || []).find(c => c && c.content_type === cType);
+                                    
+                                    if (existing) {
+                                      await supabase.from('site_content').update({
+                                        image_url: priceEditValue,
+                                        description: priceEditDesc
+                                      }).eq('id', existing.id);
+                                    } else {
+                                      await supabase.from('site_content').insert({
+                                        content_type: cType,
+                                        title: priceEditSlot,
+                                        image_url: priceEditValue,
+                                        description: priceEditDesc,
+                                        is_active: true
+                                      });
+                                    }
+                                    showAlert("Sucesso!", "Preço e descrição atualizados com sucesso!", "info");
+                                    fetchData();
+                                  } catch (err: any) {
+                                    showAlert("Erro", err.message || "Falha ao salvar configuração.", "error");
+                                  } finally {
+                                    setLoading(false);
+                                  }
+                                }}
+                                className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-black text-[9px] font-black uppercase tracking-widest rounded-lg transition-all shadow"
+                              >
+                                Salvar Configuração
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* TABELA DE VALORES ATUALIZADOS */}
+                          <div className="pt-4">
+                            <h5 className="text-[10px] font-black uppercase tracking-wider text-indigo-400 mb-4">
+                              📋 Tabela de Preços e Dimensões Vigentes
+                            </h5>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                <thead>
+                                  <tr className="border-b border-slate-200 dark:border-white/5 pb-2 text-[8px] text-zinc-500">
+                                    <th className="pb-3">Slot / Posição</th>
+                                    <th className="pb-3">Preço Configurado</th>
+                                    <th className="pb-3">Descrição Informativa</th>
+                                    <th className="pb-3">Status na Nuvem</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {[
+                                    { type: 'ad_top', label: 'Banner do Topo (970x250)', price: 'R$ 450,00', desc: 'Visibilidade máxima no topo de todas as páginas do portal.' },
+                                    { type: 'ad_skin_left_home', label: 'Skin Esquerda - Home (300x600)', price: 'R$ 380,00', desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à esquerda.' },
+                                    { type: 'ad_skin_right_home', label: 'Skin Direita - Home (300x600)', price: 'R$ 380,00', desc: 'Exclusivo para desktops na home. Acompanha o scroll do leitor à direita.' },
+                                    { type: 'ad_skin_left', label: 'Skin Esquerda - Internas (300x600)', price: 'R$ 380,00', desc: 'Exclusivo para desktops nas páginas internas. Scroll à esquerda.' },
+                                    { type: 'ad_skin_right', label: 'Skin Direita - Internas (300x600)', price: 'R$ 380,00', desc: 'Exclusivo para desktops nas páginas internas. Scroll à direita.' },
+                                    { type: 'ad_sidebar_1', label: 'Sidebar Quadrado (300x300)', price: 'R$ 280,00', desc: 'Posicionado no início do painel lateral ao lado das notícias mais lidas.' },
+                                    { type: 'ad_sidebar_2', label: 'Sidebar Vertical (300x600)', price: 'R$ 320,00', desc: 'Skyscraper vertical posicionado na lateral das páginas de leitura.' },
+                                    { type: 'ad_vittacash_horizontal', label: 'Banner do Feed (728x90)', price: 'R$ 240,00', desc: 'Banner de destaque inserido dinamicamente no meio do fluxo de notícias.' },
+                                    { type: 'ad_internal_inline_1', label: 'Interno 1 (728x90)', price: 'R$ 150,00', desc: 'Anúncio inserido após os primeiros parágrafos da notícia.' },
+                                    { type: 'ad_internal_inline_2', label: 'Interno 2 (728x90)', price: 'R$ 150,00', desc: 'Anúncio inserido no meio do corpo da notícia.' },
+                                    { type: 'ad_internal_inline_3', label: 'Interno 3 (728x90)', price: 'R$ 150,00', desc: 'Anúncio inserido nos parágrafos finais da notícia.' }
+                                  ].map(slot => {
+                                    const custom = (siteContent || []).find(c => c && c.content_type === `ad_slot_price_${slot.type}`);
+                                    const currentPrice = custom?.image_url || slot.price;
+                                    const currentDesc = custom?.description || slot.desc;
+                                    return (
+                                      <tr 
+                                        key={slot.type} 
+                                        onClick={() => {
+                                          setPriceEditSlot(slot.type);
+                                          setPriceEditValue(currentPrice);
+                                          setPriceEditDesc(currentDesc);
+                                        }}
+                                        className="border-b border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                                        title="Clique para editar este valor no formulário acima"
+                                      >
+                                        <td className="py-3 text-indigo-400 font-bold">{slot.label}</td>
+                                        <td className="py-3 text-emerald-500 font-black">{currentPrice}</td>
+                                        <td className="py-3 text-slate-400 font-medium normal-case max-w-sm truncate">{currentDesc}</td>
+                                        <td className="py-3">
+                                          {custom ? (
+                                            <span className="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 text-[7px] border border-indigo-500/20 uppercase font-black">
+                                              Salvo no Banco
+                                            </span>
+                                          ) : (
+                                            <span className="px-2 py-0.5 rounded bg-zinc-500/10 text-zinc-500 text-[7px] border border-zinc-500/20 uppercase font-bold">
+                                              Valor Padrão
+                                            </span>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
                   </>
                 );
               })()}
