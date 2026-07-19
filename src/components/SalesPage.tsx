@@ -63,28 +63,7 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
     const el = document.getElementById('pricing');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
-
   useEffect(() => {
-    const SUPA_URL = 'https://fhjdymzjikjnyafadhim.supabase.co';
-    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoamR5bXpqaWtqbnlhZmFkaGltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2Mjc2NjUsImV4cCI6MjA5MjIwMzY2NX0.7qQAYfwddqaDO7ywZUeSELs1UDzPFa3F1hwlVNOvNrs';
-
-    async function fetchFromSupabase(query: string) {
-      const url = `${SUPA_URL}/rest/v1/site_content?${query}`;
-      console.log('[SalesPage] Fetching:', url);
-      const res = await fetch(url, {
-        headers: {
-          'apikey': SUPA_KEY,
-          'Authorization': `Bearer ${SUPA_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!res.ok) {
-        console.error('[SalesPage] Supabase error:', res.status, res.statusText);
-        return [];
-      }
-      return await res.json();
-    }
-
     async function loadDynamicContent() {
       // 1. Indicadores (Valores estáveis)
       setIndicators([
@@ -94,17 +73,20 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         { title: 'BITCOIN', value: '345.200', symbol: 'R$' },
       ]);
 
-      // 2. Banners — busca direta do Supabase (sem depender de serverless /api/banners)
+      // 2. Banners — busca direta usando o cliente Supabase oficial
       try {
-        const bannerData = await fetchFromSupabase(
-          'content_type=in.(ad_skin_left_home,ad_skin_right_home,ad_skin_left,ad_skin_right)&is_active=eq.true&select=id,content_type,image_url,title,meta_value&order=created_at.desc'
-        );
-        console.log('[SalesPage] Banners recebidos:', bannerData?.length, bannerData);
+        const { data: bannerData, error: bannerError } = await supabase
+          .from('site_content')
+          .select('id,content_type,image_url,title,meta_value,description')
+          .in('content_type', ['ad_skin_left_home', 'ad_skin_right_home', 'ad_skin_left', 'ad_skin_right'])
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
 
-        if (bannerData && Array.isArray(bannerData) && bannerData.length > 0) {
+        if (bannerError) throw bannerError;
+
+        if (bannerData && bannerData.length > 0) {
           const left = bannerData.filter((b: any) => b.content_type === 'ad_skin_left_home' || b.content_type === 'ad_skin_left');
           const right = bannerData.filter((b: any) => b.content_type === 'ad_skin_right_home' || b.content_type === 'ad_skin_right');
-          console.log('[SalesPage] Left banners:', left.length, '| Right banners:', right.length);
           if (left.length > 0) setLeftBanners(left);
           if (right.length > 0) setRightBanners(right);
         }
@@ -114,11 +96,17 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
 
       // 3. Notícias recentes
       try {
-        const newsData = await fetchFromSupabase(
-          'content_type=in.(news,marketing)&is_active=eq.true&order=created_at.desc&limit=4&select=id,title,description,image_url,meta_value'
-        );
-        console.log('[SalesPage] News recebidas:', newsData?.length);
-        if (newsData && Array.isArray(newsData) && newsData.length > 0) {
+        const { data: newsData, error: newsError } = await supabase
+          .from('site_content')
+          .select('id,title,description,image_url,meta_value')
+          .in('content_type', ['news', 'marketing'])
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(4);
+
+        if (newsError) throw newsError;
+
+        if (newsData && newsData.length > 0) {
           setNews(newsData);
         }
       } catch (e) {
@@ -127,7 +115,14 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
 
       // 4. Dados Corporativos (Silencioso)
       try {
-        const corpData = await fetchFromSupabase('content_type=eq.corporate_data&limit=1');
+        const { data: corpData, error: corpError } = await supabase
+          .from('site_content')
+          .select('*')
+          .eq('content_type', 'corporate_data')
+          .limit(1);
+
+        if (corpError) throw corpError;
+
         const cData = corpData?.[0];
         if (cData) {
           setCorporateData({
