@@ -327,14 +327,14 @@ export default function AdReservationPage() {
           <div className="flex gap-2 p-1 bg-zinc-900/80 border border-white/5 rounded-2xl max-w-sm mb-4">
             <button
               type="button"
-              onClick={() => setActivePage('home')}
+              onClick={() => { setActivePage('home'); setSelectedSlot('ad_top'); setAdImageUrl(''); }}
               className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activePage === 'home' ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
             >
               🖥️ Página 1: Página Inicial
             </button>
             <button
               type="button"
-              onClick={() => setActivePage('internas')}
+              onClick={() => { setActivePage('internas'); setSelectedSlot('ad_skin_left'); setAdImageUrl(''); }}
               className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activePage === 'internas' ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
             >
               📄 Página 2: Páginas Internas
@@ -650,7 +650,24 @@ export default function AdReservationPage() {
                   </div>
                 )}
 
+                {/* Slots disponíveis por página */}
+                {(() => {
+                  // Slots exclusivos de cada página
+                  const HOME_SLOTS = ['ad_top', 'ad_vittacash_horizontal', 'ad_skin_left_home', 'ad_skin_right_home', 'ad_sidebar_1', 'ad_sidebar_2'];
+                  const INTERNAL_SLOTS = ['ad_skin_left', 'ad_skin_right', 'ad_sidebar_2', 'ad_internal_inline_1', 'ad_internal_inline_2', 'ad_internal_inline_3'];
+                  const allowedSlots = activePage === 'home' ? HOME_SLOTS : INTERNAL_SLOTS;
+                  const filteredSlots = AD_SLOTS_INFO.filter(s => allowedSlots.includes(s.type));
+                  return (
                 <div className="space-y-4">
+                  {/* Indicador da página selecionada no formulário */}
+                  <div className={`px-3 py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center gap-2 ${
+                    activePage === 'home'
+                      ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+                      : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                  }`}>
+                    {activePage === 'home' ? '🖥️ Reservando slot na Página Inicial (Home)' : '📄 Reservando slot nas Páginas Internas (Matérias)'}
+                  </div>
+
                   <div>
                     <label className="text-[9px] font-black uppercase tracking-widest ml-1 mb-1.5 block text-zinc-500">Formato Escolhido</label>
                     <div className="relative">
@@ -659,7 +676,7 @@ export default function AdReservationPage() {
                         onChange={(e) => setSelectedSlot(e.target.value)}
                         className="w-full bg-zinc-950/60 border border-white/5 px-4 py-3 rounded-xl outline-none text-xs font-black text-white focus:border-indigo-500 transition-all appearance-none uppercase border-none"
                       >
-                        {AD_SLOTS_INFO.map(s => (
+                        {filteredSlots.map(s => (
                           <option key={s.type} value={s.type} className="bg-zinc-950 text-white">
                             {s.label} ({s.price})
                           </option>
@@ -858,7 +875,9 @@ export default function AdReservationPage() {
                       ))}
                     </div>
                   </div>
-                </div>
+                 </div>
+                  );
+                })()}
 
                 <div className="pt-4">
                   <button 
