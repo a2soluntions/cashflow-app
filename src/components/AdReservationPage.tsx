@@ -174,13 +174,13 @@ export default function AdReservationPage() {
     if (isFull) {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[7px] font-black uppercase tracking-widest shadow">
-          ðŸ”´ Esgotado
+          🔴 Esgotado
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[7px] font-black uppercase tracking-widest shadow">
-        ðŸŸ¢ {free}/{max} {max > 1 ? 'slides' : 'vaga'}
+        🟢 {free}/{max} {max > 1 ? 'slides' : 'vaga'}
       </span>
     );
   };
@@ -422,14 +422,13 @@ export default function AdReservationPage() {
             </p>
           </div>
 
-          {/* SELETOR DE PÃGINAS DO MAPA */}
+          {/* SELETOR DE PÁGINAS DO MAPA */}
           <div className="flex gap-2 p-1 bg-zinc-900/80 border border-white/5 rounded-2xl max-w-sm mb-4">
             <button
               type="button"
               onClick={() => { setActivePage('home'); setSelectedSlot('ad_top'); setAdImageUrl(''); }}
               className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activePage === 'home' ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
             >
-              ðŸ–¥ï¸ PÃ¡gina 1: PÃ¡gina Inicial
               🖥️ Página 1: Página Inicial
             </button>
             <button
