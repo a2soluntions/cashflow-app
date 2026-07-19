@@ -301,9 +301,14 @@ export default function NewsArticle() {
             <span className="text-[6px] font-bold uppercase tracking-[0.4em] text-zinc-400">Inteligência Financeira</span>
           </div>
 
-          <button onClick={handleShare} className="p-2 text-zinc-400 hover:text-indigo-600 transition-colors">
-            <Share2 size={18} />
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/noticias/anunciar')} className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-[8px] md:text-[9px] font-black uppercase tracking-widest transition-all">
+              Anunciar
+            </button>
+            <button onClick={handleShare} className="p-2 text-zinc-400 hover:text-indigo-600 transition-colors" title="Compartilhar Notícia">
+              <Share2 size={16} />
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -395,7 +400,7 @@ export default function NewsArticle() {
               <li><Link to="/legal/privacy" className="hover:text-indigo-400 transition-colors">Privacidade</Link></li>
               <li><Link to="/legal/terms" className="hover:text-indigo-400 transition-colors">Termos de Uso</Link></li>
               <li><a href="/#pricing" className="hover:text-indigo-400 transition-colors">VittaConsultoria App</a></li>
-              <li><a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Tenho interesse em anunciar nos espaços publicitários do portal." target="_blank" rel="noreferrer" className="text-amber-500 hover:text-amber-400 transition-colors flex items-center gap-1.5 font-bold">📢 Anuncie Conosco</a></li>
+              <li><Link to="/noticias/anunciar" className="text-amber-500 hover:text-amber-400 transition-colors flex items-center gap-1.5 font-bold">📢 Anuncie Conosco</Link></li>
               <li>
                 <div className="flex flex-col gap-2 pt-2">
                   <a href="https://web.whatsapp.com/send?phone=5534998408962&text=Olá! Gostaria de falar com o suporte do Vitta Notícias." target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-bold">

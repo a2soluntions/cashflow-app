@@ -645,6 +645,9 @@ export default function VittaNews() {
 
           <div className="hidden md:flex items-center gap-4">
             <button className="p-2 text-zinc-400 hover:text-zinc-900 transition-colors"><Search size={20} /></button>
+            <button onClick={() => navigate('/noticias/anunciar')} className="px-5 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-[10px] font-black uppercase tracking-widest transition-all">
+              Anuncie Conosco
+            </button>
             <button onClick={() => navigate('/login')} className="px-5 md:px-8 py-2.5 md:py-3 bg-indigo-600 hover:bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/10">
               Assinar Pro
             </button>
