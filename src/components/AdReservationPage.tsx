@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowLeft, Megaphone, Send, Landmark, Calendar, MessageSquare, 
@@ -100,6 +100,90 @@ export default function AdReservationPage() {
   );
   const [activeSlideIdx, setActiveSlideIdx] = useState<number>(0);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Cotas máximas por slot (skins suportam até 6 anunciantes em carrossel)
+  const SLOT_MAX_COTAS: Record<string, number> = {
+    'ad_top': 1, 'ad_vittacash_horizontal': 1,
+    'ad_skin_left_home': 6, 'ad_skin_right_home': 6,
+    'ad_skin_left': 6, 'ad_skin_right': 6,
+    'ad_sidebar_1': 1, 'ad_sidebar_2': 1,
+    'ad_internal_inline_1': 1, 'ad_internal_inline_2': 1, 'ad_internal_inline_3': 1,
+  };
+
+  // Estado de ocupação dos slots (active + pending requests)
+  const [occupiedSlots, setOccupiedSlots] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const fetchOccupation = async () => {
+      const allTypes = Object.keys(SLOT_MAX_COTAS);
+      const pendingTypes = allTypes.map(t => `request_${t}`);
+
+      // Busca slots ativos
+      const { data: activeData } = await supabase
+        .from('site_content')
+        .select('content_type, meta_value')
+        .in('content_type', allTypes)
+        .eq('is_active', true);
+
+      // Busca solicitações pendentes
+      const { data: pendingData } = await supabase
+        .from('site_content')
+        .select('content_type, meta_value')
+        .in('content_type', pendingTypes)
+        .eq('is_active', false);
+
+      const counts: Record<string, number> = {};
+
+      // Conta slots ativos (skins contam pelos slides preenchidos)
+      (activeData || []).forEach((item: any) => {
+        const t = item.content_type;
+        if (t.includes('skin')) {
+          const slidesCount = (item.meta_value?.slides || []).filter((s: any) => s.image_url).length;
+          counts[t] = (counts[t] || 0) + Math.max(1, slidesCount);
+        } else {
+          counts[t] = (counts[t] || 0) + 1;
+        }
+      });
+
+      // Soma solicitações pendentes (cada uma é ao menos 1 cota)
+      (pendingData || []).forEach((item: any) => {
+        const t = item.content_type.replace('request_', '');
+        const slidesCount = t.includes('skin')
+          ? ((item.meta_value?.slides || []).filter((s: any) => s.image_url).length || 1)
+          : 1;
+        counts[t] = (counts[t] || 0) + slidesCount;
+      });
+
+      setOccupiedSlots(counts);
+    };
+
+    fetchOccupation();
+  }, []);
+
+  // Helper: retorna { used, max, free, isFull } para um slot
+  const getSlotStatus = (type: string) => {
+    const max = SLOT_MAX_COTAS[type] ?? 1;
+    const used = occupiedSlots[type] ?? 0;
+    const free = Math.max(0, max - used);
+    return { used, max, free, isFull: free === 0 };
+  };
+
+  // Helper: badge de disponibilidade para usar nos slots do mapa
+  const SlotBadge = ({ type }: { type: string }) => {
+    const { free, max, isFull } = getSlotStatus(type);
+    if (isFull) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[7px] font-black uppercase tracking-widest shadow">
+          🔴 Esgotado
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[7px] font-black uppercase tracking-widest shadow">
+        🟢 {free}/{max} {max > 1 ? 'slides' : 'vaga'}
+      </span>
+    );
+  };
 
   const cropAndResizeImage = (file: File, targetWidth: number, targetHeight: number): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -356,7 +440,11 @@ export default function AdReservationPage() {
                   {/* Skin Esquerda (Lateral Extrema) */}
                   <div 
                     onClick={() => { setSelectedSlot('ad_skin_left_home'); setIsFormOpen(true); }}
-                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${
+                      getSlotStatus('ad_skin_left_home').isFull
+                        ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                        : selectedSlot === 'ad_skin_left_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                    }`}
                   >
                     {selectedSlot === 'ad_skin_left_home' && adImageUrl ? (
                       <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Left" />
@@ -365,6 +453,7 @@ export default function AdReservationPage() {
                         <span>Skin Esquerda</span>
                         <span>(300x600)</span>
                         <span>R$ 380</span>
+                        <div className="mt-1"><SlotBadge type="ad_skin_left_home" /></div>
                       </>
                     )}
                   </div>
@@ -374,12 +463,19 @@ export default function AdReservationPage() {
                     {/* Banner do Topo */}
                     <div 
                       onClick={() => { setSelectedSlot('ad_top'); setIsFormOpen(true); }}
-                      className={`rounded-xl border text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[100px] flex items-center justify-center relative overflow-hidden ${selectedSlot === 'ad_top' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                      className={`rounded-xl border text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[100px] flex flex-col items-center justify-center gap-1.5 relative overflow-hidden ${
+                        getSlotStatus('ad_top').isFull
+                          ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                          : selectedSlot === 'ad_top' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg shadow-indigo-600/10' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                      }`}
                     >
                       {selectedSlot === 'ad_top' && adImageUrl ? (
                         <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Topo" />
                       ) : (
-                        <span>Banner do Topo (970x250) - R$ 450</span>
+                        <>
+                          <span>Banner do Topo (970x250) - R$ 450</span>
+                          <SlotBadge type="ad_top" />
+                        </>
                       )}
                     </div>
 
@@ -395,12 +491,19 @@ export default function AdReservationPage() {
                         {/* Banner do Centro */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_vittacash_horizontal'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex items-center justify-center relative overflow-hidden ${selectedSlot === 'ad_vittacash_horizontal' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
+                            getSlotStatus('ad_vittacash_horizontal').isFull
+                              ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                              : selectedSlot === 'ad_vittacash_horizontal' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                          }`}
                         >
                           {selectedSlot === 'ad_vittacash_horizontal' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Centro" />
                           ) : (
-                            <span>Banner de Centro (728x90) - R$ 240</span>
+                            <>
+                              <span>Banner de Centro (728x90) - R$ 240</span>
+                              <SlotBadge type="ad_vittacash_horizontal" />
+                            </>
                           )}
                         </div>
 
@@ -414,19 +517,31 @@ export default function AdReservationPage() {
                         {/* Sidebar 1 */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_sidebar_1'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest flex items-center justify-center cursor-pointer transition-all min-h-[100px] text-center relative overflow-hidden ${selectedSlot === 'ad_sidebar_1' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all min-h-[100px] text-center gap-1 relative overflow-hidden ${
+                            getSlotStatus('ad_sidebar_1').isFull
+                              ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                              : selectedSlot === 'ad_sidebar_1' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                          }`}
                         >
                           {selectedSlot === 'ad_sidebar_1' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Sidebar 1" />
                           ) : (
-                            <span>Sidebar 1 (300x300) - R$ 280</span>
+                            <>
+                              <span>Sidebar 1 (300x300)</span>
+                              <span>R$ 280</span>
+                              <SlotBadge type="ad_sidebar_1" />
+                            </>
                           )}
                         </div>
                         
                         {/* Sidebar 2 */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_sidebar_2'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center relative overflow-hidden flex-1 min-h-[200px] justify-center ${selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                          className={`rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 relative overflow-hidden flex-1 min-h-[200px] ${
+                            getSlotStatus('ad_sidebar_2').isFull
+                              ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                              : selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                          }`}
                         >
                           {selectedSlot === 'ad_sidebar_2' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Sidebar 2" />
@@ -435,6 +550,7 @@ export default function AdReservationPage() {
                               <span>Sidebar 2</span>
                               <span>(300x600)</span>
                               <span>R$ 320</span>
+                              <SlotBadge type="ad_sidebar_2" />
                             </>
                           )}
                         </div>
@@ -443,10 +559,14 @@ export default function AdReservationPage() {
                     </div>
                   </div>
 
-                  {/* Skin Direita (Lateral Extrema) */}
+                  {/* Skin Direita (Lateral Extrema) - Home */}
                   <div 
                     onClick={() => { setSelectedSlot('ad_skin_right_home'); setIsFormOpen(true); }}
-                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${
+                      getSlotStatus('ad_skin_right_home').isFull
+                        ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                        : selectedSlot === 'ad_skin_right_home' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                    }`}
                   >
                     {selectedSlot === 'ad_skin_right_home' && adImageUrl ? (
                       <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Right" />
@@ -455,6 +575,7 @@ export default function AdReservationPage() {
                         <span>Skin Direita</span>
                         <span>(300x600)</span>
                         <span>R$ 380</span>
+                        <div className="mt-1"><SlotBadge type="ad_skin_right_home" /></div>
                       </>
                     )}
                   </div>
@@ -464,10 +585,14 @@ export default function AdReservationPage() {
                 /* LAYOUT PÁGINA 2: PÁGINAS INTERNAS (MATÉRIAS) */
                 <div className="grid grid-cols-14 gap-4 items-stretch">
                   
-                  {/* Skin Esquerda (Lateral Extrema) */}
+                  {/* Skin Esquerda Internas (Lateral Extrema) */}
                   <div 
                     onClick={() => { setSelectedSlot('ad_skin_left'); setIsFormOpen(true); }}
-                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_left' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${
+                      getSlotStatus('ad_skin_left').isFull
+                        ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                        : selectedSlot === 'ad_skin_left' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                    }`}
                   >
                     {selectedSlot === 'ad_skin_left' && adImageUrl ? (
                       <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Left" />
@@ -476,6 +601,7 @@ export default function AdReservationPage() {
                         <span>Skin Esquerda</span>
                         <span>(300x600)</span>
                         <span>R$ 380</span>
+                        <div className="mt-1"><SlotBadge type="ad_skin_left" /></div>
                       </>
                     )}
                   </div>
@@ -495,12 +621,19 @@ export default function AdReservationPage() {
                         {/* Anúncio Interno 01 */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_internal_inline_1'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex items-center justify-center relative overflow-hidden ${selectedSlot === 'ad_internal_inline_1' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
+                            getSlotStatus('ad_internal_inline_1').isFull
+                              ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                              : selectedSlot === 'ad_internal_inline_1' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                          }`}
                         >
                           {selectedSlot === 'ad_internal_inline_1' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Interno 1" />
                           ) : (
-                            <span>Anúncio Interno 01 (728x90) - R$ 150</span>
+                            <>
+                              <span>Anúncio Interno 01 (728x90) - R$ 150</span>
+                              <SlotBadge type="ad_internal_inline_1" />
+                            </>
                           )}
                         </div>
 
@@ -512,33 +645,51 @@ export default function AdReservationPage() {
                         {/* Anúncio Interno 02 */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_internal_inline_2'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex items-center justify-center relative overflow-hidden ${selectedSlot === 'ad_internal_inline_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
+                            getSlotStatus('ad_internal_inline_2').isFull
+                              ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                              : selectedSlot === 'ad_internal_inline_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                          }`}
                         >
                           {selectedSlot === 'ad_internal_inline_2' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Interno 2" />
                           ) : (
-                            <span>Anúncio Interno 02 (728x90) - R$ 150</span>
+                            <>
+                              <span>Anúncio Interno 02 (728x90) - R$ 150</span>
+                              <SlotBadge type="ad_internal_inline_2" />
+                            </>
                           )}
                         </div>
 
                         {/* Anúncio Interno 03 */}
                         <div 
                           onClick={() => { setSelectedSlot('ad_internal_inline_3'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex items-center justify-center relative overflow-hidden ${selectedSlot === 'ad_internal_inline_3' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                          className={`rounded-xl border text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all min-h-[60px] flex flex-col items-center justify-center gap-1 relative overflow-hidden ${
+                            getSlotStatus('ad_internal_inline_3').isFull
+                              ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                              : selectedSlot === 'ad_internal_inline_3' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                          }`}
                         >
                           {selectedSlot === 'ad_internal_inline_3' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Interno 3" />
                           ) : (
-                            <span>Anúncio Interno 03 (728x90) - R$ 150</span>
+                            <>
+                              <span>Anúncio Interno 03 (728x90) - R$ 150</span>
+                              <SlotBadge type="ad_internal_inline_3" />
+                            </>
                           )}
                         </div>
                       </div>
 
-                      {/* Sidebar 2 */}
+                      {/* Sidebar 2 - Internas */}
                       <div className="col-span-2 flex flex-col justify-stretch">
                         <div 
                           onClick={() => { setSelectedSlot('ad_sidebar_2'); setIsFormOpen(true); }}
-                          className={`rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center relative overflow-hidden flex-1 min-h-[300px] justify-center ${selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                          className={`rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 relative overflow-hidden flex-1 min-h-[300px] ${
+                            getSlotStatus('ad_sidebar_2').isFull
+                              ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                              : selectedSlot === 'ad_sidebar_2' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                          }`}
                         >
                           {selectedSlot === 'ad_sidebar_2' && adImageUrl ? (
                             <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Sidebar 2" />
@@ -547,6 +698,7 @@ export default function AdReservationPage() {
                               <span>Sidebar 2</span>
                               <span>(300x600)</span>
                               <span>R$ 320</span>
+                              <SlotBadge type="ad_sidebar_2" />
                             </>
                           )}
                         </div>
@@ -555,10 +707,14 @@ export default function AdReservationPage() {
                     </div>
                   </div>
 
-                  {/* Skin Direita (Lateral Extrema) */}
+                  {/* Skin Direita Internas (Lateral Extrema) */}
                   <div 
                     onClick={() => { setSelectedSlot('ad_skin_right'); setIsFormOpen(true); }}
-                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${selectedSlot === 'ad_skin_right' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'}`}
+                    className={`col-span-3 rounded-xl border text-[8px] font-black uppercase tracking-widest flex flex-col items-center justify-center cursor-pointer transition-all text-center gap-1 min-h-[500px] relative overflow-hidden ${
+                      getSlotStatus('ad_skin_right').isFull
+                        ? 'bg-rose-900/20 border-rose-700/40 text-rose-500 cursor-not-allowed'
+                        : selectedSlot === 'ad_skin_right' ? 'bg-indigo-600/20 border-indigo-500 text-indigo-400 shadow-lg' : 'bg-zinc-800/20 border-white/5 hover:border-zinc-700 text-zinc-500'
+                    }`}
                   >
                     {selectedSlot === 'ad_skin_right' && adImageUrl ? (
                       <img src={adImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Preview Skin Right" />
@@ -567,6 +723,7 @@ export default function AdReservationPage() {
                         <span>Skin Direita</span>
                         <span>(300x600)</span>
                         <span>R$ 380</span>
+                        <div className="mt-1"><SlotBadge type="ad_skin_right" /></div>
                       </>
                     )}
                   </div>
