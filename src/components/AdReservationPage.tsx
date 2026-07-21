@@ -437,29 +437,29 @@ export default function AdReservationPage() {
         <div className="w-full space-y-12">
           
           <div>
-            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-4">
-              Anuncie no Maior Portal de <span className="text-indigo-500">NotÃ­cias</span>
+            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-tight mb-6">
+              Anuncie no Maior Portal de <span className="text-indigo-500">Notícias</span>
             </h1>
-            <p className="text-zinc-400 text-sm font-medium leading-relaxed max-w-xl">
-              Exiba sua marca para milhares de investidores, empreendedores e tomadores de decisÃ£o todos os dias. Selecione os espaÃ§os abaixo e reserve seu espaÃ§o em minutos.
+            <p className="text-zinc-400 text-sm font-semibold leading-relaxed max-w-2xl mb-8">
+              Exiba sua marca para milhares de investidores, empreendedores e tomadores de decisão todos os dias. Selecione os espaços abaixo e reserve seu espaço em minutos.
             </p>
           </div>
 
           {/* SELETOR DE PÁGINAS DO MAPA */}
-          <div className="flex gap-2 p-1 bg-zinc-900/80 border border-white/5 rounded-2xl max-w-sm mb-4">
+          <div className="flex gap-2 p-1 bg-zinc-900/80 border border-white/5 rounded-2xl max-w-sm mb-6">
             <button
               type="button"
               onClick={() => { setActivePage('home'); setSelectedSlot('ad_top'); setAdImageUrl(''); }}
               className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activePage === 'home' ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
             >
-              🖥️ Página 1: Página Inicial
+              🖥️ Página Inicial
             </button>
             <button
               type="button"
               onClick={() => { setActivePage('internas'); setSelectedSlot('ad_skin_left'); setAdImageUrl(''); }}
               className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${activePage === 'internas' ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}
             >
-              📄 Página 2: Páginas Internas
+              📄 Página Interna
             </button>
           </div>
 
