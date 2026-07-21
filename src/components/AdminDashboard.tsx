@@ -28,7 +28,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   // Estados para gerenciar slides de Skin Carrossel
   const [adSlides, setAdSlides] = useState<{ id: string; image_url: string; external_url: string; client_name: string; client_phone: string }[]>([]);
   const [activeSlideIdx, setActiveSlideIdx] = useState<number>(0);
-  // FORMULÃRIO LICENÃ‡AS
+  // FORMULÃRIO LICENÇAS
   const [clientName, setClientName] = useState('');
   const [saleValue, setSaleValue] = useState('');
   const [origin, setOrigin] = useState('Indicação');
@@ -201,13 +201,13 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       .reduce((acc, curr) => acc + (curr.price || 0), 0);
     const mrrGrowth = revenueLastMonth > 0 ? ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100 : 0;
 
-    // Clientes em risco: trial (preÃ§o 0) ou gratuito hÃ¡ mais de 5 dias
+    // Clientes em risco: trial (preço 0) ou gratuito hÃ¡ mais de 5 dias
     const atRisk = licenses.filter(l => {
       const daysSince = (now.getTime() - new Date(l.created_at).getTime()) / (1000 * 60 * 60 * 24);
       return (l.price === 0 || l.status === 'trial') && daysSince > 5;
     });
 
-    // Funil de planos por faixa de preÃ§o
+    // Funil de planos por faixa de preço
     const plans = {
       trial: licenses.filter(l => l.price === 0 || l.status === 'trial').length,
       basico: licenses.filter(l => l.price > 0 && l.price <= 25).length,
@@ -220,7 +220,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     licenses.forEach(l => { originsMap[l.origin || 'Direto'] = (originsMap[l.origin || 'Direto'] || 0) + 1; });
     const originData = Object.entries(originsMap).map(([name, value]) => ({ name, value }));
 
-    // Timeline para grÃ¡fico
+    // Timeline para gráfico
     const timelineData = licenses.slice(0, 12).reverse().map(l => ({
       name: new Date(l.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
       valor: l.price,
@@ -229,12 +229,12 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
     // Insights automÃ¡ticos por regras de negÃ³cio
     const insights: { type: 'danger' | 'warning' | 'info'; title: string; action: string }[] = [];
-    if (churnRate > 20) insights.push({ type: 'danger', title: `Churn em ${churnRate.toFixed(1)}%`, action: 'Ativar campanha de re-engajamento via WhatsApp. OfereÃ§a 1 mÃªs grÃ¡tis para reativar clientes inativos.' });
-    if (plans.trial > (plans.basico + plans.premium)) insights.push({ type: 'warning', title: 'Maioria ainda em Trial', action: 'Enviar email de conversÃ£o no D+3. Simplificar o onboarding para reduzir o tempo atÃ© o primeiro valor percebido.' });
+    if (churnRate > 20) insights.push({ type: 'danger', title: `Churn em ${churnRate.toFixed(1)}%`, action: 'Ativar campanha de re-engajamento via WhatsApp. OfereÃ§a 1 mês grÃ¡tis para reativar clientes inativos.' });
+    if (plans.trial > (plans.basico + plans.premium)) insights.push({ type: 'warning', title: 'Maioria ainda em Trial', action: 'Enviar email de conversão no D+3. Simplificar o onboarding para reduzir o tempo até o primeiro valor percebido.' });
     if (mrrGrowth < 0) insights.push({ type: 'danger', title: `MRR caindo ${Math.abs(mrrGrowth).toFixed(1)}%`, action: 'Revisar precificaÃ§Ã£o. Ativar downgrade para BÃ¡sico como barreira de saÃ­da antes do churn total.' });
-    if (plans.premium < Math.floor(plans.basico * 0.3) && plans.basico > 0) insights.push({ type: 'info', title: 'Baixa conversÃ£o BÃ¡sico â†’ Premium', action: 'Criar campanha de upsell focando em IA Advisor + Quita-DÃ­vidas. Oferecer trial de 7 dias do Premium para usuÃ¡rios BÃ¡sicos.' });
+    if (plans.premium < Math.floor(plans.basico * 0.3) && plans.basico > 0) insights.push({ type: 'info', title: 'Baixa conversão BÃ¡sico â†’ Premium', action: 'Criar campanha de upsell focando em IA Advisor + Quita-DÃ­vidas. Oferecer trial de 7 dias do Premium para usuários Básicos.' });
     if (atRisk.length > 2) insights.push({ type: 'warning', title: `${atRisk.length} clientes em risco de churn`, action: 'Contato direto via WhatsApp com script personalizado de recuperaÃ§Ã£o (ver scripts abaixo).' });
-    if (insights.length === 0) insights.push({ type: 'info', title: 'Base saudável', action: 'Continue monitorando. Foco em upsell: migrar usuÃ¡rios BÃ¡sicos para Premium.' });
+    if (insights.length === 0) insights.push({ type: 'info', title: 'Base saudável', action: 'Continue monitorando. Foco em upsell: migrar usuários Básicos para Premium.' });
 
     return { totalRevenue, totalClients, averageTicket, revenueThisMonth, revenueLastMonth, mrr, mrrGrowth, churnRate, activeClients, inactiveClients, atRisk, plans, originData, timelineData, ltv, insights, adRevenue, adRevenueThisMonth };
   }, [licenses]);
@@ -257,7 +257,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       }]);
       if (error) throw error;
       setClientName(''); setSaleValue(''); fetchData();
-      showAlert("LicenÃ§a Criada", "Chave Gerada: " + newKey, "info");
+      showAlert("Licença Criada", "Chave Gerada: " + newKey, "info");
     } catch (err: any) { showAlert("Erro ao criar", err.message, "error"); } finally { setLoading(false); }
   };
 
@@ -462,7 +462,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       const { error } = await supabase.from('site_content').insert([{
         content_type: 'ad_featured_video',
         title: 'Novo VÃ­deo A2 TV',
-        description: 'Descreva o conteÃºdo do vÃ­deo aqui para os usuÃ¡rios...',
+        description: 'Descreva o conteÃºdo do vÃ­deo aqui para os usuários...',
         is_active: true,
         meta_value: { external_url: 'https://www.youtube.com/watch?v=' }
       }]);
@@ -529,7 +529,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     let resume = "";
     let i = startIdx;
     
-    // Adiciona parÃ¡grafos atÃ© atingir o limite desejado
+    // Adiciona parÃ¡grafos até atingir o limite desejado
     while (i < paragraphs.length && resume.length < summaryCharLimit) {
       resume += paragraphs[i] + "\n\n";
       i++;
@@ -553,8 +553,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     // InteligÃªncia Baseada em Regras (A2 Insights)
     let generatedTitle = "Giro de Notícias: O que vocÃª precisa saber hoje";
     const genericPOVs = [
-      "Esta notÃ­cia destaca um movimento importante no cenÃ¡rio econÃ´mico. Ã‰ essencial acompanhar essas tendÃªncias para entender como o mercado pode influenciar decisões estratÃ©gicas e o planejamento financeiro no curto e mÃ©dio prazo.",
-      "O contexto apresentado reflete mudanÃ§as estruturais relevantes. Manter-se informado sobre essas atualizaÃ§Ãµes permite uma visÃ£o mais clara do mercado e facilita a adaptaÃ§Ã£o a novas realidades.",
+      "Esta notÃ­cia destaca um movimento importante no cenÃ¡rio econÃ´mico. Ã‰ essencial acompanhar essas tendÃªncias para entender como o mercado pode influenciar decisões estratégicas e o planejamento financeiro no curto e médio prazo.",
+      "O contexto apresentado reflete mudanÃ§as estruturais relevantes. Manter-se informado sobre essas atualizações permite uma visÃ£o mais clara do mercado e facilita a adaptaÃ§Ã£o a novas realidades.",
       "A situaÃ§Ã£o ilustra a dinamicidade da economia. Compreender esse cenÃ¡rio Ã© fundamental para quem busca se antecipar a possÃ­veis impactos e proteger seus investimentos de oscilaÃ§Ãµes inesperadas."
     ];
     let pov = genericPOVs[newOffset % genericPOVs.length];
@@ -567,9 +567,9 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       } else if (t.includes('dÃ³lar') || t.includes('dolar') || t.includes('cÃ¢mbio') || t.includes('fed') || t.includes('moeda')) {
         pov = "A volatilidade do cÃ¢mbio reflete incertezas globais e locais. A oscilaÃ§Ã£o do dÃ³lar pode pressionar a inflaÃ§Ã£o interna e afetar custos de importaÃ§Ã£o, servindo de termÃ´metro para a economia.";
         generatedTitle = "OscilaÃ§Ã£o do DÃ³lar: O que estÃ¡ por trÃ¡s da movimentaÃ§Ã£o cambial";
-      } else if (t.includes('inflaÃ§Ã£o') || t.includes('inflacao') || t.includes('ipca') || t.includes('preÃ§os') || t.includes('supermercado')) {
-        pov = "A pressÃ£o inflacionÃ¡ria continua a ser um desafio, reduzindo o poder de compra da populaÃ§Ã£o. Ã‰ um cenÃ¡rio que demanda atenÃ§Ã£o aos custos bÃ¡sicos e busca por proteÃ§Ã£o do valor real do dinheiro.";
-        generatedTitle = "Alta da InflaÃ§Ã£o: Perspectivas sobre o aumento de preÃ§os";
+      } else if (t.includes('inflaÃ§Ã£o') || t.includes('inflacao') || t.includes('ipca') || t.includes('preços') || t.includes('supermercado')) {
+        pov = "A pressÃ£o inflacionÃ¡ria continua a ser um desafio, reduzindo o poder de compra da populaÃ§Ã£o. Ã‰ um cenÃ¡rio que demanda atenÃ§Ã£o aos custos básicos e busca por proteÃ§Ã£o do valor real do dinheiro.";
+        generatedTitle = "Alta da InflaÃ§Ã£o: Perspectivas sobre o aumento de preços";
       } else if (t.includes('bitcoin') || t.includes('cripto') || t.includes('ethereum')) {
         pov = "O mercado de criptoativos segue demonstrando alta volatilidade e inovaÃ§Ã£o. A notÃ­cia ressalta a importÃ¢ncia de entender a tecnologia e os riscos antes de se expor a esse setor em constante transformaÃ§Ã£o.";
         generatedTitle = "MovimentaÃ§Ã£o em Criptomoedas: AnÃ¡lise do cenÃ¡rio digital";
@@ -998,7 +998,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
         {pendingRequests.length > 0 && (
           <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-3xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 mb-4 flex items-center gap-1.5">
-              ðŸ“¢ SolicitaÃ§Ãµes de Reserva Pendentes ({pendingRequests.length})
+              ðŸ“¢ Solicitações de Reserva Pendentes ({pendingRequests.length})
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {pendingRequests.map((req) => {
@@ -1269,7 +1269,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 onClick={() => {
                   showAlert(
                     "Limpar MemÃ³ria", 
-                    "Deseja forÃ§ar a limpeza do cache? O sistema irÃ¡ reiniciar para aplicar as atualizaÃ§Ãµes.", 
+                    "Deseja forçar a limpeza do cache? O sistema irá reiniciar para aplicar as atualizações.", 
                     "confirm",
                     () => {
                       navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
@@ -1310,11 +1310,11 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               {/* â”€â”€ KPI STRIP â”€â”€ */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {[
-                  { label: 'MRR (Recorrente)', val: formatCurrency(stats.mrr), sub: `${stats.mrrGrowth >= 0 ? 'â–²' : 'â–¼'} ${Math.abs(stats.mrrGrowth).toFixed(1)}% vs mÃªs ant.`, color: 'text-emerald-500', subColor: stats.mrrGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' },
-                  { label: 'Receita Publicidade', val: formatCurrency(stats.adRevenue), sub: `Este mÃªs: ${formatCurrency(stats.adRevenueThisMonth)}`, color: 'text-amber-500', subColor: 'text-slate-400' },
+                  { label: 'MRR (Recorrente)', val: formatCurrency(stats.mrr), sub: `${stats.mrrGrowth >= 0 ? 'â–²' : 'â–¼'} ${Math.abs(stats.mrrGrowth).toFixed(1)}% vs mês ant.`, color: 'text-emerald-500', subColor: stats.mrrGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' },
+                  { label: 'Receita Publicidade', val: formatCurrency(stats.adRevenue), sub: `Este mês: ${formatCurrency(stats.adRevenueThisMonth)}`, color: 'text-amber-500', subColor: 'text-slate-400' },
                   { label: 'Churn Rate', val: `${stats.churnRate.toFixed(1)}%`, sub: `${stats.inactiveClients.length} inativos`, color: stats.churnRate > 15 ? 'text-rose-500' : stats.churnRate > 5 ? 'text-amber-500' : 'text-emerald-500', subColor: 'text-slate-400' },
                   { label: 'Clientes Ativos', val: String(stats.activeClients.length), sub: `Base total: ${stats.totalClients}`, color: isLight ? 'text-slate-900' : 'text-white', subColor: 'text-slate-400' },
-                  { label: 'LTV MÃ©dio (12m)', val: formatCurrency(stats.ltv), sub: `Ticket: ${formatCurrency(stats.averageTicket)}`, color: 'text-blue-500', subColor: 'text-slate-400' },
+                  { label: 'LTV Médio (12m)', val: formatCurrency(stats.ltv), sub: `Ticket: ${formatCurrency(stats.averageTicket)}`, color: 'text-blue-500', subColor: 'text-slate-400' },
                 ].map((kpi, i) => (
                   <div key={i} className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
                     <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{kpi.label}</p>
@@ -1379,7 +1379,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                         ? 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20'
                         : 'bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/20'
                     }`}>
-                      {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : productType === 'Publicidade' ? 'Registrar Anúncio' : 'Salvar LicenÃ§a'}
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : productType === 'Publicidade' ? 'Registrar Anúncio' : 'Salvar Licença'}
                     </button>
                   </form>
                 </div>
@@ -1400,7 +1400,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               </div>
 
 
-              {/* â”€â”€ CHURN RADAR + FUNIL DE CONVERSÃƒO â”€â”€ */}
+              {/* â”€â”€ CHURN RADAR + FUNIL DE CONVERSÃO â”€â”€ */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Radar de Churn */}
                 <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
@@ -1419,7 +1419,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                           <div key={client.id} className="flex items-center justify-between p-3 bg-rose-500/5 rounded-xl border border-rose-500/10">
                             <div>
                               <p className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{client.client_name}</p>
-                              <p className="text-[9px] font-bold text-rose-400">{days} dias Â· Trial sem conversÃ£o</p>
+                              <p className="text-[9px] font-bold text-rose-400">{days} dias Â· Trial sem conversão</p>
                             </div>
                             <a href={`https://wa.me/5534998408962?text=${msg}`} target="_blank" rel="noreferrer"
                               className="px-3 py-1.5 bg-emerald-500 text-black text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-all flex items-center gap-1 shrink-0">
@@ -1457,7 +1457,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   {stats.plans.premium < stats.plans.basico && stats.plans.basico > 0 && (
                     <div className="mt-5 p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
                       <p className="text-[9px] font-black uppercase tracking-widest text-amber-500 mb-1">âš¡ AnÃ¡lise de Pricing (VariaÃ§Ã£o C)</p>
-                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Premium ({stats.plans.premium}) menor que BÃ¡sico ({stats.plans.basico}). O gap de valor entre R$19,90 e R$59,90 pode estar causando abandono. Considere trial de 7 dias do Premium para usuÃ¡rios BÃ¡sicos.</p>
+                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Premium ({stats.plans.premium}) menor que BÃ¡sico ({stats.plans.basico}). O gap de valor entre R$19,90 e R$59,90 pode estar causando abandono. Considere trial de 7 dias do Premium para usuários Básicos.</p>
                     </div>
                   )}
                 </div>
@@ -1507,7 +1507,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 </div>
               </div>
 
-              {/* â”€â”€ TABELA DE LICENÃ‡AS â”€â”€ */}
+              {/* â”€â”€ TABELA DE LICENÇAS â”€â”€ */}
               <div>
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2"><Users size={14}/> Base de Clientes</h3>
                 <div className={`overflow-x-auto rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
@@ -1707,7 +1707,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     <Newspaper size={20} className="text-indigo-500" />
                     <div>
                       <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Notícias Publicadas (Portal HQ)</h3>
-                      <p className="text-[9px] text-slate-400 uppercase font-bold mt-1">Gerencie as matÃ©rias e notÃ­cias ativas do feed do portal</p>
+                      <p className="text-[9px] text-slate-400 uppercase font-bold mt-1">Gerencie as matérias e notÃ­cias ativas do feed do portal</p>
                     </div>
                   </div>
                   <button 
@@ -1914,7 +1914,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                               disabled={safePage >= totalPages - 1}
                               className="flex items-center gap-1 px-3 py-1.5 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-400 text-slate-400 border border-white/10 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                             >
-                              AvanÃ§ar â†’
+                              Avançar â†’
                             </button>
                           </div>
                         </div>
