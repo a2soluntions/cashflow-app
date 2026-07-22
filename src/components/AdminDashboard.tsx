@@ -121,13 +121,13 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [hqImagePrompt, setHqImagePrompt] = useState('');
   const [hqExternalUrl, setHqExternalUrl] = useState('');
 
-  // NOVOS ESTADOS VITTANEWS HQ
+  // NOVOS ESTADOS A2NEWS HQ
   const [summaryCharLimit, setSummaryCharLimit] = useState<number>(300);
   const [includeVittaPov, setIncludeVittaPov] = useState<boolean>(true);
   const [resumeOffset, setResumeOffset] = useState<number>(0);
   const [pendingAdSlot, setPendingAdSlot] = useState<string | null>(null);
 
-  // ESTADOS DE FILTRO, PAGINAÃ‡ÃƒO E SELEÃ‡ÃƒO DA LISTA DE NOTÃCIAS HQ
+  // ESTADOS DE FILTRO, PAGINAÇÃO E SELEÇÃO DA LISTA DE NOTÃCIAS HQ
   const [hqFilterCategory, setHqFilterCategory] = useState<string>('Todas');
   const [hqLimit, setHqLimit] = useState<number>(10);
   const [hqPage, setHqPage] = useState<number>(0);
@@ -212,7 +212,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       .reduce((acc, curr) => acc + (curr.price || 0), 0);
     const mrrGrowth = revenueLastMonth > 0 ? ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100 : 0;
 
-    // Clientes em risco: trial (preço 0) ou gratuito hÃ¡ mais de 5 dias
+    // Clientes em risco: trial (preço 0) ou gratuito há mais de 5 dias
     const atRisk = licenses.filter(l => {
       const daysSince = (now.getTime() - new Date(l.created_at).getTime()) / (1000 * 60 * 60 * 24);
       return (l.price === 0 || l.status === 'trial') && daysSince > 5;
@@ -1327,7 +1327,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               {/* â”€â”€ KPI STRIP â”€â”€ */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {[
-                  { label: 'MRR (Recorrente)', val: formatCurrency(stats.mrr), sub: `${stats.mrrGrowth >= 0 ? 'â–²' : 'â–¼'} ${Math.abs(stats.mrrGrowth).toFixed(1)}% vs mês ant.`, color: 'text-emerald-500', subColor: stats.mrrGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' },
+                  { label: 'MRR (Recorrente)', val: formatCurrency(stats.mrr), sub: `${stats.mrrGrowth >= 0 ? '▲' : '▼'} ${Math.abs(stats.mrrGrowth).toFixed(1)}% vs mês ant.`, color: 'text-emerald-500', subColor: stats.mrrGrowth >= 0 ? 'text-emerald-400' : 'text-rose-400' },
                   { label: 'Receita Publicidade', val: formatCurrency(stats.adRevenue), sub: `Este mês: ${formatCurrency(stats.adRevenueThisMonth)}`, color: 'text-amber-500', subColor: 'text-slate-400' },
                   { label: 'Churn Rate', val: `${stats.churnRate.toFixed(1)}%`, sub: `${stats.inactiveClients.length} inativos`, color: stats.churnRate > 15 ? 'text-rose-500' : stats.churnRate > 5 ? 'text-amber-500' : 'text-emerald-500', subColor: 'text-slate-400' },
                   { label: 'Clientes Ativos', val: String(stats.activeClients.length), sub: `Base total: ${stats.totalClients}`, color: isLight ? 'text-slate-900' : 'text-white', subColor: 'text-slate-400' },
@@ -1769,15 +1769,15 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                         ? "w-full bg-white border border-slate-200 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-700 outline-none transition-all focus:border-indigo-500" 
                         : "w-full bg-white/5 border border-white/10 p-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider text-slate-300 outline-none transition-all focus:border-indigo-500"}
                     >
-                      <option value={10}>10 por pÃ¡gina</option>
-                      <option value={25}>25 por pÃ¡gina</option>
-                      <option value={50}>50 por pÃ¡gina</option>
-                      <option value={100}>100 por pÃ¡gina</option>
+                      <option value={10}>10 por página</option>
+                      <option value={25}>25 por página</option>
+                      <option value={50}>50 por página</option>
+                      <option value={100}>100 por página</option>
                     </select>
                   </div>
                 </div>
 
-                {/* TABELA COM SELEÃ‡ÃƒO MÃšLTIPLA, PAGINAÃ‡ÃƒO E EXCLUSÃƒO EM LOTE */}
+                {/* TABELA COM SELEÇÃO MÚLTIPLA, PAGINAÇÃO E EXCLUSÃO EM LOTE */}
                 {(() => {
                   // 1. Filtrar tipo de conteudo
                   let fullList = (siteContent || []).filter(c => c && c.content_type === 'news');
@@ -1814,7 +1814,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
                   return (
                     <div className="flex flex-col gap-3">
-                      {/* BARRA DE EXCLUSÃƒO EM LOTE */}
+                      {/* BARRA DE EXCLUSÃO EM LOTE */}
                       {selectedNewsIds.size > 0 && (
                         <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl">
                           <span className="text-[9px] font-black uppercase tracking-widest text-rose-400">
@@ -1849,7 +1849,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                                         checked={allPageSelected}
                                         onChange={toggleSelectAll}
                                         className="w-3.5 h-3.5 accent-indigo-500 cursor-pointer"
-                                        title="Selecionar todos desta pÃ¡gina"
+                                        title="Selecionar todos desta página"
                                       />
                                     </th>
                                     <th className="p-3 text-zinc-500">Imagem</th>
@@ -1910,7 +1910,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                         </div>
                       </div>
 
-                      {/* PAGINAÃ‡ÃƒO */}
+                      {/* PAGINAÇÃO */}
                       {totalCount > 0 && (
                         <div className="flex items-center justify-between gap-3 px-1">
                           <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
