@@ -438,7 +438,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     try {
       let formattedDescription = hqResume;
       if (includeVittaPov && hqPov.trim() !== '') {
-        formattedDescription += `\n\n**A2 Insights:**\n${hqPov}\n\nQuer organizar suas finanças na palma da mão e sem interrupçÃµes? Conheça nosso aplicativo gratuito.`;
+        formattedDescription += `\n\n**A2 Insights:**\n${hqPov}\n\nQuer organizar suas finanças na palma da mão e sem interrupções? Conheça nosso aplicativo gratuito.`;
       }
       formattedDescription += `\n\nInformaçÃµes originais baseadas na reportagem de ${hqSource}`;
       
@@ -568,7 +568,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
     setHqResume(resume);
 
-    // InteligÃªncia Baseada em Regras (A2 Insights)
+    // Inteligência Baseada em Regras (A2 Insights)
     let generatedTitle = "Giro de Notícias: O que você precisa saber hoje";
     const genericPOVs = [
       "Esta notícia destaca um movimento importante no cenário econômico. É essencial acompanhar essas tendÃªncias para entender como o mercado pode influenciar decisões estratégicas e o planejamento financeiro no curto e médio prazo.",
@@ -1353,7 +1353,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     {stats.insights.map((ins, i) => (
                       <div key={i} className={`p-4 rounded-2xl border flex flex-col gap-1.5 ${ins.type === 'danger' ? 'bg-rose-500/5 border-rose-500/20' : ins.type === 'warning' ? 'bg-amber-500/5 border-amber-500/20' : 'bg-blue-500/5 border-blue-500/20'}`}>
                         <span className={`text-[8px] font-black uppercase tracking-widest ${ins.type === 'danger' ? 'text-rose-500' : ins.type === 'warning' ? 'text-amber-500' : 'text-blue-400'}`}>
-                          {ins.type === 'danger' ? 'ðŸš¨ Crítico' : ins.type === 'warning' ? 'âš ï¸ Atenção' : 'â„¹ï¸ Insight'}
+                          {ins.type === 'danger' ? '🚨 Crítico' : ins.type === 'warning' ? '⚠️ Atenção' : 'ℹ️ Insight'}
                         </span>
                         <p className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'} leading-tight`}>{ins.title}</p>
                         <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'} font-medium leading-relaxed`}>{ins.action}</p>
@@ -1362,7 +1362,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   </div>
                 </div>
 
-                {/* FormulÃ¡rio — ocupa 1 coluna, alinhado ao topo */}
+                {/* Formulário — ocupa 1 coluna, alinhado ao topo */}
                 <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4`}>
                   <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 text-xs">
                     <Plus size={14}/> Registrar Nova Venda
