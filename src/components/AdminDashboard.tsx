@@ -227,12 +227,12 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       mes: new Date(l.created_at).toLocaleDateString('pt-BR', { month: 'short' }),
     }));
 
-    // Insights automÃ¡ticos por regras de negócio
+    // Insights automáticos por regras de negócio
     const insights: { type: 'danger' | 'warning' | 'info'; title: string; action: string }[] = [];
     if (churnRate > 20) insights.push({ type: 'danger', title: `Churn em ${churnRate.toFixed(1)}%`, action: 'Ativar campanha de re-engajamento via WhatsApp. Ofereça 1 mês grátis para reativar clientes inativos.' });
     if (plans.trial > (plans.basico + plans.premium)) insights.push({ type: 'warning', title: 'Maioria ainda em Trial', action: 'Enviar email de conversão no D+3. Simplificar o onboarding para reduzir o tempo até o primeiro valor percebido.' });
     if (mrrGrowth < 0) insights.push({ type: 'danger', title: `MRR caindo ${Math.abs(mrrGrowth).toFixed(1)}%`, action: 'Revisar precificação. Ativar downgrade para Básico como barreira de saída antes do churn total.' });
-    if (plans.premium < Math.floor(plans.basico * 0.3) && plans.basico > 0) insights.push({ type: 'info', title: 'Baixa conversão Básico â†’ Premium', action: 'Criar campanha de upsell focando em IA Advisor + Quita-Dívidas. Oferecer trial de 7 dias do Premium para usuários Básicos.' });
+    if (plans.premium < Math.floor(plans.basico * 0.3) && plans.basico > 0) insights.push({ type: 'info', title: 'Baixa conversão Básico → Premium', action: 'Criar campanha de upsell focando em IA Advisor + Quita-Dívidas. Oferecer trial de 7 dias do Premium para usuários Básicos.' });
     if (atRisk.length > 2) insights.push({ type: 'warning', title: `${atRisk.length} clientes em risco de churn`, action: 'Contato direto via WhatsApp com script personalizado de recuperação (ver scripts abaixo).' });
     if (insights.length === 0) insights.push({ type: 'info', title: 'Base saudável', action: 'Continue monitorando. Foco em upsell: migrar usuários Básicos para Premium.' });
 
@@ -339,7 +339,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
         if (imgDimensions.w > 0 && (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h)) {
           showAlert(
             "Ajustando Imagem",
-            `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte proporcional automÃ¡tico.`,
+            `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte proporcional automático.`,
             "info"
           );
           finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
@@ -536,7 +536,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     }
     resume = resume.trim();
 
-    // Se ficar excessivamente maior que o limite, fazemos um corte elegante no Ãºltimo ponto final
+    // Se ficar excessivamente maior que o limite, fazemos um corte elegante no último ponto final
     if (resume.length > summaryCharLimit + 100) {
       const cut = resume.substring(0, summaryCharLimit + 50);
       const lastPeriod = cut.lastIndexOf('.');
@@ -1095,7 +1095,6 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
             </div>
           ) : (
             <>
-            /* CONTAINER COM TAMANHO MAXIMO FIXO E BARRA DE ROLAGEM */
             <div className="max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
               <table className="w-full text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 <thead className="sticky top-0 bg-slate-50 dark:bg-zinc-950 z-10">
@@ -1491,7 +1490,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     {[
                       { label: 'Variação A · Abandono de Checkout', color: 'rose', msg: 'Olá! Notei que você iniciou seu cadastro no A2 Mentor mas não finalizou. Tivemos algum problema técnico ou posso esclarecer alguma dúvida sobre os planos? ðŸ˜Š' },
                       { label: 'Variação B · Reengajamento Premium', color: 'indigo', msg: 'Oi! Faz alguns dias que não te vejo por aqui. Sabia que o módulo de IA Advisor pode identificar onde seu dinheiro está vazando? Vale 5 minutos ðŸš€' },
-                      { label: 'Variação C · Upsell Básico â†’ Premium', color: 'amber', msg: 'Olá! VocÃª está no plano Básico e pode estar perdendo funcionalidades que fariam a diferença. Posso te dar 7 dias grátis no Premium para você testar?' },
+                      { label: 'Variação C · Upsell Básico → Premium', color: 'amber', msg: 'Olá! VocÃª está no plano Básico e pode estar perdendo funcionalidades que fariam a diferença. Posso te dar 7 dias grátis no Premium para você testar?' },
                     ].map((script) => (
                       <a key={script.label} href={`https://wa.me/5534998408962?text=${encodeURIComponent(script.msg)}`}
                         target="_blank" rel="noreferrer"
@@ -1594,7 +1593,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   </div>
                   <div className="md:col-span-3">
                     <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Endereço Completo</label>
-                    <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-lg font-bold text-sm outline-none`} value={corpAddress} onChange={e => setCorpAddress(e.target.value)} placeholder="Rua, NÃºmero, Bairro, Cidade - UF" />
+                    <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-lg font-bold text-sm outline-none`} value={corpAddress} onChange={e => setCorpAddress(e.target.value)} placeholder="Rua, Número, Bairro, Cidade - UF" />
                   </div>
                   <div className="md:col-span-3 flex justify-end">
                     <button className="px-8 py-3 bg-emerald-500 text-black font-black uppercase text-[10px] tracking-widest rounded-lg hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20">
@@ -1614,7 +1613,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   </h3>
                 </div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">
-                  Imagens exibidas nos painéis esquerdo (Web) e direito (Mobile) da tela inicial. Agora você pode adicionar mÃºltiplas imagens para criar um carrossel automÃ¡tico.
+                  Imagens exibidas nos painéis esquerdo (Web) e direito (Mobile) da tela inicial. Agora você pode adicionar múltiplas imagens para criar um carrossel automático.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1906,7 +1905,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                               disabled={safePage === 0}
                               className="flex items-center gap-1 px-3 py-1.5 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-400 text-slate-400 border border-white/10 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                             >
-                              â† Voltar
+                              ← Voltar
                             </button>
                             <button
                               type="button"
@@ -1914,7 +1913,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                               disabled={safePage >= totalPages - 1}
                               className="flex items-center gap-1 px-3 py-1.5 bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-400 text-slate-400 border border-white/10 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                             >
-                              Avançar â†’
+                              Avançar →
                             </button>
                           </div>
                         </div>
