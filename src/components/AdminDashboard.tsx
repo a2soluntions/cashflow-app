@@ -182,7 +182,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     const inactiveClients = licenses.filter(l => l.status !== 'active');
     const churnRate = totalClients > 0 ? (inactiveClients.length / totalClients) * 100 : 0;
 
-    // MRR: somente SaaS ativos (recorrentes) â€” exclui Publicidade e Desktop
+    // MRR: somente SaaS ativos (recorrentes) — exclui Publicidade e Desktop
     const saasActive = activeClients.filter(l => l.product_type === 'SaaS');
     const mrr = saasActive.reduce((acc, curr) => acc + (curr.price || 0), 0);
 
@@ -215,7 +215,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       desktop: licenses.filter(l => l.product_type === 'Desktop' || l.price >= 200).length,
     };
 
-    // DistribuiÃ§Ã£o por origem
+    // Distribuição por origem
     const originsMap: Record<string, number> = {};
     licenses.forEach(l => { originsMap[l.origin || 'Direto'] = (originsMap[l.origin || 'Direto'] || 0) + 1; });
     const originData = Object.entries(originsMap).map(([name, value]) => ({ name, value }));
@@ -227,13 +227,13 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       mes: new Date(l.created_at).toLocaleDateString('pt-BR', { month: 'short' }),
     }));
 
-    // Insights automÃ¡ticos por regras de negÃ³cio
+    // Insights automÃ¡ticos por regras de negócio
     const insights: { type: 'danger' | 'warning' | 'info'; title: string; action: string }[] = [];
-    if (churnRate > 20) insights.push({ type: 'danger', title: `Churn em ${churnRate.toFixed(1)}%`, action: 'Ativar campanha de re-engajamento via WhatsApp. OfereÃ§a 1 mês grÃ¡tis para reativar clientes inativos.' });
+    if (churnRate > 20) insights.push({ type: 'danger', title: `Churn em ${churnRate.toFixed(1)}%`, action: 'Ativar campanha de re-engajamento via WhatsApp. Ofereça 1 mês grátis para reativar clientes inativos.' });
     if (plans.trial > (plans.basico + plans.premium)) insights.push({ type: 'warning', title: 'Maioria ainda em Trial', action: 'Enviar email de conversão no D+3. Simplificar o onboarding para reduzir o tempo até o primeiro valor percebido.' });
-    if (mrrGrowth < 0) insights.push({ type: 'danger', title: `MRR caindo ${Math.abs(mrrGrowth).toFixed(1)}%`, action: 'Revisar precificaÃ§Ã£o. Ativar downgrade para BÃ¡sico como barreira de saÃ­da antes do churn total.' });
-    if (plans.premium < Math.floor(plans.basico * 0.3) && plans.basico > 0) insights.push({ type: 'info', title: 'Baixa conversão BÃ¡sico â†’ Premium', action: 'Criar campanha de upsell focando em IA Advisor + Quita-DÃ­vidas. Oferecer trial de 7 dias do Premium para usuários Básicos.' });
-    if (atRisk.length > 2) insights.push({ type: 'warning', title: `${atRisk.length} clientes em risco de churn`, action: 'Contato direto via WhatsApp com script personalizado de recuperaÃ§Ã£o (ver scripts abaixo).' });
+    if (mrrGrowth < 0) insights.push({ type: 'danger', title: `MRR caindo ${Math.abs(mrrGrowth).toFixed(1)}%`, action: 'Revisar precificação. Ativar downgrade para Básico como barreira de saída antes do churn total.' });
+    if (plans.premium < Math.floor(plans.basico * 0.3) && plans.basico > 0) insights.push({ type: 'info', title: 'Baixa conversão Básico â†’ Premium', action: 'Criar campanha de upsell focando em IA Advisor + Quita-Dívidas. Oferecer trial de 7 dias do Premium para usuários Básicos.' });
+    if (atRisk.length > 2) insights.push({ type: 'warning', title: `${atRisk.length} clientes em risco de churn`, action: 'Contato direto via WhatsApp com script personalizado de recuperação (ver scripts abaixo).' });
     if (insights.length === 0) insights.push({ type: 'info', title: 'Base saudável', action: 'Continue monitorando. Foco em upsell: migrar usuários Básicos para Premium.' });
 
     return { totalRevenue, totalClients, averageTicket, revenueThisMonth, revenueLastMonth, mrr, mrrGrowth, churnRate, activeClients, inactiveClients, atRisk, plans, originData, timelineData, ltv, insights, adRevenue, adRevenueThisMonth };
@@ -339,7 +339,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
         if (imgDimensions.w > 0 && (imgDimensions.w !== targetDimensions.w || imgDimensions.h !== targetDimensions.h)) {
           showAlert(
             "Ajustando Imagem",
-            `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaÃ§o Ã© ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte proporcional automÃ¡tico.`,
+            `Dimensões: ${imgDimensions.w}x${imgDimensions.h}. O tamanho ideal para este espaço é ${targetDimensions.w}x${targetDimensions.h}. Faremos o ajuste e recorte proporcional automÃ¡tico.`,
             "info"
           );
           finalFile = await cropAndResizeImage(file, targetDimensions.w, targetDimensions.h);
@@ -377,7 +377,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
         showAlert("Imagem Carregada", "A imagem do banner foi enviada e preenchida com sucesso!", "info");
       } else if (pendingAdSlot) {
         setLoading(true);
-        // Se pendingAdSlot contÃ©m um ID apÃ³s o tipo (ex: "home_banner_left:id"), Ã© um update
+        // Se pendingAdSlot contém um ID após o tipo (ex: "home_banner_left:id"), é um update
         const [type, id] = pendingAdSlot.split(':');
         
         const currentAd = id ? siteContent.find(c => c.id === id) : null;
@@ -420,9 +420,9 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     try {
       let formattedDescription = hqResume;
       if (includeVittaPov && hqPov.trim() !== '') {
-        formattedDescription += `\n\n**A2 Insights:**\n${hqPov}\n\nQuer organizar suas finanÃ§as na palma da mÃ£o e sem interrupÃ§Ãµes? ConheÃ§a nosso aplicativo gratuito.`;
+        formattedDescription += `\n\n**A2 Insights:**\n${hqPov}\n\nQuer organizar suas finanças na palma da mão e sem interrupçÃµes? Conheça nosso aplicativo gratuito.`;
       }
-      formattedDescription += `\n\nInformaÃ§Ãµes originais baseadas na reportagem de ${hqSource}`;
+      formattedDescription += `\n\nInformaçÃµes originais baseadas na reportagem de ${hqSource}`;
       
       const { error } = await supabase.from('site_content').insert([{ 
         content_type: 'news', 
@@ -439,7 +439,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
       
       handleClearHq();
       fetchData();
-      showAlert("Notícia Publicada!", "A curadoria foi salva e jÃ¡ estÃ¡ no ar no A2 Notícias.", "info");
+      showAlert("Notícia Publicada!", "A curadoria foi salva e jÃ¡ está no ar no A2 Notícias.", "info");
       setActiveTab('a2noticias');
     } catch (err: any) { 
       showAlert("Erro ao salvar", err.message, "error"); 
@@ -461,14 +461,14 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     try {
       const { error } = await supabase.from('site_content').insert([{
         content_type: 'ad_featured_video',
-        title: 'Novo VÃ­deo A2 TV',
-        description: 'Descreva o conteÃºdo do vÃ­deo aqui para os usuários...',
+        title: 'Novo Vídeo A2 TV',
+        description: 'Descreva o conteúdo do vídeo aqui para os usuários...',
         is_active: true,
         meta_value: { external_url: 'https://www.youtube.com/watch?v=' }
       }]);
       if (error) throw error;
       fetchData();
-      showAlert("VÃ­deo Adicionado", "Um novo slot de vÃ­deo foi criado. Agora vocÃª pode editar os detalhes.", "info");
+      showAlert("Vídeo Adicionado", "Um novo slot de vídeo foi criado. Agora você pode editar os detalhes.", "info");
     } catch (err: any) {
       showAlert("Erro ao adicionar", err.message, "error");
     } finally {
@@ -478,8 +478,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
   const handleCleanupNews = async () => {
     showAlert(
-      "AtenÃ§Ã£o: Limpeza de Banco", 
-      "Tem certeza que deseja apagar permanentemente todas as notÃ­cias e conteÃºdos com mais de 7 dias? Esta aÃ§Ã£o otimiza a performance e economiza espaÃ§o, mas não pode ser desfeita.",
+      "Atenção: Limpeza de Banco", 
+      "Tem certeza que deseja apagar permanentemente todas as notícias e conteúdos com mais de 7 dias? Esta ação otimiza a performance e economiza espaço, mas não pode ser desfeita.",
       "confirm",
       async () => {
         setLoading(true);
@@ -496,7 +496,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
           if (error) throw error;
           
           fetchData();
-          showAlert("Limpeza ConcluÃ­da!", "O banco de dados foi limpo. Notícias antigas foram removidas com sucesso.", "info");
+          showAlert("Limpeza Concluída!", "O banco de dados foi limpo. Notícias antigas foram removidas com sucesso.", "info");
         } catch (err: any) {
           showAlert("Erro na limpeza", err.message, "error");
         } finally {
@@ -508,7 +508,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
   const handleAutoGenerate = (isNew: boolean = false) => {
     if (!hqRawText.trim()) {
-      showAlert("AtenÃ§Ã£o", "Cole a notÃ­cia bruta primeiro.", "error");
+      showAlert("Atenção", "Cole a notícia bruta primeiro.", "error");
       return;
     }
 
@@ -520,11 +520,11 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     const paragraphs = hqRawText.split('\n').filter(l => l.trim().length > 20);
     
     if (paragraphs.length === 0) {
-      showAlert("Erro", "O texto inserido Ã© muito curto para gerar um contexto lÃ³gico.", "error");
+      showAlert("Erro", "O texto inserido é muito curto para gerar um contexto lógico.", "error");
       return;
     }
     
-    // LÃ³gica Extrativa: usamos parÃ¡grafos inteiros para não quebrar a lÃ³gica do texto
+    // Lógica Extrativa: usamos parÃ¡grafos inteiros para não quebrar a lógica do texto
     const startIdx = newOffset % paragraphs.length;
     let resume = "";
     let i = startIdx;
@@ -551,34 +551,34 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     setHqResume(resume);
 
     // InteligÃªncia Baseada em Regras (A2 Insights)
-    let generatedTitle = "Giro de Notícias: O que vocÃª precisa saber hoje";
+    let generatedTitle = "Giro de Notícias: O que você precisa saber hoje";
     const genericPOVs = [
-      "Esta notÃ­cia destaca um movimento importante no cenÃ¡rio econÃ´mico. Ã‰ essencial acompanhar essas tendÃªncias para entender como o mercado pode influenciar decisões estratégicas e o planejamento financeiro no curto e médio prazo.",
-      "O contexto apresentado reflete mudanÃ§as estruturais relevantes. Manter-se informado sobre essas atualizações permite uma visÃ£o mais clara do mercado e facilita a adaptaÃ§Ã£o a novas realidades.",
-      "A situaÃ§Ã£o ilustra a dinamicidade da economia. Compreender esse cenÃ¡rio Ã© fundamental para quem busca se antecipar a possÃ­veis impactos e proteger seus investimentos de oscilaÃ§Ãµes inesperadas."
+      "Esta notícia destaca um movimento importante no cenário econômico. É essencial acompanhar essas tendÃªncias para entender como o mercado pode influenciar decisões estratégicas e o planejamento financeiro no curto e médio prazo.",
+      "O contexto apresentado reflete mudanças estruturais relevantes. Manter-se informado sobre essas atualizações permite uma visão mais clara do mercado e facilita a adaptação a novas realidades.",
+      "A situação ilustra a dinamicidade da economia. Compreender esse cenário é fundamental para quem busca se antecipar a possíveis impactos e proteger seus investimentos de oscilações inesperadas."
     ];
     let pov = genericPOVs[newOffset % genericPOVs.length];
 
     if (includeVittaPov) {
       const t = (hqRawText + " " + hqTitle).toLowerCase();
       if (t.includes('selic') || t.includes('juros') || t.includes('copom') || t.includes('taxa base')) {
-        pov = "Esta mudanÃ§a na taxa de juros sinaliza um redirecionamento da polÃ­tica monetÃ¡ria. Isso geralmente impacta tanto o custo do crÃ©dito quanto a rentabilidade de investimentos em renda fixa, exigindo cautela.";
+        pov = "Esta mudança na taxa de juros sinaliza um redirecionamento da política monetÃ¡ria. Isso geralmente impacta tanto o custo do crédito quanto a rentabilidade de investimentos em renda fixa, exigindo cautela.";
         generatedTitle = "Nova Taxa Selic: Entenda os impactos da decisão";
-      } else if (t.includes('dÃ³lar') || t.includes('dolar') || t.includes('cÃ¢mbio') || t.includes('fed') || t.includes('moeda')) {
-        pov = "A volatilidade do cÃ¢mbio reflete incertezas globais e locais. A oscilaÃ§Ã£o do dÃ³lar pode pressionar a inflaÃ§Ã£o interna e afetar custos de importaÃ§Ã£o, servindo de termÃ´metro para a economia.";
-        generatedTitle = "OscilaÃ§Ã£o do DÃ³lar: O que estÃ¡ por trÃ¡s da movimentaÃ§Ã£o cambial";
-      } else if (t.includes('inflaÃ§Ã£o') || t.includes('inflacao') || t.includes('ipca') || t.includes('preços') || t.includes('supermercado')) {
-        pov = "A pressÃ£o inflacionÃ¡ria continua a ser um desafio, reduzindo o poder de compra da populaÃ§Ã£o. Ã‰ um cenÃ¡rio que demanda atenÃ§Ã£o aos custos básicos e busca por proteÃ§Ã£o do valor real do dinheiro.";
-        generatedTitle = "Alta da InflaÃ§Ã£o: Perspectivas sobre o aumento de preços";
+      } else if (t.includes('dólar') || t.includes('dolar') || t.includes('câmbio') || t.includes('fed') || t.includes('moeda')) {
+        pov = "A volatilidade do câmbio reflete incertezas globais e locais. A oscilação do dólar pode pressionar a inflação interna e afetar custos de importação, servindo de termômetro para a economia.";
+        generatedTitle = "Oscilação do Dólar: O que está por trÃ¡s da movimentação cambial";
+      } else if (t.includes('inflação') || t.includes('inflacao') || t.includes('ipca') || t.includes('preços') || t.includes('supermercado')) {
+        pov = "A pressão inflacionária continua a ser um desafio, reduzindo o poder de compra da população. É um cenário que demanda atenção aos custos básicos e busca por proteção do valor real do dinheiro.";
+        generatedTitle = "Alta da Inflação: Perspectivas sobre o aumento de preços";
       } else if (t.includes('bitcoin') || t.includes('cripto') || t.includes('ethereum')) {
-        pov = "O mercado de criptoativos segue demonstrando alta volatilidade e inovaÃ§Ã£o. A notÃ­cia ressalta a importÃ¢ncia de entender a tecnologia e os riscos antes de se expor a esse setor em constante transformaÃ§Ã£o.";
-        generatedTitle = "MovimentaÃ§Ã£o em Criptomoedas: AnÃ¡lise do cenÃ¡rio digital";
-      } else if (t.includes('imposto') || t.includes('receita') || t.includes('tributo') || t.includes('governo') || t.includes('taxaÃ§Ã£o')) {
-        pov = "As novas diretrizes tributÃ¡rias podem alterar o planejamento financeiro de empresas e cidadÃ£os. Compreender essas regras Ã© o primeiro passo para otimizar custos e manter a conformidade fiscal.";
+        pov = "O mercado de criptoativos segue demonstrando alta volatilidade e inovação. A notícia ressalta a importância de entender a tecnologia e os riscos antes de se expor a esse setor em constante transformação.";
+        generatedTitle = "Movimentação em Criptomoedas: Análise do cenário digital";
+      } else if (t.includes('imposto') || t.includes('receita') || t.includes('tributo') || t.includes('governo') || t.includes('taxação')) {
+        pov = "As novas diretrizes tributárias podem alterar o planejamento financeiro de empresas e cidadãos. Compreender essas regras é o primeiro passo para otimizar custos e manter a conformidade fiscal.";
         generatedTitle = "Novas Regras TributÃ¡rias: O que muda na prÃ¡tica";
-      } else if (t.includes('famÃ­lia') || t.includes('familia') || t.includes('aperto') || t.includes('dÃ­vida') || t.includes('divida') || t.includes('inadimplÃªncia')) {
-        pov = "O endividamento e os desafios do orÃ§amento familiar refletem o cenÃ¡rio macroeconÃ´mico atual. A educaÃ§Ã£o financeira e a reestruturaÃ§Ã£o de dÃ­vidas sÃ£o caminhos apontados para a recuperaÃ§Ã£o da estabilidade.";
-        generatedTitle = "Desafios Financeiros: ReflexÃµes sobre o cenÃ¡rio atual";
+      } else if (t.includes('família') || t.includes('familia') || t.includes('aperto') || t.includes('dívida') || t.includes('divida') || t.includes('inadimplÃªncia')) {
+        pov = "O endividamento e os desafios do orçamento familiar refletem o cenário macroeconômico atual. A educação financeira e a reestruturação de dívidas são caminhos apontados para a recuperação da estabilidade.";
+        generatedTitle = "Desafios Financeiros: ReflexÃµes sobre o cenário atual";
       }
       setHqPov(pov);
     } else {
@@ -591,7 +591,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     setHqTitle(generatedTitle);
 
     if (!isNew) {
-      showAlert("Curadoria Gerada!", "A InteligÃªncia A2 analisou o texto e gerou o conteÃºdo automaticamente.", "info");
+      showAlert("Curadoria Gerada!", "A InteligÃªncia A2 analisou o texto e gerou o conteúdo automaticamente.", "info");
     }
   };
 
@@ -600,7 +600,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     setTimeout(() => {
       const basePrompt = hqImagePrompt.trim() !== ''
         ? hqImagePrompt.trim()
-        : (hqTitle.trim() !== '' ? hqTitle : "notÃ­cia economia finanÃ§as mercado");
+        : (hqTitle.trim() !== '' ? hqTitle : "notícia economia finanças mercado");
 
       const formattedPrompt = encodeURIComponent(
         basePrompt + " realistic professional photojournalism high quality finance news"
@@ -655,8 +655,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
   const handleDeleteContent = async (id: string) => {
     showAlert(
-      "Confirmar ExclusÃ£o", 
-      "Tem certeza que deseja remover este item do feed? Esta aÃ§Ã£o não pode ser desfeita.", 
+      "Confirmar Exclusão", 
+      "Tem certeza que deseja remover este item do feed? Esta ação não pode ser desfeita.", 
       "confirm",
       async () => {
         await supabase.from('site_content').delete().eq('id', id);
@@ -669,7 +669,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     if (selectedNewsIds.size === 0) return;
     showAlert(
       'Excluir Selecionadas',
-      `Tem certeza que deseja excluir ${selectedNewsIds.size} notÃ­cia(s) selecionada(s)? Esta aÃ§Ã£o não pode ser desfeita.`,
+      `Tem certeza que deseja excluir ${selectedNewsIds.size} notícia(s) selecionada(s)? Esta ação não pode ser desfeita.`,
       'confirm',
       async () => {
         setIsDeletingSelected(true);
@@ -811,13 +811,13 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
         showAlert("Erro ao Salvar", error.message, "error");
       } else {
         fetchData();
-        showAlert("Anúncio Atualizado", "As informaÃ§Ãµes do banner foram salvas com sucesso!", "info");
+        showAlert("Anúncio Atualizado", "As informaçÃµes do banner foram salvas com sucesso!", "info");
       }
     };
 
     return (
       <div className="animate-in slide-in-from-right-4 duration-500 mt-6 flex flex-col gap-8 flex-1 pr-2 md:pr-6 overflow-y-auto custom-scrollbar pb-12">
-        {/* A LOCAÃ‡ÃƒO E CONFIGURAÃ‡ÃƒO VISUAL DE ANÃšNCIOS Ã‰ FEITA APENAS PELO PORTAL A2MENTOR PUBLICIDADES */}
+        {/* A LOCAÃ‡ÃƒO E CONFIGURAÃ‡ÃƒO VISUAL DE ANÃšNCIOS É FEITA APENAS PELO PORTAL A2MENTOR PUBLICIDADES */}
 
         {/* MODAL POPUP PARA INSERÃ‡ÃƒO DE DADOS */}
         {selectedMapSlot && (
@@ -842,7 +842,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               {selectedMapSlot?.includes('skin') && (
                 <div className="mb-4">
                   <label className="text-[9px] font-black uppercase text-slate-400 mb-2 block">
-                    Carrossel de Slides â€” AtÃ© 6 Imagens ({adSlides.filter(s => s.image_url && s.image_url.trim() !== '').length} salva(s))
+                    Carrossel de Slides — Até 6 Imagens ({adSlides.filter(s => s.image_url && s.image_url.trim() !== '').length} salva(s))
                   </label>
                   <div className="grid grid-cols-6 gap-1 bg-zinc-800/40 p-1 border border-white/5 rounded-xl">
                     {[0, 1, 2, 3, 4, 5].map(idx => {
@@ -875,7 +875,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     })}
                   </div>
                   <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider text-center mt-1.5">
-                    Editando Slide {activeSlideIdx + 1} â€” {adSlides[activeSlideIdx]?.image_url ? 'âœ… Com imagem' : 'â¬œ Vazio'}
+                    Editando Slide {activeSlideIdx + 1} — {adSlides[activeSlideIdx]?.image_url ? 'âœ… Com imagem' : 'â¬œ Vazio'}
                   </div>
                 </div>
               )}
@@ -928,7 +928,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                           });
                         }
                       }}
-                      placeholder="URL da imagem ou faÃ§a upload..."
+                      placeholder="URL da imagem ou faça upload..."
                       className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-2.5 rounded-xl font-bold text-xs outline-none focus:border-indigo-500 transition-all text-slate-800 dark:text-white"
                     />
                     <button
@@ -1009,7 +1009,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     <div className="flex items-center gap-3 overflow-hidden">
                       <div className="w-14 aspect-video rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-white/5 flex-shrink-0">
                         {req.image_url ? (
-                          <img src={req.image_url} className="w-full h-full object-cover" alt="SolicitaÃ§Ã£o" />
+                          <img src={req.image_url} className="w-full h-full object-cover" alt="Solicitação" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-[8px] text-slate-400">Sem Img</div>
                         )}
@@ -1101,7 +1101,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 <thead className="sticky top-0 bg-slate-50 dark:bg-zinc-950 z-10">
                   <tr className="border-b border-slate-200 dark:border-white/5 pb-2 text-[8px]">
                     <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Preview</th>
-                    <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Slot / PosiÃ§Ã£o</th>
+                    <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Slot / Posição</th>
                     <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Anunciante</th>
                     <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Contato</th>
                     <th className="pb-3 text-zinc-500 bg-slate-50 dark:bg-zinc-900 px-2">Link Destino</th>
@@ -1268,7 +1268,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               <button 
                 onClick={() => {
                   showAlert(
-                    "Limpar MemÃ³ria", 
+                    "Limpar Memória", 
                     "Deseja forçar a limpeza do cache? O sistema irá reiniciar para aplicar as atualizações.", 
                     "confirm",
                     () => {
@@ -1327,16 +1327,16 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               {/* â”€â”€ PLANO DE AÃ‡ÃƒO IA  +  REGISTRAR VENDA â”€â”€ */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {/* Insights â€” ocupa 2 colunas */}
+                {/* Insights — ocupa 2 colunas */}
                 <div className="lg:col-span-2 flex flex-col gap-3">
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-500 flex items-center gap-2">
-                    <Brain size={14} /> Plano de Ação Inteligente â€” A2 Growth Engine
+                    <Brain size={14} /> Plano de Ação Inteligente - A2 Growth Engine
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 flex-1">
                     {stats.insights.map((ins, i) => (
                       <div key={i} className={`p-4 rounded-2xl border flex flex-col gap-1.5 ${ins.type === 'danger' ? 'bg-rose-500/5 border-rose-500/20' : ins.type === 'warning' ? 'bg-amber-500/5 border-amber-500/20' : 'bg-blue-500/5 border-blue-500/20'}`}>
                         <span className={`text-[8px] font-black uppercase tracking-widest ${ins.type === 'danger' ? 'text-rose-500' : ins.type === 'warning' ? 'text-amber-500' : 'text-blue-400'}`}>
-                          {ins.type === 'danger' ? 'ðŸš¨ CrÃ­tico' : ins.type === 'warning' ? 'âš ï¸ AtenÃ§Ã£o' : 'â„¹ï¸ Insight'}
+                          {ins.type === 'danger' ? 'ðŸš¨ Crítico' : ins.type === 'warning' ? 'âš ï¸ Atenção' : 'â„¹ï¸ Insight'}
                         </span>
                         <p className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'} leading-tight`}>{ins.title}</p>
                         <p className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'} font-medium leading-relaxed`}>{ins.action}</p>
@@ -1345,7 +1345,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   </div>
                 </div>
 
-                {/* FormulÃ¡rio â€” ocupa 1 coluna, alinhado ao topo */}
+                {/* FormulÃ¡rio — ocupa 1 coluna, alinhado ao topo */}
                 <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-5 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} flex flex-col gap-4`}>
                   <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 text-xs">
                     <Plus size={14}/> Registrar Nova Venda
@@ -1367,7 +1367,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                         <option className={`${isLight ? 'bg-white' : 'bg-white/10'}`}>WhatsApp</option>
                       </select>
                     </div>
-                    {/* Campo de anunciante (sÃ³ aparece quando tipo = Publicidade) */}
+                    {/* Campo de anunciante (só aparece quando tipo = Publicidade) */}
                     {productType === 'Publicidade' && (
                       <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
                         <p className="text-[8px] font-black uppercase tracking-widest text-amber-500 mb-1">ðŸ“¢ Venda de Publicidade</p>
@@ -1387,7 +1387,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
               {/* â”€â”€ TIMELINE COMPACTA â”€â”€ */}
               <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'} p-5`}>
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Receita por Venda â€” Timeline</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Receita por Venda - Timeline</h3>
                 <div className="h-[160px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={stats.timelineData}>
@@ -1404,7 +1404,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Radar de Churn */}
                 <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-4 flex items-center gap-2"><AlertTriangle size={14}/> Radar de Churn â€” Clientes em Risco</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-4 flex items-center gap-2"><AlertTriangle size={14}/> Radar de Churn - Clientes em Risco</h3>
                   {stats.atRisk.length === 0 ? (
                     <div className="flex items-center gap-3 p-4 bg-emerald-500/5 rounded-xl border border-emerald-500/20">
                       <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
@@ -1414,12 +1414,12 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     <div className="space-y-2 max-h-[260px] overflow-y-auto custom-scrollbar pr-1">
                       {stats.atRisk.map((client: any) => {
                         const days = Math.floor((Date.now() - new Date(client.created_at).getTime()) / 86400000);
-                        const msg = encodeURIComponent(`OlÃ¡ ${client.client_name}! Vi que vocÃª ainda não aproveitou tudo que o A2 Mentor tem a oferecer. Posso te ajudar com algo? ðŸš€`);
+                        const msg = encodeURIComponent(`Olá ${client.client_name}! Vi que você ainda não aproveitou tudo que o A2 Mentor tem a oferecer. Posso te ajudar com algo? ðŸš€`);
                         return (
                           <div key={client.id} className="flex items-center justify-between p-3 bg-rose-500/5 rounded-xl border border-rose-500/10">
                             <div>
                               <p className={`text-xs font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{client.client_name}</p>
-                              <p className="text-[9px] font-bold text-rose-400">{days} dias Â· Trial sem conversão</p>
+                              <p className="text-[9px] font-bold text-rose-400">{days} dias · Trial sem conversão</p>
                             </div>
                             <a href={`https://wa.me/5534998408962?text=${msg}`} target="_blank" rel="noreferrer"
                               className="px-3 py-1.5 bg-emerald-500 text-black text-[8px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-all flex items-center gap-1 shrink-0">
@@ -1432,15 +1432,15 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   )}
                 </div>
 
-                {/* Funil de ConversÃ£o */}
+                {/* Funil de Conversão */}
                 <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-5 flex items-center gap-2"><Filter size={14}/> Funil de ConversÃ£o</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-5 flex items-center gap-2"><Filter size={14}/> Funil de Conversão</h3>
                   <div className="space-y-4">
                     {[
                       { label: 'Trial / Cadastro', count: stats.plans.trial, color: 'bg-slate-400' },
-                      { label: 'Plano BÃ¡sico (R$19,90)', count: stats.plans.basico, color: 'bg-blue-500' },
+                      { label: 'Plano Básico (R$19,90)', count: stats.plans.basico, color: 'bg-blue-500' },
                       { label: 'Plano Premium (R$59,90)', count: stats.plans.premium, color: 'bg-emerald-500' },
-                      { label: 'Desktop VitalÃ­cio (R$497)', count: stats.plans.desktop, color: 'bg-amber-500' },
+                      { label: 'Desktop Vitalício (R$497)', count: stats.plans.desktop, color: 'bg-amber-500' },
                     ].map((stage) => (
                       <div key={stage.label}>
                         <div className="flex justify-between items-center mb-1.5">
@@ -1456,8 +1456,8 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   </div>
                   {stats.plans.premium < stats.plans.basico && stats.plans.basico > 0 && (
                     <div className="mt-5 p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-amber-500 mb-1">âš¡ AnÃ¡lise de Pricing (VariaÃ§Ã£o C)</p>
-                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Premium ({stats.plans.premium}) menor que BÃ¡sico ({stats.plans.basico}). O gap de valor entre R$19,90 e R$59,90 pode estar causando abandono. Considere trial de 7 dias do Premium para usuários Básicos.</p>
+                      <p className="text-[9px] font-black uppercase tracking-widest text-amber-500 mb-1">âš¡ Análise de Pricing (Variação C)</p>
+                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Premium ({stats.plans.premium}) menor que Básico ({stats.plans.basico}). O gap de valor entre R$19,90 e R$59,90 pode estar causando abandono. Considere trial de 7 dias do Premium para usuários Básicos.</p>
                     </div>
                   )}
                 </div>
@@ -1486,12 +1486,12 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
 
                 {/* Scripts WhatsApp */}
                 <div className={`${isLight ? 'bg-slate-50' : 'bg-white/5 backdrop-blur-3xl'} p-6 rounded-2xl border ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-4 flex items-center gap-2"><MessageCircle size={14}/> Scripts de RecuperaÃ§Ã£o</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-4 flex items-center gap-2"><MessageCircle size={14}/> Scripts de Recuperação</h3>
                   <div className="space-y-3">
                     {[
-                      { label: 'VariaÃ§Ã£o A Â· Abandono de Checkout', color: 'rose', msg: 'OlÃ¡! Notei que vocÃª iniciou seu cadastro no A2 Mentor mas não finalizou. Tivemos algum problema tÃ©cnico ou posso esclarecer alguma dÃºvida sobre os planos? ðŸ˜Š' },
-                      { label: 'VariaÃ§Ã£o B Â· Reengajamento Premium', color: 'indigo', msg: 'Oi! Faz alguns dias que não te vejo por aqui. Sabia que o mÃ³dulo de IA Advisor pode identificar onde seu dinheiro estÃ¡ vazando? Vale 5 minutos ðŸš€' },
-                      { label: 'VariaÃ§Ã£o C Â· Upsell BÃ¡sico â†’ Premium', color: 'amber', msg: 'OlÃ¡! VocÃª estÃ¡ no plano BÃ¡sico e pode estar perdendo funcionalidades que fariam a diferenÃ§a. Posso te dar 7 dias grÃ¡tis no Premium para vocÃª testar?' },
+                      { label: 'Variação A · Abandono de Checkout', color: 'rose', msg: 'Olá! Notei que você iniciou seu cadastro no A2 Mentor mas não finalizou. Tivemos algum problema técnico ou posso esclarecer alguma dúvida sobre os planos? ðŸ˜Š' },
+                      { label: 'Variação B · Reengajamento Premium', color: 'indigo', msg: 'Oi! Faz alguns dias que não te vejo por aqui. Sabia que o módulo de IA Advisor pode identificar onde seu dinheiro está vazando? Vale 5 minutos ðŸš€' },
+                      { label: 'Variação C · Upsell Básico â†’ Premium', color: 'amber', msg: 'Olá! VocÃª está no plano Básico e pode estar perdendo funcionalidades que fariam a diferença. Posso te dar 7 dias grátis no Premium para você testar?' },
                     ].map((script) => (
                       <a key={script.label} href={`https://wa.me/5534998408962?text=${encodeURIComponent(script.msg)}`}
                         target="_blank" rel="noreferrer"
@@ -1524,12 +1524,12 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                         <tr key={l.id} className="border-b border-slate-100 dark:border-white/[0.03] hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
                           <td className={`p-3 font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{l.client_name}</td>
                           <td className="p-3"><span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${l.product_type === 'SaaS' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-amber-500/10 text-amber-500'}`}>{l.product_type}</span></td>
-                          <td className="p-3 text-slate-500 font-bold">{l.origin || 'â€”'}</td>
+                          <td className="p-3 text-slate-500 font-bold">{l.origin || '—'}</td>
                           <td className="p-3 font-black text-emerald-500">{formatCurrency(l.price || 0)}</td>
                           <td className="p-3"><span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${l.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>{l.status}</span></td>
                           <td className="p-3 text-slate-400 font-bold">{new Date(l.created_at).toLocaleDateString('pt-BR')}</td>
                           <td className="p-3">
-                            <a href={`https://wa.me/5534998408962?text=${encodeURIComponent(`OlÃ¡ ${l.client_name}! Aqui Ã© da equipe A2 Mentor.`)}`} target="_blank" rel="noreferrer"
+                            <a href={`https://wa.me/5534998408962?text=${encodeURIComponent(`Olá ${l.client_name}! Aqui é da equipe A2 Mentor.`)}`} target="_blank" rel="noreferrer"
                               className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-emerald-500 transition-all inline-flex">
                               <MessageCircle size={13}/>
                             </a>
@@ -1554,7 +1554,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
               
               {/* INDEXADORES FINANCEIROS */}
               <div>
-                <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-[#3b82f6] mb-6 text-xs"><TrendingUp size={16}/> Indexadores EconÃ´micos (Manual / Cache)</h3>
+                <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-[#3b82f6] mb-6 text-xs"><TrendingUp size={16}/> Indexadores Econômicos (Manual / Cache)</h3>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
                   {['SELIC', 'IPCA', 'INPC', 'DÓLAR', 'BITCOIN'].map(key => (
                     <div key={key} className="pb-3 group">
@@ -1581,7 +1581,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                 <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-emerald-500 mb-6 text-xs"><ShieldCheck size={16}/> Dados Corporativos & Compliance</h3>
                 <form onSubmit={handleUpdateCorporate} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                   <div>
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">RazÃ£o Social</label>
+                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Razão Social</label>
                     <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-lg font-bold text-sm outline-none`} value={corpName} onChange={e => setCorpName(e.target.value)} placeholder="Ex: Vitta Digital Ltda" />
                   </div>
                   <div>
@@ -1593,7 +1593,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-lg font-bold text-sm outline-none`} value={corpPhone} onChange={e => setCorpPhone(e.target.value)} placeholder="(00) 00000-0000" />
                   </div>
                   <div className="md:col-span-3">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">EndereÃ§o Completo</label>
+                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2 block">Endereço Completo</label>
                     <input className={`w-full ${isLight ? 'bg-slate-100' : 'bg-white/5'} p-3 rounded-lg font-bold text-sm outline-none`} value={corpAddress} onChange={e => setCorpAddress(e.target.value)} placeholder="Rua, NÃºmero, Bairro, Cidade - UF" />
                   </div>
                   <div className="md:col-span-3 flex justify-end">
@@ -1614,13 +1614,13 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                   </h3>
                 </div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">
-                  Imagens exibidas nos painÃ©is esquerdo (Web) e direito (Mobile) da tela inicial. Agora vocÃª pode adicionar mÃºltiplas imagens para criar um carrossel automÃ¡tico.
+                  Imagens exibidas nos painéis esquerdo (Web) e direito (Mobile) da tela inicial. Agora você pode adicionar mÃºltiplas imagens para criar um carrossel automÃ¡tico.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {[
-                    { type: 'home_banner_left', label: 'Painel Web â€” Esquerdo (16:9)', aspect: 'aspect-[16/9]' },
-                    { type: 'home_banner_right', label: 'Painel Mobile â€” Direito (9:16)', aspect: 'aspect-[9/16]' }
+                    { type: 'home_banner_left', label: 'Painel Web — Esquerdo (16:9)', aspect: 'aspect-[16/9]' },
+                    { type: 'home_banner_right', label: 'Painel Mobile — Direito (9:16)', aspect: 'aspect-[9/16]' }
                   ].map((slot) => {
                     const items = siteContent.filter(c => c.content_type === slot.type);
                     return (
@@ -1707,7 +1707,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     <Newspaper size={20} className="text-indigo-500" />
                     <div>
                       <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200">Notícias Publicadas (Portal HQ)</h3>
-                      <p className="text-[9px] text-slate-400 uppercase font-bold mt-1">Gerencie as matérias e notÃ­cias ativas do feed do portal</p>
+                      <p className="text-[9px] text-slate-400 uppercase font-bold mt-1">Gerencie as matérias e notícias ativas do feed do portal</p>
                     </div>
                   </div>
                   <button 
@@ -1733,10 +1733,10 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                     >
                       <option value="Todas">Todas as Categorias</option>
                       <option value="Mercado">Mercado</option>
-                      <option value="FinanÃ§as">FinanÃ§as</option>
+                      <option value="Finanças">Finanças</option>
                       <option value="Investimentos">Investimentos</option>
                       <option value="Tecnologia">Tecnologia</option>
-                      <option value="NegÃ³cios">NegÃ³cios</option>
+                      <option value="Negócios">Negócios</option>
                       <option value="VittaCash">VittaCash</option>
                       <option value="Atualidades">Atualidades</option>
                     </select>
@@ -1801,7 +1801,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                       {selectedNewsIds.size > 0 && (
                         <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl">
                           <span className="text-[9px] font-black uppercase tracking-widest text-rose-400">
-                            {selectedNewsIds.size} notÃ­cia(s) selecionada(s)
+                            {selectedNewsIds.size} notícia(s) selecionada(s)
                           </span>
                           <button
                             type="button"
@@ -1819,7 +1819,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                         <div className="max-h-[450px] overflow-y-auto custom-scrollbar">
                           {totalCount === 0 ? (
                             <div className="text-center py-12 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                              Nenhuma notÃ­cia correspondente encontrada.
+                              Nenhuma notícia correspondente encontrada.
                             </div>
                           ) : (
                             <div className="overflow-x-auto">
@@ -1836,7 +1836,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                                       />
                                     </th>
                                     <th className="p-3 text-zinc-500">Imagem</th>
-                                    <th className="p-3 text-zinc-500">TÃ­tulo</th>
+                                    <th className="p-3 text-zinc-500">Título</th>
                                     <th className="p-3 text-zinc-500">Categoria</th>
                                     <th className="p-3 text-zinc-500">Publicado Em</th>
                                     <th className="p-3 text-zinc-500 text-right">Ações</th>
@@ -1897,7 +1897,7 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
                       {totalCount > 0 && (
                         <div className="flex items-center justify-between gap-3 px-1">
                           <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                            Página {safePage + 1} de {totalPages} &nbsp;Â·&nbsp; {totalCount} notÃ­cias
+                            Página {safePage + 1} de {totalPages} &nbsp;·&nbsp; {totalCount} notícias
                           </span>
                           <div className="flex items-center gap-2">
                             <button
