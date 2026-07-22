@@ -26,13 +26,16 @@ const CATEGORY_SOURCES = [
     sources: [
       'https://revistapegn.globo.com/rss',
       'https://g1.globo.com/rss/g1/economia/negocios/',
+      'https://agenciasebrae.com.br/feed/',
+      'https://blog.rdstation.com/feed/',
+      'https://www.alomorfia.com.br/feed/',
     ],
     images: [
       'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=600&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1559136555-9303baea8ebd?q=80&w=600&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=600&auto=format&fit=crop',
     ],
-    aiContext: 'empreendedorismo, negócios, startups, gestão empresarial, pequenas e médias empresas',
+    aiContext: 'empreendedorismo, marketing digital, vendas, negócios, startups, gestão empresarial, pequenas e médias empresas',
     source_name: 'Pequenas Empresas & Grandes Negócios',
   },
   {
@@ -250,8 +253,21 @@ Contexto: "${item.description}"`;
             if (generated) finalContent = generated;
           }
 
-          if (!finalContent.includes('reportagem de')) {
-            finalContent += `\n\nInformações originais baseadas em: ${source.source_name}.`;
+          let resolvedSource = source.source_name;
+          if (item.link.includes('sebrae.com.br') || rssUrl.includes('sebrae')) {
+            resolvedSource = 'Agência Sebrae de Notícias';
+          } else if (item.link.includes('rdstation.com') || rssUrl.includes('rdstation')) {
+            resolvedSource = 'RD Station';
+          } else if (item.link.includes('alomorfia.com.br') || rssUrl.includes('alomorfia')) {
+            resolvedSource = 'Revista Alomorfia';
+          } else if (item.link.includes('pegn') || item.link.includes('revistapegn') || rssUrl.includes('pegn')) {
+            resolvedSource = 'Pequenas Empresas & Grandes Negócios';
+          } else if (item.link.includes('g1.globo.com') || rssUrl.includes('g1.globo')) {
+            resolvedSource = 'G1 Economia';
+          }
+
+          if (!finalContent.includes('reportagem de') && !finalContent.includes('baseadas em')) {
+            finalContent += `\n\nInformações originais baseadas em: ${resolvedSource}.`;
           }
 
           const imageUrl = source.images[i % source.images.length];
