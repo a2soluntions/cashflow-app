@@ -141,12 +141,23 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
   const [adsViewMode, setAdsViewMode] = useState<'financeiro' | 'valores'>('financeiro');
 
   const fetchData = async () => {
-    const { data: licData } = await supabase.from('licenses').select('*').order('created_at', { ascending: false });
-    if (licData) setLicenses(licData);
-
     const { data: contData } = await supabase.from('site_content').select('*').order('created_at', { ascending: false });
     if (contData) {
       setSiteContent(contData);
+      const licData = contData
+        .filter(c => c && c.content_type === 'license')
+        .map(c => ({
+          id: c.id,
+          created_at: c.created_at,
+          key: c.image_url,
+          client_name: c.title,
+          status: c.meta_value?.status || 'active',
+          price: c.meta_value?.price || 0,
+          origin: c.meta_value?.origin || '',
+          product_type: c.description
+        }));
+      setLicenses(licData);
+
       const newInds = { ...indicators };
       contData.filter(c => c.content_type === 'indicator').forEach(ind => {
         if (newInds[ind.title]) {
@@ -247,13 +258,20 @@ const AdminDashboard: React.FC<{ theme?: 'blue' | 'black' | 'white' | 'black-ora
     const newKey = "VITTA-" + Math.random().toString(36).substring(2, 8).toUpperCase();
     
     try {
-      const { error } = await supabase.from('licenses').insert([{ 
-        key: newKey, 
-        client_name: clientName, 
-        status: 'active', 
-        price: priceNumber || 0, 
-        origin, 
-        product_type: productType 
+      const { error } = await supabase.from('site_content').insert([{ 
+        content_type: 'license',
+        title: clientName, 
+        image_url: newKey, 
+        description: productType, 
+        meta_value: {
+          key: newKey,
+          client_name: clientName,
+          status: 'active',
+          price: priceNumber || 0,
+          origin,
+          product_type: productType
+        },
+        is_active: true
       }]);
       if (error) throw error;
       setClientName(''); setSaleValue(''); fetchData();
