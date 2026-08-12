@@ -233,15 +233,18 @@ export default async function handler(req: Request) {
           // Gera conteúdo com IA
           let finalContent = item.description || item.title;
           if (GEMINI_API_KEY) {
-            const prompt = `Você é o redator especializado da A2 Mentor, portal de inteligência financeira.
-Escreva um artigo jornalístico completo em português sobre a notícia abaixo com tom profissional, educativo e acessível.
+            const prompt = `Você é a redação do portal A2 Notícias.
+Reescreva a notícia abaixo como um artigo jornalístico em português com tom imparcial, objetivo e informativo.
 
 Estrutura obrigatória:
-1. Resumo da notícia (2-3 parágrafos diretos e informativos)
-2. **A2 Insights:** (dicas práticas de ${source.aiContext} para o leitor brasileiro)
+1. Resumo da notícia (2-3 parágrafos diretos e informativos, em terceira pessoa)
+2. **A2 Insights:** (contexto e dados relevantes sobre ${source.aiContext} para o leitor brasileiro entender o impacto da notícia)
 
-Regras:
-- Tom informativo mas próximo ao leitor
+Regras IMPORTANTES:
+- NUNCA se apresente como consultor, especialista ou advisor
+- NUNCA use primeira pessoa ("eu", "nós", "nossa equipe")
+- Aja como uma redação jornalística: apenas reporte e contextualize a notícia
+- Tom neutro, profissional e informativo
 - Sem repetir o título no corpo do texto
 - Sem incluir links ou URLs
 - Máximo 400 palavras no total
@@ -305,18 +308,22 @@ Contexto: "${item.description}"`;
       const exists = await newsExists(SUPABASE_URL, SUPABASE_SERVICE_KEY, todayId);
 
       if (!exists) {
-        const prompt = `Você é o consultor financeiro sênior da A2 Mentor.
-Escreva um artigo completo, educativo e de alta qualidade em português sobre:
+        const prompt = `Você é a redação do portal A2 Notícias.
+Escreva uma matéria editorial completa e de alta qualidade em português sobre:
 "${topic}"
 
 Estrutura obrigatória:
-1. Introdução envolvente (1 parágrafo)
+1. Introdução objetiva (1 parágrafo, sem se apresentar ou cumprimentar o leitor)
 2. Desenvolvimento com 3 tópicos práticos (use **Tópico:** para destacar)
-3. **A2 Insights:** dica exclusiva da consultoria A2 para o leitor colocar em prática hoje
-4. Conclusão motivadora (1 parágrafo)
+3. **A2 Insights:** dados e contextos relevantes para o leitor colocar em prática
+4. Conclusão com perspectiva futura (1 parágrafo)
 
-Regras:
-- Tom de especialista, mas acessível e humano
+Regras IMPORTANTES:
+- NUNCA se apresente como consultor, especialista, advisor ou mentor
+- NUNCA use "Olá!", "Sou o consultor" ou qualquer saudação pessoal
+- NUNCA use primeira pessoa ("eu recomendo", "nós aconselhamos")
+- Aja como uma redação de jornal: reporte, contextualize e informe
+- Tom jornalístico, profissional e imparcial
 - Foco em finanças pessoais brasileiras (Real, Tesouro Direto, Nubank, etc.)
 - Sem incluir links ou URLs
 - Aproximadamente 450 palavras`;
@@ -329,7 +336,7 @@ Regras:
             SUPABASE_URL,
             SUPABASE_SERVICE_KEY,
             topic,
-            content + '\n\nConteúdo exclusivo produzido pela equipe A2 Mentor.',
+            content + '\n\nMatéria produzida pela redação A2 Notícias.',
             imageUrl,
             'VittaConsultoria',
             todayId
