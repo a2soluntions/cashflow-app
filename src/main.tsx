@@ -3,18 +3,15 @@ import ReactDOM from 'react-dom/client'
 import Vitta from './Vitta' // Referência única e exata
 import './index.css'
 
-// Limpeza inteligente e direcionada de cache/Service Workers legados (VittaCash/A2Finanças)
-const SW_CLEAN_VERSION = 'a2mentor_sw_clean_v4';
+// Limpeza inteligente e direcionada de cache/Service Workers legados
+const SW_CLEAN_VERSION = 'a2mentor_sw_clean_v6';
 if (localStorage.getItem(SW_CLEAN_VERSION) !== 'true') {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then((registrations) => {
       for (const registration of registrations) {
-        const scriptURL = registration.active?.scriptURL || registration.installing?.scriptURL || registration.waiting?.scriptURL || '';
-        if (scriptURL && !scriptURL.includes('sw-v3.js')) {
-          registration.unregister().then(() => {
-            console.log('[Migration] Unregistered stale service worker:', scriptURL);
-          });
-        }
+        registration.unregister().then(() => {
+          console.log('[Migration] Unregistered service worker to refresh cache');
+        });
       }
     });
   }

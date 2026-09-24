@@ -202,6 +202,10 @@ export default function Vitta() {
         {/* LEGAL */}
         <Route path="/legal/:type" element={<LegalPage />} />
 
+        {/* REDIRECIONAMENTO DE NOTÍCIAS REMOVIDAS */}
+        <Route path="/noticias" element={<Navigate to="/" replace />} />
+        <Route path="/noticias/*" element={<Navigate to="/" replace />} />
+
         {/* LOGIN */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : (
             <LoginPage
