@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Zap, ShieldCheck, TrendingUp, AlertTriangle, 
-  CheckCircle2, ArrowRight, Newspaper, DollarSign, 
+  CheckCircle2, ArrowRight, DollarSign, 
   Globe, LayoutGrid, Brain, Lock, Infinity, Clock,
   ExternalLink, Cookie, Mail, Instagram, Youtube, Linkedin, MessageCircle,
   X, ChevronLeft, ChevronRight, Search, Menu
@@ -218,10 +218,6 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
             </div>
             
             <div className="hidden lg:flex items-center gap-8">
-              <Link to="/noticias" className="group flex items-center gap-2">
-                <Newspaper size={14} className="text-emerald-500 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 group-hover:text-white transition-colors">A2 Notícias</span>
-              </Link>
               <button onClick={scrollToPlans} className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-white transition-colors">Nossos Planos</button>
               <a href="#radar" className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-white transition-colors">Radar Econômico</a>
             </div>
@@ -246,9 +242,6 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
         {isMenuOpen && (
           <div className="lg:hidden absolute top-full left-0 w-full bg-slate-950 border-b border-white/5 p-6 animate-in slide-in-from-top-4 duration-300">
             <div className="flex flex-col gap-6">
-              <Link to="/noticias" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-white">
-                <Newspaper size={18} className="text-emerald-500" /> A2 Notícias
-              </Link>
               <button onClick={() => { scrollToPlans(); setIsMenuOpen(false); }} className="text-left text-sm font-black uppercase tracking-widest text-white">Nossos Planos</button>
               <a href="#radar" onClick={() => setIsMenuOpen(false)} className="text-sm font-black uppercase tracking-widest text-white">Radar Econômico</a>
               <div className="pt-6 border-t border-white/5 flex flex-col gap-4">
@@ -342,9 +335,6 @@ export default function SalesPage({ onSelectPlan }: { onSelectPlan: (plan: strin
             <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">Radar <span className="text-emerald-500">A2</span></h2>
             <p className="text-slate-500 text-sm font-medium mt-2">Insights exclusivos que movem o mercado agora.</p>
           </div>
-          <Link to="/noticias" className="px-8 py-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all group flex items-center gap-2">
-            Acessar A2 Notícias <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-          </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

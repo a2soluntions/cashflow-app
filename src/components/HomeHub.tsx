@@ -3,7 +3,7 @@ import {
   Plus, Settings, LayoutGrid, Target, 
   BarChart3, Brain, Sun, CheckCircle2, 
   Calendar, AppWindow, Fingerprint, Moon, LogOut,
-  ShieldAlert, X, TrendingUp, ShieldCheck, Zap, Newspaper
+  ShieldAlert, X, TrendingUp, ShieldCheck, Zap
 } from 'lucide-react';
 import NetworkBackground from './NetworkBackground';
 
@@ -64,7 +64,6 @@ export function HomeHub({ onNavigate, onNewTransaction, currentTheme, onToggleTh
   { id: 'settings', label: 'Ajustes', icon: <Settings size={20} />, action: () => onNavigate('settings') },
   ...(isAdmin ? [{ id: 'admin', label: 'Admin', icon: <ShieldCheck size={20} />, action: () => onNavigate('admin') }] : []),
   {id: 'sales', label: 'Planos & Pro', icon: <Zap size={20} />, action: () => onNavigate('sales') },
-  { id: 'noticias', label: 'A2 Notícias', icon: <Newspaper size={20} />, action: () => window.open('/noticias', '_blank') },
   { id: 'exit', label: 'Sair', icon: <LogOut size={20} />, isExit: true, action: () => setShowExitConfirm(true) }, 
  ];
 

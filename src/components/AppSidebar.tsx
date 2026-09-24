@@ -3,7 +3,7 @@ import {
   Plus, Settings, LayoutGrid, Target,
   BarChart3, Brain, CheckCircle2,
   Calendar, AppWindow, LogOut,
-  ShieldAlert, TrendingUp, ShieldCheck, Zap, Newspaper,
+  ShieldAlert, TrendingUp, ShieldCheck, Zap,
   Bell, ChevronLeft, ChevronRight,
   Wallet, PieChart, FileText
 } from 'lucide-react';
@@ -31,7 +31,6 @@ const NAV_ITEMS = [
   { id: 'target',      label: 'A2 Horizons',  icon: Target,       group: 'tools' },
   { id: 'freedom',     label: 'Liberdade $',  icon: ShieldAlert,  group: 'tools' },
   { id: 'advisor',     label: 'Consultor IA', icon: Brain,        group: 'tools' },
-  { id: 'noticias',    label: 'A2 Notícias',  icon: Newspaper,    group: 'tools' },
   { id: 'sales',       label: 'Planos & Pro', icon: Zap,          group: 'extra' },
   { id: 'settings',    label: 'Ajustes',      icon: Settings,     group: 'extra' },
 ];
@@ -53,7 +52,6 @@ export function AppSidebar({
   ];
 
   const handleNav = (id: string) => {
-    if (id === 'noticias') { window.open('/noticias', '_blank'); return; }
     onNavigate(id);
   };
 

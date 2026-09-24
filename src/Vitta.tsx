@@ -22,9 +22,6 @@ import SubscriptionWall from './components/SubscriptionWall';
 import AdminDashboard from './components/AdminDashboard';
 import SalesPage from './components/SalesPage';
 import LegalPage from './components/LegalPage';
-import VittaNews from './components/VittaNews';
-import NewsArticle from './components/NewsArticle';
-import AdReservationPage from './components/AdReservationPage';
 import NetworkBackground from './components/NetworkBackground';
 
 export default function Vitta() {
@@ -180,8 +177,7 @@ export default function Vitta() {
 
   return (
     <div className={`w-full font-sans relative text-slate-900 dark:text-white ${
-      location.pathname === '/' || location.pathname === '/vendas' ||
-      location.pathname.startsWith('/noticias') || location.pathname.startsWith('/legal')
+      location.pathname === '/' || location.pathname === '/vendas' || location.pathname.startsWith('/legal')
         ? 'min-h-screen overflow-y-auto scroll-smooth custom-scrollbar'
         : 'h-screen overflow-hidden'
     }`}>
@@ -205,11 +201,6 @@ export default function Vitta() {
 
         {/* LEGAL */}
         <Route path="/legal/:type" element={<LegalPage />} />
-
-        {/* NOTÍCIAS */}
-        <Route path="/noticias" element={<VittaNews />} />
-        <Route path="/noticias/anunciar" element={<AdReservationPage />} />
-        <Route path="/noticias/:id" element={<NewsArticle />} />
 
         {/* LOGIN */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : (
