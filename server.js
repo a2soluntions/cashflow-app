@@ -340,8 +340,8 @@ app.post('/api/save-subscription', async (req, res) => {
 const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
 
-// SPA Fallback para React Router
-app.get('*', (req, res) => {
+// SPA Fallback para React Router (compatível com Express 4 e 5)
+app.use((req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
